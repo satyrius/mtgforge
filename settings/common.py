@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 
 # Django settings for mtgforge project.
@@ -123,6 +124,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'oracle',
     'south',
+    'django_nose', # it should be after south (http://pypi.python.org/pypi/django-nose, Caveats)
 )
 
 # A sample logging configuration. The only tangible logging
@@ -147,3 +149,10 @@ LOGGING = {
         },
     }
 }
+
+# Use Django Nose test runner.
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+# South’s test runner integration will make the test database be created using
+# syncdb, rather than via migrations.
+SOUTH_TESTS_MIGRATE = False
