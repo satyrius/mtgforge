@@ -122,6 +122,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'oracle',
+    'south',
 )
 
 # A sample logging configuration. The only tangible logging
