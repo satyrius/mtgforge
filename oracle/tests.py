@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 from django.test import TestCase
 from oracle.models import CardSet
 from django.db import IntegrityError, DatabaseError
+from django.utils.functional import curry
 
 
 class CardSetModelTest(TestCase):
@@ -48,3 +50,47 @@ class CardSetModelTest(TestCase):
         max_acronym_length = 10
         msg = self.value_too_long_error.format(max_acronym_length)
         self.assertTrue(context.exception.message.startswith(msg))
+
+    def test_name_translation(self):
+        # Create object without translations and assert that only default was
+        # specified after creation
+        CardSet.objects.create(name=self.name, acronym=self.acronym)
+        get_cs = curry(CardSet.objects.get, acronym=self.acronym)
+        cs = get_cs()
+        self.assertEqual(cs.name, self.name)
+        self.assertEqual(cs.name_en, self.name)
+        self.assertIsNone(cs.name_ru)
+
+        # Check uptate original
+        name_en = 'Zendikar Set'
+        cs.name = name_en
+        cs.save()
+        cs = get_cs()
+        self.assertEqual(cs.name, name_en)
+        self.assertEqual(cs.name_en, name_en)
+        self.assertIsNone(cs.name_ru)
+
+        # Check update default translation
+        cs.name_en = self.name
+        cs.save()
+        cs = get_cs()
+        self.assertEqual(cs.name, self.name)
+        self.assertEqual(cs.name_en, self.name)
+        self.assertIsNone(cs.name_ru)
+
+        # Check update non-default translation
+        name_ru = u'Зендикар'
+        cs.name_ru = name_ru
+        cs.save()
+        cs = get_cs()
+        self.assertEqual(cs.name, cs.name_en)
+        self.assertNotEqual(cs.name, cs.name_ru)
+        self.assertEqual(cs.name_ru, name_ru)
+
+        # Check create with translations
+        cs.delete()
+        CardSet.objects.create(name=self.name, acronym=self.acronym, name_ru=name_ru)
+        cs = get_cs()
+        self.assertEqual(cs.name, self.name)
+        self.assertEqual(cs.name_en, self.name)
+        self.assertEqual(cs.name_ru, name_ru)

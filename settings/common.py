@@ -122,6 +122,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'modeltranslation',
     'oracle',
     'south',
     'django_nose', # it should be after south (http://pypi.python.org/pypi/django-nose, Caveats)
@@ -156,3 +157,13 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 # South’s test runner integration will make the test database be created using
 # syncdb, rather than via migrations.
 SOUTH_TESTS_MIGRATE = False
+
+# Modeltranslation settings.
+# http://code.google.com/p/django-modeltranslation/wiki/InstallationAndUsage03
+gettext = lambda s: s
+LANGUAGES = (
+    ('ru', gettext('Русский')),
+    ('en', gettext('English')),
+)
+MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
+MODELTRANSLATION_TRANSLATION_REGISTRY = 'translation'
