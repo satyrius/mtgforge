@@ -54,7 +54,6 @@ class CardSetModelTest(TestCase):
     def test_name_translation(self):
         # Create object without translations and assert that only default was
         # specified after creation
-        CardSet.objects.create(name=self.name, acronym=self.acronym)
         get_cs = curry(CardSet.objects.get, acronym=self.acronym)
         cs = get_cs()
         self.assertEqual(cs.name, self.name)
