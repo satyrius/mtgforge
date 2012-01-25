@@ -164,8 +164,8 @@ SOUTH_TESTS_MIGRATE = False
 # http://code.google.com/p/django-modeltranslation/wiki/InstallationAndUsage03
 gettext = lambda s: s
 LANGUAGES = (
-    ('ru', gettext('Русский')),
     ('en', gettext('English')),
+    ('ru', gettext('Русский')),
 )
 MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
 MODELTRANSLATION_TRANSLATION_REGISTRY = 'translation'
