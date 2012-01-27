@@ -155,6 +155,7 @@ LOGGING = {
 
 # Use Django Nose test runner.
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+NOSE_ARGS = ['--nologcapture', '--verbosity=2', '--failed']
 
 # South’s test runner integration will make the test database be created using
 # syncdb, rather than via migrations.
