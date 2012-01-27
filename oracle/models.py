@@ -7,4 +7,6 @@ class CardSet(models.Model):
     acronym = NullCharField(max_length=10, unique=True)
 
     def __unicode__(self):
-        return self.name
+        if not self.acronym:
+            return self.name
+        return u'{0} ({1})'.format(self.name, self.acronym)

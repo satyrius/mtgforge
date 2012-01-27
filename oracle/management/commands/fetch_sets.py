@@ -4,6 +4,7 @@ from BeautifulSoup import BeautifulSoup
 from contrib.soupselect import select
 from urllib2 import urlopen, HTTPError
 from django.utils.translation import get_language
+from oracle.models import CardSet
 import re
 
 GATHERER_INDEX_PAGE = 'http://gatherer.wizards.com/Pages/Default.aspx'
@@ -12,6 +13,8 @@ MAGICARDS_SITEMAP_PAGE = 'http://magiccards.info/sitemap.html'
 acronym_pattern = '[a-z0-9]+'
 
 class Command(BaseCommand):
+    _acronyms = {}
+
     def writeln(self, message):
         self.stdout.write(u'{0}\n'.format(message))
 
@@ -51,6 +54,12 @@ class Command(BaseCommand):
                 continue
             yield set_name
 
+    def is_unique_acronym(self, acronym, print_notice=True):
+        if acronym not in self._acronyms:
+            return True
+        self.notice('Acronym {0} already for "{1}"'.format(acronym, self._acronyms[acronym]))
+        return False
+
     def acronym(self, name):
         """Returns acronym for given name. First it tries to get it from
         magiccards.info sitemap (because they are pretty), but it asks user
@@ -65,18 +74,25 @@ class Command(BaseCommand):
         links = soup.findAll(text=re.compile(r'^{0}$'.format(name), re.IGNORECASE))
         links = filter(match_en_acronym, links)
         acronym = None
-        if not links:
-            while not acronym:
-                acronym = raw_input('Acronym for "{0}": '.format(name)).strip()
-                if not re.match(r'{0}$'.format(acronym_pattern), acronym):
-                    self.notice('Acronym should by alpha-numeric identifier')
-                    acronym = None
-        else:
+        if links:
             acronym = match_en_acronym(links[0]).group('acronym')
+            if not self.is_unique_acronym(acronym):
+                acronym = None
+        while not acronym:
+            acronym = raw_input('Enter acronym for "{0}": '.format(name)).strip()
+            match_pattern = re.match(r'{0}$'.format(acronym_pattern), acronym)
+            if not match_pattern or not self.is_unique_acronym(acronym):
+                acronym = None
+
+        self._acronyms[acronym] = name
         return acronym
 
     @translation_aware
     def handle(self, *args, **options):
+        self._acronyms = {}
+        sets = []
         for name in self.names():
-            acronym = self.acronym(name)
-            self.writeln(u'{0} ({1})'.format(name, acronym))
+            cs = CardSet(name=name)
+            cs.acronym = self.acronym(name)
+            sets.append(cs)
+            self.writeln(cs)
