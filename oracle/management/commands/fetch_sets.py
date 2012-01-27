@@ -92,6 +92,7 @@ class Command(BaseCommand):
         letters_remain = len(words) < 3 and 3 or len(words)
         acronym = u''
         for w in words:
+            w = w.strip('"\'')
             if not letters_remain:
                 break
             add = w.isnumeric() and w[-2:] or w[0]
