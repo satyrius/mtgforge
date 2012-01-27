@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+from django.db import IntegrityError, DatabaseError
 from django.test import TestCase
 from oracle.models import CardSet
-from django.db import IntegrityError, DatabaseError
-from django.utils.functional import curry
+
+
+__all__ = ['CardSetModelTest']
 
 
 class CardSetModelTest(TestCase):
@@ -54,11 +56,12 @@ class CardSetModelTest(TestCase):
     def test_name_translation(self):
         # Create object without translations and assert that only default was
         # specified after creation
-        get_cs = curry(CardSet.objects.get, acronym=self.acronym)
-        cs = get_cs()
+        cs = CardSet.objects.create(name=self.name, acronym=self.acronym)
         self.assertEqual(cs.name, self.name)
         self.assertEqual(cs.name_en, self.name)
         self.assertIsNone(cs.name_ru)
+
+        get_cs = lambda: CardSet.objects.get(acronym=self.acronym)
 
         # Check uptate original
         name_en = 'Zendikar Set'
