@@ -23,7 +23,12 @@ class Command(BaseCommand):
             dest='no_acronyms',
             default=False,
             help='Do not fetch acronyms from magiccards.info, generate then instead'),
-        )
+        make_option('--dry-run',
+            action='store_true',
+            dest='dry_run',
+            default=False,
+            help='Do not save fetched data'),
+    )
 
     _acronyms = {}
 
@@ -141,10 +146,14 @@ class Command(BaseCommand):
 
     @translation_aware
     def handle(self, *args, **options):
+        dry_run = options['dry_run']
         self._acronyms = {}
-        sets = []
         for name in self.names():
-            cs = CardSet(name=name)
-            cs.acronym = self.acronym(name, options['no_acronyms'])
-            sets.append(cs)
+            try:
+                cs = CardSet.objects.get(name=name)
+            except CardSet.DoesNotExist:
+                cs = CardSet(name=name)
+                cs.acronym = self.acronym(name, options['no_acronyms'])
+                if not dry_run:
+                    cs.save()
             self.writeln(cs)
