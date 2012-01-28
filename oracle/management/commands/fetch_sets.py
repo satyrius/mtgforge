@@ -23,7 +23,7 @@ class Command(BaseCommand):
             dest='no_acronyms',
             default=False,
             help='Do not fetch acronyms from magiccards.info, generate then instead'),
-        make_option('--dry-run',
+        make_option('-d', '--dry-run',
             action='store_true',
             dest='dry_run',
             default=False,
