@@ -14,3 +14,4 @@ class FetchCardSetsCommandTest(TestCase):
         self.assertEqual(generator('Zendikar'), 'zen')
         self.assertEqual(generator('From the Vault: Exiled'), 'ftve')
         self.assertEqual(generator('Sixth Edition'), '6ed')
+        self.assertEqual(generator('Magic 2010'), 'm10')

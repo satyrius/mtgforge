@@ -144,7 +144,7 @@ class Command(BaseCommand):
             w = w.strip('"\'')
             if not letters_remain:
                 break
-            add = w.isnumeric() and w[-2:] or w[0]
+            add = w.isdigit() and w[-2:] or w[0]
             acronym += add
             letters_remain -= len(add)
         if letters_remain:
