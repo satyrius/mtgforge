@@ -148,7 +148,7 @@ class Command(BaseCommand):
         return acronym
 
 
-    def acronym(self, name, fetch=False):
+    def acronym(self, name, fetch=False, skip_on_fail=False):
         """Returns acronym for given name. If `fetch` argument passed acronyms
         will be fetched from magiccards.info sitemap (because they are pretty),
         but it asks user input it not found."""
@@ -169,10 +169,13 @@ class Command(BaseCommand):
             if links:
                 acronym = match_en_acronym(links[0]).group('acronym')
 
+            if not acronym:
+                self.notice('Cannot find acronym for "{0}"'.format(name))
+
         if acronym and not self.is_unique_acronym(acronym):
             acronym = None
 
-        while not acronym:
+        while not acronym and not skip_on_fail:
             acronym = raw_input('Enter acronym for "{0}": '.format(name)).strip()
             match_pattern = re.match(r'{0}$'.format(acronym_pattern), acronym)
             if not match_pattern or not self.is_unique_acronym(acronym):
@@ -184,19 +187,25 @@ class Command(BaseCommand):
     @translation_aware
     def handle(self, *args, **options):
         dry_run = options['dry_run']
+        fetch_acronyms = options['fetch_acronyms']
         self._acronyms = {}
         gatherer_names = [name for name in self.gatherer_names()]
         for name, cards, release in self.products():
+            if name not in gatherer_names:
+                self.notice(u'Cannot find "{0}" among Gatherer\'s list'.format(name))
             try:
                 cs = CardSet.objects.get(name=name)
             except CardSet.DoesNotExist:
                 cs = CardSet(name=name)
-                cs.acronym = self.acronym(name, options['fetch_acronyms'])
+                cs.acronym = self.acronym(
+                    name, fetch_acronyms,
+                    # Do not prompt acronyms on dry run
+                    skip_on_fail=fetch_acronyms and dry_run
+                )
                 if not dry_run:
                     cs.save()
                     self.writeln('Saved')
             info = locals()
             info['cards'] = cards or '?'
-            self.writeln('{name:<40} {cards:<4} {release}'.format(**info))
-            if name not in gatherer_names:
-                self.notice(u'Cannot find "{0}" among Gatherer\'s list'.format(name))
+            info['acronym'] = cs.acronym or '-'
+            self.writeln('{name:<40} {acronym:<6} {cards:<4} {release}'.format(**info))
