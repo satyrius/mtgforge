@@ -2,6 +2,7 @@ from django.contrib import admin
 from modeltranslation.admin import TranslationAdmin
 from oracle import models
 
+
 class CardSetAdmin(TranslationAdmin):
     class Media:
         js = (
@@ -14,4 +15,9 @@ class CardSetAdmin(TranslationAdmin):
         }
 
 admin.site.register(models.CardSet, CardSetAdmin)
-admin.site.register(models.DataProvider)
+
+
+class DataProviderAdmin(admin.ModelAdmin):
+    list_display = ('name', 'title', 'home')
+
+admin.site.register(models.DataProvider, DataProviderAdmin)
