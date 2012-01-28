@@ -35,3 +35,14 @@ def cache(f, seconds = 900):
             _djcache.set(key, result, seconds)
         return result
     return wrapper
+
+def cache_method_calls(func):
+    """Cache methods' calls. Store cached results as objects attributes"""
+    def wrapper(self, *args, **kwargs):
+        key = sha1(str(func.__name__) + str(args) + str(kwargs)).hexdigest()
+        if hasattr(self, key):
+            return getattr(self, key)
+        result = func(self, *args, **kwargs)
+        setattr(self, key, result)
+        return result
+    return wrapper

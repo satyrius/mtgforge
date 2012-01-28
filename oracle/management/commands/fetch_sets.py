@@ -7,7 +7,7 @@ from django.core.management.base import BaseCommand, CommandError, smart_str
 from django.utils.translation import get_language
 
 from contrib.soupselect import select
-from contrib.utils import translation_aware, cache
+from contrib.utils import translation_aware, cache_method_calls
 from oracle.models import CardSet
 
 
@@ -46,7 +46,7 @@ class Command(BaseCommand):
         except HTTPError, e:
             raise CommandError(u'{0} {1} {2}'.format(url, e.code, e.msg))
 
-    @cache
+    @cache_method_calls
     def soup(self, url):
         """Fetch url and return BeautifulSoup for the document"""
         return BeautifulSoup(self.urlopen(url))
