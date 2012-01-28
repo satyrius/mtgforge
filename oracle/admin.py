@@ -14,3 +14,4 @@ class CardSetAdmin(TranslationAdmin):
         }
 
 admin.site.register(models.CardSet, CardSetAdmin)
+admin.site.register(models.DataProvider)
