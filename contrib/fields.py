@@ -21,5 +21,13 @@ class NullTextField(models.TextField):
         value = super(models.TextField, self).get_prep_value(value)
         return _empty2none(value)
 
+
+class NullURLField(models.URLField):
+    """URLField that stores empty strings as NULLs"""
+    def get_prep_value(self, value):
+        value = super(models.URLField, self).get_prep_value(value)
+        return _empty2none(value)
+
+
 from south.modelsinspector import add_introspection_rules
 add_introspection_rules([], ['^contrib\.fields'])
