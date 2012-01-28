@@ -8,18 +8,24 @@ class DataProviderModelTest(TestCase):
     def setUp(self):
         self.name = 'wizards'
         self.title = 'Wizzards ot the Coast'
+        self.url = 'http://wizards.com/magic/tcg/Article.aspx?x=mtg/tcg/products/allproducts'
+        self.kwargs = dict(name=self.name, title=self.title, home=self.url)
 
     def test_create(self):
-        DataProvider.objects.create(name=self.name, title=self.title)
+        DataProvider.objects.create(**self.kwargs)
 
     def test_unique_name(self):
-        DataProvider.objects.create(name=self.name, title=self.title)
+        DataProvider.objects.create(**self.kwargs)
         with self.assertRaises(IntegrityError):
-            new_title = 'new' + self.title
-            DataProvider.objects.create(name=self.name, title=new_title)
+            self.kwargs['title'] = 'new' + self.title
+            DataProvider.objects.create(**self.kwargs)
 
     def test_unique_title(self):
-        DataProvider.objects.create(name=self.name, title=self.title)
+        DataProvider.objects.create(**self.kwargs)
         with self.assertRaises(IntegrityError):
-            new_name = 'new' + self.name
-            DataProvider.objects.create(name=new_name, title=self.title)
+            self.kwargs['name'] = 'new' + self.name
+            DataProvider.objects.create(**self.kwargs)
+
+    def test_url_required(self):
+        with self.assertRaises(IntegrityError):
+            DataProvider.objects.create(name=self.name, title=self.title)
