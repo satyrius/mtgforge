@@ -8,3 +8,8 @@ class CardSet(models.Model):
 
     def __unicode__(self):
         return self.name
+
+
+class DataProvider(models.Model):
+    name = NullCharField(max_length=20, unique=True)
+    title = NullCharField(max_length=255, unique=True)
