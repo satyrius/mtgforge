@@ -4,9 +4,6 @@ from django.test import TestCase
 from oracle.models import CardSet
 
 
-__all__ = ['CardSetModelTest']
-
-
 class CardSetModelTest(TestCase):
     def setUp(self):
         self.not_null_integrity_error = 'null value in column "{0}" violates not-null constraint'
