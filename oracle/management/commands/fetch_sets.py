@@ -18,11 +18,11 @@ acronym_pattern = '[a-z0-9]+'
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
-        make_option('--no-acronyms',
+        make_option('-a', '--fetch-acronyms',
             action='store_true',
-            dest='no_acronyms',
+            dest='fetch_acronyms',
             default=False,
-            help='Do not fetch acronyms from magiccards.info, generate then instead'),
+            help='Fetch acronyms from magiccards.info'),
         make_option('-d', '--dry-run',
             action='store_true',
             dest='dry_run',
@@ -110,14 +110,13 @@ class Command(BaseCommand):
         return acronym
 
 
-    def acronym(self, name, no_fetch=False):
-        """Returns acronym for given name. First it tries to get it from
-        magiccards.info sitemap (because they are pretty), but it asks user
-        input it not found. If `no_fetch` argiment passed generate acronym
-        by name instead of fetching."""
+    def acronym(self, name, fetch=False):
+        """Returns acronym for given name. If `fetch` argument passed acronyms
+        will be fetched from magiccards.info sitemap (because they are pretty),
+        but it asks user input it not found."""
         acronym = None
 
-        if no_fetch:
+        if not fetch:
             acronym = self.generate_acronym(name)
         else:
             soup = self.soup(MAGICARDS_SITEMAP_PAGE)
@@ -153,7 +152,7 @@ class Command(BaseCommand):
                 cs = CardSet.objects.get(name=name)
             except CardSet.DoesNotExist:
                 cs = CardSet(name=name)
-                cs.acronym = self.acronym(name, options['no_acronyms'])
+                cs.acronym = self.acronym(name, options['fetch_acronyms'])
                 if not dry_run:
                     cs.save()
             self.writeln(cs)
