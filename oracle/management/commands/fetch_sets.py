@@ -2,7 +2,7 @@ import re
 from optparse import make_option
 from urllib2 import urlopen, HTTPError
 
-from BeautifulSoup import BeautifulSoup
+from BeautifulSoup import ICantBelieveItsBeautifulSoup, BeautifulStoneSoup, Tag
 from django.core.management.base import BaseCommand, CommandError, smart_str
 from django.utils.translation import get_language
 
@@ -11,6 +11,7 @@ from contrib.utils import translation_aware, cache_method_calls
 from oracle.models import CardSet
 
 
+WIZARDS_PRODUCTS_PAGE = 'http://wizards.com/Magic/TCG/Article.aspx?x=mtg/tcg/products/allproducts'
 GATHERER_INDEX_PAGE = 'http://gatherer.wizards.com/Pages/Default.aspx'
 MAGICARDS_SITEMAP_PAGE = 'http://magiccards.info/sitemap.html'
 
@@ -48,10 +49,47 @@ class Command(BaseCommand):
 
     @cache_method_calls
     def soup(self, url):
-        """Fetch url and return BeautifulSoup for the document"""
-        return BeautifulSoup(self.urlopen(url))
+        """Fetch url and return ICantBelieveItsBeautifulSoup for the document.
+        Do not use BeautifulSoup because source HTML is not perfect.
+        """
+        return ICantBelieveItsBeautifulSoup(
+            self.urlopen(url),
+            convertEntities=BeautifulStoneSoup.HTML_ENTITIES
+        )
 
-    def names(self):
+    def products(self):
+        """Card sets names generator which retrieves data from Gatherer's page
+        """
+        soup = self.soup(WIZARDS_PRODUCTS_PAGE)
+        product_link_re = re.compile(r'x=mtg/tcg/(?:products/([^/]+)|([^/]+)/productinfo)/?$')
+        cards_count_re = re.compile(r'(\d+)\s+cards', re.IGNORECASE)
+        separator_re = re.compile(r'\s*(?:,|and)\s*')
+        for link in select(soup, 'div.article-content a'):
+            href = link.get('href')
+            if not href:
+                continue
+            match = product_link_re.search(href)
+            if match:
+                #name = link.text.strip()
+                name = u' '.join([(isinstance(ch, Tag) and ch.text or ch).strip()
+                                  for ch in link.childGenerator()])
+                name = name.strip()
+
+                cards = link.findParent('td').findNextSibling('td')
+                match_cards = cards_count_re.match(cards.text.strip())
+                cards_count = match_cards and int(match_cards.group(1)) or None
+
+                release = cards.findNextSibling('td').find('br').nextSibling.strip()
+                release_date = release or None
+
+                if ',' in name:
+                    # Comma separated editions
+                    for separated_name in filter(None, separator_re.split(name)):
+                        yield separated_name, cards_count, release_date
+                else:
+                    yield name, cards_count, release_date
+
+    def gatherer_names(self):
         """Card sets names generator which retrieves data from Gatherer's page
         """
         soup = self.soup(GATHERER_INDEX_PAGE)
@@ -147,7 +185,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         dry_run = options['dry_run']
         self._acronyms = {}
-        for name in self.names():
+        gatherer_names = [name for name in self.gatherer_names()]
+        for name, cards, release in self.products():
             try:
                 cs = CardSet.objects.get(name=name)
             except CardSet.DoesNotExist:
@@ -155,4 +194,9 @@ class Command(BaseCommand):
                 cs.acronym = self.acronym(name, options['fetch_acronyms'])
                 if not dry_run:
                     cs.save()
-            self.writeln(cs)
+                    self.writeln('Saved')
+            info = locals()
+            info['cards'] = cards or '?'
+            self.writeln('{name:<40} {cards:<4} {release}'.format(**info))
+            if name not in gatherer_names:
+                self.notice(u'Cannot find "{0}" among Gatherer\'s list'.format(name))
