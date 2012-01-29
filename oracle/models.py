@@ -8,7 +8,7 @@ from contrib.utils import cache_method_calls
 class CardSet(models.Model):
     name = NullCharField(max_length=255, unique=True)
     acronym = NullCharField(max_length=10, unique=True)
-    cards = models.IntegerField(null=True, blank=True)
+    cards = models.PositiveIntegerField(null=True, blank=True)
     released_at = models.DateField(null=True, blank=True)
 
     def __unicode__(self):
@@ -31,6 +31,7 @@ class DataProvider(models.Model):
 
     def __unicode__(self):
         return self.name
+
 
 class DataSource(models.Model):
     url = NullURLField()
