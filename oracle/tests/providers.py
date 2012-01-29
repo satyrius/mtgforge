@@ -33,7 +33,7 @@ class DataProvidersTest(TestCase):
         p.get_page = Mock(return_value=StringIO.StringIO(_gatherer_home_page))
         products = p.products_list()
         self.assertEqual(products, [
-            ('Zendikar', 'http://gatherer.wizards.com/Pages/Default.aspx?set=[%22Zendikar%22]', None)
+            ('Zendikar', 'http://gatherer.wizards.com/Pages/Search/Default.aspx?set=[%22Zendikar%22]', None)
         ])
 
     def test_magiccards_list(self):

@@ -116,7 +116,7 @@ class GathererProvider(Provider):
     name = 'gatherer'
 
     def search_url(self, name):
-        query = u'?' + urllib.quote_plus(u'set=["{0}"]'.format(name), '=[]')
+        query = u'/Pages/Search/Default.aspx?' + urllib.quote_plus(u'set=["{0}"]'.format(name), '=')
         return self.absolute_url(query)
 
     def products_list_generator(self):
