@@ -1,30 +1,12 @@
 import re
 from optparse import make_option
-from urllib2 import urlopen, HTTPError
 
-from BeautifulSoup import ICantBelieveItsBeautifulSoup, BeautifulStoneSoup
 from django.core.management.base import BaseCommand, CommandError, smart_str
-from django.utils.translation import get_language
 
-from contrib.soupselect import select
 from contrib.utils import translation_aware, cache_method_calls
 from oracle.models import CardSet
+from oracle.providers import WizardsProvider, GathererProvider, MagiccardsProvider
 
-
-WIZARDS_PRODUCTS_PAGE = 'http://wizards.com/Magic/TCG/Article.aspx?x=mtg/tcg/products/allproducts'
-GATHERER_INDEX_PAGE = 'http://gatherer.wizards.com/Pages/Default.aspx'
-MAGICARDS_SITEMAP_PAGE = 'http://magiccards.info/sitemap.html'
-
-# Ignore products which was printed without new expansion sybmol
-ignore_products = [
-    'World Champ Decks',
-    'Premium Foil Booster',
-    'Momir Vig Basic',
-    'Legacy',
-    'Deck Builder\'s Toolkit',
-    'Promo set for Gatherer', # This name is from Gatherer's list
-]
-ignore_products_re = re.compile('|'.join(ignore_products))
 
 acronym_pattern = '[a-z0-9]+'
 
@@ -51,75 +33,29 @@ class Command(BaseCommand):
         colorized_message = self.style.NOTICE(u'Notice: {0}\n'.format(message))
         self.stderr.write(smart_str(colorized_message))
 
-    def urlopen(self, url):
-        try:
-            f = urlopen(url)
-            return f
-        except HTTPError, e:
-            raise CommandError(u'{0} {1} {2}'.format(url, e.code, e.msg))
-
-    @cache_method_calls
-    def soup(self, url):
-        """Fetch url and return ICantBelieveItsBeautifulSoup for the document.
-        Do not use BeautifulSoup because source HTML is not perfect.
-        """
-        return ICantBelieveItsBeautifulSoup(
-            self.urlopen(url),
-            convertEntities=BeautifulStoneSoup.HTML_ENTITIES
-        )
-
-    def products(self):
-        """Card sets names generator which retrieves data from Gatherer's page
-        """
-        soup = self.soup(WIZARDS_PRODUCTS_PAGE)
-        product_link_re = re.compile(r'x=mtg[/_]tcg[/_](?:products[/_]([^/_]+)|([^/_]+)[/_]productinfo)$')
-        cards_count_re = re.compile(r'(\d+)\s+cards', re.IGNORECASE)
-        separator_re = re.compile(r'\s*(?:,|and)\s*')
-        for link in select(soup, 'div.article-content a'):
-            href = link.get('href')
-            if not href:
-                continue
-            match = product_link_re.search(href)
-            if match:
-                name = re.sub(r'\s+', ' ', link.getText(u' ')).strip()
-
-                cards = link.findParent('td').findNextSibling('td')
-                match_cards = cards_count_re.match(cards.text.strip())
-                cards_count = match_cards and int(match_cards.group(1)) or None
-
-                release = cards.findNextSibling('td').find('br').nextSibling.strip()
-                release_date = release or None
-
-                if ',' in name:
-                    # Comma separated editions
-                    for separated_name in filter(None, separator_re.split(name)):
-                        yield separated_name, cards_count, release_date
-                else:
-                    yield name, cards_count, release_date
-
-    def gatherer_names(self):
-        """Card sets names generator which retrieves data from Gatherer's page
-        """
-        soup = self.soup(GATHERER_INDEX_PAGE)
-        select_id = 'ctl00_ctl00_MainContent_Content_SearchControls_setAddText'
-        options = select(soup, 'select#{0} option'.format(select_id))
-        if not options:
-            raise CommandError(
-                'Cannot find card set select box #{0} on Gatherer\'s index page {1}'.format(
-                    select_id, GATHERER_INDEX_PAGE))
-        for o in options:
-            set_name = o.get('value')
-            if set_name is None:
-                raise CommandError(u'Option {0} does not have value attribute'.format(o))
-            if not set_name or ignore_products_re.match(set_name):
-                continue
-            yield set_name
-
     def is_unique_acronym(self, acronym, print_notice=True):
         if acronym not in self._acronyms:
             return True
         self.notice(u'Acronym "{0}" already for "{1}"'.format(acronym, self._acronyms[acronym]))
         return False
+
+    def find_in_list(self, name, products):
+        # Convert list of tuples into dict with product names as keys. Return
+        # product name immediately if it will exactly match next needle.
+        products_dict = dict()
+        for product in products:
+            pname, url, extra = product
+            if pname == name:
+                return product
+            if pname in products_dict:
+                raise CommandError(u'Product name "{0}" is not unique in the list'.format(pname))
+            products_dict[pname] = product
+
+        # Simplyfy name and try to found its occurancies
+        name = re.sub(r'&', 'and', name)
+        name = re.sub(r'Magic: The Gathering', '', name).strip()
+        similar = filter(lambda n: n.find(name) >= 0 or name.find(n) >= 0, products_dict.keys())
+        return len(similar) == 1 and products_dict[similar[0]] or None
 
     def generate_acronym(self, name):
         name = name.lower()
@@ -153,6 +89,9 @@ class Command(BaseCommand):
             acronym = acronym[:-1] + w[-1]
         return acronym
 
+    @cache_method_calls
+    def magiccards_products(self):
+        return MagiccardsProvider().products_list()
 
     def acronym(self, name, fetch=False, skip_on_fail=False):
         """Returns acronym for given name. If `fetch` argument passed acronyms
@@ -163,19 +102,11 @@ class Command(BaseCommand):
         if not fetch:
             acronym = self.generate_acronym(name)
         else:
-            soup = self.soup(MAGICARDS_SITEMAP_PAGE)
-
-            acronym_re = re.compile(r'/(?P<acronym>{0})/{1}\.html$'.format(
-                acronym_pattern, get_language()))
-            match_en_acronym = lambda el: el.parent.name == 'a' and acronym_re.search(el.parent.get('href'))
-
-            links = soup.findAll(text=re.compile(r'^{0}$'.format(name), re.IGNORECASE))
-            links = filter(match_en_acronym, links)
-            if links:
-                acronym = match_en_acronym(links[0]).group('acronym')
-
-            if not acronym:
+            product = self.find_in_list(name, self.magiccards_products())
+            if not product:
                 self.notice('Cannot find acronym for "{0}"'.format(name))
+            else:
+                acronym = product[2]['acronym']
 
         if acronym and not self.is_unique_acronym(acronym):
             acronym = None
@@ -189,30 +120,20 @@ class Command(BaseCommand):
         self._acronyms[acronym] = name
         return acronym
 
-    def find_in_list(self, name, names_list):
-        if name in names_list:
-            return name
-        name = re.sub(r'&', 'and', name)
-        name = re.sub(r'Magic: The Gathering', '', name).strip()
-        similar = filter(lambda n: n.find(name) >= 0 or name.find(n) >= 0, names_list)
-        return len(similar) == 1 and similar[0] or None
-
     @translation_aware
     def handle(self, *args, **options):
         dry_run = options['dry_run']
         fetch_acronyms = options['fetch_acronyms']
         self._acronyms = {}
-        gatherer_names = [name for name in self.gatherer_names()]
-        for name, cards, release in self.products():
-            if ignore_products_re.match(name):
+        gatherer_products = GathererProvider().products_list()
+        products = WizardsProvider().products_list_generator()
+        for name, url, extra in products:
+            # Process only sets fount in Gatherer's list
+            g_product = self.find_in_list(name, gatherer_products)
+            if not g_product:
+                self.notice(u'Skip "{0}", because it is not present in Gatherer\'s list'.format(name))
                 continue
-
-            # Find card set name among Gatherer's list
-            g_name = self.find_in_list(name, gatherer_names)
-            if g_name:
-                gatherer_names.remove(g_name)
-            else:
-                self.notice(u'Cannot find "{0}" among Gatherer\'s list'.format(name))
+            gatherer_products.remove(g_product)
 
             try:
                 cs = CardSet.objects.get(name=name)
@@ -226,12 +147,13 @@ class Command(BaseCommand):
                     cs.save()
                     self.writeln('Saved')
 
-            info = locals()
-            info['cards'] = cards or '?'
-            info['acronym'] = cs.acronym or '-'
-            self.writeln(u'{name:<40} {acronym:<6} {cards:<4} {release}'.format(**info))
+            info = extra
+            extra.update(dict(name=name, url=url,
+                              cards=extra['cards'] or '?',
+                              acronym=cs.acronym or '-'))
+            self.writeln(u'{name:<40} {acronym:<6} {cards:<4} {release:<14} {url}'.format(**info))
 
-        if gatherer_names:
+        if gatherer_products:
             self.notice(
-                u'Following Gatherer\'s names was not found in products list:\n{0}'.format(
-                    u'\n'.join(gatherer_names)))
+                u'Following Gatherer\'s names was not found in products list: {0}'.format(
+                    u', '.join([p[0] for p in gatherer_products])))
