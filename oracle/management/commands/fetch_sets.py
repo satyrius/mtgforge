@@ -124,14 +124,13 @@ class Command(BaseCommand):
         self._acronyms = {}
 
         wizards = WizardsProvider()
-        products = wizards.products_list_generator()
         gatherer = GathererProvider()
         gatherer_products = gatherer.products_list()
         magiccards = MagiccardsProvider()
         magiccards_products = magiccards.products_list()
 
         # Wizards
-        for name, url, extra in products:
+        for name, url, extra in wizards.products_list_generator():
             # Gatherer
             g_product = self.find_in_list(name, gatherer_products)
             if not g_product:
@@ -166,7 +165,7 @@ class Command(BaseCommand):
                 if not cs.cards:
                     cs.cards = extra['cards'] or None
                 if not cs.released_at:
-                    # Use first of given mohth, because particular day of
+                    # Use first of given month, because particular day of
                     # month is not provided
                     cs.released_at = datetime.datetime.strptime('1 ' + extra['release'], '%d %B %Y')
                 cs.save()
