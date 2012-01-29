@@ -8,7 +8,7 @@ from oracle.models import CardSet
 from oracle.providers import WizardsProvider, GathererProvider, MagiccardsProvider
 
 
-acronym_pattern = '[a-z0-9]+'
+acronym_re = re.compile('[a-z0-9]+$')
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
@@ -88,7 +88,10 @@ class Command(BaseCommand):
             acronym += w[1:letters_remain+1]
         if acronym in self._acronyms:
             acronym = acronym[:-1] + w[-1]
-        return acronym
+
+        if acronym_re.match(acronym):
+            return acronym
+        return None
 
     @cache_method_calls
     def magiccards_products(self):
@@ -114,7 +117,7 @@ class Command(BaseCommand):
 
         while not acronym and not skip_on_fail:
             acronym = raw_input('Enter acronym for "{0}": '.format(name)).strip()
-            match_pattern = re.match(r'{0}$'.format(acronym_pattern), acronym)
+            match_pattern = acronym_re.match(acronym)
             if not match_pattern or not self.is_unique_acronym(acronym):
                 acronym = None
 
