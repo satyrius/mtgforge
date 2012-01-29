@@ -1,3 +1,4 @@
+import datetime
 import re
 from optparse import make_option
 
@@ -158,11 +159,16 @@ class Command(BaseCommand):
                 except CardSet.DoesNotExist:
                     cs = CardSet(name=name, acronym=acronym)
             if not dry_run:
-                cs.cards = extra['cards'] or None
+                if not cs.cards:
+                    cs.cards = extra['cards'] or None
+                if not cs.released_at:
+                    # Use first of given mohth, because particular day of
+                    # month is not provided
+                    cs.released_at = datetime.datetime.strptime('1 ' + extra['release'], '%d %B %Y')
                 cs.save()
 
-            info = extra
-            extra.update(dict(name=name, url=url, cards=extra['cards'] or '?', acronym=acronym or '-'))
+            info = dict(name=name, url=url, acronym=acronym or '-',
+                        cards=extra['cards'] or '?', release=extra['release'])
             self.writeln(u'{name:<40} {acronym:<6} {cards:<4} {release:<14} {url}'.format(**info))
 
         if gatherer_products:

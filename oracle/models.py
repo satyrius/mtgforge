@@ -6,6 +6,7 @@ class CardSet(models.Model):
     name = NullCharField(max_length=255, unique=True)
     acronym = NullCharField(max_length=10, unique=True)
     cards = models.IntegerField(null=True, blank=True)
+    released_at = models.DateField(null=True, blank=True)
 
     def __unicode__(self):
         return self.name
