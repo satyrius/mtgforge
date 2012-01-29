@@ -149,14 +149,15 @@ class Command(BaseCommand):
                 continue
             gatherer_products.remove(g_product)
 
+            acronym = self.acronym(name, fetch_acronyms, skip_on_fail=dry_run)
             try:
                 cs = CardSet.objects.get(name=name)
             except CardSet.DoesNotExist:
-                cs = CardSet(name=name)
-            acronym = cs.acronym or self.acronym(name, fetch_acronyms, skip_on_fail=dry_run)
+                try:
+                    cs = CardSet.objects.get(acronym=acronym)
+                except CardSet.DoesNotExist:
+                    cs = CardSet(name=name, acronym=acronym)
             if not dry_run:
-                if not cs.acronym:
-                    cs.acronym = acronym
                 cs.cards = extra['cards'] or None
                 cs.save()
 
