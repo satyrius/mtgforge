@@ -22,9 +22,29 @@ ignore_products = [
 ]
 ignore_products_re = re.compile('|'.join(ignore_products))
 
+
+class ProviderMeta(type):
+    def __new__(cls, name, bases, attrs):
+        new_class = super(ProviderMeta, cls).__new__(cls, name, bases, attrs)
+        if name is not 'Provider':
+            new_class._providers[attrs['name']] = new_class
+        return new_class
+
+
 class Provider(object):
-    def __init__(self):
-        self.provider = DataProvider.objects.get(name=self.name)
+    __metaclass__ = ProviderMeta
+    _providers = {}
+
+    def __init__(self, model=None):
+        if model and self.name != model.name:
+            raise Exception(
+                u'DataProvider model name "{0}" does not match provider name "{1}"'.format(
+                    model.name, self.name))
+        self.model = model or DataProvider.objects.get(name=self.name)
+
+    @classmethod
+    def factory(cls, model):
+        return cls._providers[model.name](model)
 
     def get_page(self, url):
         return urllib2.urlopen(url)
@@ -41,7 +61,7 @@ class Provider(object):
 
     def absolute_url(self, href):
         o = urlparse(href)
-        parts = list(urlparse(self.provider.home))
+        parts = list(urlparse(self.model.home))
         if o.path:
             parts[2] = o.path
         parts[4] = o.query or ''
@@ -60,7 +80,7 @@ class WizardsProvider(Provider):
     name = 'wizards'
 
     def products_list_generator(self):
-        soup = self.soup(self.provider.home)
+        soup = self.soup(self.model.home)
         product_link_re = re.compile(r'x=mtg[/_]tcg[/_](?:products[/_]([^/_]+)|([^/_]+)[/_]productinfo)$')
         cards_count_re = re.compile(r'(\d+)\s+cards', re.IGNORECASE)
         separator_re = re.compile(r'\s*(?:,|and)\s*')
@@ -99,7 +119,7 @@ class GathererProvider(Provider):
         return self.absolute_url(query)
 
     def products_list_generator(self):
-        soup = self.soup(self.provider.home)
+        soup = self.soup(self.model.home)
         select_id = 'ctl00_ctl00_MainContent_Content_SearchControls_setAddText'
         options = select(soup, 'select#{0} option'.format(select_id))
         for o in options:
@@ -113,7 +133,7 @@ class MagiccardsProvider(Provider):
     name = 'magiccards'
 
     def products_list_generator(self):
-        soup = self.soup(self.provider.home)
+        soup = self.soup(self.model.home)
         english_header = filter(lambda el: el.text.strip().startswith('English'), soup.findAll('h2'))[0]
         for link in english_header.findNextSibling('table').findAll('a'):
             href = link.get('href')

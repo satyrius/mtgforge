@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
-from django.test import TestCase
-from oracle.providers import WizardsProvider, GathererProvider, MagiccardsProvider
-from mock import Mock
 import StringIO
+
+from django.test import TestCase
+from mock import Mock
+
+from oracle.models import DataProvider
+from oracle.providers import WizardsProvider, GathererProvider, MagiccardsProvider
 
 
 __all__ = ['DataProvidersTest']
@@ -40,6 +43,16 @@ class DataProvidersTest(TestCase):
         self.assertEqual(products, [
             ('Zendikar', 'http://magiccards.info/zen/en.html', {'acronym': 'zen'})
         ])
+
+    def test_provider_factory(self):
+        wizards = DataProvider.objects.get(name='wizards')
+        provider = wizards.provider
+        self.assertIsInstance(provider, WizardsProvider)
+        # Assert that property always return the same instance
+        self.assertEqual(provider, wizards.provider)
+
+        gatherer = DataProvider.objects.get(name='gatherer')
+        self.assertNotEqual(gatherer.provider, wizards.provider)
 
 _wizards_home_page = """
 <html xmlns="http://www.w3.org/1999/xhtml">

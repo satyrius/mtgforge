@@ -1,5 +1,8 @@
 from django.db import models
 from contrib.fields import NullCharField, NullURLField
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
+from contrib.utils import cache_method_calls
 
 
 class CardSet(models.Model):
@@ -17,5 +20,28 @@ class DataProvider(models.Model):
     title = NullCharField(max_length=255, unique=True)
     home = NullURLField()
 
+    @property
+    @cache_method_calls
+    def provider(self):
+        from oracle.providers import Provider
+        return Provider.factory(self)
+
+    def absolute_url(self, url):
+        return self.provider.absolute_url(url)
+
     def __unicode__(self):
         return self.name
+
+class DataSource(models.Model):
+    url = NullURLField()
+    data_provider = models.ForeignKey(DataProvider)
+    content_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField()
+    content_object = generic.GenericForeignKey('content_type', 'object_id')
+
+    class Meta:
+        unique_together = (('content_type', 'object_id', 'url'),
+                           ('content_type', 'object_id', 'data_provider'))
+
+    def __unicode__(self):
+        return self.url

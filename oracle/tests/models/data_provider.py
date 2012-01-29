@@ -1,31 +1,45 @@
 # -*- coding: utf-8 -*-
+import urllib
+
 from django.db import IntegrityError
+from django.forms.models import model_to_dict
 from django.test import TestCase
-from oracle.models import DataProvider
+
+from oracle.models import DataProvider, CardSet, DataSource
 
 
 class DataProviderModelTest(TestCase):
+    fixtures = ['data_provider', 'card_set']
+
     def setUp(self):
-        self.name = 'wizards'
-        self.title = 'Wizzards ot the Coast'
-        self.url = 'http://wizards.com/magic/tcg/Article.aspx?x=mtg/tcg/products/allproducts'
-        self.kwargs = dict(name=self.name, title=self.title, home=self.url)
+        self.data_provider = DataProvider.objects.all()[0]
+        self.kwargs = model_to_dict(self.data_provider)
+        del self.kwargs['id']
 
     def test_create(self):
-        DataProvider.objects.create(**self.kwargs)
+        DataProvider.objects.create(name='new', title='New Gatherer',
+                                    home='http:/example.com')
 
     def test_unique_name(self):
-        DataProvider.objects.create(**self.kwargs)
         with self.assertRaises(IntegrityError):
-            self.kwargs['title'] = 'new' + self.title
+            self.kwargs['title'] = 'new' + self.kwargs['title']
             DataProvider.objects.create(**self.kwargs)
 
     def test_unique_title(self):
-        DataProvider.objects.create(**self.kwargs)
         with self.assertRaises(IntegrityError):
-            self.kwargs['name'] = 'new' + self.name
+            self.kwargs['name'] = 'new' + self.kwargs['name']
             DataProvider.objects.create(**self.kwargs)
 
     def test_url_required(self):
         with self.assertRaises(IntegrityError):
-            DataProvider.objects.create(name=self.name, title=self.title)
+            DataProvider.objects.create(name=self.kwargs['name'],
+                                        title=self.kwargs['title'])
+
+    def test_add_data_source(self):
+        cs = CardSet.objects.all()[0]
+        url = self.data_provider.absolute_url(urllib.quote_plus(cs.name))
+        DataSource.objects.create(content_object=cs, url=url,
+                                  data_provider=self.data_provider)
+        with self.assertRaisesRegexp(IntegrityError, 'duplicate key'):
+            DataSource.objects.create(content_object=cs, url=url,
+                                    data_provider=self.data_provider)
