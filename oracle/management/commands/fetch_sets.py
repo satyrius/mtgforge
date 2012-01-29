@@ -2,9 +2,10 @@ import datetime
 import re
 from optparse import make_option
 
-from django.core.management.base import BaseCommand, CommandError, smart_str
+from django.core.management.base import CommandError
 
 from contrib.utils import translation_aware
+from oracle.management.base import BaseCommand
 from oracle.models import CardSet, DataSource
 from oracle.providers import WizardsProvider, GathererProvider, MagiccardsProvider
 
@@ -18,21 +19,9 @@ class Command(BaseCommand):
             dest='fetch_acronyms',
             default=False,
             help='Fetch acronyms from magiccards.info'),
-        make_option('-d', '--dry-run',
-            action='store_true',
-            dest='dry_run',
-            default=False,
-            help='Do not save fetched data'),
         )
 
     _acronyms = {}
-
-    def writeln(self, message):
-        self.stdout.write(u'{0}\n'.format(message))
-
-    def notice(self, message):
-        colorized_message = self.style.NOTICE(u'Notice: {0}\n'.format(message))
-        self.stderr.write(smart_str(colorized_message))
 
     def is_unique_acronym(self, acronym, print_notice=True):
         if acronym not in self._acronyms:
