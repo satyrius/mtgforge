@@ -5,16 +5,6 @@ from django.contrib.contenttypes import generic
 from contrib.utils import cache_method_calls
 
 
-class CardSet(models.Model):
-    name = NullCharField(max_length=255, unique=True)
-    acronym = NullCharField(max_length=10, unique=True)
-    cards = models.PositiveIntegerField(null=True, blank=True)
-    released_at = models.DateField(null=True, blank=True)
-
-    def __unicode__(self):
-        return self.name
-
-
 class DataProvider(models.Model):
     name = NullCharField(max_length=20, unique=True)
     title = NullCharField(max_length=255, unique=True)
@@ -46,3 +36,14 @@ class DataSource(models.Model):
 
     def __unicode__(self):
         return self.url
+
+
+class CardSet(models.Model):
+    name = NullCharField(max_length=255, unique=True)
+    acronym = NullCharField(max_length=10, unique=True)
+    cards = models.PositiveIntegerField(null=True, blank=True)
+    released_at = models.DateField(null=True, blank=True)
+    sources = generic.GenericRelation(DataSource)
+
+    def __unicode__(self):
+        return self.name

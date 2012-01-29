@@ -5,7 +5,7 @@ from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError, smart_str
 
 from contrib.utils import translation_aware, cache_method_calls
-from oracle.models import CardSet
+from oracle.models import CardSet, DataSource
 from oracle.providers import WizardsProvider, GathererProvider, MagiccardsProvider
 
 
@@ -140,8 +140,10 @@ class Command(BaseCommand):
         fetch_acronyms = options['fetch_acronyms']
 
         self._acronyms = {}
-        gatherer_products = GathererProvider().products_list()
-        products = WizardsProvider().products_list_generator()
+        gatherer = GathererProvider()
+        gatherer_products = gatherer.products_list()
+        wizards = WizardsProvider()
+        products = wizards.products_list_generator()
         for name, url, extra in products:
             # Process only sets fount in Gatherer's list
             g_product = self.find_in_list(name, gatherer_products)
@@ -166,6 +168,14 @@ class Command(BaseCommand):
                     # month is not provided
                     cs.released_at = datetime.datetime.strptime('1 ' + extra['release'], '%d %B %Y')
                 cs.save()
+                for ds_provider, ds_url in ((wizards, url),
+                                            (gatherer, g_product[1])):
+                    try:
+                        source_data = dict(
+                            data_provider=ds_provider.data_provider, url=ds_url)
+                        cs.sources.get(**source_data)
+                    except DataSource.DoesNotExist:
+                        cs.sources.create(content_object=cs, **source_data)
 
             info = dict(name=name, url=url, acronym=acronym or '-',
                         cards=extra['cards'] or '?', release=extra['release'])

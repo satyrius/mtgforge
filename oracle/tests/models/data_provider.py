@@ -38,8 +38,18 @@ class DataProviderModelTest(TestCase):
     def test_add_data_source(self):
         cs = CardSet.objects.all()[0]
         url = self.data_provider.absolute_url(urllib.quote_plus(cs.name))
-        DataSource.objects.create(content_object=cs, url=url,
+        ds = DataSource.objects.create(content_object=cs, url=url,
                                   data_provider=self.data_provider)
+
+        # Check reverse relation
+        self.assertEqual(cs.sources.count(), 1)
+        self.assertEqual(cs.sources.all()[0].id, ds.id)
+        self.assertEqual(
+            cs.sources.get(data_provider=self.data_provider).id, ds.id)
+        with self.assertRaises(DataSource.DoesNotExist):
+            cs.sources.get(url='http://example.com/foo/bar')
+
+        # Cannot duplicate links
         with self.assertRaisesRegexp(IntegrityError, 'duplicate key'):
             DataSource.objects.create(content_object=cs, url=url,
                                     data_provider=self.data_provider)
