@@ -121,7 +121,10 @@ class Command(BaseCommand):
         if acronym and not self.is_unique_acronym(acronym):
             acronym = None
 
-        while not acronym and not skip_on_fail:
+        if not acronym and skip_on_fail:
+            return None
+
+        while not acronym:
             acronym = raw_input('Enter acronym for "{0}": '.format(name)).strip()
             match_pattern = acronym_re.match(acronym)
             if not match_pattern or not self.is_unique_acronym(acronym):
@@ -134,6 +137,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         dry_run = options['dry_run']
         fetch_acronyms = options['fetch_acronyms']
+
         self._acronyms = {}
         gatherer_products = GathererProvider().products_list()
         products = WizardsProvider().products_list_generator()
@@ -149,18 +153,15 @@ class Command(BaseCommand):
                 cs = CardSet.objects.get(name=name)
             except CardSet.DoesNotExist:
                 cs = CardSet(name=name)
-                cs.acronym = self.acronym(
-                    name, fetch_acronyms,
-                    # Do not prompt acronyms on dry run
-                    skip_on_fail=fetch_acronyms and dry_run)
-                if not dry_run:
-                    cs.save()
-                    self.writeln('Saved')
+            acronym = cs.acronym or self.acronym(name, fetch_acronyms, skip_on_fail=dry_run)
+            if not dry_run:
+                if not cs.acronym:
+                    cs.acronym = acronym
+                cs.cards = extra['cards'] or None
+                cs.save()
 
             info = extra
-            extra.update(dict(name=name, url=url,
-                              cards=extra['cards'] or '?',
-                              acronym=cs.acronym or '-'))
+            extra.update(dict(name=name, url=url, cards=extra['cards'] or '?', acronym=acronym or '-'))
             self.writeln(u'{name:<40} {acronym:<6} {cards:<4} {release:<14} {url}'.format(**info))
 
         if gatherer_products:
