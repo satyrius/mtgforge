@@ -17,6 +17,7 @@ ignore_products = [
     'Momir Vig Basic',
     'Legacy',
     'Deck Builder\'s Toolkit',
+    'Vanguard',
     'Promo set for Gatherer', # This name is from Gatherer's list
 ]
 ignore_products_re = re.compile('|'.join(ignore_products))
