@@ -4,7 +4,7 @@ from optparse import make_option
 
 from django.core.management.base import BaseCommand, CommandError, smart_str
 
-from contrib.utils import translation_aware, cache_method_calls
+from contrib.utils import translation_aware
 from oracle.models import CardSet, DataSource
 from oracle.providers import WizardsProvider, GathererProvider, MagiccardsProvider
 
@@ -100,25 +100,7 @@ class Command(BaseCommand):
             return acronym
         return None
 
-    @cache_method_calls
-    def magiccards_products(self):
-        return MagiccardsProvider().products_list()
-
-    def acronym(self, name, fetch=False, skip_on_fail=False):
-        """Returns acronym for given name. If `fetch` argument passed acronyms
-        will be fetched from magiccards.info sitemap (because they are pretty),
-        but it asks user input it not found."""
-        acronym = None
-
-        if not fetch:
-            acronym = self.generate_acronym(name)
-        else:
-            product = self.find_in_list(name, self.magiccards_products())
-            if not product:
-                self.notice('Cannot find acronym for "{0}"'.format(name))
-            else:
-                acronym = product[2]['acronym']
-
+    def check_acronym(self, acronym, name, skip_on_fail=False):
         if acronym and not self.is_unique_acronym(acronym):
             acronym = None
 
@@ -140,19 +122,37 @@ class Command(BaseCommand):
         fetch_acronyms = options['fetch_acronyms']
 
         self._acronyms = {}
-        gatherer = GathererProvider()
-        gatherer_products = gatherer.products_list()
+
         wizards = WizardsProvider()
         products = wizards.products_list_generator()
+        gatherer = GathererProvider()
+        gatherer_products = gatherer.products_list()
+        magiccards = MagiccardsProvider()
+        magiccards_products = magiccards.products_list()
+
+        # Wizards
         for name, url, extra in products:
-            # Process only sets fount in Gatherer's list
+            # Gatherer
             g_product = self.find_in_list(name, gatherer_products)
             if not g_product:
                 self.notice(u'Skip "{0}", because it is not present in Gatherer\'s list'.format(name))
                 continue
             gatherer_products.remove(g_product)
 
-            acronym = self.acronym(name, fetch_acronyms, skip_on_fail=dry_run)
+            # Magiccards product and acronym
+            mc_product = None
+            acronym = None
+            if not fetch_acronyms:
+                acronym = self.generate_acronym(name)
+            else:
+                mc_product = self.find_in_list(name, magiccards_products)
+                if not mc_product:
+                    self.notice(u'Cannot find acronym for "{0}"'.format(name))
+                else:
+                    acronym = mc_product[2]['acronym']
+            acronym = self.check_acronym(acronym, name, skip_on_fail=dry_run)
+
+            # Get or create CardSet
             try:
                 cs = CardSet.objects.get(name=name)
             except CardSet.DoesNotExist:
@@ -160,6 +160,8 @@ class Command(BaseCommand):
                     cs = CardSet.objects.get(acronym=acronym)
                 except CardSet.DoesNotExist:
                     cs = CardSet(name=name, acronym=acronym)
+
+            # Save new object or update existing
             if not dry_run:
                 if not cs.cards:
                     cs.cards = extra['cards'] or None
@@ -169,7 +171,10 @@ class Command(BaseCommand):
                     cs.released_at = datetime.datetime.strptime('1 ' + extra['release'], '%d %B %Y')
                 cs.save()
                 for ds_provider, ds_url in ((wizards, url),
-                                            (gatherer, g_product[1])):
+                                            (gatherer, g_product[1]),
+                                            (magiccards, mc_product[1])):
+                    if not ds_url:
+                        continue
                     try:
                         source_data = dict(
                             data_provider=ds_provider.data_provider, url=ds_url)
