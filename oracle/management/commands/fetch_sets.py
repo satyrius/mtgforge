@@ -73,6 +73,7 @@ class Command(BaseCommand):
         ]
         for strs, num in word2num:
             name = re.sub(r'(?<=\b)({0})(?<=\b)'.format('|'.join(strs)), str(num), name)
+        name = re.sub(r'[:&-]', ' ', name)
         words = filter(None, name.split())
         letters_remain = len(words) < 3 and 3 or len(words)
         acronym = u''
