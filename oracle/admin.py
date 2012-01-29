@@ -6,7 +6,7 @@ from oracle import models
 class CardSetAdmin(TranslationAdmin):
     list_display = ('name', 'acronym', 'cards', 'released_at')
     ordering = ['-released_at']
-    search_fields = ['name', 'acronym']
+    list_per_page = 150
     class Media:
         js = (
             '/static/modeltranslation/js/force_jquery.js',
