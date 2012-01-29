@@ -42,9 +42,11 @@ class Command(BaseCommand):
     def find_in_list(self, name, products):
         # Convert list of tuples into dict with product names as keys. Return
         # product name immediately if it will exactly match next needle.
+        name = name.lower()
         products_dict = dict()
         for product in products:
             pname, url, extra = product
+            pname = pname.lower()
             if pname == name:
                 return product
             if pname in products_dict:
@@ -53,7 +55,11 @@ class Command(BaseCommand):
 
         # Simplyfy name and try to found its occurancies
         name = re.sub(r'&', 'and', name)
-        name = re.sub(r'Magic: The Gathering', '', name).strip()
+        name = re.sub(r'magic: the gathering', '', name).strip()
+        endswith_re = re.compile(name + '$')
+        endswith = filter(lambda n: endswith_re.search(n), products_dict.keys())
+        if len(endswith) == 1:
+            return products_dict[endswith[0]]
         similar = filter(lambda n: n.find(name) >= 0 or name.find(n) >= 0, products_dict.keys())
         return len(similar) == 1 and products_dict[similar[0]] or None
 
