@@ -134,6 +134,21 @@ class GathererProvider(Provider):
                 continue
             yield name, self.search_url(name), None
 
+    def cards_list_generator(self, card_set):
+        source = card_set.sources.get(data_provider__name=self.name)
+        start_page_soup = self.soup('{0}&output=compact'.format(source.url))
+        for page_link in select(start_page_soup, 'div.pagingControls a'):
+            page_url = page_link.get('href')
+            if not page_url or not page_link.text.strip().isdigit():
+                continue
+            page_url = self.absolute_url(page_url)
+            page_soup = self.soup(page_url)
+            for row in select(page_soup, 'tr.cardItem td.name'):
+                card_link = row.find('a')
+                name = card_link.text.strip()
+                url = self.absolute_url(card_link.get('href'), page_url)
+                yield name, url, None
+
 
 class MagiccardsProvider(Provider):
     name = 'magiccards'
