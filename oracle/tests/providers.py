@@ -16,9 +16,17 @@ class DataProvidersTest(TestCase):
 
     def test_normalize_href(self):
         p = WizardsProvider()
-        self.assertEqual(p.absolute_url('/foo/bar.aspx'), 'http://wizards.com/foo/bar.aspx')
-        self.assertEqual(p.absolute_url('/foo.aspx?x=1'), 'http://wizards.com/foo.aspx?x=1')
-        self.assertEqual(p.absolute_url('?x=1'), 'http://wizards.com/magic/tcg/Article.aspx?x=1')
+        self.assertEqual(p.absolute_url('/foo/bar.aspx'),
+                         'http://wizards.com/foo/bar.aspx')
+        self.assertEqual(p.absolute_url('/foo.aspx?x=1'),
+                         'http://wizards.com/foo.aspx?x=1')
+        self.assertEqual(p.absolute_url('?x=1'),
+                         'http://wizards.com/magic/tcg/Article.aspx?x=1')
+        self.assertEqual(p.absolute_url('../foo/Bar.aspx'),
+                         'http://wizards.com/magic/foo/Bar.aspx')
+        self.assertEqual(p.absolute_url('../foo/Bar.aspx',
+                                        'http://wizards.com/magic/tcg/mtg/Article.aspx'),
+                         'http://wizards.com/magic/tcg/foo/Bar.aspx')
 
     def test_wizards_list(self):
         p = WizardsProvider()
@@ -33,7 +41,7 @@ class DataProvidersTest(TestCase):
         p.get_page = Mock(return_value=StringIO.StringIO(_gatherer_home_page))
         products = p.products_list()
         self.assertEqual(products, [
-            ('Zendikar', 'http://gatherer.wizards.com/Pages/Search/Default.aspx?set=[%22Zendikar%22]', None)
+            ('Zendikar', 'http://gatherer.wizards.com/Pages/Search/Default.aspx?set=%5B%22Zendikar%22%5D', None)
         ])
 
     def test_magiccards_list(self):

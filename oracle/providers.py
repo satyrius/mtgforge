@@ -1,3 +1,4 @@
+import os
 import re
 import urllib
 import urllib2
@@ -60,11 +61,15 @@ class Provider(object):
             convertEntities=BeautifulStoneSoup.HTML_ENTITIES
         )
 
-    def absolute_url(self, href):
+    def absolute_url(self, href, base=None):
         o = urlparse(href)
-        parts = list(urlparse(self.data_provider.home))
+        parts = list(urlparse(base or self.data_provider.home))
         if o.path:
-            parts[2] = o.path
+            if o.path.startswith('..'):
+                base_path = os.path.dirname(parts[2])
+                parts[2] = os.path.abspath(os.path.join(base_path, o.path))
+            else:
+                parts[2] = o.path
         parts[4] = o.query or ''
         return urlunparse(parts)
 
