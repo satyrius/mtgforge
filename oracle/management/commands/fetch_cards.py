@@ -16,7 +16,10 @@ class Command(BaseCommand):
 
     def fetch_cards(self, cs):
         cards_found = 0
-        for name, url, extra in GathererProvider().cards_list_generator(cs):
+        gatherer = GathererProvider()
+        cs_page = gatherer.cards_list_url(cs)
+        self.writeln(u'=== {0} === {1}'.format(cs.name, cs_page))
+        for name, url, extra in gatherer.cards_list_generator(cs):
             cards_found += 1
             self.writeln(u'{0:30} {1}'.format(unicode(name), url))
         if cs.cards and cards_found is not cs.cards and \

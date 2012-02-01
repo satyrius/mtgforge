@@ -134,15 +134,26 @@ class GathererProvider(Provider):
                 continue
             yield name, self.search_url(name), None
 
-    def cards_list_generator(self, card_set):
+    def cards_list_url(self, card_set):
         source = card_set.sources.get(data_provider__name=self.name)
-        start_page_soup = self.soup('{0}&output=compact'.format(source.url))
-        for page_link in select(start_page_soup, 'div.pagingControls a'):
-            page_url = page_link.get('href')
-            if not page_url or not page_link.text.strip().isdigit():
-                continue
-            page_url = self.absolute_url(page_url)
-            page_soup = self.soup(page_url)
+        return '{0}&output=compact'.format(source.url)
+
+    def cards_pages_generator(self, card_set):
+        url = self.cards_list_url(card_set)
+        start_page_soup = self.soup(url)
+        pagination = select(start_page_soup, 'div.pagingControls a')
+        if pagination:
+            for page_link in pagination:
+                page_url = page_link.get('href')
+                if not page_url or not page_link.text.strip().isdigit():
+                    continue
+                page_url = self.absolute_url(page_url)
+                yield self.soup(page_url), page_url
+        else:
+            yield start_page_soup, url
+
+    def cards_list_generator(self, card_set):
+        for page_soup, page_url in self.cards_pages_generator(card_set):
             for row in select(page_soup, 'tr.cardItem td.name'):
                 card_link = row.find('a')
                 name = card_link.text.strip()
