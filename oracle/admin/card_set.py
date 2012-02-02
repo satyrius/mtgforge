@@ -28,8 +28,3 @@ class CardSetAdmin(TranslationAdmin):
 
 admin.site.register(models.CardSet, CardSetAdmin)
 
-
-class DataProviderAdmin(admin.ModelAdmin):
-    list_display = ('name', 'title', 'home')
-
-admin.site.register(models.DataProvider, DataProviderAdmin)
