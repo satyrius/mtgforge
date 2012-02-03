@@ -68,7 +68,10 @@ class CardType(models.Model):
     )
 
     name = NullCharField(max_length=255, unique=True)
-    category = NullCharField(max_length=9)
+    category = NullCharField(max_length=9, choices=CATEGORY_CHOICES)
+
+    def __unicode__(self):
+        return self.name
 
 
 class CardFace(models.Model):
