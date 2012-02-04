@@ -113,13 +113,16 @@ class CardFace(models.Model):
 class Artist(models.Model):
     name = NullCharField(max_length=255)
 
+    def __unicode__(self):
+        return self.name
+
 
 class CardRelease(models.Model):
     COMMON, UNCOMMON, RARE, MYTHIC = 'c', 'u', 'r', 'm'
     RARITY_CHOICES = (
         (COMMON, _('Common')),
         (UNCOMMON, _('Uncommon')),
-        (RARE, _('Rate')),
+        (RARE, _('Rare')),
         (MYTHIC, _('Mythic Rare')),
     )
 
