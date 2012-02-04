@@ -94,7 +94,7 @@ class CardFace(models.Model):
     cmc = models.PositiveIntegerField(null=True, blank=True)
 
     # Oracle's card name, type line, rules text and flavor. Always in English.
-    name = NullCharField(max_length=255)
+    name = NullCharField(max_length=255, unique=True)
     type_line = NullCharField(max_length=255)
     rules = NullTextField(max_length=255)
     flavor = NullTextField(blank=True)
@@ -111,6 +111,9 @@ class CardFace(models.Model):
 
     # Planeswalker's loyality counters
     loyality = models.PositiveSmallIntegerField(null=True, blank=True)
+
+    def __unicode__(self):
+        return self.name
 
 
 class Artist(models.Model):
