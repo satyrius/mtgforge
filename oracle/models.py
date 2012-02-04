@@ -104,7 +104,7 @@ class CardFace(models.Model):
     # Store power and thoughtness as strings because of */*, *^2/*^2, 2{1/2}/1
     # and other variants of calculated or strange values.
     power = NullCharField(max_length=10, null=True, blank=True)
-    thoughtness = NullCharField(max_length=10, null=True, blank=False)
+    thoughtness = NullCharField(max_length=10, null=True, blank=True)
     # Store parsed power and thoughtness if they are integers
     fixed_power = models.PositiveSmallIntegerField(null=True, blank=True)
     fixed_thoughtness = models.PositiveSmallIntegerField(null=True, blank=True)
