@@ -136,6 +136,9 @@ class CardRelease(models.Model):
     card_number = models.PositiveIntegerField(null=True, blank=True)
     artist = models.ForeignKey(Artist)
 
+    def __unicode__(self):
+        return '{0} ({1})'.format(self.card.name, self.card_set.name)
+
 
 class CardL10n(models.Model):
     card_face = models.ForeignKey(CardFace)
