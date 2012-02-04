@@ -9,5 +9,6 @@ class CardFaceInline(admin.StackedInline):
 
 class CardAdmin(admin.ModelAdmin):
     inlines = [CardFaceInline]
+    readonly_fields = ('name',)
 
 admin.site.register(models.Card, CardAdmin)

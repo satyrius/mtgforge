@@ -56,7 +56,10 @@ class CardSet(models.Model):
 
 
 class Card(models.Model):
-    pass
+    name = NullCharField(max_length=255, blank=True)
+
+    def __unicode__(self):
+        return self.name
 
 
 class CardType(models.Model):
