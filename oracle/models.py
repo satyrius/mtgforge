@@ -56,7 +56,7 @@ class CardSet(models.Model):
 
 
 class Card(models.Model):
-    name = NullCharField(max_length=255, blank=True)
+    name = NullCharField(max_length=255, null=True, blank=True)
 
     def __unicode__(self):
         return self.name
@@ -90,14 +90,14 @@ class CardFace(models.Model):
     place = NullCharField(max_length=5, choices=TYPE_CHOICES, default=FRONT)
 
     # Mana cost code and CMC (Converted Mana Cost)
-    mana_cost = NullCharField(max_length=20, blank=True)
+    mana_cost = NullCharField(max_length=20, null=True, blank=True)
     cmc = models.PositiveIntegerField(null=True, blank=True)
 
     # Oracle's card name, type line, rules text and flavor. Always in English.
     name = NullCharField(max_length=255, unique=True)
     type_line = NullCharField(max_length=255)
-    rules = NullTextField(max_length=255)
-    flavor = NullTextField(blank=True)
+    rules = NullTextField(null=True, blank=True)
+    flavor = NullTextField(null=True, blank=True)
 
     types = models.ManyToManyField(CardType)
 
@@ -150,5 +150,5 @@ class CardL10n(models.Model):
 
     name = NullCharField(max_length=255)
     type_line = NullCharField(max_length=255)
-    rules = NullTextField()
-    flavor = NullTextField(blank=True)
+    rules = NullTextField(null=True, blank=True)
+    flavor = NullTextField(null=True, blank=True)
