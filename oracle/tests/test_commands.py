@@ -3,9 +3,6 @@ from django.test import TestCase
 from oracle.management.commands.fetch_sets import Command
 
 
-__all__ = ['FetchCardSetsCommandTest']
-
-
 class FetchCardSetsCommandTest(TestCase):
     def test_acronym_generation(self):
         generator = Command().generate_acronym

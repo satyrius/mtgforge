@@ -8,9 +8,6 @@ from oracle.models import DataProvider
 from oracle.providers import WizardsProvider, GathererProvider, MagiccardsProvider
 
 
-__all__ = ['DataProvidersTest']
-
-
 class DataProvidersTest(TestCase):
     fixtures = ['data_provider']
 
