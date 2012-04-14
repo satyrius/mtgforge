@@ -160,7 +160,7 @@ class Command(BaseCommand):
                 cs.save()
                 for ds_provider, ds_url in ((wizards, url),
                                             (gatherer, g_product[1]),
-                                            (magiccards, mc_product[1])):
+                                            (magiccards, mc_product and mc_product[1] or None)):
                     if not ds_url:
                         continue
                     try:
