@@ -3,7 +3,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
-from contrib.fields import NullCharField, NullURLField, NullTextField
+from contrib.fields import NullCharField, NullTextField
 from contrib.utils import cache_method_calls
 
 
@@ -12,9 +12,9 @@ _ = lambda s: s
 
 
 class DataProvider(models.Model):
-    name = NullCharField(max_length=20, unique=True)
-    title = NullCharField(max_length=255, unique=True)
-    home = NullURLField()
+    name = models.CharField(max_length=20, unique=True)
+    title = models.CharField(max_length=255, unique=True)
+    home = models.URLField()
 
     @property
     @cache_method_calls
@@ -30,7 +30,7 @@ class DataProvider(models.Model):
 
 
 class DataSource(models.Model):
-    url = NullURLField()
+    url = models.URLField()
     data_provider = models.ForeignKey(DataProvider)
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
