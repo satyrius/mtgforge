@@ -45,8 +45,8 @@ class DataSource(models.Model):
 
 
 class CardSet(models.Model):
-    name = NullCharField(max_length=255, unique=True)
-    acronym = NullCharField(max_length=10, unique=True)
+    name = models.CharField(max_length=255, unique=True)
+    acronym = models.CharField(max_length=10, unique=True)
     cards = models.PositiveIntegerField(null=True, blank=True)
     released_at = models.DateField(null=True, blank=True)
     sources = generic.GenericRelation(DataSource)

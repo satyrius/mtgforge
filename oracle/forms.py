@@ -7,3 +7,8 @@ from oracle import models
 class DataProviderForm(forms.ModelForm):
     class Meta:
         model = models.DataProvider
+
+
+class CardSetForm(forms.ModelForm):
+    class Meta:
+        model = models.CardSet

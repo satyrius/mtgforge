@@ -1,54 +1,63 @@
 # -*- coding: utf-8 -*-
-from django.db import IntegrityError, DatabaseError
 from django.test import TestCase
+
+from oracle.forms import CardSetForm
 from oracle.models import CardSet
 
 
 class CardSetModelTest(TestCase):
     def setUp(self):
-        self.not_null_integrity_error = 'null value in column "{0}" violates not-null constraint'
-        self.value_too_long_error = 'value too long for type character varying({0})'
         self.name, self.acronym = 'Zendikar', 'zen'
 
     def test_card_set_empty_name(self):
-        with self.assertRaises(IntegrityError) as context:
-            CardSet.objects.create(acronym=self.acronym)
-        msg = self.not_null_integrity_error.format('name')
-        self.assertTrue(context.exception.message.startswith(msg))
+        form = CardSetForm(dict(acronym=self.acronym))
+        self.assertFalse(form.is_valid())
+        self.assertIn('name', form.errors)
+        self.assertEqual(len(form.errors['name']), 1)
+        self.assertRegexpMatches(form.errors['name'][0], 'field is required')
 
     def test_card_set_empty_acronym(self):
-        with self.assertRaises(IntegrityError) as context:
-            CardSet.objects.create(name=self.name)
-        msg = self.not_null_integrity_error.format('acronym')
-        self.assertTrue(context.exception.message.startswith(msg))
+        form = CardSetForm(dict(name=self.name))
+        self.assertFalse(form.is_valid())
+        self.assertIn('acronym', form.errors)
+        self.assertEqual(len(form.errors['acronym']), 1)
+        self.assertRegexpMatches(form.errors['acronym'][0], 'field is required')
 
     def test_card_set_unique_name(self):
-        CardSet.objects.create(name=self.name, acronym=self.acronym)
-        with self.assertRaises(IntegrityError) as context:
-            new_set_acronym = 'new' + self.acronym
-            CardSet.objects.create(name=self.name, acronym=new_set_acronym)
-        self.assertRegexpMatches(
-            context.exception.message,
-            r'Key \(name\)=\({0}\) already exists'.format(self.name)
-        )
+        form = CardSetForm(dict(name=self.name, acronym=self.acronym))
+        self.assertTrue(form.is_valid())
+        form.save()
+
+        # Post the same name thing twice
+        new_set_acronym = 'new' + self.acronym
+        form = CardSetForm(dict(name=self.name, acronym=new_set_acronym))
+        self.assertFalse(form.is_valid())
+        self.assertIn('name', form.errors)
+        self.assertEqual(len(form.errors['name']), 1)
+        self.assertRegexpMatches(form.errors['name'][0], 'already exists')
 
     def test_card_set_unique_acronym(self):
-        CardSet.objects.create(name=self.name, acronym=self.acronym)
-        with self.assertRaises(IntegrityError) as context:
-            new_set_name = 'new' + self.name
-            CardSet.objects.create(name=new_set_name, acronym=self.acronym)
-        self.assertRegexpMatches(
-            context.exception.message,
-            r'Key \(acronym\)=\({0}\) already exists'.format(self.acronym)
-        )
+        form = CardSetForm(dict(name=self.name, acronym=self.acronym))
+        self.assertTrue(form.is_valid())
+        form.save()
+
+        # Post the same acronym thing twice
+        new_set_name = 'new' + self.name
+        form = CardSetForm(dict(name=new_set_name, acronym=self.acronym))
+        self.assertFalse(form.is_valid())
+        self.assertIn('acronym', form.errors)
+        self.assertEqual(len(form.errors['acronym']), 1)
+        self.assertRegexpMatches(form.errors['acronym'][0], 'already exists')
 
     def test_card_set_long_acronym(self):
-        with self.assertRaises(DatabaseError) as context:
-            long_acronym = '1234567890a'
-            CardSet.objects.create(name=self.name, acronym=long_acronym)
-        max_acronym_length = 10
-        msg = self.value_too_long_error.format(max_acronym_length)
-        self.assertTrue(context.exception.message.startswith(msg))
+        long_acronym = '1234567890a'
+        form = CardSetForm(dict(name=self.name, acronym=long_acronym))
+        self.assertFalse(form.is_valid())
+        self.assertIn('acronym', form.errors)
+        self.assertEqual(len(form.errors['acronym']), 1)
+        self.assertRegexpMatches(
+            form.errors['acronym'][0],
+            'Ensure this value has at most 10 characters')
 
     def test_name_translation(self):
         # Create object without translations and assert that only default was

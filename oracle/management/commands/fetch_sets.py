@@ -5,6 +5,7 @@ from optparse import make_option
 from django.core.management.base import CommandError
 
 from contrib.utils import translation_aware
+from oracle.forms import CardSetForm
 from oracle.management.base import BaseCommand
 from oracle.models import CardSet, DataSource
 from oracle.providers import WizardsProvider, GathererProvider, MagiccardsProvider
@@ -147,17 +148,27 @@ class Command(BaseCommand):
                 try:
                     cs = CardSet.objects.get(acronym=acronym)
                 except CardSet.DoesNotExist:
-                    cs = CardSet(name=name, acronym=acronym)
+                    cs = None
 
             # Save new object or update existing
             if not dry_run:
-                if not cs.cards:
-                    cs.cards = extra['cards'] or None
-                if not cs.released_at:
+                data = dict(name=name, acronym=acronym)
+
+                if not cs or not cs.cards:
+                    data['cards'] = extra['cards'] or None
+                elif cs and cs.cards:
+                    data['cards'] = cs.cards
+
+                if not cs or not cs.released_at:
                     # Use first of given month, because particular day of
                     # month is not provided
-                    cs.released_at = datetime.datetime.strptime('1 ' + extra['release'], '%d %B %Y')
-                cs.save()
+                    data['released_at'] = datetime.datetime.strptime('1 ' + extra['release'], '%d %B %Y')
+                elif cs or cs.released_at:
+                    data['released_at'] = cs.released_at
+
+                form = CardSetForm(data, instance=cs)
+                form.is_valid()
+                cs = form.save()
                 for ds_provider, ds_url in ((wizards, url),
                                             (gatherer, g_product[1]),
                                             (magiccards, mc_product and mc_product[1] or None)):

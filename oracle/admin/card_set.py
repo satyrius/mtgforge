@@ -3,6 +3,7 @@ from django.contrib.contenttypes import generic
 from modeltranslation.admin import TranslationAdmin
 
 from oracle import models
+from oracle.forms import CardSetForm
 
 
 class DataSourceInline(generic.GenericTabularInline):
@@ -11,6 +12,7 @@ class DataSourceInline(generic.GenericTabularInline):
 
 
 class CardSetAdmin(TranslationAdmin):
+    form = CardSetForm
     list_display = ('name', 'acronym', 'cards', 'released_at')
     ordering = ['-released_at']
     list_per_page = 150
