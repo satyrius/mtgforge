@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import sys
 
 # Django settings for mtgforge project.
 
@@ -73,12 +74,12 @@ STATIC_URL = '/static/'
 ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 # Additional locations of static files
-STATICFILES_DIRS = (
+STATICFILES_DIRS = [
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     os.path.join(DIR_NAME, 'static'),
-)
+]
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -87,6 +88,18 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
+
+# experiment with mediagenerator (alternative asset manager and compression tool)
+MEDIA_DEV_MODE = 'runserver' in sys.argv  # do not compress media under ./manage.py runserver
+PRODUCTION_MEDIA_URL = '/static/gm/'
+GENERATED_MEDIA_DIR = os.path.join(DIR_NAME, '_generated_media/gm')
+GLOBAL_MEDIA_DIRS = STATICFILES_DIRS # force mediagenerator to do not walk over _generated_media dir
+DEV_MEDIA_URL = '/static-dev/'
+ROOT_MEDIA_FILTERS = {}
+MEDIA_BLOCKS = False
+
+STATICFILES_DIRS.append(os.path.join(DIR_NAME, '_generated_media'))
+
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '32fcsn31khb%-3m$iu1hs@i_l$)woq88m*_*$-k31z-9z3m!c^'
@@ -99,6 +112,7 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'mediagenerator.middleware.MediaMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -125,6 +139,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django_extensions',
     'modeltranslation',
+    'mediagenerator',
     'oracle',
     'south',
     'django_nose', # it should be after south (http://pypi.python.org/pypi/django-nose, Caveats)

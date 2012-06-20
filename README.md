@@ -7,10 +7,20 @@ Clone git repository with project, and configure your own `settings/local.py`:
     git clone git@github.com:ostrovok-team/mtgforge.git
     vim settings/local.py
 
+Do not forget to install python packages:
+
+    pip install -r requirements.txt
+
 Standard way to setup database:
 
     ./manage.py syncdb
     ./manage.py migrate
+
+Our frontenders say: "CoffeeScript is awesome!". So you have to install all stack including Node.js.
+
+    brew install nodejs
+    curl http://npmjs.org/install.sh | sh
+    npm install -g coffee-script
 
 Then load fixtures and get card sets list from Gatherer:
 

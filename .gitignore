@@ -1,3 +1,4 @@
 settings/local.py
 .noseids
 *.pyc
+_generated_media*

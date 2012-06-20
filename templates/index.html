@@ -1,8 +1,9 @@
-{% load staticfiles %}
+{% load media %}
 <html>
 <head>
     <title>MTG Forge</title>
-    <script type="text/javascript" charset="utf-8" src="{% static 'js/hello.js' %}"></script>
+    {% include_media 'common.css' %}
+    {% include_media 'common.js' %}
 </head>
 <body>
     <h1>MTG Forge</h1>
