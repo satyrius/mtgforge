@@ -1,4 +1,4 @@
--e git+git://github.com/ostrovok-team/django-mediagenerator.git@dd4f3600adb96cc9213bf2450502ab5afae38eb6#egg=mediagenerator
+-e git+git://github.com/ostrovok-team/django-mediagenerator.git@ace7e19ddcdd125218c660d037f487b5574078ab#egg=mediagenerator
 BeautifulSoup==3.2.0
 Django==1.4
 django-extensions==0.7.1

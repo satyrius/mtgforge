@@ -16,16 +16,20 @@ Standard way to setup database:
     ./manage.py syncdb
     ./manage.py migrate
 
-Our frontenders say: "CoffeeScript is awesome!". So you have to install all stack including Node.js.
+Then load fixtures and get card sets list from Gatherer:
+
+    ./manage.py loaddata data_provider
+    ./manage.py fetch_sets -a
+
+And a little bit happyness for frond-end developers. They say: "CoffeeScript is awesome!". So you have to install all stack including Node.js.
 
     brew install nodejs
     curl http://npmjs.org/install.sh | sh
     npm install -g coffee-script
 
-Then load fixtures and get card sets list from Gatherer:
+And they like SASS too. Do not forget to include your gems binaries dir into PATH.
 
-    ./manage.py loaddata data_provider
-    ./manage.py fetch_sets -a
+    gem install compass
 
 ## Tools
 
