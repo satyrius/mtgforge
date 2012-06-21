@@ -11,12 +11,6 @@
 </head>
 <body>
     <h1>MTG Forge</h1>
-    <ul id="cards">
-        <li data-foreach-card="Card.all">
-            <input type="number" data-bind="card.cmc" />
-            <label data-bind="card.name"></label>
-            <button class="btn" data-event-click="card.save"><i class="icon-save"></i></button>
-        </li>
-    </ul>
+    <div data-yield="main"></div>
 </body>
 </html>
