@@ -152,7 +152,15 @@ class GathererProvider(Provider):
         else:
             yield start_page_soup, url
 
-    def cards_list_generator(self, card_set):
+    def card_details(self, url, name):
+        '''Fetch cards details from page by given `url`. Use `name` to choose
+        cards face or flip to choose'''
+        details = dict(name=name, url=url)
+        return details
+
+    def cards_list_generator(self, card_set, full_info=False):
+        '''Generates list of cards info for given card set. If `full_info`
+        argument is True fetch card details page for complete details'''
         mvid_re = re.compile('multiverseid\=(?P<id>\d+)')
         for page_soup, page_url in self.cards_pages_generator(card_set):
             for row in select(page_soup, 'tr.cardItem td.name'):
@@ -160,7 +168,11 @@ class GathererProvider(Provider):
                 name = card_link.text.strip()
                 url = self.absolute_url(card_link.get('href'), page_url)
                 m = mvid_re.search(url)
-                extra = m and dict(mvid=m.group('id')) or None
+                if not m:
+                    raise Exception('Cannot get multiverseid for {0}'.format(name))
+                extra = dict(mvid=m.group('id'))
+                if full_info:
+                    extra.update(self.card_details(url, name))
                 yield name, url, extra
 
 

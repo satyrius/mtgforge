@@ -6,9 +6,11 @@ from oracle.providers import GathererProvider
 
 class Command(BaseCommand):
     args = '<card_set_acronym_1 card_set_acronym_2 ...>'
+    verbose = False
 
     @translation_aware
     def handle(self, *args, **options):
+        self.verbose = options['verbosity'] > 1
         sets = not args and CardSet.objects.all() or \
             CardSet.objects.filter(acronym__in=args)
         for cs in sets:
@@ -19,13 +21,16 @@ class Command(BaseCommand):
         gatherer = GathererProvider()
         cs_page = gatherer.cards_list_url(cs)
         self.writeln(u'=== {0} === {1}'.format(cs.name, cs_page))
-        for name, url, extra in gatherer.cards_list_generator(cs):
-            if extra is None or 'mvid' not in extra:
-                raise Exception('Cannot get multiverseid for {0}'.format(name))
+        for name, url, extra in gatherer.cards_list_generator(cs, full_info=True):
             cards_found += 1
-            self.writeln(u'{2:10} {0:30} {1}'.format(unicode(name), url, extra['mvid']))
-        if cs.cards and cards_found is not cs.cards and \
-                cs.cards - cards_found != 15: # Every set has 4 different basic land card
+            if not self.verbose:
+                self.writeln(u'{2:10} {0:30} {1}'.format(unicode(name), url, extra['mvid']))
+            else:
+                self.writeln(u'#{0} {1}'.format(extra['mvid'], unicode(name)))
+                for k in sorted(extra.keys()):
+                    self.writeln(u'{0:>10}: {1}'.format(k, unicode(extra[k])))
+
+        if cs.cards and cards_found is not cs.cards:
             self.notice(u'"{0}" should contain {1} cards, {2} found'.format(
                 cs.name, cs.cards, cards_found))
 
