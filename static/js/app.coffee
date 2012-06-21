@@ -4,6 +4,10 @@ class Forge extends Batman.App
     @root "cards#index"
     @resources "cards"
 
+    @set "advanced", false
+    lol: () ->
+        console.log "test"
+
 class Forge.Card extends Batman.Model
     @persist Batman.LocalStorage
     @encode 'name', 'cmc'
@@ -31,5 +35,11 @@ class Forge.CardsController extends Batman.Controller
         @set "card", Forge.Card.find parseInt(params.id, 10), (err) ->
             throw err if err
 
+    lol: () ->
+        console.log "test"
+
+window.lol = () ->
+    console.log "test"
 $ ->
     Forge.run()
+    $(".check-toggles").button()
