@@ -20,8 +20,10 @@ class Command(BaseCommand):
         cs_page = gatherer.cards_list_url(cs)
         self.writeln(u'=== {0} === {1}'.format(cs.name, cs_page))
         for name, url, extra in gatherer.cards_list_generator(cs):
+            if extra is None or 'mvid' not in extra:
+                raise Exception('Cannot get multiverseid for {0}'.format(name))
             cards_found += 1
-            self.writeln(u'{0:30} {1}'.format(unicode(name), url))
+            self.writeln(u'{2:10} {0:30} {1}'.format(unicode(name), url, extra['mvid']))
         if cs.cards and cards_found is not cs.cards and \
                 cs.cards - cards_found != 15: # Every set has 4 different basic land card
             self.notice(u'"{0}" should contain {1} cards, {2} found'.format(

@@ -153,12 +153,15 @@ class GathererProvider(Provider):
             yield start_page_soup, url
 
     def cards_list_generator(self, card_set):
+        mvid_re = re.compile('multiverseid\=(?P<id>\d+)')
         for page_soup, page_url in self.cards_pages_generator(card_set):
             for row in select(page_soup, 'tr.cardItem td.name'):
                 card_link = row.find('a')
                 name = card_link.text.strip()
                 url = self.absolute_url(card_link.get('href'), page_url)
-                yield name, url, None
+                m = mvid_re.search(url)
+                extra = m and dict(mvid=m.group('id')) or None
+                yield name, url, extra
 
 
 class MagiccardsProvider(Provider):
