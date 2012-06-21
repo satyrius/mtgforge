@@ -2,9 +2,13 @@ import os
 import re
 import urllib
 import urllib2
+from hashlib import sha1
+from StringIO import StringIO
 from urlparse import urlparse, urlunparse
 
 from BeautifulSoup import ICantBelieveItsBeautifulSoup, BeautifulStoneSoup
+from django.conf import settings
+from django.core.cache import cache
 
 from contrib.soupselect import select
 from contrib.utils import cache_method_calls
@@ -49,7 +53,12 @@ class Provider(object):
         return cls._providers[model.name](model)
 
     def get_page(self, url):
-        return urllib2.urlopen(url)
+        k = sha1(url).hexdigest()
+        content = cache.get(k)
+        if not content:
+            content = urllib2.urlopen(url).read()
+            cache.set(k, content, settings.DATA_PROVIDER_TIMEOUT)
+        return StringIO(content)
 
     @cache_method_calls
     def soup(self, url):
@@ -152,10 +161,74 @@ class GathererProvider(Provider):
         else:
             yield start_page_soup, url
 
-    def card_details(self, url, name):
+    def _replace_mana_img(self, img):
+        mana_re = re.compile(r'name=(.+?)&')
+        mana = unicode(mana_re.search(img.get('src')).groups()[0])
+        img.replaceWith(u'{' + mana + u'}')
+
+    def _encode_mana(self, html_el):
+        map(self._replace_mana_img, select(html_el, 'img'))
+
+    def _normalize_spaces(self, text):
+        text = re.sub(r'(?<!\(|\{|\s)\{', ' {', text)
+        text = re.sub(r'\}(?!=\)|\}|\s|\:)', '} ', text)
+        text = re.sub(r'}\s+{', '}{', text)
+        return text
+
+    def parse_mana(self, html_el):
+        self._encode_mana(html_el)
+        return html_el.getText()
+
+    def parse_text(self, html_el):
+        blocks = []
+        for block in select(html_el, 'div.cardtextbox'):
+            self._encode_mana(block)
+            blocks.append(block.getText())
+        return self._normalize_spaces('\n'.join(blocks))
+
+    def card_details(self, url, name, oracle_text=True):
         '''Fetch cards details from page by given `url`. Use `name` to choose
         cards face or flip to choose'''
-        details = dict(name=name, url=url)
+        card_page_soup = self.soup(url)
+
+        found = False
+        subcontent_re = re.compile('MainContent_SubContent_SubContent')
+        name_row_key = 'nameRow'
+        for face in select(card_page_soup, 'td.cardComponentContainer'):
+            details = {}
+            for subcontent in select(face, 'td.rightCol div.row'):
+                id = subcontent.get('id')
+                if subcontent_re.search(id):
+                    k = id.split('_')[-1]
+                    el = select(subcontent, 'div.value')[0]
+                    parse_method_name = 'parse_' + k[:-3]
+                    if hasattr(self, parse_method_name):
+                        v = getattr(self, parse_method_name)(el)
+                    else:
+                        v = el.getText()
+                    if k == name_row_key and v != name:
+                        break
+                    details[k] = v
+            if name_row_key in details:
+                found = True
+                art_src = select(face, 'td.leftCol img')[0].get('src')
+                details['art'] = self.absolute_url(art_src, url)
+                break
+
+        if not found:
+            raise Exception(u'Card \'{0}\' not found on page \'{1}\''.format(
+                name, url))
+
+        details['url'] = url
+
+        if oracle_text:
+            printed_rulings_url = select(card_page_soup, '#cardTextSwitchLink2')[0].get('href')
+            printed_details = self.card_details(
+                url=self.absolute_url(printed_rulings_url, url),
+                name=name, oracle_text=False)
+            printed_details['oracle'] = details
+            details = printed_details
+
         return details
 
     def cards_list_generator(self, card_set, full_info=False):

@@ -168,6 +168,13 @@ LOGGING = {
     }
 }
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/tmp/django_cache',
+    }
+}
+
 # Use Django Nose test runner.
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_ARGS = ['--verbosity=2', '--with-id']
@@ -185,3 +192,6 @@ LANGUAGES = (
 )
 MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
 MODELTRANSLATION_TRANSLATION_REGISTRY = 'translation'
+
+# Data provider settings
+DATA_PROVIDER_TIMEOUT = 60 * 60

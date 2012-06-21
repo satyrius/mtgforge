@@ -10,11 +10,23 @@ class Command(BaseCommand):
 
     @translation_aware
     def handle(self, *args, **options):
-        self.verbose = options['verbosity'] > 1
+        self.verbosity = int(options['verbosity'])
+        self.verbose = self.verbosity > 1
         sets = not args and CardSet.objects.all() or \
             CardSet.objects.filter(acronym__in=args)
         for cs in sets:
             self.fetch_cards(cs)
+
+    def writeln_dict(self, d, prev_level=None):
+        for k in sorted(d.keys()):
+            level = prev_level and '{}.{}'.format(prev_level, k) or k
+            item = d[k]
+            if isinstance(item, dict):
+                if self.verbosity <= 2:
+                    continue
+                self.writeln_dict(item, level)
+            else:
+                self.writeln(u'{0:>22}: {1}'.format(level, unicode(item)))
 
     def fetch_cards(self, cs):
         cards_found = 0
@@ -27,8 +39,7 @@ class Command(BaseCommand):
                 self.writeln(u'{2:10} {0:30} {1}'.format(unicode(name), url, extra['mvid']))
             else:
                 self.writeln(u'#{0} {1}'.format(extra['mvid'], unicode(name)))
-                for k in sorted(extra.keys()):
-                    self.writeln(u'{0:>10}: {1}'.format(k, unicode(extra[k])))
+                self.writeln_dict(extra)
 
         if cs.cards and cards_found is not cs.cards:
             self.notice(u'"{0}" should contain {1} cards, {2} found'.format(
