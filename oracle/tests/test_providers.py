@@ -26,30 +26,6 @@ class DataProvidersTest(TestCase):
                                         'http://wizards.com/magic/tcg/mtg/Article.aspx'),
                          'http://wizards.com/magic/tcg/foo/Bar.aspx')
 
-    def test_wizards_list(self):
-        p = WizardsProvider()
-        p.get_page = Mock(return_value=StringIO.StringIO(fixtures.wizards_home_page))
-        products = p.products_list()
-        self.assertEqual(products, [
-            ('Zendikar', 'http://wizards.com/magic/tcg/products.aspx?x=mtg/tcg/products/zendikar', {'cards': 249, 'release': 'October 2009'})
-        ])
-
-    def test_gatherer_list(self):
-        p = GathererProvider()
-        p.get_page = Mock(return_value=StringIO.StringIO(fixtures.gatherer_home_page))
-        products = p.products_list()
-        self.assertEqual(products, [
-            ('Zendikar', 'http://gatherer.wizards.com/Pages/Search/Default.aspx?set=%5B%22Zendikar%22%5D', None)
-        ])
-
-    def test_magiccards_list(self):
-        p = MagiccardsProvider()
-        p.get_page = Mock(return_value=StringIO.StringIO(fixtures.magiccards_home_page))
-        products = p.products_list()
-        self.assertEqual(products, [
-            ('Zendikar', 'http://magiccards.info/zen/en.html', {'acronym': 'zen'})
-        ])
-
     def test_provider_factory(self):
         wizards = DataProvider.objects.get(name='wizards')
         provider = wizards.provider
@@ -59,3 +35,30 @@ class DataProvidersTest(TestCase):
 
         gatherer = DataProvider.objects.get(name='gatherer')
         self.assertNotEqual(gatherer.provider, wizards.provider)
+
+    def _mock_provider_get_page(self, provider, fixture):
+        provider.get_page = Mock(return_value=StringIO.StringIO(fixture))
+
+    def test_wizards_list(self):
+        p = WizardsProvider()
+        self._mock_provider_get_page(p, fixtures.wizards_home_page)
+        products = p.products_list()
+        self.assertEqual(products, [
+            ('Zendikar', 'http://wizards.com/magic/tcg/products.aspx?x=mtg/tcg/products/zendikar', {'cards': 249, 'release': 'October 2009'})
+        ])
+
+    def test_magiccards_list(self):
+        p = MagiccardsProvider()
+        self._mock_provider_get_page(p, fixtures.magiccards_home_page)
+        products = p.products_list()
+        self.assertEqual(products, [
+            ('Zendikar', 'http://magiccards.info/zen/en.html', {'acronym': 'zen'})
+        ])
+
+    def test_gatherer_list(self):
+        p = GathererProvider()
+        self._mock_provider_get_page(p, fixtures.gatherer_home_page)
+        products = p.products_list()
+        self.assertEqual(products, [
+            ('Zendikar', 'http://gatherer.wizards.com/Pages/Search/Default.aspx?set=%5B%22Zendikar%22%5D', None)
+        ])
