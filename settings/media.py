@@ -1,11 +1,16 @@
 MEDIA_BUNDLES = (
+    ( 'libs.css',
+        'bootstrap/css/bootstrap.css',
+    ),
     ( 'common.css',
-      'css/main.css',
-      'css/main.sass',
-       ),
-
+        'css/main.sass',
+    ),
+    ( 'libs.js',
+        'js/lib/jquery.js',
+        'bootstrap/js/bootstrap.js',
+        'js/lib/batman.js',
+    ),
     ( 'common.js',
-      'js/hello.js',
-      'js/hello.coffee',
-        ),
+        'js/app.coffee',
+    ),
 )

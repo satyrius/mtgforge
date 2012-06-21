@@ -2,3 +2,5 @@ settings/local.py
 .noseids
 *.pyc
 _generated_media*
+.DS_Store
+*.swp
