@@ -74,13 +74,17 @@ The `--no-update` option skips updating card faces already saved
 To skip card faces that cannot be found (parsed from) on card page you can pass `--skip-not-found`. This will catch *CardNotFound* exception.
 
     ./manage.py fetch_cards -s chk --skip-not-found
-    
+
 ### Cards post processing
-    
+
 Loading cards' scans is a heavy pricess. It was introduces as separate management command.
 
     ./manage.py fetch_scans
-    
+
 MTG has a number of unordinary cards: splited, fliped and double-faced. To set right face type use next command:
 
     ./manage.py parse_face_type
+
+To calculate color identity for card faces run following command:
+
+    ./manage.py parse_colors

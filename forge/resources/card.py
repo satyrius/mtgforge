@@ -1,10 +1,14 @@
 import urllib
 
+from django.db import connection
 from django.core.paginator import Paginator, InvalidPage
 from django.conf.urls.defaults import *
 from tastypie.resources import ModelResource
-from oracle.models import CardL10n
+from oracle.models import CardFtsIndex, CardL10n, CardFace, Color
 
+def int2bin(n, count=24):
+    """returns the binary of integer n, using count number of digits"""
+    return "".join([str((n >> y) & 1) for y in range(count-1, -1, -1)])
 
 class CardResource(ModelResource):
     class Meta:
@@ -32,27 +36,50 @@ class CardResource(ModelResource):
         search = ["%s:*" % s for s in search]
         search = " & ".join(search)
         # search = 'cheap:* & red:* & creature:*'
+        
+        # prepare base query
+        query = """
+            select {select_type} from oracle_card c
+            join oracle_cardftsindex i on (c.id = i.card_id)
+            join oracle_cardface f on (f.card_id = c.id and f.place = 'front')
+            join oracle_cardl10n l on (f.id = l.card_face_id)
+            {set_joins}
+            where 
+                i.fts @@ to_tsquery(%s) AND
+                l.language = 'en'
+                {set_filter}
+                {color_filter}
+        """
 
-        query_args = dict(
-            tables = [
-                'oracle_cardftsindex',
-                'oracle_cardface',
-                'oracle_card'
-            ],
-            where = [ """
-                oracle_cardface.id = oracle_cardl10n.card_face_id AND
-                oracle_card.id = oracle_cardface.card_id AND
-                oracle_cardftsindex.card_id = oracle_card.id AND
-                oracle_cardftsindex.fts @@ to_tsquery('%s')
-                
-            """ % search]
+        args = [search]
+        filters = dict(
+            set_filter = '',
+            set_joins = '',
+            color_filter = ''
         )
-        query = CardL10n.objects.extra(**query_args)
+        
+        # custom filters
+        if request.GET.get('sets', ''):
+            filters['set_joins'] = "join oracle_cardrelease r on (l.card_release_id = r.id)"    
+            filters['set_filter'] = "AND r.card_set_id = any(%s)"
+            args.append([int(s) for s in request.GET['set'].split(',')])
 
-        total_count = query.count()
+        if request.GET.get('color', ''):
+            color = request.GET.get('color').lower()
+            operator = '&' if 'a' in color else '|'
+            identity = Color(color).identity
+            filters['color_filter'] = "AND (f.color_identity %s %d) = %d" % (
+                operator, 
+                identity,
+                identity
+            )
+
+        # fetch total objects count and build metadata
+        cursor = connection.cursor()
+        cursor.execute(query.format(select_type="count(*)", **filters), args)
+        total_count = cursor.fetchone()[0]
         limit = int(request.GET.get('limit', 20))
         offset = int(request.GET.get('offset', 0))
-
         if total_count < limit + offset:
             next_url = None
         else:
@@ -63,24 +90,32 @@ class CardResource(ModelResource):
                 q = request.GET.get('q')
             )).replace('+', ' ')
 
-        
-        # make ordering here (fucken djanga orm)
-        query_args['where'][0] += """
-                ORDER BY
-                ts_rank_cd( 
-                    ARRAY[1.0,0.9,0.8,0.7], 
-                    oracle_cardftsindex.fts,
-                    to_tsquery('%s')
-                )
-        """ % search
 
+
+        
+        # make an ordered and limited query
+        query = query + """
+            order by  ts_rank_cd( 
+                ARRAY[1.0,0.9,0.8,0.7], 
+                i.fts,
+                to_tsquery(%s)
+            )
+            limit %s 
+            offset %s
+        """
+        args += [search, limit, offset]
+        query = query.format(select_type = 'l.*', **filters)
+        query = CardL10n.objects.raw(query, args)
+
+        
+        
+        # serialize objects for tastypy response
         objects = []
-        for result in query[offset:limit+offset]:
+        for result in query:
             bundle = self.build_bundle(obj=result, request=request)
             bundle = self.full_dehydrate(bundle)
             objects.append(bundle)
 
-        
         return self.create_response(request, dict(
             objects = objects,
             meta = dict(
