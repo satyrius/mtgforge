@@ -5,6 +5,13 @@ from oracle.admin.data_provider import DataSourceInline
 from oracle import models
 
 
+class CardL10nInline(admin.TabularInline):
+    model = models.CardL10n
+    readonly_fields = ('card_release', 'language',)
+    fields = ('card_release', 'language', 'name', 'scan')
+    extra = 0
+
+
 class CardFaceForm(forms.ModelForm):
     power = forms.CharField(max_length=10, required=False)
     thoughtness = forms.CharField(max_length=10, required=False)
@@ -50,6 +57,6 @@ class CardFaceAdmin(admin.ModelAdmin):
     form = CardFaceForm
     readonly_fields = ('type_line', 'card')
     fieldsets = card_face_fieldsets
-    inlines = [DataSourceInline]
+    inlines = [DataSourceInline, CardL10nInline]
 
 admin.site.register(models.CardFace, CardFaceAdmin)
