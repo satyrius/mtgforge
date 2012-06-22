@@ -178,6 +178,11 @@ class GathererProvider(Provider):
         text = re.sub(r'}\s+{', '}{', text)
         return text
 
+    def _normalize_puct(self, text):
+        text = re.sub(u'\xe2\x80\x99|\u2019', '\'', text)
+        text = re.sub(u'\s*(\xe2\x80\x94|\u2014)\s*', ' - ', text)
+        return text
+
     def parse_mana(self, html_el):
         self._encode_mana(html_el)
         return html_el.getText()
@@ -187,7 +192,8 @@ class GathererProvider(Provider):
         for block in select(html_el, 'div.cardtextbox'):
             self._encode_mana(block)
             blocks.append(block.getText())
-        return self._normalize_spaces('\n'.join(blocks))
+        text = self._normalize_spaces('\n'.join(blocks))
+        return self._normalize_puct(text)
 
     def card_details(self, url, name, oracle_text=True):
         '''Fetch cards details from page by given `url`. Use `name` to choose
@@ -197,7 +203,8 @@ class GathererProvider(Provider):
         found = False
         subcontent_re = re.compile('MainContent_SubContent_SubContent')
         name_row_key = 'name'
-        for face in select(card_page_soup, 'td.cardComponentContainer'):
+        to_normalize = ['name', 'text', 'type']
+        for face in select(card_page_soup, 'table.cardDetails'):
             details = {}
             for subcontent in select(face, 'td.rightCol div.row'):
                 id = subcontent.get('id')
@@ -209,6 +216,8 @@ class GathererProvider(Provider):
                         v = getattr(self, parse_method_name)(el)
                     else:
                         v = el.getText()
+                    if k in to_normalize:
+                        v = self._normalize_puct(v)
                     if k == name_row_key and v != name:
                         break
                     details[k] = v.strip()
@@ -234,7 +243,7 @@ class GathererProvider(Provider):
 
         other_names = []
         for name in select(card_page_soup, 'td.rightCol div[id$="nameRow"] div.value'):
-            value = name.getText()
+            value = self._normalize_spaces(name.getText())
             if value != name:
                 other_names.append(value)
         if other_names:
@@ -249,7 +258,7 @@ class GathererProvider(Provider):
         for page_soup, page_url in self.cards_pages_generator(card_set):
             for row in select(page_soup, 'tr.cardItem td.name'):
                 card_link = row.find('a')
-                name = card_link.text.strip()
+                name = self._normalize_puct(card_link.text.strip())
                 url = self.absolute_url(card_link.get('href'), page_url)
                 m = mvid_re.search(url)
                 if not m:

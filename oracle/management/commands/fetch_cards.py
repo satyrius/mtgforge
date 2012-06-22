@@ -12,7 +12,6 @@ from oracle.models import (
 from oracle.providers import GathererProvider
 
 
-type_line_dash_re = re.compile(u'\s*(\xe2\x80\x94|\u2014)\s*')
 pt_separator_re = re.compile(u'\s*/\s*')
 
 
@@ -104,7 +103,7 @@ class Command(BaseCommand):
         face.mana_cost = 'mana' in oracle and oracle['mana'] or None
         face.cmc = 'cmc' in oracle and int(oracle['cmc']) or None
         face.name = oracle['name']
-        face.type_line = type_line_dash_re.sub(' - ', oracle['type'])
+        face.type_line = oracle['type']
         # TODO Parse types and join them
         face.rules = 'text' in oracle and oracle['text'] or None
         face.flavor = 'flavor' in oracle and oracle['flavor'] or None
