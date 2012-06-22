@@ -143,8 +143,11 @@ class GathererProvider(Provider):
                 continue
             yield name, self.search_url(name), None
 
+    def card_set_source(self, card_set):
+        return card_set.sources.get(data_provider__name=self.name)
+
     def cards_list_url(self, card_set):
-        source = card_set.sources.get(data_provider__name=self.name)
+        source = self.card_set_source(card_set)
         return '{0}&output=compact'.format(source.url)
 
     def cards_pages_generator(self, card_set):
@@ -193,22 +196,22 @@ class GathererProvider(Provider):
 
         found = False
         subcontent_re = re.compile('MainContent_SubContent_SubContent')
-        name_row_key = 'nameRow'
+        name_row_key = 'name'
         for face in select(card_page_soup, 'td.cardComponentContainer'):
             details = {}
             for subcontent in select(face, 'td.rightCol div.row'):
                 id = subcontent.get('id')
                 if subcontent_re.search(id):
-                    k = id.split('_')[-1]
+                    k = id.split('_')[-1][:-3]
                     el = select(subcontent, 'div.value')[0]
-                    parse_method_name = 'parse_' + k[:-3]
+                    parse_method_name = 'parse_' + k
                     if hasattr(self, parse_method_name):
                         v = getattr(self, parse_method_name)(el)
                     else:
                         v = el.getText()
                     if k == name_row_key and v != name:
                         break
-                    details[k] = v
+                    details[k] = v.strip()
             if name_row_key in details:
                 found = True
                 art_src = select(face, 'td.leftCol img')[0].get('src')
@@ -228,6 +231,14 @@ class GathererProvider(Provider):
                 name=name, oracle_text=False)
             printed_details['oracle'] = details
             details = printed_details
+
+        other_names = []
+        for name in select(card_page_soup, 'td.rightCol div[id$="nameRow"] div.value'):
+            value = name.getText()
+            if value != name:
+                other_names.append(value)
+        if other_names:
+            details['other_faces'] = other_names
 
         return details
 
