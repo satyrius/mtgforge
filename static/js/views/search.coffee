@@ -22,7 +22,11 @@ class Forge.Views.Search extends Backbone.View
         false
 
     submitSearch: (event) ->
-        console.log $(event.target).serialize()
+        Forge.App.router.navigate("/search/?" + $(event.target).serialize())
+        #Forge.App.cards.url = "api/v1/card/search/?" + $(event.target).serialize()
+        #Forge.App.cards.reset()
+        #Forge.App.cards.fetch()
+        console.log "from search cards url:", Forge.App.cards.url, "meta", Forge.App.cards.meta
         false
 
 class Forge.Views.AdvancedSearch extends Backbone.View

@@ -1,15 +1,12 @@
 class Forge.Views.App extends Backbone.View
     el: "#app-main"
     template: MEDIA.templates["templates/app.jst"]
-    meta: {}
     events:
         "click .app-load-next" : "loadNext"
     initialize: () ->
+        @router = new Forge.Router
         @cards = new Forge.Collections.Cards
-        @cards.fetch
-            success: (cards, response) =>
-                if response.meta
-                    @meta = response.meta
+        @cards.fetch()
         
         @cards.bind "reset", () =>
             @render()
@@ -23,11 +20,12 @@ class Forge.Views.App extends Backbone.View
 
     loadNext: () ->
         tmpCardsCollection = new Forge.Collections.Cards
-        tmpCardsCollection.url = @meta.next
+        tmpCardsCollection.url = @cards.meta.next
         tmpCardsCollection.fetch
             success: (cards, response) =>
                 if cards.length
                     @cards.add cards.toJSON()
                 if response.meta
-                    @meta = response.meta
+                    @cards.meta = _.clone response.meta
+        false
 
