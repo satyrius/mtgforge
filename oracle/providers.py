@@ -28,6 +28,10 @@ ignore_products = [
 ignore_products_re = re.compile('|'.join(ignore_products))
 
 
+class CardNotFound(Exception):
+    pass
+
+
 class ProviderMeta(type):
     def __new__(cls, name, bases, attrs):
         new_class = super(ProviderMeta, cls).__new__(cls, name, bases, attrs)
@@ -228,7 +232,7 @@ class GathererProvider(Provider):
                 break
 
         if not found:
-            raise Exception(u'Card \'{0}\' not found on page \'{1}\''.format(
+            raise CardNotFound(u'Card \'{0}\' not found on page \'{1}\''.format(
                 name, url))
 
         details['url'] = url
@@ -242,8 +246,8 @@ class GathererProvider(Provider):
             details = printed_details
 
         other_names = []
-        for name in select(card_page_soup, 'td.rightCol div[id$="nameRow"] div.value'):
-            value = self._normalize_spaces(name.getText())
+        for name_block in select(card_page_soup, 'td.rightCol div[id$="nameRow"] div.value'):
+            value = self._normalize_spaces(name_block.getText())
             if value != name:
                 other_names.append(value)
         if other_names:
@@ -251,7 +255,7 @@ class GathererProvider(Provider):
 
         return details
 
-    def cards_list_generator(self, card_set, full_info=False, names=None):
+    def cards_list_generator(self, card_set, names=None, full_info=False, skip_not_found=False):
         '''Generates list of cards info for given card set. If `full_info`
         argument is True fetch card details page for complete details. If
         names argument passed, fetch infor only for those cards.'''
@@ -268,7 +272,11 @@ class GathererProvider(Provider):
                     raise Exception('Cannot get multiverseid for {0}'.format(name))
                 extra = dict(mvid=m.group('id'))
                 if full_info:
-                    extra.update(self.card_details(url, name))
+                    try:
+                        extra.update(self.card_details(url, name))
+                    except CardNotFound, e:
+                        if not skip_not_found:
+                            raise e
                 yield name, url, extra
 
 

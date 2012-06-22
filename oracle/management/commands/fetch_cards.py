@@ -27,9 +27,15 @@ class Command(BaseCommand):
             action='store',
             dest='card_set',
             help='Card set acronym if you want to filter by one'),
+        make_option('--skip-not-found',
+            action='store_true',
+            dest='skip_not_found',
+            default=False,
+            help='Do not stop process if any card was not found'),
         )
     verbose = False
     no_update = False
+    skip_not_found = False
 
     def __init__(self):
         super(Command, self).__init__()
@@ -41,6 +47,7 @@ class Command(BaseCommand):
         self.verbosity = int(options['verbosity'])
         self.verbose = self.verbosity > 1
         self.no_update = options['no_update']
+        self.skip_not_found = options['skip_not_found']
 
         sets = CardSet.objects.all()
         names = None
@@ -69,7 +76,11 @@ class Command(BaseCommand):
         gatherer = self.provider
         cs_page = gatherer.cards_list_url(cs)
         self.writeln(u'=== {0} === {1}'.format(cs.name, cs_page))
-        for name, url, extra in gatherer.cards_list_generator(cs, full_info=True, names=names):
+        for name, url, extra in gatherer.cards_list_generator(
+                cs, names=names, full_info=True, skip_not_found=self.skip_not_found):
+            if len(extra) == 1:
+                self.notice(u'Not found \'{0}\' on page {1}'.format(unicode(name), url))
+                continue
             cards_found += 1
             if not self.verbose:
                 self.writeln(u'{2:10} {0:30} {1}'.format(unicode(name), url, extra['mvid']))
@@ -78,14 +89,18 @@ class Command(BaseCommand):
                 self.writeln_dict(extra)
 
             if not self.dry_run:
-                self.save(extra)
+                # Fix card number. It is for early sets whick have no
+                # collector's number. We ser sequence id instead
+                if 'number' not in extra:
+                    extra['number'] = extra['oracle']['number'] = unicode(cards_found)
+                self.save(extra, cs)
 
         if not names and cs.cards and cards_found is not cs.cards:
             self.notice(u'"{0}" should contain {1} cards, {2} found'.format(
                 cs.name, cs.cards, cards_found))
 
     @xact.xact
-    def save(self, card_details):
+    def save(self, card_details, card_set):
         '''Save or update card details'''
         oracle = card_details['oracle']
 
@@ -93,19 +108,29 @@ class Command(BaseCommand):
         # Get or create the Card instance
         #
         card = None
+        face = None
         try:
             face = CardFace.objects.get(name=oracle['name'])
             if self.no_update:
                 return
             card = face.card
         except CardFace.DoesNotExist:
-            if 'other_faces' in oracle:
-                faces = CardFace.objects.filter(name__in=oracle['other_faces'])
-                if faces:
-                    card = faces[0].card
+            pass
+        finally:
+            if 'other_faces' in card_details:
+                for f in CardFace.objects.filter(name__in=card_details['other_faces']):
+                    if not card:
+                        card = f.card
+                        break
+                    if card.id != f.card_id:
+                        # Delete duplicate and link with right card
+                        f.card.delete()
+                        f.card = card
+                        f.save()
             if not card:
                 card = Card.objects.create()
-            face = CardFace(card=card)
+            if not face:
+                face = CardFace(card=card)
 
         #
         # Oracle rules data
@@ -134,7 +159,7 @@ class Command(BaseCommand):
         #
         # Card release notes
         #
-        cs = CardSet.objects.get(name=oracle['set'])
+        cs = card_set
         artist = Artist.objects.get_or_create(name=oracle['artist'])[0]
         try:
             release = CardRelease.objects.get(card_set=cs, card=card)
