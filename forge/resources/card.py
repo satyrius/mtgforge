@@ -61,7 +61,7 @@ class CardResource(ModelResource):
                 limit = limit,
                 offset = limit + offset,
                 q = request.GET.get('q')
-            ))
+            )).replace('+', ' ')
 
         
         # make ordering here (fucken djanga orm)
