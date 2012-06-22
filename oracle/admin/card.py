@@ -10,6 +10,7 @@ class CardReleaseInline(admin.TabularInline):
 
 class CardAdmin(admin.ModelAdmin):
     readonly_fields = ('name',)
+    search_fields = ('name', 'cardface__cardl10n__name')
     inlines = [CardReleaseInline, CardFaceInline]
 
 admin.site.register(models.Card, CardAdmin)
