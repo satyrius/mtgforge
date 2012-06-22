@@ -28,6 +28,9 @@ To fill cards database do the following:
     # Partial load. Get only particular set (e.g. Zendikar)
     ./manage.py fetch_cards zen
 
+To build full text search engine do:
+    ./manage.py build_fts_index
+
 And a little bit happyness for frond-end developers. They say: "CoffeeScript is awesome!". So you have to install all stack including Node.js.
 
     brew install nodejs
@@ -47,3 +50,27 @@ Projects ships with useful tolls. They are to fetch MTG set names, catds info an
 We use Wizards' official product page to get all valueable product releases (aka card sets). Additionally `-a` (`--fetch-acronyms`) option can be used to parse *magiccards.info* for pretty acronyms.
 
     ./manage.py fetch_sets -d
+
+### Cards
+
+Another major command `fetch_cards` loads cards details you want. It's output
+depends on verbose mode `-v` (`--verbosity`): 1 is mimimal output, 2 shows
+card details, 3 show card details with oracle rulings. Without argumetds it
+fetches cards for all sets that database has. To limit grabber for particular
+sets `-s` (`--set`) option may be used or argument to filter multiple sets.
+
+    ./manage.py fetch_cards --set=isd
+    ./manage.py fetch_cards isd dka avr
+
+It is possible to update single cards, not whole set. You have to specify
+card set filter in this case.
+
+    ./manage.py fetch_cards -s avr 'Avacyn, Angel of Hope' 'Sigarda, Host of Herons'
+
+The `--no-update` option skips updating card faces already saved
+
+    ./manage.py fetch_cards -s chk --no-update
+
+To skip card faces that cannot be found (parsed from) on card page you can pass `--skip-not-found`. This will catch *CardNotFound* exception.
+
+    ./manage.py fetch_cards -s chk --skip-not-found
