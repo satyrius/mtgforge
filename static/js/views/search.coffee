@@ -6,7 +6,10 @@ class Forge.Views.Search extends Backbone.View
         "submit .form-search" : "submitSearch"
     template: MEDIA.templates["templates/search/simple.jst"]
     initialize: () ->
-        @render()
+        @searchModel = new Forge.Models.Search
+        @searchModel.bind "change", () =>
+            @render()
+        @searchModel.set "query", ""
 
     render: () ->
         @$el.html @template.render(this)
@@ -22,11 +25,8 @@ class Forge.Views.Search extends Backbone.View
         false
 
     submitSearch: (event) ->
-        Forge.App.router.navigate("/search/?" + $(event.target).serialize())
-        #Forge.App.cards.url = "api/v1/card/search/?" + $(event.target).serialize()
-        #Forge.App.cards.reset()
-        #Forge.App.cards.fetch()
-        console.log "from search cards url:", Forge.App.cards.url, "meta", Forge.App.cards.meta
+        event.preventDefault()
+        Forge.App.router.navigate("/search/?" + $(event.target).serialize(), { trigger: true })
         false
 
 class Forge.Views.AdvancedSearch extends Backbone.View
@@ -42,12 +42,13 @@ class Forge.Views.AdvancedSearch extends Backbone.View
         $(".check-toggles").button()
 
     manaToggle: (event) ->
-        input = $(event.target).closest("button").find("input")
-        oldValue = parseInt input.val(), 10
-        console.log "click",  input, oldValue
+        input = @$el.find("input[name='color']")
+        color = $(event.target).closest("button").attr("id").replace("mana-toggle-", "")
+        isEnabled = input.val().search(color) > -1
 
-        if oldValue
-            input.val(0)
+        if isEnabled
+            console.log "enabled", input.val(), input.val().replace(color, "")
+            input.val(input.val().replace(color, ""))
         else
-            console.log "turn on"
-            input.val(1)
+            console.log "disabled", input.val(), input.val() + color
+            input.val(input.val() + color)

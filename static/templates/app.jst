@@ -1,8 +1,0 @@
-<ul class="cards-list">
-    <% _.each(cards.models, function(card) { %><li class="app-card">
-        <img src="<%= card.get('scan') %>" />
-    </li><% }) %>
-</ul>
-<div class="well next-cards" style="text-align: center">
-    <a class="app-load-next" href="<%= cards.meta.next %>">More cards!</a>
-</div>
