@@ -143,6 +143,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'modeltranslation',
     'mediagenerator',
+    'tastypie',
     'oracle',
     'south',
     'django_nose', # it should be after south (http://pypi.python.org/pypi/django-nose, Caveats)
