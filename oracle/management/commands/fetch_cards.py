@@ -18,11 +18,15 @@ pt_separator_re = re.compile(u'\s*/\s*')
 class Command(BaseCommand):
     args = '<card_set_acronym_1 card_set_acronym_2 ...>'
     option_list = BaseCommand.option_list + (
-        make_option('-s', '--no-update',
+        make_option('--no-update',
             action='store_true',
             dest='no_update',
             default=False,
             help='Do not update existing card faces'),
+        make_option('-s', '--set',
+            action='store',
+            dest='card_set',
+            help='Card set acronym if you want to filter by one'),
         )
     verbose = False
     no_update = False
@@ -38,10 +42,16 @@ class Command(BaseCommand):
         self.verbose = self.verbosity > 1
         self.no_update = options['no_update']
 
-        sets = not args and CardSet.objects.all() or \
-            CardSet.objects.filter(acronym__in=args)
+        sets = CardSet.objects.all()
+        names = None
+        if options['card_set']:
+            sets = sets.filter(acronym=options['card_set'])
+            names = args
+        elif args:
+            sets = sets.filter(acronym__in=args)
+
         for cs in sets:
-            self.fetch_cards(cs)
+            self.fetch_cards(cs, names=names)
 
     def writeln_dict(self, d, prev_level=None):
         for k in sorted(d.keys()):
@@ -54,12 +64,12 @@ class Command(BaseCommand):
             else:
                 self.writeln(u'{0:>20}: {1}'.format(level, unicode(item)))
 
-    def fetch_cards(self, cs):
+    def fetch_cards(self, cs, names=None):
         cards_found = 0
         gatherer = self.provider
         cs_page = gatherer.cards_list_url(cs)
         self.writeln(u'=== {0} === {1}'.format(cs.name, cs_page))
-        for name, url, extra in gatherer.cards_list_generator(cs, full_info=True):
+        for name, url, extra in gatherer.cards_list_generator(cs, full_info=True, names=names):
             cards_found += 1
             if not self.verbose:
                 self.writeln(u'{2:10} {0:30} {1}'.format(unicode(name), url, extra['mvid']))
@@ -70,7 +80,7 @@ class Command(BaseCommand):
             if not self.dry_run:
                 self.save(extra)
 
-        if cs.cards and cards_found is not cs.cards:
+        if not names and cs.cards and cards_found is not cs.cards:
             self.notice(u'"{0}" should contain {1} cards, {2} found'.format(
                 cs.name, cs.cards, cards_found))
 

@@ -251,14 +251,17 @@ class GathererProvider(Provider):
 
         return details
 
-    def cards_list_generator(self, card_set, full_info=False):
+    def cards_list_generator(self, card_set, full_info=False, names=None):
         '''Generates list of cards info for given card set. If `full_info`
-        argument is True fetch card details page for complete details'''
+        argument is True fetch card details page for complete details. If
+        names argument passed, fetch infor only for those cards.'''
         mvid_re = re.compile('multiverseid\=(?P<id>\d+)')
         for page_soup, page_url in self.cards_pages_generator(card_set):
             for row in select(page_soup, 'tr.cardItem td.name'):
                 card_link = row.find('a')
                 name = self._normalize_puct(card_link.text.strip())
+                if names and name not in names:
+                    continue
                 url = self.absolute_url(card_link.get('href'), page_url)
                 m = mvid_re.search(url)
                 if not m:
