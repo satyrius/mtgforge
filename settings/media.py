@@ -23,9 +23,12 @@ MEDIA_BUNDLES = (
         'js/collections/cards.coffee'
     ),
     ( 'views.js',
-        'js/views/cards.coffee',
+        'js/views/app.coffee',
+        'js/views/search.coffee',
     ),
-    ( 'templates.jst',
-        'templates/app.jst'
+    ( 'templates.js',
+        'templates/app.jst',
+        'templates/search/simple.jst',
+        'templates/search/advanced.jst',
     ),
 )

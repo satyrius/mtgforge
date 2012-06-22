@@ -1,6 +1,6 @@
-class Forge.Views.AppView extends Backbone.View
-    el: "#app"
-    template: MEDIA.templates["templates/app.js"]
+class Forge.Views.App extends Backbone.View
+    el: "#app-main"
+    template: MEDIA.templates["templates/app.jst"]
     initialize: () ->
         @cards = new Forge.Collections.Cards
         @cards.fetch()
@@ -8,4 +8,4 @@ class Forge.Views.AppView extends Backbone.View
             @render()
 
     render: () ->
-        $(el).html(@template)
+        $(@el).html(@template.render(this))

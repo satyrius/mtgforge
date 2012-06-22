@@ -4,5 +4,5 @@ window.Forge =
     Views: {}
 
 $ ->
-    Forge.App = new Forge.Views.AppView
-    $(".check-toggles").button()
+    Forge.App = new Forge.Views.App()
+    Forge.Search = new Forge.Views.Search()
