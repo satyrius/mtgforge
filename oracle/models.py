@@ -5,6 +5,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from contrib.cdn import CDNFileField
 from contrib.fields import NullCharField, NullTextField
 from contrib.utils import cache_method_calls
 
@@ -155,6 +156,9 @@ class CardRelease(models.Model):
         return u'{0} ({1})'.format(self.card.name, self.card_set.name)
 
 
+STORAGE_PATH = '/mtgforge/media/'
+IMAGE_FORMATS = ['orig', 'x220']
+
 class CardL10n(models.Model):
     card_face = models.ForeignKey(CardFace)
     card_release = models.ForeignKey(CardRelease)
@@ -167,6 +171,7 @@ class CardL10n(models.Model):
     flavor = NullTextField(null=True, blank=True)
 
     scan = models.URLField()
+    file = CDNFileField(storage_path=STORAGE_PATH, null=True, blank=True)
 
     class Meta:
         unique_together = (('card_face', 'card_release', 'language'),)

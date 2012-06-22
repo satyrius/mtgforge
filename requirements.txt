@@ -1,3 +1,4 @@
+-e git+ssh://git@git.ostrovok.ru/common@54212c1#egg=ostrovok_common
 -e git+git://github.com/ostrovok-team/django-mediagenerator.git@ace7e19ddcdd125218c660d037f487b5574078ab#egg=mediagenerator
 -e git+git://github.com/ostrovok-team/xact.git@65e19094#egg=xact
 BeautifulSoup==3.2.0
