@@ -57,6 +57,6 @@ class CardFaceAdmin(admin.ModelAdmin):
     form = CardFaceForm
     readonly_fields = ('type_line', 'card')
     fieldsets = card_face_fieldsets
-    inlines = [DataSourceInline, CardL10nInline]
+    inlines = [CardL10nInline]
 
 admin.site.register(models.CardFace, CardFaceAdmin)

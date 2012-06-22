@@ -114,8 +114,6 @@ class CardFace(models.Model):
     # Planeswalker's loyality counters
     loyality = models.PositiveSmallIntegerField(null=True, blank=True)
 
-    sources = generic.GenericRelation(DataSource)
-
     def __unicode__(self):
         return self.name
 
@@ -175,3 +173,5 @@ class CardL10n(models.Model):
 
     class Meta:
         unique_together = (('card_face', 'card_release', 'language'),)
+
+    sources = generic.GenericRelation(DataSource)

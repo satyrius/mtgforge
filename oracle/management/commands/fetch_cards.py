@@ -123,17 +123,6 @@ class Command(BaseCommand):
         face.save()
 
         #
-        # Remember the source
-        #
-        ds_provider = self.provider
-        try:
-            source_data = dict(
-                data_provider=ds_provider.data_provider, url=oracle['url'])
-            face.sources.get(**source_data)
-        except DataSource.DoesNotExist:
-            face.sources.create(content_object=face, **source_data)
-
-        #
         # Card release notes
         #
         cs = CardSet.objects.get(name=oracle['set'])
@@ -162,3 +151,14 @@ class Command(BaseCommand):
         l10n.flavor = 'flavor' in card_details and card_details['flavor'] or None
         l10n.scan = card_details['art']
         l10n.save()
+
+        #
+        # Remember the source
+        #
+        ds_provider = self.provider
+        try:
+            source_data = dict(
+                data_provider=ds_provider.data_provider, url=oracle['url'])
+            l10n.sources.get(**source_data)
+        except DataSource.DoesNotExist:
+            l10n.sources.create(content_object=l10n, **source_data)
