@@ -21,6 +21,13 @@ Then load fixtures and get card sets list from Gatherer:
     ./manage.py loaddata data_provider
     ./manage.py fetch_sets -a
 
+To fill cards database do the following:
+
+    # To download all (not recommended)
+    ./manage.py fetch_cards
+    # Partial load. Get only particular set (e.g. Zendikar)
+    ./manage.py fetch_cards zen
+
 And a little bit happyness for frond-end developers. They say: "CoffeeScript is awesome!". So you have to install all stack including Node.js.
 
     brew install nodejs

@@ -2,7 +2,10 @@ from django.conf import settings
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
+from contrib.cdn import CDNFileField
 from contrib.fields import NullCharField, NullTextField
 from contrib.utils import cache_method_calls
 
@@ -59,7 +62,7 @@ class Card(models.Model):
     name = NullCharField(max_length=255, null=True, blank=True)
 
     def __unicode__(self):
-        return self.name
+        return self.name or 'Card #{}'.format(self.id)
 
 
 class CardType(models.Model):
@@ -90,7 +93,7 @@ class CardFace(models.Model):
     place = NullCharField(max_length=5, choices=TYPE_CHOICES, default=FRONT)
 
     # Mana cost code and CMC (Converted Mana Cost)
-    mana_cost = NullCharField(max_length=20, null=True, blank=True)
+    mana_cost = NullCharField(max_length=255, null=True, blank=True)
     cmc = models.PositiveIntegerField(null=True, blank=True)
 
     # Oracle's card name, type line, rules text and flavor. Always in English.
@@ -108,12 +111,22 @@ class CardFace(models.Model):
     # Store parsed power and thoughtness if they are integers
     fixed_power = models.PositiveSmallIntegerField(null=True, blank=True)
     fixed_thoughtness = models.PositiveSmallIntegerField(null=True, blank=True)
-
     # Planeswalker's loyality counters
     loyality = models.PositiveSmallIntegerField(null=True, blank=True)
 
+    sources = generic.GenericRelation(DataSource)
+
     def __unicode__(self):
         return self.name
+
+
+@receiver(post_save, sender=CardFace)
+def update_card_name(sender, **kwargs):
+    card_face = kwargs['instance']
+    if card_face.place == card_face.FRONT:
+        card = card_face.card
+        card.name = card_face.name
+        card.save()
 
 
 class Artist(models.Model):
@@ -140,15 +153,25 @@ class CardRelease(models.Model):
     artist = models.ForeignKey(Artist)
 
     def __unicode__(self):
-        return '{0} ({1})'.format(self.card.name, self.card_set.name)
+        return u'{0} ({1})'.format(self.card.name, self.card_set.name)
 
+
+STORAGE_PATH = '/mtgforge/media/'
+IMAGE_FORMATS = ['orig', 'x220']
 
 class CardL10n(models.Model):
     card_face = models.ForeignKey(CardFace)
     card_release = models.ForeignKey(CardRelease)
-    language = NullCharField(max_length=2, choices=settings.LANGUAGES)
+    language = NullCharField(max_length=2, choices=settings.LANGUAGES,
+                            default=settings.MODELTRANSLATION_DEFAULT_LANGUAGE)
 
     name = NullCharField(max_length=255)
     type_line = NullCharField(max_length=255)
     rules = NullTextField(null=True, blank=True)
     flavor = NullTextField(null=True, blank=True)
+
+    scan = models.URLField()
+    file = CDNFileField(storage_path=STORAGE_PATH, null=True, blank=True)
+
+    class Meta:
+        unique_together = (('card_face', 'card_release', 'language'),)

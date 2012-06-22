@@ -23,6 +23,9 @@ DATABASES = {
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'OPTIONS': {
+            'autocommit': True,
+        }
     }
 }
 
@@ -140,6 +143,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'modeltranslation',
     'mediagenerator',
+    'tastypie',
     'oracle',
     'south',
     'django_nose', # it should be after south (http://pypi.python.org/pypi/django-nose, Caveats)
@@ -168,6 +172,13 @@ LOGGING = {
     }
 }
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/tmp/django_cache',
+    }
+}
+
 # Use Django Nose test runner.
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_ARGS = ['--verbosity=2', '--with-id']
@@ -185,3 +196,6 @@ LANGUAGES = (
 )
 MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
 MODELTRANSLATION_TRANSLATION_REGISTRY = 'translation'
+
+# Data provider settings
+DATA_PROVIDER_TIMEOUT = 60 * 60
