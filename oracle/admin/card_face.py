@@ -1,7 +1,6 @@
 from django import forms
 from django.contrib import admin
 
-from oracle.admin.data_provider import DataSourceInline
 from oracle import models
 
 
@@ -15,8 +14,9 @@ class CardL10nInline(admin.TabularInline):
 class CardFaceForm(forms.ModelForm):
     power = forms.CharField(max_length=10, required=False)
     thoughtness = forms.CharField(max_length=10, required=False)
-    fixed_power = forms.CharField(max_length=10, required=False)
-    fixed_thoughtness = forms.CharField(max_length=10, required=False)
+    fixed_power = forms.IntegerField(required=False)
+    fixed_thoughtness = forms.IntegerField(required=False)
+    types = forms.MultipleChoiceField(required=False)
     class Meta:
         model = models.CardFace
 
@@ -25,7 +25,7 @@ card_face_fieldsets = (
     (None, {
         'fields': (
             ('name', 'place'),
-            ('mana_cost', 'cmc')
+            ('mana_cost', 'cmc', 'color_identity')
         )
     }),
     (None, {
@@ -47,7 +47,7 @@ card_face_fieldsets = (
 class CardFaceInline(admin.StackedInline):
     model = models.CardFace
     form = CardFaceForm
-    readonly_fields = ('type_line', 'card')
+    readonly_fields = ('type_line', 'card', 'color_identity')
     extra = 0
     fieldsets = card_face_fieldsets
 

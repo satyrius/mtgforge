@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
 from contrib.cdn import CDNFileField
@@ -12,6 +12,38 @@ from contrib.utils import cache_method_calls
 
 # Stub for gettext translation
 _ = lambda s: s
+
+
+# Color identity
+class Color(object):
+    WHITE = 0b1
+    BLUE = 0b10
+    BLACK = 0b100
+    RED = 0b1000
+    GREEN = 0b10000
+    COLORLESS = 0b100000
+
+    MAP = dict(
+        w=WHITE,
+        u=BLUE,
+        b=BLACK,
+        r=RED,
+        g=GREEN,
+        c=COLORLESS,
+    )
+
+    identity = 0
+
+    def __init__(self, mana_cost=None):
+        if mana_cost:
+            costs = set(mana_cost.lower())
+            has_colorless_mana = len(filter(lambda s: s.isdigit(), costs)) > 0
+            allowed_symbols = self.MAP.keys()
+            for c in filter(lambda s: s.isalpha(), costs):
+                if c in allowed_symbols:
+                    self.identity |= self.MAP[c]
+            if not self.identity and has_colorless_mana:
+                self.identity = self.COLORLESS
 
 
 class DataProvider(models.Model):
@@ -95,6 +127,7 @@ class CardFace(models.Model):
     # Mana cost code and CMC (Converted Mana Cost)
     mana_cost = NullCharField(max_length=255, null=True, blank=True)
     cmc = models.PositiveIntegerField(null=True, blank=True)
+    color_identity = models.PositiveSmallIntegerField(default=0)
 
     # Oracle's card name, type line, rules text and flavor. Always in English.
     name = NullCharField(max_length=255, unique=True)
@@ -116,6 +149,12 @@ class CardFace(models.Model):
 
     def __unicode__(self):
         return self.name
+
+
+@receiver(pre_save, sender=CardFace)
+def update_color_identity(sender, **kwargs):
+    card_face = kwargs['instance']
+    card_face.color_identity = Color(card_face.mana_cost).identity
 
 
 @receiver(post_save, sender=CardFace)

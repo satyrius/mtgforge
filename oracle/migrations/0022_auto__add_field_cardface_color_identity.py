@@ -7,41 +7,15 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        db.execute("""
-            CREATE OR REPLACE FUNCTION oracle_card_colors(in_card_id int)
-            RETURNS varchar[] AS
-            $BODY$
-            DECLARE
-                _result varchar[];
-                _color varchar;
-                _face oracle_cardface%%rowtype;
-            BEGIN
-
-                FOR _face IN SELECT * FROM oracle_cardface WHERE card_id = in_card_id and mana_cost is not NULL LOOP
-                    _color := _face.mana_cost;
-                    IF _color !~ '[UBGRW]' THEN
-                        _result := array_append(_result, 'colorless');
-                        CONTINUE;
-                    END IF;
-                    IF _color ~ 'U' THEN _result := array_append(_result, 'blue'); END IF;
-                    IF _color ~ 'B' THEN _result := array_append(_result, 'black'); END IF;
-                    IF _color ~ 'G' THEN _result := array_append(_result, 'green'); END IF;
-                    IF _color ~ 'R' THEN _result := array_append(_result, 'red'); END IF;
-                    IF _color ~ 'W' THEN _result := array_append(_result, 'white'); END IF;
-                END LOOP;
-
-                RETURN _result;
-            END
-            $BODY$
-            LANGUAGE plpgsql;
-
-        """)
+        
+        # Adding field 'CardFace.color_identity'
+        db.add_column('oracle_cardface', 'color_identity', self.gf('django.db.models.fields.PositiveSmallIntegerField')(default=0), keep_default=False)
 
 
     def backwards(self, orm):
-        db.execute("""
-            DROP FUNCTION IF EXISTS oracle_card_colors(int);
-        """)
+        
+        # Deleting field 'CardFace.color_identity'
+        db.delete_column('oracle_cardface', 'color_identity')
 
 
     models = {
@@ -66,6 +40,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'CardFace'},
             'card': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['oracle.Card']"}),
             'cmc': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'color_identity': ('django.db.models.fields.PositiveSmallIntegerField', [], {'default': '0'}),
             'fixed_power': ('django.db.models.fields.PositiveSmallIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'fixed_thoughtness': ('django.db.models.fields.PositiveSmallIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'flavor': ('contrib.fields.NullTextField', [], {'null': 'True', 'blank': 'True'}),
@@ -82,7 +57,7 @@ class Migration(SchemaMigration):
         },
         'oracle.cardftsindex': {
             'Meta': {'object_name': 'CardFtsIndex'},
-            'card': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['oracle.Card']"}),
+            'card': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'fts'", 'to': "orm['oracle.Card']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         'oracle.cardl10n': {

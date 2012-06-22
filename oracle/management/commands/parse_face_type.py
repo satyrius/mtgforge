@@ -14,15 +14,15 @@ class Command(BaseCommand):
             # All splited card faces mark with type 'flip'
             if cs in splited:
                 for face in card.cardface_set.all():
-                    self.writeln('"{0}" is treated as SPLIT face'.format(face.name))
+                    self.writeln(u'"{0}" is treated as SPLIT face'.format(face.name))
                     face.place = CardFace.SPLIT
                     face.save()
                 continue
             face = card.cardface_set.get(mana_cost=None)
             if cs in fliped:
-                self.writeln('"{0}" is treated as FLIPED face'.format(face.name))
+                self.writeln(u'"{0}" is treated as FLIPED face'.format(face.name))
                 face.place = CardFace.FLIP
             elif cs in double_faced:
-                self.writeln('"{0}" is treated as BACK face'.format(face.name))
+                self.writeln(u'"{0}" is treated as BACK face'.format(face.name))
                 face.place = CardFace.BACK
             face.save()

@@ -103,7 +103,7 @@ class CardResource(ModelResource):
             objects.append(bundle)
 
         return self.create_response(request, dict(
-            object_list = objects,
+            objects = objects,
             meta = dict(
                 next = next_url,
                 total_count = total_count,
