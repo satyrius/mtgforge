@@ -242,8 +242,8 @@ class GathererProvider(Provider):
             details = printed_details
 
         other_names = []
-        for name in select(card_page_soup, 'td.rightCol div[id$="nameRow"] div.value'):
-            value = self._normalize_spaces(name.getText())
+        for name_block in select(card_page_soup, 'td.rightCol div[id$="nameRow"] div.value'):
+            value = self._normalize_spaces(name_block.getText())
             if value != name:
                 other_names.append(value)
         if other_names:

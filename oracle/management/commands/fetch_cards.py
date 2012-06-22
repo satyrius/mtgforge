@@ -99,13 +99,22 @@ class Command(BaseCommand):
                 return
             card = face.card
         except CardFace.DoesNotExist:
-            if 'other_faces' in oracle:
-                faces = CardFace.objects.filter(name__in=oracle['other_faces'])
-                if faces:
-                    card = faces[0].card
+            pass
+        finally:
+            if 'other_faces' in card_details:
+                for f in CardFace.objects.filter(name__in=card_details['other_faces']):
+                    if not card:
+                        card = f.card
+                        break
+                    if card.id != f.card_id:
+                        # Delete duplicate and link with right card
+                        f.card.delete()
+                        f.card = card
+                        f.save()
             if not card:
                 card = Card.objects.create()
-            face = CardFace(card=card)
+            if not face:
+                face = CardFace(card=card)
 
         #
         # Oracle rules data
