@@ -1,0 +1,3 @@
+.mana-icons {
+    @include allsprites('img/mana/');
+}
