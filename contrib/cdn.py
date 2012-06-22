@@ -36,6 +36,8 @@ class CDNFileField(models.FileField):
 
     def pre_save(self, model_instance, add):
         file = super(CDNFileField, self).pre_save(model_instance, add)
+        if not file:
+            return file
 
         # Cut CDN prefix
         cdn_prefix = '^(' + settings.CDN_URL_HTTP_ONLY.rstrip('/')\
