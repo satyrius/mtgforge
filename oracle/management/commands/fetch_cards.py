@@ -89,14 +89,18 @@ class Command(BaseCommand):
                 self.writeln_dict(extra)
 
             if not self.dry_run:
-                self.save(extra)
+                # Fix card number. It is for early sets whick have no
+                # collector's number. We ser sequence id instead
+                if 'number' not in extra:
+                    extra['number'] = extra['oracle']['number'] = unicode(cards_found)
+                self.save(extra, cs)
 
         if not names and cs.cards and cards_found is not cs.cards:
             self.notice(u'"{0}" should contain {1} cards, {2} found'.format(
                 cs.name, cs.cards, cards_found))
 
     @xact.xact
-    def save(self, card_details):
+    def save(self, card_details, card_set):
         '''Save or update card details'''
         oracle = card_details['oracle']
 
@@ -155,7 +159,7 @@ class Command(BaseCommand):
         #
         # Card release notes
         #
-        cs = CardSet.objects.get(name=oracle['set'])
+        cs = card_set
         artist = Artist.objects.get_or_create(name=oracle['artist'])[0]
         try:
             release = CardRelease.objects.get(card_set=cs, card=card)
