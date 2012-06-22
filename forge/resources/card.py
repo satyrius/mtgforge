@@ -4,8 +4,11 @@ from django.db import connection
 from django.core.paginator import Paginator, InvalidPage
 from django.conf.urls.defaults import *
 from tastypie.resources import ModelResource
-from oracle.models import CardFtsIndex, CardL10n, CardFace
+from oracle.models import CardFtsIndex, CardL10n, CardFace, Color
 
+def int2bin(n, count=24):
+    """returns the binary of integer n, using count number of digits"""
+    return "".join([str((n >> y) & 1) for y in range(count-1, -1, -1)])
 
 class CardResource(ModelResource):
     class Meta:
@@ -45,6 +48,7 @@ class CardResource(ModelResource):
                 i.fts @@ to_tsquery(%s) AND
                 l.language = 'en'
                 {set_filter}
+                {color_filter}
         """
 
         args = [search]
@@ -53,13 +57,22 @@ class CardResource(ModelResource):
             set_joins = '',
             color_filter = ''
         )
-
-        if 'set' in request.GET:
+        
+        # custom filters
+        if request.GET.get('sets', ''):
             filters['set_joins'] = "join oracle_cardrelease r on (l.card_release_id = r.id)"    
             filters['set_filter'] = "AND r.card_set_id = any(%s)"
             args.append([int(s) for s in request.GET['set'].split(',')])
 
-
+        if request.GET.get('color', ''):
+            color = request.GET.get('color').lower()
+            operator = '&' if 'a' in color else '|'
+            identity = Color(color).identity
+            filters['color_filter'] = "AND (f.color_identity %s %d) = %d" % (
+                operator, 
+                identity,
+                identity
+            )
 
         # fetch total objects count and build metadata
         cursor = connection.cursor()
@@ -76,6 +89,7 @@ class CardResource(ModelResource):
                 offset = limit + offset,
                 q = request.GET.get('q')
             )).replace('+', ' ')
+
 
 
         
