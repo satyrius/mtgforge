@@ -28,6 +28,9 @@ To fill cards database do the following:
     # Partial load. Get only particular set (e.g. Zendikar)
     ./manage.py fetch_cards zen
 
+To build full text search engine do:
+    ./manage.py build_fts_index
+
 And a little bit happyness for frond-end developers. They say: "CoffeeScript is awesome!". So you have to install all stack including Node.js.
 
     brew install nodejs
