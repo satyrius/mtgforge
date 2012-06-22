@@ -1,11 +1,19 @@
+<!DOCTYPE html>
 {% load media %}
+{% load static %}
 <html>
 <head>
     <title>MTG Forge</title>
+    {% include_media 'libs.css' %}
+    {% include_media 'libs.js' %}
     {% include_media 'common.css' %}
     {% include_media 'common.js' %}
 </head>
 <body>
-    <h1>MTG Forge</h1>
+    <div id="wrapper">
+        <div id="search" class="well" data-partial="search/simple">
+        </div>
+        <div id="main" data-yield="main"></div>
+    </div>
 </body>
 </html>
