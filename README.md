@@ -63,3 +63,11 @@ It is possible to update single cards, not whole set. You have to specify
 card set filter in this case.
 
     ./manage.py fetch_cards -s avr 'Avacyn, Angel of Hope' 'Sigarda, Host of Herons'
+
+The `--no-update` option skips updating card faces already saved
+
+    ./manage.py fetch_cards -s chk --no-update
+
+To skip card faces that cannot be found (parsed from) on card page you can pass `--skip-not-found`. This will catch *CardNotFound* exception.
+
+    ./manage.py fetch_cards -s chk --skip-not-found

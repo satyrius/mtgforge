@@ -27,9 +27,15 @@ class Command(BaseCommand):
             action='store',
             dest='card_set',
             help='Card set acronym if you want to filter by one'),
+        make_option('--skip-not-found',
+            action='store_true',
+            dest='skip_not_found',
+            default=False,
+            help='Do not stop process if any card was not found'),
         )
     verbose = False
     no_update = False
+    skip_not_found = False
 
     def __init__(self):
         super(Command, self).__init__()
@@ -41,6 +47,7 @@ class Command(BaseCommand):
         self.verbosity = int(options['verbosity'])
         self.verbose = self.verbosity > 1
         self.no_update = options['no_update']
+        self.skip_not_found = options['skip_not_found']
 
         sets = CardSet.objects.all()
         names = None
@@ -69,7 +76,11 @@ class Command(BaseCommand):
         gatherer = self.provider
         cs_page = gatherer.cards_list_url(cs)
         self.writeln(u'=== {0} === {1}'.format(cs.name, cs_page))
-        for name, url, extra in gatherer.cards_list_generator(cs, full_info=True, names=names):
+        for name, url, extra in gatherer.cards_list_generator(
+                cs, names=names, full_info=True, skip_not_found=self.skip_not_found):
+            if len(extra) == 1:
+                self.notice(u'Not found \'{0}\' on page {1}'.format(unicode(name), url))
+                continue
             cards_found += 1
             if not self.verbose:
                 self.writeln(u'{2:10} {0:30} {1}'.format(unicode(name), url, extra['mvid']))
@@ -93,6 +104,7 @@ class Command(BaseCommand):
         # Get or create the Card instance
         #
         card = None
+        face = None
         try:
             face = CardFace.objects.get(name=oracle['name'])
             if self.no_update:
