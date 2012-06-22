@@ -1,3 +1,5 @@
+import urllib
+
 from django.core.paginator import Paginator, InvalidPage
 from django.conf.urls.defaults import *
 from tastypie.resources import ModelResource
@@ -25,11 +27,13 @@ class CardResource(ModelResource):
 
         # search = 'cheap red creature'
         search = request.GET.get('q', '')
+        search = search.strip(' \n\t')
         search = search.split(' ')
         search = ["%s:*" % s for s in search]
         search = " & ".join(search)
         # search = 'cheap:* & red:* & creature:*'
-        query = CardL10n.objects.extra(
+
+        query_args = dict(
             tables = [
                 'oracle_cardftsindex',
                 'oracle_cardface',
@@ -40,21 +44,50 @@ class CardResource(ModelResource):
                 oracle_card.id = oracle_cardface.card_id AND
                 oracle_cardftsindex.card_id = oracle_card.id AND
                 oracle_cardftsindex.fts @@ to_tsquery('%s')
+                
             """ % search]
         )
+        query = CardL10n.objects.extra(**query_args)
 
-        paginator = self._meta.paginator_class(
-            request.GET,
-            query,
-            self.get_resource_list_uri(),
-            limit=self._meta.limit
-        )
-        page = paginator.page()
+        total_count = query.count()
+        limit = int(request.GET.get('limit', 20))
+        offset = int(request.GET.get('offset', 0))
+
+        if total_count < limit + offset:
+            next_url = None
+        else:
+            next_url = "/api/v1/card/search/?" + urllib.urlencode(dict(
+                format='json',
+                limit = limit,
+                offset = limit + offset,
+                q = request.GET.get('q')
+            ))
+
+        
+        # make ordering here (fucken djanga orm)
+        query_args['where'][0] += """
+                ORDER BY
+                ts_rank_cd( 
+                    ARRAY[1.0,0.9,0.8,0.7], 
+                    oracle_cardftsindex.fts,
+                    to_tsquery('%s')
+                )
+        """ % search
+
         objects = []
-        for result in page['objects']:
+        for result in query[offset:limit+offset]:
             bundle = self.build_bundle(obj=result, request=request)
             bundle = self.full_dehydrate(bundle)
             objects.append(bundle)
 
-        page['objects'] = objects
-        return self.create_response(request, page)
+        
+        return self.create_response(request, dict(
+            object_list = objects,
+            meta = dict(
+                next = next_url,
+                total_count = total_count,
+                limit = limit,
+                offset=offset
+            )
+        ))
+
