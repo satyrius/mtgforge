@@ -121,8 +121,8 @@ class CardFace(models.Model):
 @receiver(post_save, sender=CardFace)
 def update_card_name(sender, **kwargs):
     card_face = kwargs['instance']
-    if card_face.place == card_face.FRONT:
-        card = card_face.card
+    card = card_face.card
+    if card_face.place == card_face.FRONT or not card.name:
         card.name = card_face.name
         card.save()
 
