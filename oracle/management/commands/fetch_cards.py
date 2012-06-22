@@ -132,7 +132,10 @@ class Command(BaseCommand):
             release = CardRelease(card_set=cs, card=card)
         release.artist = artist
         release.rarity = oracle['rarity'].lower()[0]
-        release.card_number = oracle['number']
+        m = re.match(r'(\d+)\w?', oracle['number'])
+        if not m:
+            raise Exception('Collector\'s number is undefined')
+        release.card_number = m.group(1)
         release.save()
 
         #
