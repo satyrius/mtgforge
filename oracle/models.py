@@ -166,5 +166,7 @@ class CardL10n(models.Model):
     rules = NullTextField(null=True, blank=True)
     flavor = NullTextField(null=True, blank=True)
 
+    scan = models.URLField()
+
     class Meta:
         unique_together = (('card_face', 'card_release', 'language'),)

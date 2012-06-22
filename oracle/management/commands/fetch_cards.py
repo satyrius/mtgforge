@@ -106,7 +106,7 @@ class Command(BaseCommand):
         face.name = oracle['name']
         face.type_line = type_line_dash_re.sub(' - ', oracle['type'])
         # TODO Parse types and join them
-        face.rules = oracle['text']
+        face.rules = 'text' in oracle and oracle['text'] or None
         face.flavor = 'flavor' in oracle and oracle['flavor'] or None
         # TODO Add color identyty
         face.power, face.thoughtness, face.loyality = None, None, None
@@ -158,6 +158,7 @@ class Command(BaseCommand):
             l10n = CardL10n(**data)
         l10n.name = card_details['name']
         l10n.type_line = card_details['type']
-        l10n.rules = card_details['text']
+        l10n.rules = 'text' in card_details and card_details['text'] or None
         l10n.flavor = 'flavor' in card_details and card_details['flavor'] or None
+        l10n.scan = card_details['art']
         l10n.save()
