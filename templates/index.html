@@ -14,11 +14,13 @@
     {% include_media 'views.js' %}
     {% include_media 'router.js' %}
 </head>
-<body>
+<body id="app">
     <div id="wrapper">
-        <div id="app-search" class="well">
+        <div id="app-search" class="well"></div>
+        <div id="app-cards" style="display: none">
+            <div class="spinner"></div>
         </div>
-        <div id="app-main"></div>
+        <div id="app-index" style="display: none"></div>
     </div>
 </body>
 </html>
