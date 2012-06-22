@@ -1,14 +1,9 @@
 from django.contrib import admin
-from django.contrib.contenttypes import generic
 from modeltranslation.admin import TranslationAdmin
 
 from oracle import models
+from oracle.admin.data_provider import DataSourceInline
 from oracle.forms import CardSetForm
-
-
-class DataSourceInline(generic.GenericTabularInline):
-    model = models.DataSource
-    extra = 0
 
 
 class CardSetAdmin(TranslationAdmin):
