@@ -9,13 +9,15 @@
     {% include_media 'common.css' %}
     {% include_media 'common.js' %}
     {% include_media 'models.js' %}
-    {% include_media 'controllers.js' %}
+    {% include_media 'collections.js' %}
+    {% include_media 'views.js' %}
+    {% include_media 'templates.js' %}
 </head>
 <body>
     <div id="wrapper">
-        <div id="search" class="well" data-partial="search/simple">
+        <div id="app-search" class="well">
         </div>
-        <div id="main" data-yield="main"></div>
+        <div id="app-main"></div>
     </div>
 </body>
 </html>

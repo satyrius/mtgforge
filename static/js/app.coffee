@@ -1,12 +1,8 @@
-window.Forge = class Forge extends Batman.App
-    Batman.ViewStore.prefix = 'static/views'
-    
-    @root "cards#index"
-    @resources "cards"
-
-    @on "ready", () ->
-        console.log "Ready."
+window.Forge =
+    Models: {}
+    Collections: {}
+    Views: {}
 
 $ ->
-    Forge.run()
+    Forge.App = new Forge.Views.AppView
     $(".check-toggles").button()

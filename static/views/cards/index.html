@@ -1,10 +1,7 @@
 <ul id="cards">
     <li data-foreach-card="Card.all">
-        <input type="number" data-bind="card.cmc" />
         <a data-bind="card.name" data-route="routes.cards[card]">
         </a>
-        <button class="btn" data-event-click="card.save">
-            <i class="icon-thumbs-up"></i>
-        </button>
+        <img data-src="card.scan" />
     </li>
 </ul>

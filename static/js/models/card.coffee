@@ -1,8 +1,5 @@
-class Forge.Card extends Batman.Model
-    @persist Batman.LocalStorage
-    @encode 'name', 'cmc'
-    @resourceName: "cards"
-    @storageKey: 'ads'
-
-    name: ''
-    cmc: 0
+class Forge.Card extends Backbone.Model
+    defaults:
+        id: 0
+        name: ''
+        scan: ''
