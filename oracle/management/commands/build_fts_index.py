@@ -20,7 +20,7 @@ class Command(BaseCommand):
             UPDATE oracle_cardftsindex SET fts = fts 
                 || setweight(to_tsvector(n.names), 'A')
                 || setweight(to_tsvector(n.types), 'B')
-                || setweight(to_tsvector(n.rules), 'B')
+                || setweight(to_tsvector(n.rules), 'C')
             FROM (
                 SELECT c.id as id, 
                     array_to_string(array_agg(t.name), ' ') as names,
@@ -45,9 +45,9 @@ class Command(BaseCommand):
             UPDATE oracle_cardftsindex SET fts = fts || 
             CASE 
                 WHEN n.cmc <= 1 
-                THEN setweight(to_tsvector('cheap'), 'B')
-                WHEN n.cmc in (2, 3) 
                 THEN setweight(to_tsvector('cheap'), 'C')
+                WHEN n.cmc in (2, 3) 
+                THEN setweight(to_tsvector('cheap'), 'D')
                 ELSE to_tsvector('')
             END
             FROM oracle_cardface n

@@ -339,6 +339,7 @@
       options.success = function(resp, status, xhr) {
         if (!model.set(model.parse(resp, xhr), options)) return false;
         if (success) success(model, resp);
+        if (resp.meta) model.meta = resp.meta;
       };
       options.error = Backbone.wrapError(options.error, model, options);
       return (this.sync || Backbone.sync).call(this, 'read', this, options);
