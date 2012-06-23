@@ -4,9 +4,11 @@
             <img src="<%= card.get('scan') %>" />
         </li><% }) %>
     </ul>
-    <div class="well next-cards" style="text-align: center">
-        <a class="app-load-next" href="<%= cards.meta && cards.meta.next %>">More cards!</a>
-    </div>
+    <% if(cards.meta && cards.meta.next) { %>
+        <div class="well next-cards" style="text-align: center">
+            <a class="app-load-next" href="<%= cards.meta.next %>">More cards!</a>
+        </div>
+    <% } %>
     <div class="next-spinner spinner" style="display: none"></div>
 <% } else { %>
     <div>
