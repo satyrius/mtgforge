@@ -102,7 +102,10 @@ class CardResource(ModelResource):
                 format='json',
                 limit = limit,
                 offset = limit + offset,
-                q = request.GET.get('q')
+                q = request.GET.get('q', ''),
+                types = request.GET.get('types', ''),
+                color = request.GET.get('color', ''),
+                sets = request.GET.get('sets', ''),
             )).replace('+', ' ')
 
 
