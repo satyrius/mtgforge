@@ -26,6 +26,13 @@ class Forge.Views.Search extends Backbone.View
 
     submitSearch: (event) ->
         event.preventDefault()
+        serializedData = $(event.target).serializeArray()
+        _.each serializedData, (param, index) ->
+            if !param.value
+                serializedData.splice index, 1
+            if param.value.charAt(param.value.length - 1) == ","
+                param.value = param.value.substr(0, param.value.length - 1)
+        console.log "daaaaa", serializedData
         Forge.App.router.navigate("/search/?" + $(event.target).serialize(), { trigger: true })
         false
 
@@ -34,6 +41,7 @@ class Forge.Views.AdvancedSearch extends Backbone.View
     events:
         "click .app-mana-toggles button" : "manaToggle"
         "click .app-cmc-toggles button" : "cmcToggle"
+        "click .app-type-toggles button" : "typeToggle"
     template: MEDIA.templates["templates/search/advanced.jst"]
     initialize: () ->
         @sets = new Forge.Collections.Sets
@@ -73,3 +81,13 @@ class Forge.Views.AdvancedSearch extends Backbone.View
             input.val(input.val().replace(cmc, ""))
         else
             input.val(input.val() + cmc)
+
+    typeToggle: (event) ->
+        input = @$el.find("input[name='type']")
+        type = $(event.target).closest("button").attr("id").replace("type-toggle-", "")
+        isEnabled = input.val().search(type) > -1
+
+        if isEnabled
+            input.val(input.val().replace(type+",", ""))
+        else
+            input.val(input.val() + type + ",")
