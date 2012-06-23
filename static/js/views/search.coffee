@@ -14,6 +14,7 @@ class Forge.Views.Search extends Backbone.View
     render: () ->
         @$el.html @template.render(this)
         @advancedSearchView = new Forge.Views.AdvancedSearch
+        @advancedSearchView.searchModel = @searchModel
 
     toggleAdvancedEnabled: () ->
         if @advancedEnabled
@@ -32,7 +33,6 @@ class Forge.Views.Search extends Backbone.View
                 serializedData.splice index, 1
             if param.value.charAt(param.value.length - 1) == ","
                 param.value = param.value.substr(0, param.value.length - 1)
-        console.log "daaaaa", serializedData
         Forge.App.router.navigate("/search/?" + $(event.target).serialize(), { trigger: true })
         false
 
@@ -58,7 +58,7 @@ class Forge.Views.AdvancedSearch extends Backbone.View
                 id: set.get('id')
                 name: set.get('name')
         console.log "sets", sets
-        @$el.find("input[name='sets']").tokenInput sets, {theme: "facebook"}
+        @$el.find("input[name='sets']").tokenInput sets, {theme: "facebook", minChars: 2, hintText: "Begin typing set name"}
 
     manaToggle: (event) ->
         input = @$el.find("input[name='color']")
