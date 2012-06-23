@@ -1,7 +1,7 @@
     <div class="group">
         <div class="btn-toolbar">
             <div class="btn-group check-toggles app-mana-toggles" data-toggle="buttons-checkbox">
-                <input type="hidden" name="color" value="">
+                <input type="hidden" name="color" value="<%= searchModel.get('query')['color'] %>">
                 <button class="btn" type="button" id="mana-toggle-b">
                     <i class="icon-mana-b"></i>
                 </button>
@@ -60,7 +60,7 @@
     <div class="group">
         <div class="btn-toolbar">
             <div class="btn-group check-toggles app-type-toggles" data-toggle="buttons-checkbox">
-                <input type="hidden" name="type" value="">
+                <input type="hidden" name="type" value="<%= searchModel.get('query')['type'] %>">
                 <button class="btn" type="button" id="type-toggle-land">
                     Land
                 </button>

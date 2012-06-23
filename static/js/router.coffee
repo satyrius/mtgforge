@@ -10,6 +10,7 @@ class Forge.Router extends Backbone.Router
     search: (query) ->
         Forge.App.indexView.$el.hide()
         Forge.App.cardsView.$el.show()
-        Forge.App.searchView.searchModel.set "query", $.unserialize(query)["q"]
+        Forge.App.searchView.searchModel.set "query", $.unserialize(query)
+        console.log "qqq", Forge.App.searchView.searchModel.get("query")
         Forge.App.cardsView.cards.url = "api/v1/card/search/" + query
         Forge.App.cardsView.cards.fetch()

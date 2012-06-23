@@ -18,7 +18,7 @@ class Forge.Views.Cards extends Backbone.View
         @$el.find(".next-cards").hide()
         @$el.find(".next-spinner").show()
         tmpCardsCollection = new Forge.Collections.Cards
-        tmpCardsCollection.url = @cards.meta.next || "api/v1/card/"
+        tmpCardsCollection.url = @cards.meta.next || null
         tmpCardsCollection.fetch
             success: (cards, response) =>
                 if cards.length
