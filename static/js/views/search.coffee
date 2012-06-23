@@ -33,13 +33,24 @@ class Forge.Views.AdvancedSearch extends Backbone.View
     el: "#app-advanced-search"
     events:
         "click .app-mana-toggles button" : "manaToggle"
+        "click .app-cmc-toggles button" : "cmcToggle"
     template: MEDIA.templates["templates/search/advanced.jst"]
     initialize: () ->
-        @render()
+        @sets = new Forge.Collections.Sets
+        @sets.bind "reset", () =>
+            @render()
+        @sets.fetch()
 
     render: () ->
         @$el.html @template.render(this)
         $(".check-toggles").button()
+        sets = []
+        @sets.map (set) ->
+            sets.push
+                id: set.get('id')
+                name: set.get('name')
+        console.log "sets", sets
+        @$el.find("input[name='sets']").tokenInput sets, {theme: "facebook"}
 
     manaToggle: (event) ->
         input = @$el.find("input[name='color']")
@@ -52,3 +63,13 @@ class Forge.Views.AdvancedSearch extends Backbone.View
         else
             console.log "disabled", input.val(), input.val() + color
             input.val(input.val() + color)
+
+    cmcToggle: (event) ->
+        input = @$el.find("input[name='cmc']")
+        cmc = $(event.target).closest("button").attr("id").replace("cmc-toggle-", "")
+        isEnabled = input.val().search(cmc) > -1
+
+        if isEnabled
+            input.val(input.val().replace(cmc, ""))
+        else
+            input.val(input.val() + cmc)
