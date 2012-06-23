@@ -29,13 +29,8 @@ class CardResource(ModelResource):
         Performs fts search on Card using CardFtsIndex table
         """
 
-        # search = 'cheap red creature'
-        search = request.GET.get('q', '')
-        search = search.strip(' \n\t')
-        search = search.split(' ')
-        search = ["%s:*" % s for s in search]
-        search = " & ".join(search)
-        # search = 'cheap:* & red:* & creature:*'
+        search = ''
+
         
         # prepare base query
         query = """
@@ -45,24 +40,36 @@ class CardResource(ModelResource):
             join oracle_cardl10n l on (f.id = l.card_face_id)
             {set_joins}
             where 
-                i.fts @@ to_tsquery(%s) AND
                 l.language = 'en'
+                {search_filter}
                 {set_filter}
                 {color_filter}
+                {type_filter}
         """
 
-        args = [search]
+        args = []
         filters = dict(
+            search_filter = '',
             set_filter = '',
             set_joins = '',
-            color_filter = ''
+            color_filter = '',
+            type_filter = ''
         )
         
         # custom filters
+        if request.GET.get('q', ''):
+            search = request.GET.get('q', '')
+            search = search.strip(' \n\t')
+            search = search.split(' ')
+            search = ["%s:*" % s for s in search]
+            search = " & ".join(search)
+            filters['search_filter'] = 'AND i.fts @@ to_tsquery(%s)'
+            args.append(search)
+
         if request.GET.get('sets', ''):
             filters['set_joins'] = "join oracle_cardrelease r on (l.card_release_id = r.id)"    
             filters['set_filter'] = "AND r.card_set_id = any(%s)"
-            args.append([int(s) for s in request.GET['set'].split(',')])
+            args.append([int(s) for s in request.GET['sets'].split(',')])
 
         if request.GET.get('color', ''):
             color = request.GET.get('color').lower()
@@ -73,6 +80,14 @@ class CardResource(ModelResource):
                 identity,
                 identity
             )
+
+        if request.GET.get('type', ''):
+            type_query = request.GET.get('type').strip(' \t\n,').split(',')
+            type_query = ['%s:B*' % q for q in type_query]
+            type_query = ' | '.join(type_query)
+            filters['type_filter'] = 'AND i.fts @@ to_tsquery(%s)'
+            args.append(type_query)
+
 
         # fetch total objects count and build metadata
         cursor = connection.cursor()
