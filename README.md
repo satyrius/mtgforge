@@ -41,6 +41,10 @@ And they like SASS too. Do not forget to include your gems binaries dir into PAT
 
     gem install compass
 
+Mediagenerator require ImageMagick.
+
+    brew install imagemagick
+
 ## Tools
 
 Projects ships with useful tolls. They are to fetch MTG set names, catds info and other stuff users want to see and use. In `dry run` mode they just prints what they can get and do not save it to the database. Use `-d` or `--dry-run` just to see.
