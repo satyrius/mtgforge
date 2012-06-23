@@ -33,8 +33,7 @@ class Forge.Views.Search extends Backbone.View
                 serializedData.splice index, 1
             if param.value.charAt(param.value.length - 1) == ","
                 param.value = param.value.substr(0, param.value.length - 1)
-            if param.value.search("+") > -1
-                param.value = param.value.replace("+", "")
+            param.value = param.value.replace("\+", "")
         Forge.App.router.navigate("/search/?" + $(event.target).serialize(), { trigger: true })
         false
 
