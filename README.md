@@ -88,3 +88,7 @@ MTG has a number of unordinary cards: splited, fliped and double-faced. To set r
 To calculate color identity for card faces run following command:
 
     ./manage.py parse_colors
+
+To fill card types table and link it with cards use command:
+
+    ./manage.py parse_card_type
