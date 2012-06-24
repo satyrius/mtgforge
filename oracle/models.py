@@ -214,6 +214,3 @@ class CardL10n(models.Model):
         unique_together = (('card_face', 'card_release', 'language'),)
 
     sources = generic.GenericRelation(DataSource)
-
-class CardFtsIndex(models.Model):
-    card = models.ForeignKey(Card, related_name='fts')

@@ -4,7 +4,7 @@ from django.db import connection
 from django.core.paginator import Paginator, InvalidPage
 from django.conf.urls.defaults import *
 from tastypie.resources import ModelResource
-from oracle.models import CardFtsIndex, CardL10n, CardFace, Color
+from oracle.models import CardL10n, Color
 
 def int2bin(n, count=24):
     """returns the binary of integer n, using count number of digits"""
@@ -34,13 +34,10 @@ class CardResource(ModelResource):
         
         # prepare base query
         query = """
-            select {select_type} from oracle_card c
-            join oracle_cardftsindex i on (c.id = i.card_id)
-            join oracle_cardface f on (f.card_id = c.id and f.place = 'front')
-            join oracle_cardl10n l on (f.id = l.card_face_id)
-            {set_joins}
+            select {select_type} from forge_cardftsindex i
+            join oracle_cardl10n l on (i.card_face_id = l.card_face_id and l.language='en')
             where 
-                l.language = 'en'
+                True
                 {search_filter}
                 {set_filter}
                 {color_filter}
@@ -67,19 +64,18 @@ class CardResource(ModelResource):
             args.append(search)
 
         if request.GET.get('sets', ''):
-            filters['set_joins'] = "join oracle_cardrelease r on (l.card_release_id = r.id)"    
-            filters['set_filter'] = "AND r.card_set_id = any(%s)"
-            args.append([int(s) for s in request.GET['sets'].split(',')])
+            sets = [str(int(s)) for s in request.GET['sets'].split(',')]
+            sets = '|'.join(sets)
+            sets = "AND i.sets @@ '%s'::query_int" % sets
+            filters['set_filter'] = sets
 
         if request.GET.get('color', ''):
             color = request.GET.get('color').lower()
-            operator = '&' if 'a' in color else '|'
             identity = Color(color).identity
-            filters['color_filter'] = "AND (f.color_identity %s %d) = %d" % (
-                operator, 
-                identity,
-                identity
-            )
+            identity_query = [ str(1<<i) for i in range(6) if (i<<i) & identity ]
+            operator = '&' if 'a' in color else '|'
+            identity_query = "'%s'::query_int" % operator.join(identity_query)
+            filters['color_filter'] = 'AND color_identity_idx @@ %s' % identity_query
 
         if request.GET.get('type', ''):
             type_query = request.GET.get('type').strip(' \t\n,').split(',')
@@ -123,6 +119,7 @@ class CardResource(ModelResource):
         """
         args += [search, limit, offset]
         query = query.format(select_type = 'l.*', **filters)
+        print query, args
         query = CardL10n.objects.raw(query, args)
 
         

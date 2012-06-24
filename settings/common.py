@@ -145,6 +145,7 @@ INSTALLED_APPS = (
     'mediagenerator',
     'tastypie',
     'oracle',
+    'forge',
     'south',
     'django_nose', # it should be after south (http://pypi.python.org/pypi/django-nose, Caveats)
 )
