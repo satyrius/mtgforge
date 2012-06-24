@@ -14,7 +14,8 @@ class CardResource(ModelResource):
     class Meta:
         resource_name = 'card'
         queryset = CardL10n.objects.all()
-        allowed_methods = ['get']
+        list_allowed_methods = []
+        details_allowed_methods = ['get']
 
     def override_urls(self):
         return [
