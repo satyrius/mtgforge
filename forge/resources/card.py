@@ -25,6 +25,22 @@ class CardResource(ModelResource):
                 name="api_get_search"),
         ]
 
+    def get_resource_search_uri(self):
+        """
+        Returns a URL specific to this resource's search endpoint.
+        """
+        kwargs = {
+            'resource_name': self._meta.resource_name,
+        }
+
+        if self._meta.api_name is not None:
+            kwargs['api_name'] = self._meta.api_name
+
+        try:
+            return self._build_reverse_url("api_get_search", kwargs=kwargs)
+        except NoReverseMatch:
+            return None
+
     def get_search(self, request, **kwargs):
         """
         Performs fts search on Card using CardFtsIndex table
@@ -95,7 +111,7 @@ class CardResource(ModelResource):
         if total_count < limit + offset:
             next_url = None
         else:
-            next_url = "/api/v1/card/search/?" + urllib.urlencode(dict(
+            next_url = self.get_resource_search_uri() + '?' + urllib.urlencode(dict(
                 format='json',
                 limit = limit,
                 offset = limit + offset,
