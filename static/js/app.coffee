@@ -1,8 +1,14 @@
-window.Forge =
-    Models: {}
-    Collections: {}
-    Views: {}
+class Batman.LolStorage extends Batman.RestStorage
+    collectionJsonNamespace: ()->
+        console.log(this, this.prototype)
+        return "cards"
+
+window.Forge = class Forge extends Batman.App
+    Batman.ViewStore.prefix = 'static/views'
+    
+    @resources 'cards', 'index'
+    @root 'index#index'
+    @route '/search', 'cards#search', resource: 'cards', action: 'search'
 
 $ ->
-    Forge.App = new Forge.Views.App()
-    Backbone.history.start()
+    Forge.run()

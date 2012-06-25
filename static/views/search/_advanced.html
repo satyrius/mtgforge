@@ -1,0 +1,90 @@
+<div class="group">
+    <div class="btn-toolbar">
+        <div class="btn-group check-toggles app-mana-toggles" data-toggle="buttons-checkbox">
+            <input type="hidden" name="color" data-bind="query.color">
+            <button class="btn" type="button" id="mana-toggle-b" data-event-click="controllers.search.manaToggle">
+                <i class="icon-mana-b"></i>
+            </button>
+            <button class="btn" type="button" id="mana-toggle-u" data-event-click="controllers.search.manaToggle">
+                <i class="icon-mana-u"></i>
+            </button>
+            <button class="btn" type="button" id="mana-toggle-w" data-event-click="controllers.search.manaToggle">
+                <i class="icon-mana-w"></i>
+            </button>
+            <button class="btn" type="button" id="mana-toggle-g" data-event-click="controllers.search.manaToggle">
+                <i class="icon-mana-g"></i>
+            </button>
+            <button class="btn" type="button" id="mana-toggle-r" data-event-click="controllers.search.manaToggle">
+                <i class="icon-mana-r"></i>
+            </button>
+            <button class="btn" type="button" id="mana-toggle-c" data-event-click="controllers.search.manaToggle">
+                <i class="icon-mana-1"></i>
+            </button>
+            <button class="btn" type="button" id="mana-toggle-a" data-event-click="controllers.search.manaToggle">
+                AND
+            </button>
+        </div>
+    </div>
+</div>
+<!--<div class="group">
+    <div class="btn-toolbar">
+        <div class="btn-group check-toggles app-cmc-toggles" data-toggle="buttons-checkbox">
+            <input type="hidden" name="cmc" value="">
+            <button class="btn" type="button" id="cmc-toggle-0">
+                0
+            </button>
+            <button class="btn" type="button" id="cmc-toggle-1">
+                1
+            </button>
+            <button class="btn" type="button" id="cmc-toggle-2">
+                2
+            </button>
+            <button class="btn" type="button" id="cmc-toggle-3">
+                3
+            </button>
+            <button class="btn" type="button" id="cmc-toggle-4">
+                4
+            </button>
+            <button class="btn" type="button" id="cmc-toggle-5">
+                5
+            </button>
+            <button class="btn" type="button" id="cmc-toggle-6">
+                6
+            </button>
+            <button class="btn" type="button" id="cmc-toggle-7">
+                7+
+            </button>
+        </div>
+    </div>
+</div>-->
+<div class="group">
+    <div class="btn-toolbar">
+        <div class="btn-group check-toggles app-type-toggles" data-toggle="buttons-checkbox">
+            <input type="hidden" name="type" value="<%= searchModel.get('query')['type'] %>">
+            <button class="btn" type="button" id="type-toggle-land">
+                Land
+            </button>
+            <button class="btn" type="button" id="type-toggle-creature">
+                Creature
+            </button>
+            <button class="btn" type="button" id="type-toggle-sorcery">
+                Sorcery
+            </button>
+            <button class="btn" type="button" id="type-toggle-instant">
+                Instant
+            </button>
+            <button class="btn" type="button" id="type-toggle-enchant">
+                Enchant
+            </button>
+            <button class="btn" type="button" id="type-toggle-artifact">
+                Artifact
+            </button>
+            <button class="btn" type="button" id="type-toggle-planeswalker">
+                Planeswalker
+            </button>
+        </div>
+    </div>
+</div>
+<div class="group">
+    <input type="text" name="sets" value="1"/>
+</div>

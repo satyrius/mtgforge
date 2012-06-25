@@ -6,21 +6,18 @@
     <title>MTG Forge</title>
     {% include_media 'libs.css' %}
     {% include_media 'libs.js' %}
-    {% include_media 'templates.js' %}
     {% include_media 'common.css' %}
     {% include_media 'common.js' %}
     {% include_media 'models.js' %}
-    {% include_media 'collections.js' %}
+    {% include_media 'controllers.js' %}
     {% include_media 'views.js' %}
-    {% include_media 'router.js' %}
 </head>
 <body id="app">
     <div id="wrapper">
-        <div id="app-search" class="well"></div>
-        <div id="app-cards" style="display: none">
-            <div class="spinner"></div>
+        <div id="app-search" class="well" data-partial="search/_search"></div>
+        <div id="app-main">
+            <div data-yield="main"></div>
         </div>
-        <div id="app-index" style="display: none"></div>
     </div>
 </body>
 </html>
