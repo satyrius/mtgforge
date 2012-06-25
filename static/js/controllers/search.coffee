@@ -29,10 +29,18 @@ class Forge.SearchController extends Batman.Controller
         color = $(event.target).closest("button").attr("id").replace("mana-toggle-", "")
         queryColor = @get "query.color"
         isEnabled = queryColor.search(color) > -1
-        console.log("color:", color)
-        console.log("get:#{queryColor}, colorinput: #{color},sss:#{ queryColor.search(color)}")
 
         if isEnabled
             @set "query.color", (queryColor.replace(color, ""))
         else
             @set "query.color", (queryColor + color)
+    
+    #typeToggle: (element, event, context) =>
+        #type = $(event.target).closest("button").attr("id").replace("type-toggle-", "")
+        #queryType = @get "query.type"
+        #isEnabled = queryColor.search(color) > -1
+
+        #if isEnabled
+            #@set "query.type", ((queryType+",").replace(color, ""))
+        #else
+            #@set "query.type", (queryColor + color)

@@ -2,25 +2,25 @@
     <div class="btn-toolbar">
         <div class="btn-group check-toggles app-mana-toggles" data-toggle="buttons-checkbox">
             <input type="hidden" name="color" data-bind="query.color">
-            <button class="btn" type="button" id="mana-toggle-b" data-event-click="controllers.search.manaToggle">
+            <button class="btn" type="button" id="mana-toggle-b" data-event-click="manaToggle">
                 <i class="icon-mana-b"></i>
             </button>
-            <button class="btn" type="button" id="mana-toggle-u" data-event-click="controllers.search.manaToggle">
+            <button class="btn" type="button" id="mana-toggle-u" data-event-click="manaToggle">
                 <i class="icon-mana-u"></i>
             </button>
-            <button class="btn" type="button" id="mana-toggle-w" data-event-click="controllers.search.manaToggle">
+            <button class="btn" type="button" id="mana-toggle-w" data-event-click="manaToggle">
                 <i class="icon-mana-w"></i>
             </button>
-            <button class="btn" type="button" id="mana-toggle-g" data-event-click="controllers.search.manaToggle">
+            <button class="btn" type="button" id="mana-toggle-g" data-event-click="manaToggle">
                 <i class="icon-mana-g"></i>
             </button>
-            <button class="btn" type="button" id="mana-toggle-r" data-event-click="controllers.search.manaToggle">
+            <button class="btn" type="button" id="mana-toggle-r" data-event-click="manaToggle">
                 <i class="icon-mana-r"></i>
             </button>
-            <button class="btn" type="button" id="mana-toggle-c" data-event-click="controllers.search.manaToggle">
+            <button class="btn" type="button" id="mana-toggle-c" data-event-click="manaToggle">
                 <i class="icon-mana-1"></i>
             </button>
-            <button class="btn" type="button" id="mana-toggle-a" data-event-click="controllers.search.manaToggle">
+            <button class="btn" type="button" id="mana-toggle-a" data-event-click="manaToggle">
                 AND
             </button>
         </div>
@@ -60,7 +60,7 @@
 <div class="group">
     <div class="btn-toolbar">
         <div class="btn-group check-toggles app-type-toggles" data-toggle="buttons-checkbox">
-            <input type="hidden" name="type" value="<%= searchModel.get('query')['type'] %>">
+            <input type="hidden" name="type" value="controllers.search.query.type">
             <button class="btn" type="button" id="type-toggle-land">
                 Land
             </button>

@@ -1,31 +1,3 @@
-class Forge.SearchView extends Batman.View
-    constructor: ()->
-        @get "node"
-        @set "advancedEnabled", false
-        super
-    
-    advancedToggle: (element, event, context) =>
-        if @get "advancedEnabled"
-            @set "advancedEnabled", false
-        else
-            @set "advancedEnabled", true
-        false
-
-    submitSearch: (element, event, context) ->
-        Forge.SearchController.prototype.redirect "/search/#{@get('serializedQuery')}"
-        false
-
-    query:
-        q: ""
-        color: ""
-
-    @accessor "serializedQuery", () ->
-        query = @get "query"
-        for key, param of query
-            if !param.length
-                delete query[key]
-        $.param(query)
-
 #class Forge.Views.Search extends Backbone.View
     #el: "#app-search"
     #advancedEnabled: false
