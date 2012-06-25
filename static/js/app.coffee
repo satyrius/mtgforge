@@ -6,7 +6,7 @@ window.Forge = class Forge extends Batman.App
         #usePushState: true
     @resources 'cards', 'index'
     @root 'index#index'
-    @route '/search', 'cards#search', resource: 'cards', action: 'search'
+    @route '/search', 'cards#search'#, resource: 'cards', action: 'search'
 
 $ ->
     Forge.run()
