@@ -2,20 +2,17 @@ import re
 import urllib
 
 from django.db import connection
-from django.core.paginator import Paginator, InvalidPage
 from django.conf.urls.defaults import *
-from tastypie.resources import ModelResource
 from oracle.models import CardL10n, Color
+from . import ModelResource
 
-def int2bin(n, count=24):
-    """returns the binary of integer n, using count number of digits"""
-    return "".join([str((n >> y) & 1) for y in range(count-1, -1, -1)])
 
 class CardResource(ModelResource):
     class Meta:
-        resource_name = 'card'
+        resource_name = 'cards'
         queryset = CardL10n.objects.all()
-        allowed_methods = ['get']
+        list_allowed_methods = []
+        details_allowed_methods = ['get']
 
     def override_urls(self):
         return [
@@ -24,6 +21,22 @@ class CardResource(ModelResource):
                 self.wrap_view('get_search'),
                 name="api_get_search"),
         ]
+
+    def get_resource_search_uri(self):
+        """
+        Returns a URL specific to this resource's search endpoint.
+        """
+        kwargs = {
+            'resource_name': self._meta.resource_name,
+        }
+
+        if self._meta.api_name is not None:
+            kwargs['api_name'] = self._meta.api_name
+
+        try:
+            return self._build_reverse_url("api_get_search", kwargs=kwargs)
+        except NoReverseMatch:
+            return None
 
     def get_search(self, request, **kwargs):
         """
@@ -37,7 +50,7 @@ class CardResource(ModelResource):
         query = """
             select {select_type} from forge_cardftsindex i
             join oracle_cardl10n l on (i.card_face_id = l.card_face_id and l.language='en')
-            where 
+            where
                 True
                 {search_filter}
                 {set_filter}
@@ -53,7 +66,7 @@ class CardResource(ModelResource):
             color_filter = '',
             type_filter = ''
         )
-        
+
         # custom filters
         if request.GET.get('q', ''):
             search = request.GET.get('q', '')
@@ -99,7 +112,7 @@ class CardResource(ModelResource):
         if total_count < limit + offset:
             next_url = None
         else:
-            next_url = "/api/v1/card/search/?" + urllib.urlencode(dict(
+            next_url = self.get_resource_search_uri() + '?' + urllib.urlencode(dict(
                 format='json',
                 limit = limit,
                 offset = limit + offset,
@@ -118,21 +131,18 @@ class CardResource(ModelResource):
         
         # make an ordered and limited query
         query = query + """
-            order by  ts_rank_cd( 
-                ARRAY[1.0,0.9,0.8,0.7], 
+            order by  ts_rank_cd(
+                ARRAY[1.0,0.9,0.8,0.7],
                 i.fts,
                 to_tsquery(%s)
             )
-            limit %s 
+            limit %s
             offset %s
         """
         args += [search, limit, offset]
         query = query.format(select_type = 'l.*', **filters)
-        print query, args
         query = CardL10n.objects.raw(query, args)
 
-        
-        
         # serialize objects for tastypy response
         objects = []
         for result in query:
@@ -140,10 +150,12 @@ class CardResource(ModelResource):
             bundle = self.full_dehydrate(bundle)
             objects.append(bundle)
 
-        return self.create_response(request, dict(
+        to_be_serialized = dict(
             objects = objects,
             meta = meta
-        ))
+        )
+        to_be_serialized = self.alter_list_data_to_serialize(request, to_be_serialized)
+        return self.create_response(request, to_be_serialized)
 
 def similarity_check(cursor, query):
     original = query
