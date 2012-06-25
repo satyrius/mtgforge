@@ -140,13 +140,18 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+
+    # Third-party apps
     'django_extensions',
-    'modeltranslation',
     'mediagenerator',
-    'tastypie',
+    'modeltranslation',
     'oracle',
+    'tastypie',
+
+    # Our apps
     'forge',
     'south',
+
     'django_nose', # it should be after south (http://pypi.python.org/pypi/django-nose, Caveats)
 )
 
@@ -186,7 +191,7 @@ NOSE_ARGS = ['--verbosity=2', '--with-id']
 
 # South’s test runner integration will make the test database be created using
 # syncdb, rather than via migrations.
-SOUTH_TESTS_MIGRATE = False
+SOUTH_TESTS_MIGRATE = True
 
 # Modeltranslation settings.
 # http://code.google.com/p/django-modeltranslation/wiki/InstallationAndUsage03

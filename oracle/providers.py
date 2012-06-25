@@ -11,7 +11,6 @@ from django.conf import settings
 from django.core.cache import cache
 
 from contrib.soupselect import select
-from contrib.utils import cache_method_calls
 from oracle.models import DataProvider
 
 
@@ -64,7 +63,6 @@ class Provider(object):
             cache.set(k, content, settings.DATA_PROVIDER_TIMEOUT)
         return StringIO(content)
 
-    @cache_method_calls
     def soup(self, url):
         """Fetch url and return ICantBelieveItsBeautifulSoup for the document.
         Do not use BeautifulSoup because source HTML is not perfect.

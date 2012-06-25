@@ -2,11 +2,12 @@
 -e git+git://github.com/ostrovok-team/django-mediagenerator.git@ace7e19ddcdd125218c660d037f487b5574078ab#egg=mediagenerator
 -e git+git://github.com/ostrovok-team/xact.git@65e19094#egg=xact
 BeautifulSoup==3.2.0
-Django==1.4
+django-arrayfields==0.1.0
 django-extensions==0.7.1
 django-modeltranslation==0.3.3
 django-nose==0.1.3
 django-tastypie==0.9.11
+Django==1.4
 ipdb==0.6.1
 ipdbplugin==1.2
 mock==0.7.2

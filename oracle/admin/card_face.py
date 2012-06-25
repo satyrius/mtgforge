@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib import admin
+from django.contrib.admin.widgets import FilteredSelectMultiple
 
 from oracle import models
 
@@ -16,7 +17,14 @@ class CardFaceForm(forms.ModelForm):
     thoughtness = forms.CharField(max_length=10, required=False)
     fixed_power = forms.IntegerField(required=False)
     fixed_thoughtness = forms.IntegerField(required=False)
-    types = forms.MultipleChoiceField(required=False)
+    types = forms.ModelMultipleChoiceField(
+        models.CardType.objects.all().order_by('name'),
+        widget=FilteredSelectMultiple(
+            verbose_name='Card face types',
+            is_stacked=False
+        ),
+        required=False,
+    )
     class Meta:
         model = models.CardFace
 
