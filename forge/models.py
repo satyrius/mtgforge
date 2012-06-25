@@ -7,3 +7,7 @@ class CardFtsIndex(models.Model):
     card_face = models.ForeignKey(CardFace, null=True)
     cmc = models.IntegerField(null=True)
     color_identity = models.IntegerField(default=0)
+
+class CardSimilarity(models.Model):
+    keyword = models.CharField(max_length=128, unique=True)
+    alias = models.ForeignKey('forge.CardSimilarity', null=True)
