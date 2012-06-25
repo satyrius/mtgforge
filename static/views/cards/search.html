@@ -4,11 +4,10 @@
             <img data-bind-src="card.scan" />
         </li>
     </ul>
-    <!--<% if(cards.meta && cards.meta.next) { %>-->
-        <!--<div class="well next-cards" style="text-align: center">-->
-            <!--<a class="app-load-next" href="<%= cards.meta.next %>">More cards!</a>-->
-        <!--</div>-->
-    <!--<% } %>-->
+
+    <div class="well next-cards" style="text-align: center" data-showif="meta.next.length">
+        <a class="app-load-next" data-event-click="controllers.cards.loadNext">More cards!</a>
+    </div>
     <!--<div class="next-spinner spinner" style="display: none"></div>-->
     
     <!--<div>-->

@@ -26,9 +26,9 @@ MEDIA_BUNDLES = (
         'js/models/card.coffee',
     ),
     ( 'controllers.js',
+        'js/controllers/search.coffee',
         'js/controllers/cards.coffee',
         'js/controllers/index.coffee',
-        'js/controllers/search.coffee',
     ),
     ( 'views.js',
         'js/views/search.coffee'
