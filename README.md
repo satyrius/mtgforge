@@ -30,6 +30,7 @@ To fill cards database do the following:
 
 To build full text search engine do:
     ./manage.py build_fts_index
+    ./manage.py build_sim_index
 
 And a little bit happyness for frond-end developers. They say: "CoffeeScript is awesome!". So you have to install all stack including Node.js.
 

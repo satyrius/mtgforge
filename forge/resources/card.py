@@ -1,3 +1,4 @@
+import re
 import urllib
 
 from django.db import connection
@@ -29,8 +30,8 @@ class CardResource(ModelResource):
         Performs fts search on Card using CardFtsIndex table
         """
 
-        search = ''
-
+        cursor = connection.cursor()
+        meta = {}
         
         # prepare base query
         query = """
@@ -56,7 +57,10 @@ class CardResource(ModelResource):
         # custom filters
         if request.GET.get('q', ''):
             search = request.GET.get('q', '')
+            search, original = similarity_check(cursor, search)
             search = search.strip(' \n\t')
+            meta['query'] = search
+            meta['original_query'] = original
             search = search.split(' ')
             search = ["%s:*" % s for s in search]
             search = " & ".join(search)
@@ -75,18 +79,19 @@ class CardResource(ModelResource):
             identity_query = [ str(1<<i) for i in range(6) if (i<<i) & identity ]
             operator = '&' if 'a' in color else '|'
             identity_query = "'%s'::query_int" % operator.join(identity_query)
+            # identity_query = '1 | 12 | 56'
             filters['color_filter'] = 'AND color_identity_idx @@ %s' % identity_query
 
         if request.GET.get('type', ''):
             type_query = request.GET.get('type').strip(' \t\n,').split(',')
             type_query = ['%s:B*' % q for q in type_query]
             type_query = ' | '.join(type_query)
+            # type_query = 'red:B* & creature:B* with:B* flying:B*'
             filters['type_filter'] = 'AND i.fts @@ to_tsquery(%s)'
             args.append(type_query)
 
 
         # fetch total objects count and build metadata
-        cursor = connection.cursor()
         cursor.execute(query.format(select_type="count(*)", **filters), args)
         total_count = cursor.fetchone()[0]
         limit = int(request.GET.get('limit', 20))
@@ -104,8 +109,12 @@ class CardResource(ModelResource):
                 sets = request.GET.get('sets', ''),
             )).replace('+', ' ')
 
-
-
+        meta.update(
+            next = next_url,
+            total_count = total_count,
+            limit = limit,
+            offset=offset
+        )
         
         # make an ordered and limited query
         query = query + """
@@ -133,11 +142,29 @@ class CardResource(ModelResource):
 
         return self.create_response(request, dict(
             objects = objects,
-            meta = dict(
-                next = next_url,
-                total_count = total_count,
-                limit = limit,
-                offset=offset
-            )
+            meta = meta
         ))
 
+def similarity_check(cursor, query):
+    original = query
+    query = re.split('[^\w]', query.lower(), flags=re.I)
+    cursor.execute("""
+        SELECT DISTINCT ON (sim.keyword) src.kw, sim.keyword 
+        FROM (
+            SELECT UNNEST(ARRAY[%s]) kw
+        ) src, forge_cardsimilarity sim
+        WHERE 
+            NOT EXISTS(
+                SELECT id 
+                FROM forge_cardsimilarity 
+                WHERE keyword = src.kw
+            ) 
+            AND sim.keyword %% src.kw
+        ORDER BY sim.keyword, similarity(sim.keyword, src.kw)
+    """, [query])
+    modifications = cursor.fetchall()
+    modified = original
+    for source, changed in modifications:
+        modified = modified.replace(source, changed)
+
+    return modified, original
