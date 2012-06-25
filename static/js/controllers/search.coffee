@@ -13,7 +13,8 @@ class Forge.SearchController extends Batman.Controller
 
     query: Batman({
         q: ""
-        color: ""
+        color: new Batman.Set
+        type: new Batman.Set
     })
 
     advancedEnabled: false
@@ -25,22 +26,25 @@ class Forge.SearchController extends Batman.Controller
                 delete query[key]
         $.param(query)
 
-    manaToggle: (element, event, context) =>
-        color = $(event.target).closest("button").attr("id").replace("mana-toggle-", "")
-        queryColor = @get "query.color"
-        isEnabled = queryColor.search(color) > -1
-
-        if isEnabled
-            @set "query.color", (queryColor.replace(color, ""))
-        else
-            @set "query.color", (queryColor + color)
-    
-    #typeToggle: (element, event, context) =>
-        #type = $(event.target).closest("button").attr("id").replace("type-toggle-", "")
-        #queryType = @get "query.type"
-        #isEnabled = queryColor.search(color) > -1
+    #manaToggle: (element, event, context) =>
+        #color = $(event.target).closest("button").attr("id").replace("mana-toggle-", "")
+        #queryColor = @get "query.color"
+        #console.log("ggg", queryColor)
+        #isEnabled = queryColor.has(color)
 
         #if isEnabled
-            #@set "query.type", ((queryType+",").replace(color, ""))
+            #queryColor.remove(color)
         #else
-            #@set "query.type", (queryColor + color)
+            #queryColor.add(color)
+    
+    toggle: (element, event, context) =>
+        typeAndValue = $(event.target).closest("button").attr("id").split("-toggle-")
+        type = typeAndValue[0]
+        value = typeAndValue[1]
+        query = @get "query.#{type}"
+        isEnabled = query.has(value)
+
+        if isEnabled
+            query.remove(value)
+        else
+            query.add(value)

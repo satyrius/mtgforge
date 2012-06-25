@@ -1,8 +1,3 @@
-class Batman.LolStorage extends Batman.RestStorage
-    collectionJsonNamespace: ()->
-        console.log(this, this.prototype)
-        return "cards"
-
 window.Forge = class Forge extends Batman.App
     Batman.ViewStore.prefix = 'static/views'
     

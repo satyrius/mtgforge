@@ -1,9 +1,9 @@
-.icon-mana-b { @include sprite('img/mana/B.png'); }
-.icon-mana-u { @include sprite('img/mana/U.png'); }
-.icon-mana-g { @include sprite('img/mana/G.png'); }
-.icon-mana-r { @include sprite('img/mana/R.png'); }
-.icon-mana-w { @include sprite('img/mana/W.png'); }
-.icon-mana-1 { @include sprite('img/mana/1.png'); }
+.icon-color-b { @include sprite('img/mana/B.png'); }
+.icon-color-u { @include sprite('img/mana/U.png'); }
+.icon-color-g { @include sprite('img/mana/G.png'); }
+.icon-color-r { @include sprite('img/mana/R.png'); }
+.icon-color-w { @include sprite('img/mana/W.png'); }
+.icon-color-1 { @include sprite('img/mana/1.png'); }
 
 .icon-sets-avr { @include sprite('img/sets/AVR.png'); }
 .icon-sets-dka { @include sprite('img/sets/DKA.png'); }
