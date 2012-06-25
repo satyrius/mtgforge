@@ -1,3 +1,4 @@
+from arrayfields import IntegerArrayField
 from django.conf import settings
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
@@ -14,37 +15,7 @@ from contrib.utils import cache_method_calls
 _ = lambda s: s
 
 
-# Color identity
-class Color(object):
-    WHITE = 0b1
-    BLUE = 0b10
-    BLACK = 0b100
-    RED = 0b1000
-    GREEN = 0b10000
-    COLORLESS = 0b100000
-
-    MAP = dict(
-        w=WHITE,
-        u=BLUE,
-        b=BLACK,
-        r=RED,
-        g=GREEN,
-        c=COLORLESS,
-    )
-
-    identity = 0
-
-    def __init__(self, mana_cost=None):
-        if mana_cost:
-            costs = set(mana_cost.lower())
-            has_colorless_mana = len(filter(lambda s: s.isdigit(), costs)) > 0
-            allowed_symbols = self.MAP.keys()
-            for c in filter(lambda s: s.isalpha(), costs):
-                if c in allowed_symbols:
-                    self.identity |= self.MAP[c]
-            if not self.identity and has_colorless_mana:
-                self.identity = self.COLORLESS
-
+# {{{ Data providers and sources
 
 class DataProvider(models.Model):
     name = models.CharField(max_length=20, unique=True)
@@ -78,17 +49,10 @@ class DataSource(models.Model):
     def __unicode__(self):
         return self.url
 
+# }}}
 
-class CardSet(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    acronym = models.CharField(max_length=10, unique=True)
-    cards = models.PositiveIntegerField(null=True, blank=True)
-    released_at = models.DateField(null=True, blank=True)
-    sources = generic.GenericRelation(DataSource)
 
-    def __unicode__(self):
-        return self.name
-
+# {{{ Cards and faces
 
 class Card(models.Model):
     name = NullCharField(max_length=255, null=True, blank=True)
@@ -112,6 +76,42 @@ class CardType(models.Model):
         return self.name
 
 
+# Color identity
+class Color(object):
+    WHITE = 0b1
+    BLUE = 0b10
+    BLACK = 0b100
+    RED = 0b1000
+    GREEN = 0b10000
+    COLORLESS = 0b100000
+
+    MAP = dict(
+        w=WHITE,
+        u=BLUE,
+        b=BLACK,
+        r=RED,
+        g=GREEN,
+        c=COLORLESS,
+    )
+
+    def __init__(self, mana_cost=None):
+        self.identity = 0
+        self.colors = []
+
+        if mana_cost:
+            costs = set(mana_cost.lower())
+            has_colorless_mana = len(filter(lambda s: s.isdigit() or s == 'x', costs)) > 0
+            allowed_symbols = self.MAP.keys()
+            for s in filter(lambda s: s.isalpha() and s in allowed_symbols, costs):
+                c = self.MAP[s]
+                self.identity |= c
+                self.colors.append(c)
+            if not self.identity and has_colorless_mana:
+                self.identity = self.COLORLESS
+                self.colors = [self.COLORLESS]
+            self.colors.sort()
+
+
 class CardFace(models.Model):
     FRONT, BACK, SPLIT, FLIP = 'front', 'back', 'split', 'flip'
     TYPE_CHOICES = (
@@ -127,7 +127,8 @@ class CardFace(models.Model):
     # Mana cost code and CMC (Converted Mana Cost)
     mana_cost = NullCharField(max_length=255, null=True, blank=True)
     cmc = models.PositiveIntegerField(null=True, blank=True)
-    color_identity = models.PositiveSmallIntegerField(default=0)
+    color_identity = models.PositiveSmallIntegerField(default=0) # DEPRICATED
+    colors = IntegerArrayField(default=[])
 
     # Oracle's card name, type line, rules text and flavor. Always in English.
     name = NullCharField(max_length=255, unique=True)
@@ -154,7 +155,9 @@ class CardFace(models.Model):
 @receiver(pre_save, sender=CardFace)
 def update_color_identity(sender, **kwargs):
     card_face = kwargs['instance']
-    card_face.color_identity = Color(card_face.mana_cost).identity
+    c = Color(card_face.mana_cost)
+    card_face.color_identity = c.identity
+    card_face.colors = c.colors
 
 
 @receiver(post_save, sender=CardFace)
@@ -164,6 +167,21 @@ def update_card_name(sender, **kwargs):
     if card_face.place == card_face.FRONT or not card.name:
         card.name = card_face.name
         card.save()
+
+# }}}
+
+
+# {{{ Card release and localization models
+
+class CardSet(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    acronym = models.CharField(max_length=10, unique=True)
+    cards = models.PositiveIntegerField(null=True, blank=True)
+    released_at = models.DateField(null=True, blank=True)
+    sources = generic.GenericRelation(DataSource)
+
+    def __unicode__(self):
+        return self.name
 
 
 class Artist(models.Model):
@@ -196,6 +214,7 @@ class CardRelease(models.Model):
 STORAGE_PATH = '/mtgforge/media/'
 IMAGE_FORMATS = ['orig', 'x220']
 
+
 class CardL10n(models.Model):
     card_face = models.ForeignKey(CardFace)
     card_release = models.ForeignKey(CardRelease)
@@ -214,3 +233,5 @@ class CardL10n(models.Model):
         unique_together = (('card_face', 'card_release', 'language'),)
 
     sources = generic.GenericRelation(DataSource)
+
+# }}}
