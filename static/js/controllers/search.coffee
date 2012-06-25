@@ -26,17 +26,6 @@ class Forge.SearchController extends Batman.Controller
                 delete query[key]
         $.param(query)
 
-    #manaToggle: (element, event, context) =>
-        #color = $(event.target).closest("button").attr("id").replace("mana-toggle-", "")
-        #queryColor = @get "query.color"
-        #console.log("ggg", queryColor)
-        #isEnabled = queryColor.has(color)
-
-        #if isEnabled
-            #queryColor.remove(color)
-        #else
-            #queryColor.add(color)
-    
     toggle: (element, event, context) =>
         typeAndValue = $(event.target).closest("button").attr("id").split("-toggle-")
         type = typeAndValue[0]
