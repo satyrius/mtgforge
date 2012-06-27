@@ -6,7 +6,7 @@ from django.test import TestCase
 
 from oracle.forms import DataProviderForm
 from oracle.models import DataProvider, CardSet, DataSource
-from oracle.providers import ProviderPage
+from oracle.providers.gatherer import GathererPage
 
 
 class DataProviderModelTest(TestCase):
@@ -48,23 +48,22 @@ class DataProviderModelTest(TestCase):
 
     def test_add_data_source(self):
         cs = CardSet.objects.all()[0]
-        page = ProviderPage(self.data_provider)
+        page = GathererPage()
+        provider = page.get_provider()
         url = page.absolute_url(urllib.quote_plus(cs.name))
         self.assertEqual(cs.sources.count(), 0)
 
         # Create data source generic relation
-        ds = DataSource.objects.create(content_object=cs, url=url,
-                                       data_provider=self.data_provider)
+        ds = DataSource.objects.create(content_object=cs, url=url, data_provider=provider)
 
         # Check reverse relation
         self.assertEqual(cs.sources.count(), 1)
         self.assertEqual(cs.sources.all()[0].id, ds.id)
-        self.assertEqual(
-            cs.sources.get(data_provider=self.data_provider).id, ds.id)
+        self.assertEqual(cs.sources.get(data_provider=provider).id, ds.id)
         with self.assertRaises(DataSource.DoesNotExist):
             cs.sources.get(url='http://example.com/foo/bar')
 
         # Cannot duplicate links
         with self.assertRaisesRegexp(IntegrityError, 'duplicate key'):
             DataSource.objects.create(content_object=cs, url=url,
-                                      data_provider=self.data_provider)
+                                      data_provider=provider)
