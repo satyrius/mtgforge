@@ -1,8 +1,12 @@
-window.Forge =
-    Models: {}
-    Collections: {}
-    Views: {}
+window.Forge = class Forge extends Batman.App
+    Batman.ViewStore.prefix = 'static/views'
+    
+    #Batman.config =
+        #pathPrefix: "/"
+        #usePushState: true
+    @resources 'cards', 'index'
+    @root 'index#index'
+    @route '/search', 'cards#search'#, resource: 'cards', action: 'search'
 
 $ ->
-    Forge.App = new Forge.Views.App()
-    Backbone.history.start()
+    Forge.run()

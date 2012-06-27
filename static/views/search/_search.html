@@ -1,0 +1,12 @@
+<form class="form-search search-simple" data-event-submit="controllers.cards.submitSearch">
+    <input type="text" class="input-large search-query" name="q" 
+    placeholder="Card name, text, type" data-bind="controllers.cards.query.q"/>
+    <button class="btn">
+        <i class="icon-search"></i>
+    </button>
+    <button class="btn app-toggleAdvanced" data-event-click="controllers.cards.advancedToggle">
+        <i class="icon-list-alt"></i>
+    </button>
+    <div id="app-advanced-search" data-partial="search/_advanced" data-showif="controllers.cards.advancedEnabled">
+    </div>
+</form>
