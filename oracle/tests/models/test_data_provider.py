@@ -6,6 +6,7 @@ from django.test import TestCase
 
 from oracle.forms import DataProviderForm
 from oracle.models import DataProvider, CardSet, DataSource
+from oracle.providers import ProviderPage
 
 
 class DataProviderModelTest(TestCase):
@@ -47,7 +48,8 @@ class DataProviderModelTest(TestCase):
 
     def test_add_data_source(self):
         cs = CardSet.objects.all()[0]
-        url = self.data_provider.absolute_url(urllib.quote_plus(cs.name))
+        page = ProviderPage(self.data_provider)
+        url = page.absolute_url(urllib.quote_plus(cs.name))
         self.assertEqual(cs.sources.count(), 0)
 
         # Create data source generic relation

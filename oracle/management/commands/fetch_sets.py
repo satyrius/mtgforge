@@ -8,10 +8,24 @@ from contrib.utils import translation_aware
 from oracle.forms import CardSetForm
 from oracle.management.base import BaseCommand
 from oracle.models import CardSet, DataSource
-from oracle.providers import WizardsProvider, GathererProvider, MagiccardsProvider
+from oracle.providers.gatherer import GathererHomePage
+from oracle.providers.magiccards import MagiccardsHomePage
+from oracle.providers.wizards import WizardsHomePage
 
 
 acronym_re = re.compile('[a-z0-9]+$')
+
+# Ignore products which was printed without new expansion sybmol
+ignore_products = [
+    'World Champ Decks',
+    'Premium Foil Booster',
+    'Momir Vig Basic',
+    'Legacy',
+    'Deck Builder\'s Toolkit',
+    'Vanguard',
+    'Promo set for Gatherer', # This name is from Gatherer's list
+]
+ignore_products_re = re.compile('|'.join(ignore_products))
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
@@ -112,15 +126,18 @@ class Command(BaseCommand):
         fetch_acronyms = options['fetch_acronyms']
 
         self._acronyms = {}
+        ignored_filter = lambda p: not ignore_products_re.match(isinstance(p, basestring) and p or p[0])
 
-        wizards = WizardsProvider()
-        gatherer = GathererProvider()
-        gatherer_products = gatherer.products_list()
-        magiccards = MagiccardsProvider()
-        magiccards_products = magiccards.products_list()
+        wizards = WizardsHomePage()
+        gatherer = GathererHomePage()
+        gatherer_products = filter(ignored_filter, gatherer.products_list())
+        magiccards = MagiccardsHomePage()
+        magiccards_products = filter(ignored_filter, magiccards.products_list())
 
         # Wizards
         for name, url, extra in wizards.products_list_generator():
+            if not ignored_filter(name):
+                continue
             # Gatherer
             g_product = self.find_in_list(name, gatherer_products)
             if not g_product:

@@ -8,7 +8,6 @@ from django.dispatch import receiver
 
 from contrib.cdn import CDNFileField
 from contrib.fields import NullCharField, NullTextField
-from contrib.utils import cache_method_calls
 
 
 # Stub for gettext translation
@@ -21,15 +20,6 @@ class DataProvider(models.Model):
     name = models.CharField(max_length=20, unique=True)
     title = models.CharField(max_length=255, unique=True)
     home = models.URLField()
-
-    @property
-    @cache_method_calls
-    def provider(self):
-        from oracle.providers import Provider
-        return Provider.factory(self)
-
-    def absolute_url(self, url):
-        return self.provider.absolute_url(url)
 
     def __unicode__(self):
         return self.name
