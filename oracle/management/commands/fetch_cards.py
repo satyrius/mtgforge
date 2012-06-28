@@ -9,7 +9,7 @@ from oracle.management.base import BaseCommand
 from oracle.models import (
     CardSet, CardFace, Card, DataSource, CardRelease, Artist, CardL10n
 )
-from oracle.providers import GathererProvider
+from oracle.providers.gatherer import GathererCardList, CardNotFound
 
 
 pt_separator_re = re.compile(u'\s*/\s*')
@@ -36,10 +36,6 @@ class Command(BaseCommand):
     verbose = False
     no_update = False
     skip_not_found = False
-
-    def __init__(self):
-        super(Command, self).__init__()
-        self.provider = GathererProvider()
 
     @translation_aware
     def handle(self, *args, **options):
@@ -73,14 +69,19 @@ class Command(BaseCommand):
 
     def fetch_cards(self, cs, names=None):
         cards_found = 0
-        gatherer = self.provider
-        cs_page = gatherer.cards_list_url(cs)
-        self.writeln(u'=== {0} === {1}'.format(cs.name, cs_page))
-        for name, url, extra in gatherer.cards_list_generator(
-                cs, names=names, full_info=True, skip_not_found=self.skip_not_found):
-            if len(extra) == 1:
-                self.notice(u'Not found \'{0}\' on page {1}'.format(unicode(name), url))
-                continue
+        list_page = GathererCardList(cs)
+        self.writeln(u'=== {0} === {1}'.format(cs.name, list_page.url))
+        for name, card_page in list_page.cards_list_generator(names=names):
+            url = card_page.url
+            try:
+                extra = card_page.details(name)
+            except CardNotFound, e:
+                if self.skip_not_found:
+                    self.notice(u'Not found \'{0}\' on page {1}'.format(unicode(name), url))
+                    continue
+                else:
+                    raise e
+
             cards_found += 1
             if not self.verbose:
                 self.writeln(u'{2:10} {0:30} {1}'.format(unicode(name), url, extra['mvid']))
@@ -93,14 +94,14 @@ class Command(BaseCommand):
                 # collector's number. We ser sequence id instead
                 if 'number' not in extra:
                     extra['number'] = extra['oracle']['number'] = unicode(cards_found)
-                self.save(extra, cs)
+                self.save(extra, cs, card_page.get_provider())
 
         if not names and cs.cards and cards_found is not cs.cards:
             self.notice(u'"{0}" should contain {1} cards, {2} found'.format(
                 cs.name, cs.cards, cards_found))
 
     @xact.xact
-    def save(self, card_details, card_set):
+    def save(self, card_details, card_set, data_provider):
         '''Save or update card details'''
         oracle = card_details['oracle']
 
@@ -192,10 +193,9 @@ class Command(BaseCommand):
         #
         # Remember the source
         #
-        ds_provider = self.provider
         try:
             source_data = dict(
-                data_provider=ds_provider.data_provider, url=oracle['url'])
+                data_provider=data_provider, url=oracle['url'])
             l10n.sources.get(**source_data)
         except DataSource.DoesNotExist:
             l10n.sources.create(content_object=l10n, **source_data)
