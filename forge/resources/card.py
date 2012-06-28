@@ -6,7 +6,6 @@ from django.conf.urls.defaults import *
 from oracle.models import CardL10n, Color
 from . import ModelResource
 
-
 class CardResource(ModelResource):
     class Meta:
         resource_name = 'cards'
@@ -45,7 +44,8 @@ class CardResource(ModelResource):
 
         cursor = connection.cursor()
         meta = {}
-        
+        extra_url_args = {} # for building next and prev links
+
         # prepare base query
         query = """
             select {select_type} from forge_cardftsindex i
@@ -72,6 +72,7 @@ class CardResource(ModelResource):
             search = request.GET.get('q', '')
             search, original = similarity_check(cursor, search)
             search = search.strip(' \n\t')
+            extra_url_args['q'] = search
             meta['query'] = search
             meta['original_query'] = original
             search = search.split(' ')
@@ -80,27 +81,35 @@ class CardResource(ModelResource):
             filters['search_filter'] = 'AND i.fts @@ to_tsquery(%s)'
             args.append(search)
 
-        if request.GET.get('sets', ''):
-            sets = [str(int(s)) for s in request.GET['sets'].split(',')]
+        if request.GET.get('sets[]', []):
+            sets = [str(int(s)) for s in request.GET.getlist('sets[]')]
+            extra_url_args['sets[]'] = sets
             sets = '|'.join(sets)
             sets = "AND i.sets @@ '%s'::query_int" % sets
             filters['set_filter'] = sets
 
-        if request.GET.get('color', ''):
-            color = request.GET.get('color').lower()
-            identity = Color(color).identity
-            identity_query = [ str(1<<i) for i in range(6) if (i<<i) & identity ]
-            operator = '&' if 'a' in color else '|'
+        if request.GET.get('color[]', []):
+            colors = request.GET.getlist('color[]')
+            extra_url_args['color[]'] = colors
+            if 'a' in colors:
+                colors.remove('a')
+                operator = ' & '
+            else:
+                operator = ' | '
+
+            identity_query = [str(Color.MAP[c]) for c in colors]
             identity_query = "'%s'::query_int" % operator.join(identity_query)
             # identity_query = '1 | 12 | 56'
             filters['color_filter'] = 'AND color_identity_idx @@ %s' % identity_query
 
-        if request.GET.get('type', ''):
-            type_query = request.GET.get('type').strip(' \t\n,').split(',')
-            type_query = ['%s:B*' % q for q in type_query]
+        if request.GET.get('type[]', False):
+            type_query = request.GET.getlist('type[]')
+            extra_url_args['type[]'] = type_query
+            type_query = ['%s:B*' % q.strip(' \n\t') for q in type_query]
             type_query = ' | '.join(type_query)
             # type_query = 'red:B* & creature:B* with:B* flying:B*'
             filters['type_filter'] = 'AND i.fts @@ to_tsquery(%s)'
+            print filters['type_filter'], type_query
             args.append(type_query)
 
 
@@ -116,11 +125,9 @@ class CardResource(ModelResource):
                 format='json',
                 limit = limit,
                 offset = limit + offset,
-                q = request.GET.get('q', ''),
-                types = request.GET.get('types', ''),
-                color = request.GET.get('color', ''),
-                sets = request.GET.get('sets', ''),
-            )).replace('+', ' ')
+                **extra_url_args
+            ), doseq=True)
+
 
         meta.update(
             next = next_url,
