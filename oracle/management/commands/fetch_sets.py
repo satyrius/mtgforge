@@ -186,14 +186,15 @@ class Command(BaseCommand):
                 form = CardSetForm(data, instance=cs)
                 form.is_valid()
                 cs = form.save()
-                for ds_provider, ds_url in ((wizards, url),
-                                            (gatherer, g_product[1]),
-                                            (magiccards, mc_product and mc_product[1] or None)):
+                for page, ds_url in (
+                        (wizards, url),
+                        (gatherer, g_product[1]),
+                        (magiccards, mc_product and mc_product[1] or None)):
                     if not ds_url:
                         continue
                     try:
                         source_data = dict(
-                            data_provider=ds_provider.data_provider, url=ds_url)
+                            data_provider=page.get_provider(), url=ds_url)
                         cs.sources.get(**source_data)
                     except DataSource.DoesNotExist:
                         cs.sources.create(content_object=cs, **source_data)
