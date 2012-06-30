@@ -1,7 +1,11 @@
-from django.conf import settings
-from django.utils import translation
+import datetime
+import logging
 from hashlib import sha1
+
+from django.conf import settings
 from django.core.cache import cache as _djcache
+from django.utils import translation
+from django.utils.functional import wraps
 
 
 def translation_aware(func):
@@ -10,6 +14,7 @@ def translation_aware(func):
         func(self, *args, **kwargs)
         translation.deactivate()
     return wrapper
+
 
 def cache(f, seconds = 900):
     """
@@ -36,6 +41,7 @@ def cache(f, seconds = 900):
         return result
     return wrapper
 
+
 def cache_method_calls(func):
     """Cache methods' calls. Store cached results as objects attributes"""
     def wrapper(self, *args, **kwargs):
@@ -46,3 +52,22 @@ def cache_method_calls(func):
         setattr(self, key, result)
         return result
     return wrapper
+
+
+console_logger = logging.getLogger('stdout')
+
+def measureit(func=None, logger=None):
+    if not logger:
+        logger = console_logger
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            name = func.__name__
+            started_at = datetime.datetime.now()
+            result =  func(*args, **kwargs)
+            delta = (datetime.datetime.now() - started_at).total_seconds()
+            message = u'`{}` has taken {:.2f} sec'.format(name, delta)
+            logger.debug(message)
+            return result
+        return wrapper
+    return func and decorator(func) or decorator
