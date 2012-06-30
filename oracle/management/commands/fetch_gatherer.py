@@ -26,6 +26,7 @@ class Command(BaseCommand):
             help='Number of threads will be spawn to download content'),
         )
 
+    @measureit(logger=logger)
     def handle(self, *args, **options):
         self.threads_count = int(options['threads'])
         sets = CardSet.objects.all()
@@ -34,28 +35,33 @@ class Command(BaseCommand):
 
         self.process_sets(sets)
 
-    @measureit(logger=logger)
     def process_sets(self, sets):
         chunk = self.threads_count
+        failed = []
         for sets_chunk in itertools.izip_longest(*([iter(sets)] * chunk)):
-            self.process_chunk(sets_chunk)
+            for result in self.process_chunk(sets_chunk):
+                if isinstance(result, GathererCardList):
+                    self.writeln(u'>>> {0}'.format(result.url))
+                else:
+                    failed_cs = result.args[0]
+                    self.notice(
+                        u'Cannot download page "{0}", try again later'.format(
+                            failed_cs))
+                    failed.append(failed_cs)
+        # Try again for failed downloads
+        if failed:
+            self.process_sets(failed)
 
-    @measureit(logger=logger)
     def process_chunk(self, sets):
         jobs = [gevent.spawn(self.fetch_set_page, cs) \
                 for cs in filter(None, sets)]
-        gevent.joinall(jobs, timeout=60)
+        gevent.joinall(jobs, timeout=10)
         for job in jobs:
-            if not job.value:
-                raise Exception(u'Cannot download content for "{0}"'.format(
-                    job.args[0]))
+            # Return fetched page or job to try again
+            yield job.successful() and job.value or job
 
     def fetch_set_page(self, cs):
         page = GathererCardList(cs)
         # Call this method for http request
-        content = page.get_content()
-        if not content:
-            raise Exception('Cannot get content for "{0}" from {1}'.format(
-                cs.name, page.url))
-        self.writeln(u'{0} >>> {1}'.format(cs.name, page.url))
+        page.get_content()
         return page
