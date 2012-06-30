@@ -7,7 +7,24 @@ Clone git repository with project, and configure your own `settings/local.py`:
     git clone git@github.com:ostrovok-team/mtgforge.git
     vim settings/local.py
 
-Do not forget to install python packages:
+You should intall some system requirements (Mac OS X dependent):
+
+    # CoffeeScript (as Node.js module)
+    brew install nodejs
+    curl http://npmjs.org/install.sh | sh
+    npm install -g coffee-script
+
+    # SASS (as Ruby gem)
+    gem install compass
+
+    # ImageMagick for sprites
+    brew install imagemagick
+
+    # Gevent requires libevent library
+    brew install libevent
+    export CFLAGS=-I/brew/include
+
+Next step is to install python packages:
 
     pip install -r requirements.txt
 
@@ -31,20 +48,6 @@ To fill cards database do the following:
 To build full text search engine do:
     ./manage.py build_fts_index
     ./manage.py build_sim_index
-
-And a little bit happyness for frond-end developers. They say: "CoffeeScript is awesome!". So you have to install all stack including Node.js.
-
-    brew install nodejs
-    curl http://npmjs.org/install.sh | sh
-    npm install -g coffee-script
-
-And they like SASS too. Do not forget to include your gems binaries dir into PATH.
-
-    gem install compass
-
-Mediagenerator require ImageMagick.
-
-    brew install imagemagick
 
 ## Tools
 
