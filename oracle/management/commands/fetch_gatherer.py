@@ -20,13 +20,17 @@ class Command(BaseCommand):
         if args:
             sets = sets.filter(acronym__in=args)
 
-        self.card_set_pages(sets)
+        self.process_sets(sets)
 
     @measureit(logger=logger)
-    def card_set_pages(self, sets):
+    def process_sets(self, sets):
         chunk = 3
         for sets_chunk in itertools.izip_longest(*([iter(sets)] * chunk)):
-            jobs = [gevent.spawn(self.fetch_set_page, cs) for cs in filter(None, sets_chunk)]
+            self.process_chunk(sets_chunk)
+
+    @measureit(logger=logger)
+    def process_chunk(self, sets):
+            jobs = [gevent.spawn(self.fetch_set_page, cs) for cs in filter(None, sets)]
             gevent.joinall(jobs, timeout=5)
             self.writeln(u'Downloaded pages: {0}'.format(
                 [job.value.url for job in jobs]))
