@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import StringIO
 import urllib
+from os import path
 
 from BeautifulSoup import ICantBelieveItsBeautifulSoup
 from django.test import TestCase
@@ -16,6 +17,7 @@ from oracle.tests import fixtures
 
 class DataProvidersTest(TestCase):
     fixtures = ['data_provider', 'card_set']
+    zen_url = 'http://gatherer.wizards.com/Pages/Search/Default.aspx?set=%5B%22Zendikar%22%5D'
 
     def test_page_init(self):
         url = 'http://example.com/magic/tcg/home.html'
@@ -121,7 +123,7 @@ class DataProvidersTest(TestCase):
         self.assertEqual(list_page.url, compact_url)
 
         # Test adding `output` parameter to existing query
-        zen_url = 'http://gatherer.wizards.com/Pages/Search/Default.aspx?set=%5B%22Zendikar%22%5D'
+        zen_url = self.zen_url
         compact_zen_url = zen_url + '&output=compact'
         list_page = GathererCardList(zen_url)
         self.assertEqual(list_page.url, compact_zen_url)
@@ -129,3 +131,30 @@ class DataProvidersTest(TestCase):
         zen_url += '&output=standard'
         list_page = GathererCardList(zen_url)
         self.assertEqual(list_page.url, compact_zen_url)
+
+    def _get_html_fixture(self, name):
+        fname = path.join(path.dirname(__file__), 'html_fixtures', name + '.html')
+        return open(fname)
+
+    @patch.object(Page, 'get_content')
+    def test_card_list_pagination(self, patched_content):
+        patched_content.return_value = self._get_html_fixture('gatherer_list')
+
+        # Get Zendikar card set and create DataSource record for it, because
+        # its url will be used as `url` in list page init
+        zen = CardSet.objects.get(acronym='zen')
+        DataSource.objects.create(
+            content_object=zen,
+            url=self.zen_url,
+            data_provider=GathererPage().get_provider())
+        page = GathererCardList(zen)
+
+        urls = []
+        for p in page.pages_generator():
+            self.assertIsInstance(p, GathererCardList)
+            urls.append(p.url)
+        self.assertEqual(urls, [
+            'http://gatherer.wizards.com/Pages/Search/Default.aspx?page=0&action=advanced&set=+%5b%22Zendikar%22%5d&output=compact',
+            'http://gatherer.wizards.com/Pages/Search/Default.aspx?page=1&action=advanced&set=+%5b%22Zendikar%22%5d&output=compact',
+            'http://gatherer.wizards.com/Pages/Search/Default.aspx?page=2&action=advanced&set=+%5b%22Zendikar%22%5d&output=compact'
+        ])
