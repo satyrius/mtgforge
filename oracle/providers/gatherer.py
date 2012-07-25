@@ -3,6 +3,7 @@ import urllib
 from urlparse import urlparse, urlunparse
 
 from contrib.soupselect import select
+from django.conf import settings
 from django.core.cache import get_cache
 from oracle.providers import HomePage, ProviderPage, ProviderCardListPage, ProviderCardPage
 
@@ -66,7 +67,10 @@ class GathererCardList(ProviderCardListPage, GathererPage):
                 yield name, GathererCard(url)
 
     def pages_generator(self, paginate=True):
-        cache = get_cache('default', KEY_PREFIX='pagination')
+        cache = get_cache(
+            'default',
+            TIMEOUT=settings.DATA_PROVIDER_CACHE_TIMEOUT,
+            KEY_PREFIX='pagination')
         key = self.get_url_hash()
         urls = cache.get(key, default=[])
         if not urls:

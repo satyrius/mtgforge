@@ -3,6 +3,7 @@ import logging
 from optparse import make_option
 
 import gevent
+from django.conf import settings
 from django.core.cache import get_cache
 from gevent import monkey
 
@@ -81,7 +82,7 @@ class Command(BaseCommand):
             page.get_content()
             return page
         jobs = [gevent.spawn(fetch_page, page) for page in filter(None, pages)]
-        gevent.joinall(jobs, timeout=10)
+        gevent.joinall(jobs, timeout=settings.DATA_PROVIDER_TIMEOUT)
         for job in jobs:
             # Return fetched page or job to try again
             yield job.successful() and job.value or job
