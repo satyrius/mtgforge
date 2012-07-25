@@ -159,7 +159,10 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': '/tmp/django_cache',
-    }
+    },
+    'provider_page': {
+        'BACKEND': 'oracle.providers.cache.PageCache',
+    },
 }
 
 # Use Django Nose test runner.

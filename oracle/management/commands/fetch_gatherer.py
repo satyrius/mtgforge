@@ -1,22 +1,25 @@
 import itertools
 import logging
-import gevent
 from optparse import make_option
+
+import gevent
+from django.core.cache import get_cache
+from gevent import monkey
+
 from contrib.utils import measureit
-from oracle.models import CardSet
 from oracle.management.base import BaseCommand
-from oracle.providers.gatherer import GathererCardList
+from oracle.models import CardSet
+from oracle.providers.gatherer import GathererCardList, GathererPage
 
 
 logger = logging.getLogger(__name__)
 
-from gevent import monkey
 monkey.patch_all(thread=False, select=False)
 
 
 class Command(BaseCommand):
     args = '<card_set_1 card_set_2 ...>'
-    help = ('Fetched pages from Gatherer and save then to the store. This '
+    help = ('Fetched pages from Gatherer and save then to the storage. This '
             'data will bu used to fill cards database.self')
 
     option_list = BaseCommand.option_list + (
@@ -24,44 +27,60 @@ class Command(BaseCommand):
             dest='threads',
             default=30,
             help='Number of threads will be spawn to download content'),
+        make_option('-c', '--clear-cache',
+            dest='clear',
+            action='store_true',
+            default=False,
+            help='Invalidate pages cache'),
         )
 
     @measureit(logger=logger)
     def handle(self, *args, **options):
+        if options['clear']:
+            get_cache('provider_page').clear()
+
         self.threads_count = int(options['threads'])
         sets = CardSet.objects.all()
         if args:
             sets = sets.filter(acronym__in=args)
 
-        self.process_sets(sets)
+        pagination = []
+        self.writeln('Fetch home page for each card set')
+        message_shown = False
+        for cs_page in self.process_pages(map(GathererCardList, sets)):
+            if not message_shown:
+                self.writeln('Parse card sets pages to get pagination')
+                message_shown = True
+            for page in cs_page.pages_generator():
+                pagination.append(page)
+        self.writeln('Fetch card list pages for each set')
+        self.process_pages(pagination)
 
-    def process_sets(self, sets):
+    def process_pages(self, pages, i=0):
         chunk = self.threads_count
         failed = []
-        for sets_chunk in itertools.izip_longest(*([iter(sets)] * chunk)):
-            for result in self.process_chunk(sets_chunk):
-                if isinstance(result, GathererCardList):
-                    self.writeln(u'>>> {0}'.format(result.url))
+        for pages_chunk in itertools.izip_longest(*([iter(pages)] * chunk)):
+            for result in self.process_chunk(pages_chunk):
+                if isinstance(result, GathererPage):
+                    i += 1
+                    self.writeln(u'>>> {1:3} {0}'.format(result.url, i))
                 else:
-                    failed_cs = result.args[0]
+                    page = result.args[0]
                     self.notice(
-                        u'Cannot download page "{0}", try again later'.format(
-                            failed_cs))
-                    failed.append(failed_cs)
+                        u'Cannot download page {0}, try again later'.format(
+                            page.url))
+                    failed.append(page)
         # Try again for failed downloads
         if failed:
-            self.process_sets(failed)
+            self.process_pages(failed, i)
+        return pages
 
-    def process_chunk(self, sets):
-        jobs = [gevent.spawn(self.fetch_set_page, cs) \
-                for cs in filter(None, sets)]
+    def process_chunk(self, pages):
+        def fetch_page(page):
+            page.get_content()
+            return page
+        jobs = [gevent.spawn(fetch_page, page) for page in filter(None, pages)]
         gevent.joinall(jobs, timeout=10)
         for job in jobs:
             # Return fetched page or job to try again
             yield job.successful() and job.value or job
-
-    def fetch_set_page(self, cs):
-        page = GathererCardList(cs)
-        # Call this method for http request
-        page.get_content()
-        return page

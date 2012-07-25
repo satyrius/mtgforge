@@ -39,6 +39,17 @@ class DataSource(models.Model):
     def __unicode__(self):
         return self.url
 
+
+class DataProviderPage(models.Model):
+    url = models.URLField()
+    url_hash = models.CharField(max_length=40)
+    data_provider = models.ForeignKey(DataProvider)
+    content = NullTextField(null=False, blank=False)
+    name = NullCharField(max_length=255, null=False, blank=False)
+
+    class Meta:
+        unique_together = ('url_hash', 'name')
+
 # }}}
 
 

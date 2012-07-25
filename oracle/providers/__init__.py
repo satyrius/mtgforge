@@ -3,6 +3,7 @@ import urllib2
 from urlparse import urlparse, urlunparse
 
 from BeautifulSoup import ICantBelieveItsBeautifulSoup, BeautifulStoneSoup
+from django.core.cache import get_cache
 
 from oracle.models import DataProvider, CardSet
 
@@ -23,9 +24,13 @@ class Page(object):
         raise BadPageSource(u'Invalid page source: {0}'.format(source))
 
     def get_content(self):
-        """Return page content as file-like object."""
+        """Return page content as a string."""
         if self._content is None:
-            self._content = urllib2.urlopen(self.url)
+            cache = get_cache('provider_page')
+            self._content = cache.get(self)
+            if not self._content:
+                self._content = urllib2.urlopen(self.url).read()
+                cache.set(self, self._content)
         return self._content
 
     @property
@@ -95,8 +100,10 @@ class ProviderPage(Page):
 
 class ProviderCardListPage(CardListPage, ProviderPage):
     def _source_url(self, source):
+        self.card_set = None
         if isinstance(source, CardSet):
             cs = source
+            self.card_set = cs
             return cs.sources.get(data_provider=self.get_provider()).url
         return super(CardListPage, self)._source_url(source)
 

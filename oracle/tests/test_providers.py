@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-import StringIO
 import urllib
 from os import path
+from StringIO import StringIO
 
 from BeautifulSoup import ICantBelieveItsBeautifulSoup
 from django.test import TestCase
@@ -42,7 +42,7 @@ class DataProvidersTest(TestCase):
     def test_get_content(self, patched_urlopen):
         url = 'http://example.com/'
         page_content = '<html><h1>Example</h1></html>'
-        patched_urlopen.return_value = page_content
+        patched_urlopen.return_value = StringIO(page_content)
 
         p = Page(url)
         # Call get_content
@@ -81,7 +81,7 @@ class DataProvidersTest(TestCase):
         self.assertNotEqual(magiccards_page.url, wizards_page.url)
 
     def _mock_page_get_content(self, page, fixture):
-        page.get_content = Mock(return_value=StringIO.StringIO(fixture))
+        page.get_content = Mock(return_value=fixture)
 
     def test_wizards_list(self):
         p = WizardsHomePage()
@@ -134,11 +134,11 @@ class DataProvidersTest(TestCase):
 
     def _get_html_fixture(self, name):
         fname = path.join(path.dirname(__file__), 'html_fixtures', name + '.html')
-        return open(fname)
+        return open(fname).read()
 
     @patch.object(Page, 'get_content')
-    def test_card_list_pagination(self, patched_content):
-        patched_content.return_value = self._get_html_fixture('gatherer_list')
+    def test_card_list_pagination(self, get_content):
+        get_content.return_value = self._get_html_fixture('gatherer_list')
 
         # Get Zendikar card set and create DataSource record for it, because
         # its url will be used as `url` in list page init
@@ -158,3 +158,21 @@ class DataProvidersTest(TestCase):
             'http://gatherer.wizards.com/Pages/Search/Default.aspx?page=1&action=advanced&set=+%5b%22Zendikar%22%5d&output=compact',
             'http://gatherer.wizards.com/Pages/Search/Default.aspx?page=2&action=advanced&set=+%5b%22Zendikar%22%5d&output=compact'
         ])
+
+
+    @patch('urllib2.urlopen')
+    def test_page_cache(self, urlopen):
+        page_content = self._get_html_fixture('gatherer_list')
+        urlopen.return_value = StringIO(page_content)
+        self.assertEqual(urlopen.call_count, 0)
+
+        # Create a page, get its content, and assert http request called
+        page1 = GathererCardList(self.zen_url)
+        page1.get_content()
+        self.assertEqual(urlopen.call_count, 1)
+
+        # Create the page again with the same url and test cache hit. Second
+        # instance is to exclude in-memory cache hit.
+        page2 = GathererCardList(self.zen_url)
+        page2.get_content()
+        self.assertEqual(urlopen.call_count, 1)
