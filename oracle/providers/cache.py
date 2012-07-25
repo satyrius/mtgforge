@@ -1,4 +1,3 @@
-import hashlib
 from django.core.cache.backends.base import BaseCache
 from oracle.models import DataProviderPage
 
@@ -15,7 +14,7 @@ class PageCache(BaseCache):
             version -- For capability with cache interface. Does not maters.
         """
         page = key
-        url_hash = hashlib.sha1(page.url).hexdigest()
+        url_hash = page.get_url_hash()
         page_name = page.__class__.__name__
         return dict(url_hash=url_hash, name=page_name)
 

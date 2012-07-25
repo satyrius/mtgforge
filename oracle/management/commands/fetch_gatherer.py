@@ -38,6 +38,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if options['clear']:
             get_cache('provider_page').clear()
+            get_cache('default', KEY_PREFIX='pagination').clear()
 
         self.threads_count = int(options['threads'])
         sets = CardSet.objects.all()

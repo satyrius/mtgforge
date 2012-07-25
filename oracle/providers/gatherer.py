@@ -3,6 +3,7 @@ import urllib
 from urlparse import urlparse, urlunparse
 
 from contrib.soupselect import select
+from django.core.cache import get_cache
 from oracle.providers import HomePage, ProviderPage, ProviderCardListPage, ProviderCardPage
 
 
@@ -65,16 +66,22 @@ class GathererCardList(ProviderCardListPage, GathererPage):
                 yield name, GathererCard(url)
 
     def pages_generator(self, paginate=True):
-        pagination = select(self.soup, 'div.pagingControls a')
-        if paginate and pagination:
-            for page_link in pagination:
-                page_url = page_link.get('href')
-                if not page_url or not page_link.text.strip().isdigit():
-                    continue
-                page_url = self.absolute_url(page_url)
-                yield GathererCardList(page_url)
-        else:
-            yield self
+        cache = get_cache('default', KEY_PREFIX='pagination')
+        key = self.get_url_hash()
+        urls = cache.get(key, default=[])
+        if not urls:
+            pagination = select(self.soup, 'div.pagingControls a')
+            if paginate and pagination:
+                for page_link in pagination:
+                    page_url = page_link.get('href')
+                    if not page_url or not page_link.text.strip().isdigit():
+                        continue
+                    urls.append(self.absolute_url(page_url))
+            else:
+                urls.append(self.url)
+            cache.set(key, urls)
+
+        return map(GathererCardList, urls)
 
 
 class GathererCard(ProviderCardPage, GathererPage):

@@ -1,3 +1,4 @@
+import hashlib
 import os
 import urllib2
 from urlparse import urlparse, urlunparse
@@ -32,6 +33,9 @@ class Page(object):
                 self._content = urllib2.urlopen(self.url).read()
                 cache.set(self, self._content)
         return self._content
+
+    def get_url_hash(self):
+        return hashlib.sha1(self.url).hexdigest()
 
     @property
     def soup(self):
