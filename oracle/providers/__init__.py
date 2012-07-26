@@ -94,10 +94,10 @@ class ProviderPage(Page):
     name = None
     _data_provider = None
 
-    def __init__(self, source=None):
+    def __init__(self, source=None, *args, **kwargs):
         if source is None:
             source = self.get_provider().home
-        super(ProviderPage, self).__init__(source)
+        super(ProviderPage, self).__init__(source, *args, **kwargs)
 
     def get_provider(self):
         if not self._data_provider:

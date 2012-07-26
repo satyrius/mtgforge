@@ -134,7 +134,7 @@ class DataProvidersTest(TestCase):
             content_object=zen,
             url=self.zen_url,
             data_provider=GathererPage().get_provider())
-        page = GathererCardList(zen)
+        page = GathererCardList(zen, use_cache=False)
 
         urls = []
         for p in page.pages_generator():

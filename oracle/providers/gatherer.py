@@ -43,8 +43,8 @@ class CardNotFound(Exception):
 
 
 class GathererCardList(ProviderCardListPage, GathererPage):
-    def __init__(self, card_set):
-        super(GathererCardList, self).__init__(card_set)
+    def __init__(self, card_set, *args, **kwargs):
+        super(GathererCardList, self).__init__(card_set, *args, **kwargs)
 
         # Fix list url, add `output` get parameter
         parts = list(urlparse(self.url))
@@ -67,12 +67,16 @@ class GathererCardList(ProviderCardListPage, GathererPage):
                 yield name, GathererCard(url)
 
     def pages_generator(self, paginate=True):
-        cache = get_cache(
-            'default',
-            TIMEOUT=settings.DATA_PROVIDER_CACHE_TIMEOUT,
-            KEY_PREFIX='pagination')
-        key = self.get_url_hash()
-        urls = cache.get(key, default=[])
+        if self._use_cache:
+            cache = get_cache(
+                'default',
+                TIMEOUT=settings.DATA_PROVIDER_CACHE_TIMEOUT,
+                KEY_PREFIX='pagination')
+            key = self.get_url_hash()
+            urls = cache.get(key, default=[])
+        else:
+            urls = []
+
         if not urls:
             pagination = select(self.soup, 'div.pagingControls a')
             if paginate and pagination:
@@ -83,7 +87,8 @@ class GathererCardList(ProviderCardListPage, GathererPage):
                     urls.append(self.absolute_url(page_url))
             else:
                 urls.append(self.url)
-            cache.set(key, urls)
+            if self._use_cache:
+                cache.set(key, urls)
 
         return map(GathererCardList, urls)
 
