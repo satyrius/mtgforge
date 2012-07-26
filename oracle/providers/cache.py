@@ -1,5 +1,6 @@
 from django.core.cache.backends.base import BaseCache
 from oracle.models import DataProviderPage
+from oracle.providers import ProviderPage
 
 
 class PageCache(BaseCache):
@@ -29,11 +30,9 @@ class PageCache(BaseCache):
         page = key
         key = self.make_key(key)
         DataProviderPage.objects.filter(**key).delete()
+        dp = isinstance(page, ProviderPage) and page.get_provider() or None
         DataProviderPage.objects.create(
-            url=page.url,
-            data_provider=page.get_provider(),
-            content=value,
-            **key)
+            url=page.url, data_provider=dp, content=value, **key)
 
     def clear(self):
         DataProviderPage.objects.all().delete()

@@ -43,7 +43,7 @@ class DataSource(models.Model):
 class DataProviderPage(models.Model):
     url = models.URLField()
     url_hash = models.CharField(max_length=40)
-    data_provider = models.ForeignKey(DataProvider)
+    data_provider = models.ForeignKey(DataProvider, null=True, blank=True)
     content = NullTextField(null=False, blank=False)
     name = NullCharField(max_length=255, null=False, blank=False)
 
