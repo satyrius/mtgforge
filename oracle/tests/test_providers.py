@@ -6,6 +6,7 @@ from StringIO import StringIO
 
 from BeautifulSoup import ICantBelieveItsBeautifulSoup
 from django.test import TestCase
+from django.test.utils import override_settings
 from mock import Mock, patch
 
 from oracle.models import DataProvider, DataSource, CardSet, DataProviderPage
@@ -16,6 +17,10 @@ from oracle.providers.wizards import WizardsHomePage
 from oracle.tests import fixtures
 
 
+@override_settings(CACHES={
+    'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'},
+    'provider_page': {'BACKEND': 'oracle.providers.cache.PageCache'},
+})
 class DataProvidersTest(TestCase):
     fixtures = ['data_provider', 'card_set']
     zen_url = 'http://gatherer.wizards.com/Pages/Search/Default.aspx?set=%5B%22Zendikar%22%5D'
@@ -134,7 +139,7 @@ class DataProvidersTest(TestCase):
             content_object=zen,
             url=self.zen_url,
             data_provider=GathererPage().get_provider())
-        page = GathererCardList(zen, use_cache=False)
+        page = GathererCardList(zen)
 
         urls = []
         for p in page.pages_generator():
