@@ -5,7 +5,10 @@ from urlparse import urlparse, urlunparse
 from contrib.soupselect import select
 from django.conf import settings
 from django.core.cache import get_cache
-from oracle.providers import HomePage, ProviderPage, ProviderCardListPage, ProviderCardPage
+from oracle.providers import (
+    HomePage, ProviderPage, ProviderCardListPage, ProviderCardPage,
+    map_result_as_pages
+)
 
 
 mvid_re = re.compile('multiverseid\=(?P<id>\d+)')
@@ -66,6 +69,7 @@ class GathererCardList(ProviderCardListPage, GathererPage):
                 url = self.absolute_url(card_link.get('href'))
                 yield name, GathererCard(url)
 
+    @map_result_as_pages()
     def pages_generator(self, paginate=True):
         if self._use_cache:
             cache = get_cache(
@@ -90,7 +94,7 @@ class GathererCardList(ProviderCardListPage, GathererPage):
             if self._use_cache:
                 cache.set(key, urls)
 
-        return map(GathererCardList, urls)
+        return urls
 
 
 class GathererCard(ProviderCardPage, GathererPage):

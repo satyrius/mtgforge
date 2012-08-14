@@ -5,6 +5,7 @@ from urlparse import urlparse, urlunparse
 
 from BeautifulSoup import ICantBelieveItsBeautifulSoup, BeautifulStoneSoup
 from django.core.cache import get_cache
+from django.utils.functional import wraps, curry
 
 from oracle.models import DataProvider, CardSet
 
@@ -117,3 +118,14 @@ class ProviderCardListPage(CardListPage, ProviderPage):
 
 class ProviderCardPage(CardPage, ProviderPage):
     pass
+
+
+def map_result_as_pages(page_class=None):
+    def decorator(func):
+        @wraps(func)
+        def result_wrapper(self, page_class=None, *args, **kwargs):
+            result = func(self, *args, **kwargs)
+            page_class = page_class or self.__class__
+            return map(page_class, result)
+        return curry(result_wrapper, page_class=page_class)
+    return decorator
