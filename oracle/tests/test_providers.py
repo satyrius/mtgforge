@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-import codecs
 import urllib
-from os import path
 from StringIO import StringIO
 
 from django.test import TestCase
@@ -15,6 +13,7 @@ from oracle.providers.gatherer import GathererPage, GathererHomePage, GathererCa
 from oracle.providers.magiccards import MagiccardsHomePage
 from oracle.providers.wizards import WizardsHomePage
 from oracle.tests import fixtures
+from oracle.tests.helpers import get_html_fixture
 
 
 @override_settings(CACHES={
@@ -124,13 +123,9 @@ class DataProvidersTest(TestCase):
         list_page = GathererCardList(zen_url)
         self.assertEqual(list_page.url, compact_zen_url)
 
-    def _get_html_fixture(self, name):
-        fname = path.join(path.dirname(__file__), 'html_fixtures', name + '.html')
-        return codecs.open(fname).read().strip()
-
     @patch.object(Page, 'get_content')
     def test_card_list_pagination(self, get_content):
-        get_content.return_value = self._get_html_fixture('gatherer_list')
+        get_content.return_value = get_html_fixture('gatherer_list')
 
         # Get Zendikar card set and create DataSource record for it, because
         # its url will be used as `url` in list page init
@@ -153,7 +148,7 @@ class DataProvidersTest(TestCase):
 
     @patch('urllib2.urlopen')
     def test_cache(self, urlopen):
-        page_content = self._get_html_fixture('gatherer_list')
+        page_content = get_html_fixture('gatherer_list')
         urlopen.return_value = StringIO(page_content)
         self.assertEqual(urlopen.call_count, 0)
 
@@ -178,7 +173,7 @@ class DataProvidersTest(TestCase):
 
     @patch('urllib2.urlopen')
     def test_common_page_cache(self, urlopen):
-        page_content = self._get_html_fixture('gatherer_list')
+        page_content = get_html_fixture('gatherer_list')
         urlopen.return_value = StringIO(page_content)
         dummy_url = 'http://example.com/foo/bar.html'
 
