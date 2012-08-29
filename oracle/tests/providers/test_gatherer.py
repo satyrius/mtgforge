@@ -5,7 +5,9 @@ from mock import patch
 
 from oracle.models import DataSource, CardSet, DataProviderPage
 from oracle.providers import Page
-from oracle.providers.gatherer import GathererPage, GathererHomePage, GathererCardList
+from oracle.providers.gatherer import (
+    GathererPage, GathererHomePage, GathererCardList, GathererCard
+)
 from oracle.tests.helpers import get_html_fixture
 from oracle.tests.providers.base import ProviderTest
 
@@ -157,18 +159,21 @@ class GathererWizardsComParsingTest(ProviderTest):
         list_page = GathererCardList(zen_url)
         self.assertEqual(list_page.url, compact_zen_url)
 
+    def card_set_and_page(self, acronym, url):
+        cs = CardSet.objects.get(acronym=acronym)
+        DataSource.objects.create(
+            content_object=cs,
+            url=url,
+            data_provider=GathererPage().get_provider())
+        return cs, GathererCardList(cs)
+
     @patch.object(Page, 'get_content')
     def test_card_list_pagination(self, get_content):
         get_content.return_value = get_html_fixture('gatherer_list')
 
         # Get Zendikar card set and create DataSource record for it, because
         # its url will be used as `url` in list page init
-        zen = CardSet.objects.get(acronym='zen')
-        DataSource.objects.create(
-            content_object=zen,
-            url=self.zen_url,
-            data_provider=GathererPage().get_provider())
-        page = GathererCardList(zen)
+        zen, page = self.card_set_and_page('zen', self.zen_url)
 
         urls = []
         for p in page.pages_generator():
@@ -204,3 +209,117 @@ class GathererWizardsComParsingTest(ProviderTest):
 
         self.assertTrue(page1.url.startswith(self.zen_url))
         urlopen.assert_called_once_with(page1.url)
+
+    @patch.object(Page, 'get_content')
+    def test_get_cards_urls(self, get_content):
+        get_content.return_value = get_html_fixture('gatherer_list')
+        url = 'http://gatherer.wizards.com/Pages/Search/Default.aspx?page=0&action=advanced&set=+%5b%22Zendikar%22%5d&output=compact'
+        zen, page = self.card_set_and_page('zen', url)
+        self.assertEqual(page.url, url)
+        urls = []
+        for p in page.cards_list_generator():
+            self.assertIsInstance(p, GathererCard)
+            urls.append(p.url)
+            print p.url
+        self.assertEqual(urls, [
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=178135',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=170993',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=189638',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=197538',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=197893',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=177584',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=190420',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=193404',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=197402',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=197531',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=192231',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=185703',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=197890',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=193397',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=180350',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=191372',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=180362',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=170995',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=197892',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=192230',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=177500',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=180509',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=185734',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=177558',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=183417',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=189001',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=185697',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=193406',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=198524',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=195402',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=177546',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=197535',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=195626',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=186322',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=190394',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=178121',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=186309',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=190406',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=178137',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=191374',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=180115',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=193398',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=191373',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=192221',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=190399',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=190414',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=189006',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=193405',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=190396',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=189629',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=185743',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=201962',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=180361',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=185698',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=197887',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=192226',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=195627',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=177501',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=170987',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=180411',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=180473',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=185701',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=198523',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=192220',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=189631',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=189621',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=185694',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=180127',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=183418',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=180498',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=170998',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=197404',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=185752',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=180408',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=191361',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=180348',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=193394',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=192215',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=185727',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=180435',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=180467',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=197530',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=178151',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=190407',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=185711',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=201964',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=192227',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=177505',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=189627',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=169963',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=180347',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=185704',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=191356',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=189635',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=190408',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=198519',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=186320',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=177530',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=170991',
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=177542',
+        ])

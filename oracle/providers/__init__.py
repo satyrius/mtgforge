@@ -4,6 +4,7 @@ import urllib2
 from urlparse import urlparse, urlunparse
 
 from lxml.html import document_fromstring
+from django.conf import settings
 from django.core.cache import get_cache
 from django.utils.functional import wraps, curry
 from django.utils.encoding import smart_str
@@ -124,4 +125,29 @@ def map_result_as_pages(page_class=None):
             page_class = page_class or self.__class__
             return map(page_class, result)
         return curry(result_wrapper, page_class=page_class)
+    return decorator
+
+
+def cache_parsed(key_prefix):
+    def decorator(func):
+        @wraps(func)
+        def result_wrapper(self, key_prefix, *args, **kwargs):
+            if self._use_cache:
+                cache = get_cache(
+                    'default',
+                    TIMEOUT=settings.DATA_PROVIDER_CACHE_TIMEOUT,
+                    KEY_PREFIX=key_prefix)
+                key = self.get_url_hash()
+                result = cache.get(key, default=[])
+            else:
+                result = None
+
+            if not result:
+                result = func(self, *args, **kwargs)
+
+            if self._use_cache:
+                cache.set(key, result)
+
+            return result
+        return curry(result_wrapper, key_prefix=key_prefix)
     return decorator

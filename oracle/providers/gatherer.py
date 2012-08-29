@@ -3,11 +3,9 @@ import urllib
 from urlparse import urlparse, urlunparse
 
 from contrib.soupselect import select
-from django.conf import settings
-from django.core.cache import get_cache
 from oracle.providers import (
     HomePage, ProviderPage, ProviderCardListPage, ProviderCardPage,
-    map_result_as_pages
+    map_result_as_pages, cache_parsed
 )
 
 
@@ -42,57 +40,6 @@ class GathererHomePage(HomePage, GathererPage):
 
 class CardNotFound(Exception):
     pass
-
-
-class GathererCardList(ProviderCardListPage, GathererPage):
-    def __init__(self, card_set, *args, **kwargs):
-        super(GathererCardList, self).__init__(card_set, *args, **kwargs)
-
-        # Fix list url, add `output` get parameter
-        parts = list(urlparse(self.url))
-        query = filter(lambda s: s and not s.startswith('output='), parts[4].split('&'))
-        query.append('output=compact')
-        parts[4] = '&'.join(query)
-        self.url = urlunparse(parts)
-
-    def cards_list_generator(self, names=None):
-        '''Generates list of card pages. If names argument passed, fetch infor
-        only for those cards.
-        '''
-        for page in self.pages_generator():
-            for card_link in self.doc.cssselect('tr.cardItem td.name a'):
-                name = self._normalize_puct(card_link.text.strip())
-                if names and name not in names:
-                    continue
-                url = self.absolute_url(card_link.get('href'))
-                yield name, GathererCard(url)
-
-    @map_result_as_pages()
-    def pages_generator(self, paginate=True):
-        if self._use_cache:
-            cache = get_cache(
-                'default',
-                TIMEOUT=settings.DATA_PROVIDER_CACHE_TIMEOUT,
-                KEY_PREFIX='pagination')
-            key = self.get_url_hash()
-            urls = cache.get(key, default=[])
-        else:
-            urls = []
-
-        if not urls:
-            pagination = self.doc.cssselect('div.pagingControls a')
-            if paginate and pagination:
-                for page_link in pagination:
-                    page_url = page_link.get('href')
-                    if not page_url or not page_link.text.strip().isdigit():
-                        continue
-                    urls.append(self.absolute_url(page_url))
-            else:
-                urls.append(self.url)
-            if self._use_cache:
-                cache.set(key, urls)
-
-        return urls
 
 
 class GathererCard(ProviderCardPage, GathererPage):
@@ -174,3 +121,45 @@ class GathererCard(ProviderCardPage, GathererPage):
             details['other_faces'] = other_names
 
         return details
+
+
+class GathererCardList(ProviderCardListPage, GathererPage):
+    def __init__(self, card_set, *args, **kwargs):
+        super(GathererCardList, self).__init__(card_set, *args, **kwargs)
+
+        # Fix list url, add `output` get parameter
+        parts = list(urlparse(self.url))
+        query = filter(lambda s: s and not s.startswith('output='), parts[4].split('&'))
+        query.append('output=compact')
+        parts[4] = '&'.join(query)
+        self.url = urlunparse(parts)
+
+    @map_result_as_pages(GathererCard)
+    @cache_parsed('cards')
+    def cards_list_generator(self, names=None):
+        '''Generates list of card pages. If names argument passed, fetch infor
+        only for those cards.
+        '''
+        urls = []
+        for card_link in self.doc.cssselect('tr.cardItem td.name a'):
+            name = self._normalize_puct(card_link.text.strip())
+            if names and name not in names:
+                continue
+            urls.append(self.absolute_url(card_link.get('href')))
+        return urls
+
+    @map_result_as_pages()
+    @cache_parsed('pagination')
+    def pages_generator(self):
+        urls = []
+        pagination = self.doc.cssselect('div.pagingControls a')
+        if pagination:
+            for page_link in pagination:
+                page_url = page_link.get('href')
+                if not page_url or not page_link.text.strip().isdigit():
+                    continue
+                urls.append(self.absolute_url(page_url))
+        else:
+            urls.append(self.url)
+
+        return urls
