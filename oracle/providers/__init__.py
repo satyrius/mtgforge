@@ -3,9 +3,10 @@ import os
 import urllib2
 from urlparse import urlparse, urlunparse
 
-from BeautifulSoup import ICantBelieveItsBeautifulSoup, BeautifulStoneSoup
+from lxml.html import document_fromstring
 from django.core.cache import get_cache
 from django.utils.functional import wraps, curry
+from django.utils.encoding import smart_str
 
 from oracle.models import DataProvider, CardSet
 
@@ -18,7 +19,7 @@ class Page(object):
     def __init__(self, source, use_cache=True):
         self.url = self._source_url(source)
         self._content = None
-        self._soup = None
+        self._doc = None
         self._use_cache = use_cache
 
     def _source_url(self, source):
@@ -36,22 +37,17 @@ class Page(object):
                 self._content = urllib2.urlopen(self.url).read()
                 if self._use_cache:
                     cache.set(self, self._content)
-        return self._content
+        return smart_str(self._content)
 
     def get_url_hash(self):
         return hashlib.sha1(self.url).hexdigest()
 
     @property
-    def soup(self):
-        """Get content and return ICantBelieveItsBeautifulSoup for the document.
-        Do not use BeautifulSoup because source HTML is not perfect.
-        """
-        if not self._soup:
-            self._soup = ICantBelieveItsBeautifulSoup(
-                self.get_content(),
-                convertEntities=BeautifulStoneSoup.HTML_ENTITIES
-            )
-        return self._soup
+    def doc(self):
+        """Get content and return lxml document"""
+        if self._doc is None:
+            self._doc = document_fromstring(self.get_content())
+        return self._doc
 
     def absolute_url(self, href):
         o = urlparse(href)

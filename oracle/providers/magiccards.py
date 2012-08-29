@@ -9,12 +9,12 @@ class MagiccardsHomePage(HomePage, MagiccardsPage):
     def products_list_generator(self):
         english_header = filter(
             lambda el: el.text.strip().startswith('English'),
-            self.soup.findAll('h2'))[0]
+            self.doc.cssselect('h2'))[0]
 
-        for link in english_header.findNextSibling('table').findAll('a'):
+        for link in english_header.getnext().cssselect('a'):
             href = link.get('href')
             if not href:
                 continue
             name = link.text.strip()
-            acronym = link.findNextSibling('small').text.strip() or None
+            acronym = link.getnext().text.strip() or None
             yield name, self.absolute_url(href), dict(acronym=acronym)

@@ -4,9 +4,9 @@ import urllib
 from os import path
 from StringIO import StringIO
 
-from BeautifulSoup import ICantBelieveItsBeautifulSoup
 from django.test import TestCase
 from django.test.utils import override_settings
+from lxml.html import HtmlElement
 from mock import Mock, patch
 
 from oracle.models import DataProvider, DataSource, CardSet, DataProviderPage
@@ -45,16 +45,16 @@ class DataProvidersTest(TestCase):
                          'http://example.com/magic/foo/bar.html')
 
     @patch.object(Page, 'get_content')
-    def test_get_soup(self, patched_content):
+    def test_get_doc(self, patched_content):
         page_content = '<html><h1>Example</h1></html>'
         patched_content.return_value = page_content
 
         p = Page('http://example.com/')
-        # Call soup property
-        soup = p.soup
-        self.assertIsInstance(soup, ICantBelieveItsBeautifulSoup)
+        # Call doc property
+        doc = p.doc
+        self.assertIsInstance(doc, HtmlElement)
         # Call againt and it is still the same instance
-        self.assertEqual(p.soup, soup)
+        self.assertEqual(p.doc, doc)
 
     def test_home_page(self):
         gatherer_page = GathererHomePage()
@@ -126,7 +126,7 @@ class DataProvidersTest(TestCase):
 
     def _get_html_fixture(self, name):
         fname = path.join(path.dirname(__file__), 'html_fixtures', name + '.html')
-        return codecs.open(fname, encoding='utf-8').read().strip()
+        return codecs.open(fname).read().strip()
 
     @patch.object(Page, 'get_content')
     def test_card_list_pagination(self, get_content):
@@ -152,19 +152,24 @@ class DataProvidersTest(TestCase):
         ])
 
     @patch('urllib2.urlopen')
-    def test_page_cache(self, urlopen):
+    def test_cache(self, urlopen):
         page_content = self._get_html_fixture('gatherer_list')
         urlopen.return_value = StringIO(page_content)
         self.assertEqual(urlopen.call_count, 0)
 
         # Create a page, get its content, and assert http request called
         page1 = GathererCardList(self.zen_url)
+        # Access doc property to trigger lxml parser
+        page1.doc
         self.assertEqual(page1.get_content(), page_content)
         self.assertEqual(urlopen.call_count, 1)
+        cache_entry = DataProviderPage.objects.get(url=page1.url)
+        self.assertEqual(cache_entry.data_provider, page1.get_provider())
 
         # Create the page again with the same url and test cache hit. Second
         # instance is to exclude in-memory cache hit.
         page2 = GathererCardList(self.zen_url)
+        page2.doc
         self.assertEqual(page2.get_content(), page_content)
         self.assertEqual(urlopen.call_count, 1)
 
@@ -172,19 +177,12 @@ class DataProvidersTest(TestCase):
         urlopen.assert_called_once_with(page1.url)
 
     @patch('urllib2.urlopen')
-    def test_page_cache_provider(self, urlopen):
+    def test_common_page_cache(self, urlopen):
         page_content = self._get_html_fixture('gatherer_list')
-
-        # Provider's cached page has FK to the provider
-        urlopen.return_value = StringIO(page_content)
-        page1 = GathererCardList(self.zen_url)
-        self.assertEqual(page1.get_content(), page_content)
-        cache_entry = DataProviderPage.objects.get(url=page1.url)
-        self.assertEqual(cache_entry.data_provider, page1.get_provider())
-
-        # Common page has empty provider FK
         urlopen.return_value = StringIO(page_content)
         dummy_url = 'http://example.com/foo/bar.html'
+
+        # Common page has empty provider FK
         page2 = Page(dummy_url)
         self.assertEqual(page2.get_content(), page_content)
         cache_entry = DataProviderPage.objects.get(url=dummy_url)

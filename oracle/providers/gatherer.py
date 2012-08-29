@@ -32,8 +32,7 @@ class GathererPage(ProviderPage):
 class GathererHomePage(HomePage, GathererPage):
     def products_list_generator(self):
         select_id = 'ctl00_ctl00_MainContent_Content_SearchControls_setAddText'
-        options = select(self.soup, 'select#{0} option'.format(select_id))
-        for o in options:
+        for o in self.doc.cssselect('select#{0} option'.format(select_id)):
             name = o.get('value')
             if not name:
                 continue
@@ -61,8 +60,7 @@ class GathererCardList(ProviderCardListPage, GathererPage):
         only for those cards.
         '''
         for page in self.pages_generator():
-            for row in select(page.soup, 'tr.cardItem td.name'):
-                card_link = row.find('a')
+            for card_link in self.doc.cssselect('tr.cardItem td.name a'):
                 name = self._normalize_puct(card_link.text.strip())
                 if names and name not in names:
                     continue
@@ -82,7 +80,7 @@ class GathererCardList(ProviderCardListPage, GathererPage):
             urls = []
 
         if not urls:
-            pagination = select(self.soup, 'div.pagingControls a')
+            pagination = self.doc.cssselect('div.pagingControls a')
             if paginate and pagination:
                 for page_link in pagination:
                     page_url = page_link.get('href')

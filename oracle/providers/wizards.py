@@ -1,6 +1,5 @@
 import re
 
-from contrib.soupselect import select
 from oracle.providers import HomePage, ProviderPage
 
 
@@ -13,20 +12,22 @@ class WizardsHomePage(HomePage, WizardsPage):
         product_link_re = re.compile(r'x=mtg[/_]tcg[/_](?:products[/_]([^/_]+)|([^/_]+)[/_]productinfo)$')
         cards_count_re = re.compile(r'(\d+)\s+cards', re.IGNORECASE)
         separator_re = re.compile(r'\s*(?:,|and)\s*')
-        for link in select(self.soup, 'div.article-content a'):
+        for link in self.doc.cssselect('div.article-content a'):
             href = link.get('href')
             if not href:
                 continue
             match = product_link_re.search(href)
             if match:
-                name = re.sub(r'\s+', ' ', link.getText(u' ')).strip()
+                name = re.sub(r'\s+', ' ', link.text).strip()
 
-                cards = link.findParent('td').findNextSibling('td')
+                for e in link.iterancestors():
+                    if e.tag == 'td':
+                        cards = e.getnext()
+                        break
                 match_cards = cards_count_re.match(cards.text.strip())
                 cards_count = match_cards and int(match_cards.group(1)) or None
 
-                release = cards.findNextSibling('td').find('br').nextSibling.strip()
-                release_date = release or None
+                release_date = [t for t in cards.getnext().itertext()][1].strip()
 
                 url = self.absolute_url(href)
                 result = lambda name: (name, url, dict(cards=cards_count, release=release_date))
