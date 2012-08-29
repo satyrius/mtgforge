@@ -22,9 +22,10 @@ class PageCache(BaseCache):
     def get(self, key, default=None, version=None):
         try:
             key = self.make_key(key)
-            return DataProviderPage.objects.get(**key).content
+            entry = DataProviderPage.objects.get(**key)
+            return entry.name, entry.content
         except DataProviderPage.DoesNotExist:
-            return default
+            return None, default
 
     def set(self, key, value, timeout=None, version=None):
         page = key

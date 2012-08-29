@@ -19,10 +19,11 @@ class BadPageSource(Exception):
 class Page(object):
     def __init__(self, source, name=None, use_cache=True):
         self.url = self._source_url(source)
-        self.name = name
+        self._name = name
         self._content = None
         self._doc = None
         self._use_cache = use_cache
+        self._cache = get_cache('provider_page')
 
     def _source_url(self, source):
         if isinstance(source, basestring):
@@ -33,13 +34,22 @@ class Page(object):
         """Return page content as a string."""
         if self._content is None:
             if self._use_cache:
-                cache = get_cache('provider_page')
-                self._content = cache.get(self)
+                name, self._content = self._cache.get(self)
+                if self._name is None:
+                    self._name = name
             if not self._content:
                 self._content = urllib2.urlopen(self.url).read()
                 if self._use_cache:
-                    cache.set(self, self._content)
+                    self._cache.set(self, self._content)
         return smart_str(self._content)
+
+    @property
+    def name(self):
+        if self._name is None and self._use_cache:
+            self._name, content = self._cache.get(self)
+            if self._content is None:
+                self._content = content
+        return self._name
 
     def get_url_hash(self):
         return hashlib.sha1(self.url).hexdigest()

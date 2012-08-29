@@ -91,3 +91,7 @@ class DataProvidersTest(ProviderTest):
         self.assertEqual(content2, page_content)
         cache_entry = DataProviderPage.objects.get(url=dummy_url_2)
         self.assertEqual(cache_entry.name, title)
+
+        # Test restoring page name from cache
+        page3 = Page(dummy_url_2)
+        self.assertEqual(page3.name, title)
