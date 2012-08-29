@@ -347,3 +347,27 @@ class GathererWizardsComParsingTest(ProviderTest):
             flavor='A golden helix streaked skyward from the Helvault. A thunderous explosion shattered the silver monolith and Avacyn emerged, free from her prison at last.',
             type='Legendary Creature - Angel',
         ))
+
+    @patch.object(Page, 'get_content')
+    def test_card_rules_with_comments(self, get_content):
+        get_content.return_value = get_html_fixture('gatherer_gear_oracle')
+        url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=178135'
+        name = u'Adventuring Gear'
+        page = GathererCard(url, name=name)
+        details = page.details()
+        self.assertEqual(details, dict(
+            set='Zendikar',
+            art='http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=178135&type=card',
+            name='Adventuring Gear',
+            artist='Howard Lyon',
+            url='http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=178135',
+            text='Landfall - Whenever a land enters the battlefield under your control, equipped creature gets +2/+2 until end of turn.\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)',
+            cmc='1',
+            number='195',
+            mvid='178135',
+            rarity='Common',
+            mana='{1}',
+            playerRating='Rating: 3.389 / 5 (90 votes)',
+            flavor='An explorer\'s essentials in a wild world.',
+            type='Artifact - Equipment',
+        ))

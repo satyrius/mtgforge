@@ -59,7 +59,7 @@ class GathererCard(ProviderCardPage, GathererPage):
         mana_re = re.compile(r'name=(.+?)&')
         for img in html_el.cssselect('img'):
             mana = unicode(mana_re.search(img.get('src')).groups()[0])
-            img.tail = u'{' + mana + u'}'
+            img.tail = u'{' + mana + u'}' + unicode(img.tail or '')
         etree.strip_elements(html_el, 'img', with_tail=False)
 
     def parse_mana(self, html_el):
