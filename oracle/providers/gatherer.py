@@ -13,7 +13,7 @@ mvid_re = re.compile('multiverseid\=(?P<id>\d+)')
 
 
 class GathererPage(ProviderPage):
-    name = 'gatherer'
+    provider_name = 'gatherer'
 
     def _normalize_spaces(self, text):
         text = re.sub(r'(?<!\(|\{|\s)\{', ' {', text)

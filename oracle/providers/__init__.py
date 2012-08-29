@@ -17,8 +17,9 @@ class BadPageSource(Exception):
 
 
 class Page(object):
-    def __init__(self, source, use_cache=True):
+    def __init__(self, source, name=None, use_cache=True):
         self.url = self._source_url(source)
+        self.name = name
         self._content = None
         self._doc = None
         self._use_cache = use_cache
@@ -89,7 +90,7 @@ class CardPage(Page):
 
 
 class ProviderPage(Page):
-    name = None
+    provider_name = None
     _data_provider = None
 
     def __init__(self, source=None, *args, **kwargs):
@@ -99,7 +100,7 @@ class ProviderPage(Page):
 
     def get_provider(self):
         if not self._data_provider:
-            self._data_provider = DataProvider.objects.get(name=self.name)
+            self._data_provider = DataProvider.objects.get(name=self.provider_name)
         return self._data_provider
 
 

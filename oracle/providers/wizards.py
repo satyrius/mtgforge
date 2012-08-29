@@ -4,7 +4,7 @@ from oracle.providers import HomePage, ProviderPage
 
 
 class WizardsPage(ProviderPage):
-    name = 'wizards'
+    provider_name = 'wizards'
 
 
 class WizardsHomePage(HomePage, WizardsPage):

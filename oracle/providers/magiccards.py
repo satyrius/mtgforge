@@ -2,7 +2,7 @@ from oracle.providers import HomePage, ProviderPage
 
 
 class MagiccardsPage(ProviderPage):
-    name = 'magiccards'
+    provider_name = 'magiccards'
 
 
 class MagiccardsHomePage(HomePage, MagiccardsPage):

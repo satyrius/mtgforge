@@ -19,6 +19,11 @@ class DataProvidersTest(ProviderTest):
         url = 'http://example.com/magic/tcg/home.html'
         p = Page(url)
         self.assertEqual(p.url, url)
+        self.assertIsNone(p.name)
+
+        name = 'Savannah'
+        p = Page(url, name=name)
+        self.assertEqual(p.name, name)
 
         with self.assertRaises(BadPageSource):
             p = Page(None)
