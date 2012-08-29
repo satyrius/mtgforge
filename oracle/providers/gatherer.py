@@ -145,7 +145,7 @@ class GathererCardList(ProviderCardListPage, GathererPage):
             name = self._normalize_puct(card_link.text.strip())
             if names and name not in names:
                 continue
-            urls.append(self.absolute_url(card_link.get('href')))
+            urls.append((name, self.absolute_url(card_link.get('href'))))
         return urls
 
     @map_result_as_pages()

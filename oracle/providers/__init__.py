@@ -124,7 +124,9 @@ def map_result_as_pages(page_class=None):
         def result_wrapper(self, page_class=None, *args, **kwargs):
             result = func(self, *args, **kwargs)
             page_class = page_class or self.__class__
-            return map(page_class, result)
+            cls = lambda r: isinstance(r, tuple) and \
+                    page_class(r[1], name=r[0]) or page_class(r)
+            return map(cls, result)
         return curry(result_wrapper, page_class=page_class)
     return decorator
 
