@@ -74,7 +74,20 @@ class DataProvidersTest(ProviderTest):
         dummy_url = 'http://example.com/foo/bar.html'
 
         # Common page has empty provider FK
-        page2 = Page(dummy_url)
-        self.assertEqual(page2.get_content(), page_content)
+        page = Page(dummy_url)
+        self.assertEqual(page.get_content(), page_content)
         cache_entry = DataProviderPage.objects.get(url=dummy_url)
         self.assertIsNone(cache_entry.data_provider)
+        self.assertIsNone(cache_entry.name)
+        self.assertEqual(cache_entry.class_name, page.__class__.__name__)
+
+        # Assert page name saved to cache
+        title = 'The Epic Page'
+        dummy_url_2 = 'http://example.com/foo/baz.html'
+        urlopen.return_value = StringIO(page_content)
+        page2 = Page(dummy_url_2, name=title)
+        content2 = page2.get_content()
+        self.assertIsNotNone(content2)
+        self.assertEqual(content2, page_content)
+        cache_entry = DataProviderPage.objects.get(url=dummy_url_2)
+        self.assertEqual(cache_entry.name, title)

@@ -45,11 +45,11 @@ class DataProviderPage(models.Model):
     url_hash = models.CharField(max_length=40)
     data_provider = models.ForeignKey(DataProvider, null=True, blank=True)
     content = NullTextField(null=False, blank=False)
-    # TODO rename to 'type'
-    name = NullCharField(max_length=255, null=False, blank=False)
+    class_name = NullCharField(max_length=255, null=False, blank=False)
+    name = NullCharField(max_length=255, null=True, blank=True)
 
     class Meta:
-        unique_together = ('url_hash', 'name')
+        unique_together = ('url_hash', 'class_name')
 
 # }}}
 

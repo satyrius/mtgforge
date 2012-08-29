@@ -16,8 +16,8 @@ class PageCache(BaseCache):
         """
         page = key
         url_hash = page.get_url_hash()
-        page_name = page.__class__.__name__
-        return dict(url_hash=url_hash, name=page_name)
+        class_name = page.__class__.__name__
+        return dict(url_hash=url_hash, class_name=class_name)
 
     def get(self, key, default=None, version=None):
         try:
@@ -32,8 +32,8 @@ class PageCache(BaseCache):
         DataProviderPage.objects.filter(**key).delete()
         dp = isinstance(page, ProviderPage) and page.get_provider() or None
         DataProviderPage.objects.create(
-            url=page.url, data_provider=dp, content=value, **key)
+            url=page.url, name=page.name,
+            data_provider=dp, content=value, **key)
 
     def clear(self):
         DataProviderPage.objects.all().delete()
-
