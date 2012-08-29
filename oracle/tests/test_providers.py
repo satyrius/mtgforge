@@ -74,14 +74,6 @@ class DataProvidersTest(TestCase):
     def _mock_page_get_content(self, page, fixture):
         page.get_content = Mock(return_value=fixture)
 
-    def test_wizards_list(self):
-        p = WizardsHomePage()
-        self._mock_page_get_content(p, fixtures.wizards_home_page)
-        products = p.products_list()
-        self.assertEqual(products, [
-            ('Zendikar', 'http://wizards.com/magic/tcg/products.aspx?x=mtg/tcg/products/zendikar', {'cards': 249, 'release': 'October 2009'})
-        ])
-
     def test_magiccards_list(self):
         p = MagiccardsHomePage()
         self._mock_page_get_content(p, fixtures.magiccards_home_page)
