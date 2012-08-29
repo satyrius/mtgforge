@@ -57,9 +57,12 @@ class Command(BaseCommand):
                 pagination.append(page)
 
         self.notice('Fetch card list pages for each set')
+        i = 0
         for cs_page in self.process_pages(pagination):
-            self.notice('Fetch card page for list {}'.format(cs_page.url))
-            self.process_pages(cs_page.cards_list_generator())
+            self.notice('Fetch card pages for list {}'.format(cs_page.url))
+            urls = cs_page.cards_list_generator()
+            self.process_pages(urls, i)
+            i += len(urls)
 
     def process_pages(self, pages, i=0):
         chunk = self.threads_count
