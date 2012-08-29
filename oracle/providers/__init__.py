@@ -95,7 +95,7 @@ class CardListPage(Page):
 
 class CardPage(Page):
     def details(self):
-        """Parse page and returns dard details dict"""
+        """Parse page and return card details dict"""
         raise NotImplementedError
 
 

@@ -322,3 +322,28 @@ class GathererWizardsComParsingTest(ProviderTest):
             ('Kor Cartographer', u'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=170991'),
             ('Kor Duelist', u'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=177542'),
         ])
+
+    @patch.object(Page, 'get_content')
+    def test_card_oracle_details(self, get_content):
+        get_content.return_value = get_html_fixture('gatherer_angel_oracle')
+        url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=239961'
+        name = u'Avacyn, Angel of Hope'
+        page = GathererCard(url, name=name)
+        details = page.details()
+        self.assertEqual(details, dict(
+            set='Avacyn Restored',
+            art='http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=239961&type=card',
+            name='Avacyn, Angel of Hope',
+            pt='8 / 8',
+            artist='Jason Chan',
+            url='http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=239961',
+            text='Flying, vigilance\nAvacyn, Angel of Hope and other permanents you control are indestructible.',
+            cmc='8',
+            number='6',
+            mvid='239961',
+            rarity='Mythic Rare',
+            mana='{5}{W}{W}{W}',
+            playerRating='Rating: 4.202 / 5 (146 votes)',
+            flavor='A golden helix streaked skyward from the Helvault. A thunderous explosion shattered the silver monolith and Avacyn emerged, free from her prison at last.',
+            type='Legendary Creature - Angel',
+        ))
