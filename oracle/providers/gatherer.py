@@ -123,6 +123,10 @@ class GathererCard(ProviderCardPage, GathererPage):
         return details
 
 
+class GathererCardPrint(GathererCard):
+    pass
+
+
 class GathererCardList(ProviderCardListPage, GathererPage):
     def __init__(self, card_set, *args, **kwargs):
         super(GathererCardList, self).__init__(card_set, *args, **kwargs)
@@ -162,3 +166,7 @@ class GathererCardList(ProviderCardListPage, GathererPage):
         else:
             urls.append(self.url)
         return urls
+
+
+class GathererCardLanguages(GathererPage):
+    pass
