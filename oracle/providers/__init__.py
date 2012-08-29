@@ -75,7 +75,7 @@ class HomePage(Page):
 
 
 class CardListPage(Page):
-    def cards_list_generator(self):
+    def cards_list(self):
         """Each card in the list is a tuple. First element is a card's name,
         second is GardPage instance.
         """

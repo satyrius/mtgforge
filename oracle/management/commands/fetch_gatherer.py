@@ -53,14 +53,14 @@ class Command(BaseCommand):
             if not message_shown:
                 self.notice('Parse card sets pages to get pagination')
                 message_shown = True
-            for page in cs_page.pages_generator():
+            for page in cs_page.pages():
                 pagination.append(page)
 
         self.notice('Fetch card list pages for each set')
         i = 0
         for cs_page in self.process_pages(pagination):
             self.notice('Fetch card pages for list {}'.format(cs_page.url))
-            urls = cs_page.cards_list_generator()
+            urls = cs_page.cards_list()
             self.process_pages(urls, i)
             i += len(urls)
 

@@ -71,7 +71,7 @@ class Command(BaseCommand):
         cards_found = 0
         list_page = GathererCardList(cs)
         self.writeln(u'=== {0} === {1}'.format(cs.name, list_page.url))
-        for name, card_page in list_page.cards_list_generator(names=names):
+        for name, card_page in list_page.cards_list(names=names):
             url = card_page.url
             try:
                 extra = card_page.details(name)

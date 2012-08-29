@@ -136,7 +136,7 @@ class GathererCardList(ProviderCardListPage, GathererPage):
 
     @map_result_as_pages(GathererCard)
     @cache_parsed('cards')
-    def cards_list_generator(self, names=None):
+    def cards_list(self, names=None):
         '''Generates list of card pages. If names argument passed, fetch infor
         only for those cards.
         '''
@@ -150,7 +150,7 @@ class GathererCardList(ProviderCardListPage, GathererPage):
 
     @map_result_as_pages()
     @cache_parsed('pagination')
-    def pages_generator(self):
+    def pages(self):
         urls = []
         pagination = self.doc.cssselect('div.pagingControls a')
         if pagination:
@@ -161,5 +161,4 @@ class GathererCardList(ProviderCardListPage, GathererPage):
                 urls.append(self.absolute_url(page_url))
         else:
             urls.append(self.url)
-
         return urls

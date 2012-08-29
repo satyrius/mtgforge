@@ -176,7 +176,7 @@ class GathererWizardsComParsingTest(ProviderTest):
         zen, page = self.card_set_and_page('zen', self.zen_url)
 
         urls = []
-        for p in page.pages_generator():
+        for p in page.pages():
             self.assertIsInstance(p, GathererCardList)
             urls.append(p.url)
         self.assertEqual(urls, [
@@ -217,7 +217,7 @@ class GathererWizardsComParsingTest(ProviderTest):
         zen, page = self.card_set_and_page('zen', url)
         self.assertEqual(page.url, url)
         urls = []
-        for p in page.cards_list_generator():
+        for p in page.cards_list():
             self.assertIsInstance(p, GathererCard)
             urls.append(p.url)
             print p.url
