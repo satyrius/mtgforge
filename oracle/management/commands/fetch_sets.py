@@ -41,7 +41,7 @@ class Command(BaseCommand):
     def is_unique_acronym(self, acronym, print_notice=True):
         if acronym not in self._acronyms:
             return True
-        self.notice(u'Acronym "{0}" already for "{1}"'.format(acronym, self._acronyms[acronym]))
+        self.error(u'Acronym "{0}" already for "{1}"'.format(acronym, self._acronyms[acronym]))
         return False
 
     def find_in_list(self, name, products):
@@ -141,7 +141,7 @@ class Command(BaseCommand):
             # Gatherer
             g_product = self.find_in_list(name, gatherer_products)
             if not g_product:
-                self.notice(u'Skip "{0}", because it is not present in Gatherer\'s list'.format(name))
+                self.error(u'Skip "{0}", because it is not present in Gatherer\'s list'.format(name))
                 continue
             gatherer_products.remove(g_product)
 
@@ -153,7 +153,7 @@ class Command(BaseCommand):
             else:
                 mc_product = self.find_in_list(name, magiccards_products)
                 if not mc_product:
-                    self.notice(u'Cannot find acronym for "{0}"'.format(name))
+                    self.error(u'Cannot find acronym for "{0}"'.format(name))
                 else:
                     acronym = mc_product[2]['acronym']
             acronym = self.check_acronym(acronym, name, skip_on_fail=dry_run)
@@ -204,6 +204,6 @@ class Command(BaseCommand):
             self.writeln(u'{name:<40} {acronym:<6} {cards:<4} {release:<14} {url}'.format(**info))
 
         if gatherer_products:
-            self.notice(
+            self.error(
                 u'Following Gatherer\'s names was not found in products list: {0}'.format(
                     u', '.join([p[0] for p in gatherer_products])))

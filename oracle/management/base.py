@@ -12,8 +12,13 @@ class BaseCommand(base.BaseCommand):
         )
 
     def writeln(self, message):
-        self.stdout.write(u'{0}\n'.format(message))
+        message = u'{0}\n'.format(message)
+        self.stdout.write(message)
 
     def notice(self, message):
+        colorized_message = self.style.SQL_COLTYPE(message)
+        self.writeln(colorized_message)
+
+    def error(self, message):
         colorized_message = self.style.NOTICE(u'Notice: {0}\n'.format(message))
         self.stderr.write(base.smart_str(colorized_message))

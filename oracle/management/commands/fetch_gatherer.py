@@ -47,16 +47,19 @@ class Command(BaseCommand):
             sets = sets.filter(acronym__in=args)
 
         pagination = []
-        self.writeln('Fetch home page for each card set')
+        self.notice('Fetch home page for each card set')
         message_shown = False
         for cs_page in self.process_pages(map(GathererCardList, sets)):
             if not message_shown:
-                self.writeln('Parse card sets pages to get pagination')
+                self.notice('Parse card sets pages to get pagination')
                 message_shown = True
             for page in cs_page.pages_generator():
                 pagination.append(page)
-        self.writeln('Fetch card list pages for each set')
-        self.process_pages(pagination)
+
+        self.notice('Fetch card list pages for each set')
+        for cs_page in self.process_pages(pagination):
+            self.notice('Fetch card page for list {}'.format(cs_page.url))
+            self.process_pages(cs_page.cards_list_generator())
 
     def process_pages(self, pages, i=0):
         chunk = self.threads_count
@@ -68,7 +71,7 @@ class Command(BaseCommand):
                     self.writeln(u'>>> {1:3} {0}'.format(result.url, i))
                 else:
                     page = result.args[0]
-                    self.notice(
+                    self.error(
                         u'Cannot download page {0}, try again later'.format(
                             page.url))
                     failed.append(page)

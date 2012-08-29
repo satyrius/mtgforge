@@ -77,7 +77,7 @@ class Command(BaseCommand):
                 extra = card_page.details(name)
             except CardNotFound, e:
                 if self.skip_not_found:
-                    self.notice(u'Not found \'{0}\' on page {1}'.format(unicode(name), url))
+                    self.error(u'Not found \'{0}\' on page {1}'.format(unicode(name), url))
                     continue
                 else:
                     raise e
@@ -97,7 +97,7 @@ class Command(BaseCommand):
                 self.save(extra, cs, card_page.get_provider())
 
         if not names and cs.cards and cards_found is not cs.cards:
-            self.notice(u'"{0}" should contain {1} cards, {2} found'.format(
+            self.error(u'"{0}" should contain {1} cards, {2} found'.format(
                 cs.name, cs.cards, cards_found))
 
     @xact.xact
