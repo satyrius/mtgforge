@@ -126,7 +126,7 @@ class Command(BaseCommand):
         fetch_acronyms = options['fetch_acronyms']
 
         self._acronyms = {}
-        ignored_filter = lambda p: not ignore_products_re.match(isinstance(p, basestring) and p or p[0])
+        ignored_filter = lambda p: p and not ignore_products_re.match(isinstance(p, basestring) and p or p[0])
 
         wizards = WizardsHomePage()
         gatherer = GathererHomePage()
