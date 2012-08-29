@@ -1,17 +1,11 @@
-from django.test import TestCase
-from django.test.utils import override_settings
 from mock import patch
 
 from oracle.providers.wizards import WizardsHomePage
 from oracle.tests.helpers import get_html_fixture
+from oracle.tests.providers.base import ProviderTest
 
 
-@override_settings(CACHES={
-    'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'},
-    'provider_page': {'BACKEND': 'oracle.providers.cache.PageCache'},
-})
-class WizardsComParsingTest(TestCase):
-    fixtures = ['data_provider', 'card_set']
+class WizardsComParsingTest(ProviderTest):
 
     @patch.object(WizardsHomePage, 'get_content')
     def test_wizards_products_list(self, get_content):
