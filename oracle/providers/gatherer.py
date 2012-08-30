@@ -155,6 +155,11 @@ class GathererCard(ProviderCardPage, GathererPage):
 
         return details
 
+    def printed_card_page(self):
+        print_link = self.doc.cssselect('a#cardTextSwitchLink2')[0]
+        url = self.absolute_url(print_link.get('href'))
+        return GathererCardPrint(url)
+
 
 class GathererCardPrint(GathererCard):
     pass

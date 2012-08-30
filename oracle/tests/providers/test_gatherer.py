@@ -6,7 +6,8 @@ from mock import patch, call
 from oracle.models import DataSource, CardSet, DataProviderPage
 from oracle.providers import Page
 from oracle.providers.gatherer import (
-    GathererPage, GathererHomePage, GathererCardList, GathererCard
+    GathererPage, GathererHomePage, GathererCardList, GathererCard,
+    GathererCardPrint
 )
 from oracle.tests.helpers import get_html_fixture
 from oracle.tests.providers.base import ProviderTest
@@ -348,6 +349,13 @@ class GathererWizardsComParsingTest(ProviderTest):
             type='Legendary Creature - Angel',
         ))
 
+        printed_page = page.printed_card_page()
+        self.assertIsInstance(printed_page, GathererCardPrint)
+        self.assertEqual(
+            printed_page.url,
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?printed=true&multiverseid=239961'
+        )
+
     @patch.object(Page, 'get_content')
     def test_card_rules_with_comments(self, get_content):
         get_content.return_value = get_html_fixture('gatherer_gear_oracle')
@@ -371,6 +379,13 @@ class GathererWizardsComParsingTest(ProviderTest):
             flavor='An explorer\'s essentials in a wild world.',
             type='Artifact - Equipment',
         ))
+
+        printed_page = page.printed_card_page()
+        self.assertIsInstance(printed_page, GathererCardPrint)
+        self.assertEqual(
+            printed_page.url,
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?printed=true&multiverseid=178135'
+        )
 
     @patch.object(Page, 'get_content')
     def test_double_faced_card_front(self, get_content):
@@ -398,6 +413,13 @@ class GathererWizardsComParsingTest(ProviderTest):
             flavor='He scans for wolves, knowing there\'s one he can never anticipate.',
             type='Creature - Human Warrior Werewolf',
         ))
+
+        printed_page = page.printed_card_page()
+        self.assertIsInstance(printed_page, GathererCardPrint)
+        self.assertEqual(
+            printed_page.url,
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?printed=true&multiverseid=244683'
+        )
 
     @patch.object(Page, 'get_content')
     def test_double_faced_card_back(self, get_content):
@@ -450,6 +472,13 @@ class GathererWizardsComParsingTest(ProviderTest):
             other_faces=['Tok-Tok, Volcano Born'],
             type='Creature - Goblin Warrior',
         ))
+
+        printed_page = page.printed_card_page()
+        self.assertIsInstance(printed_page, GathererCardPrint)
+        self.assertEqual(
+            printed_page.url,
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?printed=true&multiverseid=78694'
+        )
 
     @patch.object(Page, 'get_content')
     def test_fliped_card_flip(self, get_content):
@@ -507,3 +536,10 @@ class GathererWizardsComParsingTest(ProviderTest):
             otherSets='',
             type='Instant',
         ))
+
+        printed_page = page.printed_card_page()
+        self.assertIsInstance(printed_page, GathererCardPrint)
+        self.assertEqual(
+            printed_page.url,
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?printed=true&multiverseid=27166'
+        )
