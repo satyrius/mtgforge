@@ -1,7 +1,7 @@
 import urllib
 from StringIO import StringIO
 
-from mock import patch
+from mock import patch, call
 
 from oracle.models import DataSource, CardSet, DataProviderPage
 from oracle.providers import Page
@@ -404,8 +404,8 @@ class GathererWizardsComParsingTest(ProviderTest):
         get_content.return_value = get_html_fixture('gatherer_werewolf_oracle')
         url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=244687'
 
-        front_name = u'Bane of Hanweir'
-        page = GathererCard(url, name=front_name)
+        back_name = u'Bane of Hanweir'
+        page = GathererCard(url, name=back_name)
         details = page.details()
         self.assertEqual(details, dict(
             set='Innistrad',
@@ -456,8 +456,8 @@ class GathererWizardsComParsingTest(ProviderTest):
         get_content.return_value = get_html_fixture('gatherer_flip_oracle')
         url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=78694&part=Tok-Tok%2c+Volcano+Born'
 
-        front_name = u'Akki Lavarunner (Tok-Tok, Volcano Born)'
-        page = GathererCard(url, name=front_name)
+        fliped_name = u'Akki Lavarunner (Tok-Tok, Volcano Born)'
+        page = GathererCard(url, name=fliped_name)
         details = page.details()
         self.assertEqual(details, dict(
             set='Champions of Kamigawa',
@@ -475,4 +475,35 @@ class GathererWizardsComParsingTest(ProviderTest):
             playerRating='Rating: 2.716 / 5 (44 votes)',
             other_faces=['Akki Lavarunner'],
             type='Legendary Creature - Goblin Shaman',
+        ))
+
+    @patch('urllib2.urlopen')
+    def test_splited_card(self, urlopen):
+        page_url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=27166'
+        fire_url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?part=Fire&multiverseid=27166'
+
+        card_page = StringIO(get_html_fixture('gatherer_split_oracle'))
+        fire_page = StringIO(get_html_fixture('gatherer_fire_oracle'))
+        urlopen.side_effect = [card_page, fire_page]
+
+        name = u'Fire'
+        page = GathererCard(page_url, name=name)
+        details = page.details()
+        self.assertEqual(urlopen.call_args_list, [call(page_url), call(fire_url)])
+        self.assertEqual(details, dict(
+            set='Apocalypse',
+            art='http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=27166&type=card',
+            name='Fire',
+            artist='Franz Vohwinkel',
+            url='http://gatherer.wizards.com/Pages/Card/Details.aspx?part=Fire&multiverseid=27166',
+            text='Fire deals 2 damage divided as you choose among one or two target creatures and/or players.',
+            cmc='2',
+            number='128',
+            mvid='27166',
+            rarity='Uncommon',
+            mana='{1}{R}',
+            playerRating='Rating: 4.533 / 5 (45 votes)',
+            other_faces=['Ice'],
+            otherSets='',
+            type='Instant',
         ))

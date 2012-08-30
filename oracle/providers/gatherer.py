@@ -73,13 +73,35 @@ class GathererCard(ProviderCardPage, GathererPage):
             blocks.append(normalized_text(block))
         return '\n'.join(blocks)
 
-    def details(self):
+    def details(self, forward=True):
+        """Return card face details from current page. Matches given card name
+        with the found one.
+
+        Keyword argumets:
+        forward -- navigate to related pages for additional info
+        """
         if not self.name:
             raise Exception('Cannot get details for page with unknown name')
 
         faces = self.doc.cssselect('table.cardDetails')
         if not faces:
             raise ParseError('No one card face found on this page')
+
+        parts = {}
+        # Workaround with multipart (splited) cards. Splited card page content
+        # is not relevant to requested card name, so we have to navigate to
+        # url with 'part' get parameter. Parse navigation block (Oracle/Printed
+        # switcher) to find link to the correct page.
+        if len(faces) == 1:
+            navi = faces[0].cssselect(
+                '#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_rightCol '
+                'div.smallGreyMono')[0]
+            if re.search(r'This is one part of the multi-part card',
+                         gettext(navi)):
+                for a in navi.cssselect('ul li a'):
+                    m = re.match(u'[^(]+\(([^)]+)\)', gettext(a))
+                    if m:
+                        parts[m.group(1)] = self.absolute_url(a.get('href'))
 
         found = False
         name_row_key = 'name'
@@ -107,6 +129,12 @@ class GathererCard(ProviderCardPage, GathererPage):
                 break
 
         if not found:
+            # Navigate to part page if able
+            if len(faces) == 1 and forward and self.name in parts:
+                part_page = self.__class__(parts[self.name], self.name)
+                return part_page.details(forward=False)
+
+            # Otherwise raise exception
             raise CardNotFound(u'Card \'{0}\' not found on page \'{1}\''.format(
                 self.name, self.url))
 
@@ -116,11 +144,12 @@ class GathererCard(ProviderCardPage, GathererPage):
             raise Exception('Cannot get multiverseid for {0}'.format(self.name))
         details['mvid'] = m.group('id')
 
-        other_names = []
-        for name_block in self.doc.cssselect('td.rightCol div[id$="nameRow"] div.value'):
-            value = normalized_text(name_block)
-            if value != self.name:
-                other_names.append(value)
+        other_names = parts.keys()
+        if not other_names:
+            for name_block in self.doc.cssselect('td.rightCol div[id$="nameRow"] div.value'):
+                value = normalized_text(name_block)
+                if value != self.name:
+                    other_names.append(value)
         if other_names:
             details['other_faces'] = other_names
 

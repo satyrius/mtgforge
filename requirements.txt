@@ -13,5 +13,5 @@ gevent==0.13.7
 ipdb==0.6.1
 ipdbplugin==1.2
 lxml==2.3.4
-mock==0.7.2
+mock==0.8
 psycopg2==2.4.1
