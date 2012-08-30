@@ -371,3 +371,56 @@ class GathererWizardsComParsingTest(ProviderTest):
             flavor='An explorer\'s essentials in a wild world.',
             type='Artifact - Equipment',
         ))
+
+    @patch.object(Page, 'get_content')
+    def test_double_faced_card_front(self, get_content):
+        get_content.return_value = get_html_fixture('gatherer_werewolf_oracle')
+        url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=2446835'
+
+        front_name = u'Hanweir Watchkeep'
+        page = GathererCard(url, name=front_name)
+        details = page.details()
+        self.assertEqual(details, dict(
+            set='Innistrad',
+            art='http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=244683&type=card',
+            name='Hanweir Watchkeep',
+            pt='1 / 5',
+            artist='Wayne Reynolds',
+            url='http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=2446835',
+            text='Defender\nAt the beginning of each upkeep, if no spells were cast last turn, transform Hanweir Watchkeep.',
+            cmc='3',
+            number='145a',
+            mvid='2446835',
+            rarity='Uncommon',
+            mana='{2}{R}',
+            playerRating='Rating: 3.520 / 5 (51 votes)',
+            other_faces=['Bane of Hanweir'],
+            flavor='He scans for wolves, knowing there\'s one he can never anticipate.',
+            type='Creature - Human Warrior Werewolf',
+        ))
+
+    @patch.object(Page, 'get_content')
+    def test_double_faced_card_back(self, get_content):
+        get_content.return_value = get_html_fixture('gatherer_werewolf_oracle')
+        url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=244687'
+
+        front_name = u'Bane of Hanweir'
+        page = GathererCard(url, name=front_name)
+        details = page.details()
+        self.assertEqual(details, dict(
+            set='Innistrad',
+            art='http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=244687&type=card',
+            name='Bane of Hanweir',
+            pt='5 / 5',
+            artist='Wayne Reynolds',
+            url='http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=244687',
+            text='Bane of Hanweir attacks each turn if able.\nAt the beginning of each upkeep, if a player cast two or more spells last turn, transform Bane of Hanweir.',
+            playerRating='Rating: 3.806 / 5 (54 votes)',
+            number='145b',
+            mvid='244687',
+            rarity='Uncommon',
+            colorIndicator='Red',
+            other_faces=['Hanweir Watchkeep'],
+            flavor='Technically he never left his post. He looks after the wolf wherever it goes.',
+            type='Creature - Werewolf',
+        ))
