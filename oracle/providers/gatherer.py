@@ -212,4 +212,13 @@ class GathererCardList(ProviderCardListPage, GathererPage):
 
 
 class GathererCardLanguages(GathererPage):
-    pass
+    @map_result_as_pages(GathererCard)
+    @cache_parsed('languages')
+    def languages(self):
+        urls = []
+        for lang_row in self.doc.cssselect('table.cardList tr.cardItem'):
+            cells = [td for td in lang_row.iterchildren('td')]
+            lang = gettext(cells[1])
+            url = cells[0].getchildren()[0].get('href')
+            urls.append((lang, url))
+        return urls
