@@ -424,3 +424,55 @@ class GathererWizardsComParsingTest(ProviderTest):
             flavor='Technically he never left his post. He looks after the wolf wherever it goes.',
             type='Creature - Werewolf',
         ))
+
+    @patch.object(Page, 'get_content')
+    def test_fliped_card_normal(self, get_content):
+        get_content.return_value = get_html_fixture('gatherer_flip_oracle')
+        url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=78694'
+
+        front_name = u'Akki Lavarunner'
+        page = GathererCard(url, name=front_name)
+        details = page.details()
+        self.assertEqual(details, dict(
+            set='Champions of Kamigawa',
+            art='http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=78694&type=card',
+            name='Akki Lavarunner',
+            pt='1 / 1',
+            artist='Matt Cavotta',
+            url='http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=78694',
+            text='Haste\nWhenever Akki Lavarunner deals damage to an opponent, flip it.',
+            cmc='4',
+            number='153a',
+            mvid='78694',
+            rarity='Rare',
+            mana='{3}{R}',
+            playerRating='Rating: 2.716 / 5 (44 votes)',
+            other_faces=['Tok-Tok, Volcano Born'],
+            type='Creature - Goblin Warrior',
+        ))
+
+    @patch.object(Page, 'get_content')
+    def test_fliped_card_flip(self, get_content):
+        get_content.return_value = get_html_fixture('gatherer_flip_oracle')
+        url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=78694&part=Tok-Tok%2c+Volcano+Born'
+
+        front_name = u'Akki Lavarunner (Tok-Tok, Volcano Born)'
+        page = GathererCard(url, name=front_name)
+        details = page.details()
+        self.assertEqual(details, dict(
+            set='Champions of Kamigawa',
+            art='http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=78694&type=card&options=rotate180',
+            name='Tok-Tok, Volcano Born',
+            pt='2 / 2',
+            artist='Matt Cavotta',
+            url='http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=78694&part=Tok-Tok%2c+Volcano+Born',
+            text='Protection from red\nIf a red source would deal damage to a player, it deals that much damage plus 1 to that player instead.',
+            cmc='4',
+            number='153b',
+            mvid='78694',
+            rarity='Rare',
+            mana='{3}{R}',
+            playerRating='Rating: 2.716 / 5 (44 votes)',
+            other_faces=['Akki Lavarunner'],
+            type='Legendary Creature - Goblin Shaman',
+        ))

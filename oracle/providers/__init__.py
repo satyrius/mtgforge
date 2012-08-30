@@ -1,5 +1,6 @@
 import hashlib
 import os
+import re
 import urllib2
 from urlparse import urlparse, urlunparse
 
@@ -19,7 +20,7 @@ class BadPageSource(Exception):
 class Page(object):
     def __init__(self, source, name=None, use_cache=True):
         self.url = self._source_url(source)
-        self._name = name
+        self.name = name
         self._content = None
         self._doc = None
         self._use_cache = use_cache
@@ -36,7 +37,7 @@ class Page(object):
             if self._use_cache:
                 name, self._content = self._cache.get(self)
                 if self._name is None:
-                    self._name = name
+                    self.name = name
             if not self._content:
                 self._content = urllib2.urlopen(self.url).read()
                 if self._use_cache:
@@ -46,10 +47,18 @@ class Page(object):
     @property
     def name(self):
         if self._name is None and self._use_cache:
-            self._name, content = self._cache.get(self)
+            self.name, content = self._cache.get(self)
             if self._content is None:
                 self._content = content
         return self._name
+
+    @name.setter
+    def name(self, value):
+        if value is not None:
+            matches = re.match(r'[^(]+\(([^)]+)\)$', value)
+            if matches:
+                value = matches.group(1)
+        self._name = value
 
     def get_url_hash(self):
         return hashlib.sha1(self.url).hexdigest()

@@ -25,6 +25,10 @@ class DataProvidersTest(ProviderTest):
         p = Page(url, name=name)
         self.assertEqual(p.name, name)
 
+        name = u'Akki Lavarunner (Tok-Tok, Volcano Born)'
+        p = Page(url, name=name)
+        self.assertEqual(p.name, 'Tok-Tok, Volcano Born')
+
         with self.assertRaises(BadPageSource):
             p = Page(None)
 
