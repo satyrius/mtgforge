@@ -7,7 +7,7 @@ from oracle.models import DataSource, CardSet, DataProviderPage
 from oracle.providers import Page
 from oracle.providers.gatherer import (
     GathererPage, GathererHomePage, GathererCardList, GathererCard,
-    GathererCardPrint
+    GathererCardPrint, GathererCardLanguages
 )
 from oracle.tests.helpers import get_html_fixture
 from oracle.tests.providers.base import ProviderTest
@@ -354,6 +354,13 @@ class GathererWizardsComParsingTest(ProviderTest):
         self.assertEqual(
             printed_page.url,
             'http://gatherer.wizards.com/Pages/Card/Details.aspx?printed=true&multiverseid=239961'
+        )
+
+        lang_page = page.languages_page()
+        self.assertIsInstance(lang_page, GathererCardLanguages)
+        self.assertEqual(
+            lang_page.url,
+            'http://gatherer.wizards.com/Pages/Card/Languages.aspx?multiverseid=239961'
         )
 
     @patch.object(Page, 'get_content')

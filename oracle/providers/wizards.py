@@ -9,7 +9,7 @@ class WizardsPage(ProviderPage):
 
 class WizardsHomePage(HomePage, WizardsPage):
     def products_list_generator(self):
-        product_link_re = re.compile(r'x=mtg[/_]tcg[/_](?:products[/_]([^/_]+)|([^/_]+)[/_]productinfo)$')
+        product_link_re = re.compile(r'x=mtg[/_]tcg[/_](?:products[/_]([^/_#]+)|([^/_]+)[/_]productinfo)$')
         cards_count_re = re.compile(r'(\d+)\s+cards', re.IGNORECASE)
         separator_re = re.compile(r'\s*(?:,|and)\s*')
         for link in self.doc.cssselect('div.article-content a'):
@@ -30,8 +30,7 @@ class WizardsHomePage(HomePage, WizardsPage):
 
                 release_date = [t for t in cards.getnext().itertext()][1].strip()
 
-                url = self.absolute_url(href)
-                result = lambda name: (name, url, dict(cards=cards_count, release=release_date))
+                result = lambda name: (name, href, dict(cards=cards_count, release=release_date))
                 if ',' in name:
                     # Comma separated editions
                     for separated_name in filter(None, separator_re.split(name)):

@@ -68,6 +68,7 @@ class Page(object):
         """Get content and return lxml document"""
         if self._doc is None:
             self._doc = document_fromstring(self.get_content())
+            self.doc.make_links_absolute(self.url)
         return self._doc
 
     def absolute_url(self, href):

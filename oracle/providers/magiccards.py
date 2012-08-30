@@ -17,4 +17,4 @@ class MagiccardsHomePage(HomePage, MagiccardsPage):
                 continue
             name = link.text.strip()
             acronym = link.getnext().text.strip() or None
-            yield name, self.absolute_url(href), dict(acronym=acronym)
+            yield name, href, dict(acronym=acronym)

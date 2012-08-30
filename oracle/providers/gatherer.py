@@ -101,7 +101,7 @@ class GathererCard(ProviderCardPage, GathererPage):
                 for a in navi.cssselect('ul li a'):
                     m = re.match(u'[^(]+\(([^)]+)\)', gettext(a))
                     if m:
-                        parts[m.group(1)] = self.absolute_url(a.get('href'))
+                        parts[m.group(1)] = a.get('href')
 
         found = False
         name_row_key = 'name'
@@ -125,7 +125,7 @@ class GathererCard(ProviderCardPage, GathererPage):
             if name_row_key in details:
                 found = True
                 art_src = face.cssselect('td.leftCol img')[0].get('src')
-                details['art'] = self.absolute_url(art_src)
+                details['art'] = art_src
                 break
 
         if not found:
@@ -157,8 +157,13 @@ class GathererCard(ProviderCardPage, GathererPage):
 
     def printed_card_page(self):
         print_link = self.doc.cssselect('a#cardTextSwitchLink2')[0]
-        url = self.absolute_url(print_link.get('href'))
+        url = print_link.get('href')
         return GathererCardPrint(url)
+
+    def languages_page(self):
+        print_link = self.doc.cssselect('a#ctl00_ctl00_ctl00_MainContent_SubContent_SubContentAnchors_DetailsAnchors_LanguagesLink')[0]
+        url = print_link.get('href')
+        return GathererCardLanguages(url)
 
 
 class GathererCardPrint(GathererCard):
@@ -187,7 +192,7 @@ class GathererCardList(ProviderCardListPage, GathererPage):
             name = normalized_text(card_link)
             if names and name not in names:
                 continue
-            urls.append((name, self.absolute_url(card_link.get('href'))))
+            urls.append((name, card_link.get('href')))
         return urls
 
     @map_result_as_pages()
@@ -200,7 +205,7 @@ class GathererCardList(ProviderCardListPage, GathererPage):
                 page_url = page_link.get('href')
                 if not page_url or not page_link.text.strip().isdigit():
                     continue
-                urls.append(self.absolute_url(page_url))
+                urls.append(page_url)
         else:
             urls.append(self.url)
         return urls
