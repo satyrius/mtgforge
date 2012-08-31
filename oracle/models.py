@@ -207,7 +207,6 @@ class CardRelease(models.Model):
 
     rarity = NullCharField(max_length=1, choices=RARITY_CHOICES)
     card_number = models.PositiveIntegerField(null=True, blank=True)
-    artist = models.ForeignKey(Artist)
 
     def __unicode__(self):
         return u'{0} ({1})'.format(self.card.name, self.card_set.name)
@@ -228,6 +227,7 @@ class CardL10n(models.Model):
     rules = NullTextField(null=True, blank=True)
     flavor = NullTextField(null=True, blank=True)
 
+    artist = models.ForeignKey(Artist)
     scan = models.URLField()
     file = CDNFileField(storage_path=STORAGE_PATH, null=True, blank=True)
 
