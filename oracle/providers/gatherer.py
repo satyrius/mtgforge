@@ -73,6 +73,7 @@ class GathererCard(ProviderCardPage, GathererPage):
             blocks.append(normalized_text(block))
         return '\n'.join(blocks)
 
+    @cache_parsed()
     def details(self, forward=True):
         """Return card face details from current page. Matches given card name
         with the found one.
@@ -182,7 +183,7 @@ class GathererCardList(ProviderCardListPage, GathererPage):
         self.url = urlunparse(parts)
 
     @map_result_as_pages(GathererCard)
-    @cache_parsed('cards')
+    @cache_parsed()
     def cards_list(self, names=None):
         '''Generates list of card pages. If names argument passed, fetch infor
         only for those cards.
@@ -196,7 +197,7 @@ class GathererCardList(ProviderCardListPage, GathererPage):
         return urls
 
     @map_result_as_pages()
-    @cache_parsed('pagination')
+    @cache_parsed()
     def pages(self):
         urls = []
         pagination = self.doc.cssselect('div.pagingControls a')
@@ -213,7 +214,7 @@ class GathererCardList(ProviderCardListPage, GathererPage):
 
 class GathererCardLanguages(GathererPage):
     @map_result_as_pages(GathererCard)
-    @cache_parsed('languages')
+    @cache_parsed()
     def languages(self):
         urls = []
         for lang_row in self.doc.cssselect('table.cardList tr.cardItem'):

@@ -151,15 +151,15 @@ def map_result_as_pages(page_class=None):
     return decorator
 
 
-def cache_parsed(key_prefix):
+def cache_parsed():
     def decorator(func):
         @wraps(func)
-        def result_wrapper(self, key_prefix, *args, **kwargs):
+        def result_wrapper(self, *args, **kwargs):
             if self._use_cache:
                 cache = get_cache(
                     'default',
                     TIMEOUT=settings.DATA_PROVIDER_CACHE_TIMEOUT,
-                    KEY_PREFIX=key_prefix)
+                    KEY_PREFIX=func.__name__)
                 key = self.get_url_hash()
                 result = cache.get(key, default=[])
             else:
@@ -172,5 +172,5 @@ def cache_parsed(key_prefix):
                 cache.set(key, result)
 
             return result
-        return curry(result_wrapper, key_prefix=key_prefix)
+        return curry(result_wrapper)
     return decorator
