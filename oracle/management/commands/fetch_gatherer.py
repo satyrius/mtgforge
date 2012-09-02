@@ -1,15 +1,19 @@
 import itertools
 import logging
+import re
 from optparse import make_option
 
 import gevent
+import xact
 from django.conf import settings
 from django.core.cache import get_cache
+from django.core.exceptions import ValidationError
 from gevent import monkey
 
 from contrib.utils import measureit
+from oracle.forms import CardFaceForm
 from oracle.management.base import BaseCommand
-from oracle.models import CardSet
+from oracle.models import CardSet, CardFace, Card, CardRelease
 from oracle.providers.gatherer import GathererCardList, GathererPage
 
 
@@ -33,7 +37,16 @@ class Command(BaseCommand):
             action='store_true',
             default=False,
             help='Invalidate pages cache'),
+        make_option('--no-update',
+            action='store_true',
+            dest='no_update',
+            default=False,
+            help='Do not update existing card faces'),
         )
+
+    def __init__(self):
+        super(Command, self).__init__()
+        self.no_update = False
 
     @measureit(logger=logger)
     def handle(self, *args, **options):
@@ -45,6 +58,8 @@ class Command(BaseCommand):
         sets = CardSet.objects.all()
         if args:
             sets = sets.filter(acronym__in=args)
+
+        self.no_update = options['no_update']
 
         pagination = []
         self.notice('Fetch home page for each card set')
@@ -60,9 +75,10 @@ class Command(BaseCommand):
         i = 0
         for cs_page in self.process_pages(pagination):
             self.notice('Fetch card pages for list {}'.format(cs_page.url))
-            urls = cs_page.cards_list()
-            self.process_pages(urls, i)
-            i += len(urls)
+            cards = cs_page.cards_list()
+            for card_page in self.process_pages(cards, i):
+                self.save_card_face(card_page.details(), cs_page.card_set)
+                i += 1
 
     def process_pages(self, pages, i=0):
         chunk = self.threads_count
@@ -92,3 +108,54 @@ class Command(BaseCommand):
         for job in jobs:
             # Return fetched page or job to try again
             yield job.successful() and job.value or job
+
+    @xact.xact
+    def save_card_face(self, card_details, card_set):
+        #
+        # Get or create the Card instance
+        #
+        card = None
+        face = None
+        try:
+            face = CardFace.objects.get(name=card_details['name'])
+            if self.no_update:
+                return face
+            card = face.card
+        except CardFace.DoesNotExist:
+            pass
+        finally:
+            if 'other_faces' in card_details:
+                for f in CardFace.objects.filter(name__in=card_details['other_faces']):
+                    if not card:
+                        card = f.card
+                        break
+                    if card.id != f.card_id:
+                        # Delete duplicate and link with right card
+                        f.card.delete()
+                        f.card = card
+                        f.save()
+            if not card:
+                card = Card.objects.create()
+            if not face:
+                face = CardFace(card=card)
+
+        form = CardFaceForm(card_details, instance=face)
+        if not form.is_valid():
+            raise ValidationError(form.errors)
+        face = form.save()
+
+        #
+        # Card release notes
+        #
+        try:
+            release = CardRelease.objects.get(card_set=card_set, card=card)
+        except CardRelease.DoesNotExist:
+            release = CardRelease(card_set=card_set, card=card)
+        release.rarity = card_details['rarity'].lower()[0]
+        m = re.match(r'(\d+)\w?', card_details['number'])
+        if not m:
+            raise Exception('Collector\'s number is undefined')
+        release.card_number = m.group(1)
+        release.save()
+
+        return face
