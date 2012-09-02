@@ -123,14 +123,14 @@ class CardFace(models.Model):
         (FLIP, _('Flip')),
     )
 
-    card = models.ForeignKey(Card)
-    place = NullCharField(max_length=5, choices=TYPE_CHOICES, default=FRONT)
+    card = models.ForeignKey(Card, blank=True)
+    place = NullCharField(max_length=5, choices=TYPE_CHOICES, default=FRONT, blank=True)
 
     # Mana cost code and CMC (Converted Mana Cost)
     mana_cost = NullCharField(max_length=255, null=True, blank=True)
     cmc = models.PositiveIntegerField(null=True, blank=True)
-    color_identity = models.PositiveSmallIntegerField(default=0) # DEPRICATED
-    colors = IntegerArrayField(default=[])
+    color_identity = models.PositiveSmallIntegerField(default=0, blank=True) # DEPRICATED
+    colors = IntegerArrayField(default=[], blank=True)
 
     # Oracle's card name, type line, rules text and flavor. Always in English.
     name = NullCharField(max_length=255, unique=True)
@@ -138,7 +138,7 @@ class CardFace(models.Model):
     rules = NullTextField(null=True, blank=True)
     flavor = NullTextField(null=True, blank=True)
 
-    types = models.ManyToManyField(CardType)
+    types = models.ManyToManyField(CardType, blank=True)
 
     # Store power and thoughtness as strings because of */*, *^2/*^2, 2{1/2}/1
     # and other variants of calculated or strange values.
@@ -160,6 +160,14 @@ def update_color_identity(sender, **kwargs):
     c = Color(card_face.mana_cost)
     card_face.color_identity = c.identity
     card_face.colors = c.colors
+
+
+@receiver(pre_save, sender=CardFace)
+def update_fixed_power_and_thoughtness(sender, **kwargs):
+    card_face = kwargs['instance']
+    p, t = card_face.power, card_face.thoughtness
+    card_face.fixed_power = (p is not None and p.isdigit() and [int(p)] or [None])[0]
+    card_face.fixed_thoughtness = (t is not None and t.isdigit() and [int(t)] or [None])[0]
 
 
 @receiver(post_save, sender=CardFace)
