@@ -179,6 +179,7 @@ class GathererWizardsComParsingTest(ProviderTest):
         urls = []
         for p in page.pages():
             self.assertIsInstance(p, GathererCardList)
+            self.assertEqual(p.card_set, page.card_set)
             urls.append(p.url)
         self.assertEqual(urls, [
             'http://gatherer.wizards.com/Pages/Search/Default.aspx?page=0&action=advanced&set=+%5b%22Zendikar%22%5d&output=compact',

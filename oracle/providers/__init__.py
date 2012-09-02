@@ -138,7 +138,10 @@ class ProviderCardPage(CardPage, ProviderPage):
     pass
 
 
-def map_result_as_pages(page_class=None):
+def map_result_as_pages(page_class=None, map_data=None):
+    """Wraps result url list and make it list of Page instances of given
+    `page_class`. The additional data modifier callback may be passed as
+    `map_data` keyword argument"""
     def decorator(func):
         @wraps(func)
         def result_wrapper(self, page_class=None, *args, **kwargs):
@@ -146,7 +149,10 @@ def map_result_as_pages(page_class=None):
             page_class = page_class or self.__class__
             cls = lambda r: isinstance(r, tuple) and \
                     page_class(r[1], name=r[0]) or page_class(r)
-            return map(cls, result)
+            pages = map(cls, result)
+            if map_data:
+                map(curry(map_data, self), pages)
+            return pages
         return curry(result_wrapper, page_class=page_class)
     return decorator
 

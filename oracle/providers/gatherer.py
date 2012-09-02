@@ -171,6 +171,10 @@ class GathererCardPrint(GathererCard):
     pass
 
 
+def map_card_set_to_pagination(parent_page, child_page):
+    child_page.card_set=parent_page.card_set
+
+
 class GathererCardList(ProviderCardListPage, GathererPage):
     def __init__(self, card_set, *args, **kwargs):
         super(GathererCardList, self).__init__(card_set, *args, **kwargs)
@@ -196,7 +200,7 @@ class GathererCardList(ProviderCardListPage, GathererPage):
             urls.append((name, card_link.get('href')))
         return urls
 
-    @map_result_as_pages()
+    @map_result_as_pages(map_data=map_card_set_to_pagination)
     @cache_parsed()
     def pages(self):
         urls = []
