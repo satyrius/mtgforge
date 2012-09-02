@@ -2,6 +2,7 @@
 import re
 
 from django import forms
+from django.contrib.admin.widgets import FilteredSelectMultiple
 
 from oracle import models
 
@@ -17,6 +18,19 @@ class CardSetForm(forms.ModelForm):
 
 
 class CardFaceForm(forms.ModelForm):
+    power = forms.CharField(max_length=10, required=False)
+    thoughtness = forms.CharField(max_length=10, required=False)
+    fixed_power = forms.IntegerField(required=False)
+    fixed_thoughtness = forms.IntegerField(required=False)
+    types = forms.ModelMultipleChoiceField(
+        models.CardType.objects.all().order_by('name'),
+        widget=FilteredSelectMultiple(
+            verbose_name='Card types',
+            is_stacked=False
+        ),
+        required=False,
+    )
+
     class Meta:
         model = models.CardFace
 

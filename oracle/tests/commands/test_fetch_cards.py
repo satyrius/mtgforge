@@ -2,7 +2,7 @@
 from mock import patch
 
 from oracle.management.commands.fetch_gatherer import Command
-from oracle.models import CardFace, CardRelease, CardSet
+from oracle.models import CardFace, CardRelease, CardSet, Card
 from oracle.providers.gatherer import GathererCard
 from oracle.tests.helpers import get_html_fixture
 from oracle.tests.providers.base import ProviderTest
@@ -13,6 +13,8 @@ class FetchCardsCommandTest(ProviderTest):
     def test_save_card_oracle_details(self, get_content):
         cs = CardSet.objects.create(name='Avacyn Restored')
         self.assertEqual(cs.cardrelease_set.all().count(), 0)
+        self.assertEqual(CardFace.objects.all().count(), 0)
+        self.assertEqual(Card.objects.all().count(), 0)
 
         get_content.return_value = get_html_fixture('gatherer_angel_oracle')
         url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=239961'

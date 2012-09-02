@@ -127,26 +127,26 @@ class CardFace(models.Model):
     place = NullCharField(max_length=5, choices=TYPE_CHOICES, default=FRONT, blank=True)
 
     # Mana cost code and CMC (Converted Mana Cost)
-    mana_cost = NullCharField(max_length=255, null=True, blank=True)
-    cmc = models.PositiveIntegerField(null=True, blank=True)
+    mana_cost = NullCharField(max_length=255, null=True)
+    cmc = models.PositiveIntegerField(null=True)
     color_identity = models.PositiveSmallIntegerField(default=0, blank=True) # DEPRICATED
     colors = IntegerArrayField(default=[], blank=True)
 
     # Oracle's card name, type line, rules text and flavor. Always in English.
     name = NullCharField(max_length=255, unique=True)
     type_line = NullCharField(max_length=255)
-    rules = NullTextField(null=True, blank=True)
-    flavor = NullTextField(null=True, blank=True)
+    rules = NullTextField(null=True)
+    flavor = NullTextField(null=True)
 
-    types = models.ManyToManyField(CardType, blank=True)
+    types = models.ManyToManyField(CardType)
 
     # Store power and thoughtness as strings because of */*, *^2/*^2, 2{1/2}/1
     # and other variants of calculated or strange values.
-    power = NullCharField(max_length=10, null=True, blank=True)
-    thoughtness = NullCharField(max_length=10, null=True, blank=True)
+    power = NullCharField(max_length=10, null=True)
+    thoughtness = NullCharField(max_length=10, null=True)
     # Store parsed power and thoughtness if they are integers
-    fixed_power = models.PositiveSmallIntegerField(null=True, blank=True)
-    fixed_thoughtness = models.PositiveSmallIntegerField(null=True, blank=True)
+    fixed_power = models.PositiveSmallIntegerField(null=True)
+    fixed_thoughtness = models.PositiveSmallIntegerField(null=True)
     # Planeswalker's loyality counters
     loyality = models.PositiveSmallIntegerField(null=True, blank=True)
 
