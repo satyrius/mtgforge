@@ -12,10 +12,12 @@
     })(Batman.Object, mixins, function(){});
   };
 
-  Batman.version = '0.10.0';
+  Batman.version = '0.13.0';
 
   Batman.config = {
     pathPrefix: '/',
+    viewPrefix: 'views',
+    fetchRemoteViews: true,
     usePushState: false,
     minificationErrors: true
   };
@@ -43,329 +45,6 @@
   Batman.exportGlobals = function() {
     return Batman.exportHelpers(Batman.container);
   };
-
-}).call(this);
-
-(function() {
-  var __slice = [].slice,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
-  Batman.Inflector = (function() {
-
-    Inflector.prototype.plural = function(regex, replacement) {
-      return this._plural.unshift([regex, replacement]);
-    };
-
-    Inflector.prototype.singular = function(regex, replacement) {
-      return this._singular.unshift([regex, replacement]);
-    };
-
-    Inflector.prototype.human = function(regex, replacement) {
-      return this._human.unshit([regex, replacement]);
-    };
-
-    Inflector.prototype.uncountable = function() {
-      var strings;
-      strings = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return this._uncountable = this._uncountable.concat(strings.map(function(x) {
-        return new RegExp("" + x + "$", 'i');
-      }));
-    };
-
-    Inflector.prototype.irregular = function(singular, plural) {
-      if (singular.charAt(0) === plural.charAt(0)) {
-        this.plural(new RegExp("(" + (singular.charAt(0)) + ")" + (singular.slice(1)) + "$", "i"), "$1" + plural.slice(1));
-        this.plural(new RegExp("(" + (singular.charAt(0)) + ")" + (plural.slice(1)) + "$", "i"), "$1" + plural.slice(1));
-        return this.singular(new RegExp("(" + (plural.charAt(0)) + ")" + (plural.slice(1)) + "$", "i"), "$1" + singular.slice(1));
-      } else {
-        this.plural(new RegExp("" + singular + "$", 'i'), plural);
-        this.plural(new RegExp("" + plural + "$", 'i'), plural);
-        return this.singular(new RegExp("" + plural + "$", 'i'), singular);
-      }
-    };
-
-    function Inflector() {
-      this._plural = [];
-      this._singular = [];
-      this._uncountable = [];
-      this._human = [];
-    }
-
-    Inflector.prototype.ordinalize = function(number) {
-      var absNumber, _ref;
-      absNumber = Math.abs(parseInt(number));
-      if (_ref = absNumber % 100, __indexOf.call([11, 12, 13], _ref) >= 0) {
-        return number + "th";
-      } else {
-        switch (absNumber % 10) {
-          case 1:
-            return number + "st";
-          case 2:
-            return number + "nd";
-          case 3:
-            return number + "rd";
-          default:
-            return number + "th";
-        }
-      }
-    };
-
-    Inflector.prototype.pluralize = function(word) {
-      var regex, replace_string, uncountableRegex, _i, _j, _len, _len1, _ref, _ref1, _ref2;
-      _ref = this._uncountable;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        uncountableRegex = _ref[_i];
-        if (uncountableRegex.test(word)) {
-          return word;
-        }
-      }
-      _ref1 = this._plural;
-      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-        _ref2 = _ref1[_j], regex = _ref2[0], replace_string = _ref2[1];
-        if (regex.test(word)) {
-          return word.replace(regex, replace_string);
-        }
-      }
-      return word;
-    };
-
-    Inflector.prototype.singularize = function(word) {
-      var regex, replace_string, uncountableRegex, _i, _j, _len, _len1, _ref, _ref1, _ref2;
-      _ref = this._uncountable;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        uncountableRegex = _ref[_i];
-        if (uncountableRegex.test(word)) {
-          return word;
-        }
-      }
-      _ref1 = this._singular;
-      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-        _ref2 = _ref1[_j], regex = _ref2[0], replace_string = _ref2[1];
-        if (regex.test(word)) {
-          return word.replace(regex, replace_string);
-        }
-      }
-      return word;
-    };
-
-    Inflector.prototype.humanize = function(word) {
-      var regex, replace_string, _i, _len, _ref, _ref1;
-      _ref = this._human;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        _ref1 = _ref[_i], regex = _ref1[0], replace_string = _ref1[1];
-        if (regex.test(word)) {
-          return word.replace(regex, replace_string);
-        }
-      }
-      return word;
-    };
-
-    return Inflector;
-
-  })();
-
-}).call(this);
-
-(function() {
-  var Inflector, camelize_rx, capitalize_rx, humanize_rx1, humanize_rx2, humanize_rx3, underscore_rx1, underscore_rx2;
-
-  camelize_rx = /(?:^|_|\-)(.)/g;
-
-  capitalize_rx = /(^|\s)([a-z])/g;
-
-  underscore_rx1 = /([A-Z]+)([A-Z][a-z])/g;
-
-  underscore_rx2 = /([a-z\d])([A-Z])/g;
-
-  humanize_rx1 = /_id$/;
-
-  humanize_rx2 = /_|-/g;
-
-  humanize_rx3 = /^\w/g;
-
-  Batman.helpers = {
-    ordinalize: function() {
-      return Batman.helpers.inflector.ordinalize.apply(Batman.helpers.inflector, arguments);
-    },
-    singularize: function() {
-      return Batman.helpers.inflector.singularize.apply(Batman.helpers.inflector, arguments);
-    },
-    pluralize: function(count, singular, plural, includeCount) {
-      var result;
-      if (includeCount == null) {
-        includeCount = true;
-      }
-      if (arguments.length < 2) {
-        return Batman.helpers.inflector.pluralize(count);
-      } else {
-        result = +count === 1 ? singular : plural || Batman.helpers.inflector.pluralize(singular);
-        if (includeCount) {
-          result = ("" + (count || 0) + " ") + result;
-        }
-        return result;
-      }
-    },
-    camelize: function(string, firstLetterLower) {
-      string = string.replace(camelize_rx, function(str, p1) {
-        return p1.toUpperCase();
-      });
-      if (firstLetterLower) {
-        return string.substr(0, 1).toLowerCase() + string.substr(1);
-      } else {
-        return string;
-      }
-    },
-    underscore: function(string) {
-      return string.replace(underscore_rx1, '$1_$2').replace(underscore_rx2, '$1_$2').replace('-', '_').toLowerCase();
-    },
-    capitalize: function(string) {
-      return string.replace(capitalize_rx, function(m, p1, p2) {
-        return p1 + p2.toUpperCase();
-      });
-    },
-    trim: function(string) {
-      if (string) {
-        return string.trim();
-      } else {
-        return "";
-      }
-    },
-    interpolate: function(stringOrObject, keys) {
-      var key, string, value;
-      if (typeof stringOrObject === 'object') {
-        string = stringOrObject[keys.count];
-        if (!string) {
-          string = stringOrObject['other'];
-        }
-      } else {
-        string = stringOrObject;
-      }
-      for (key in keys) {
-        value = keys[key];
-        string = string.replace(new RegExp("%\\{" + key + "\\}", "g"), value);
-      }
-      return string;
-    },
-    humanize: function(string) {
-      string = Batman.helpers.underscore(string);
-      string = Batman.helpers.inflector.humanize(string);
-      return string.replace(humanize_rx1, '').replace(humanize_rx2, ' ').replace(humanize_rx3, function(match) {
-        return match.toUpperCase();
-      });
-    }
-  };
-
-  Inflector = new Batman.Inflector;
-
-  Batman.helpers.inflector = Inflector;
-
-  Inflector.plural(/$/, 's');
-
-  Inflector.plural(/s$/i, 's');
-
-  Inflector.plural(/(ax|test)is$/i, '$1es');
-
-  Inflector.plural(/(octop|vir)us$/i, '$1i');
-
-  Inflector.plural(/(octop|vir)i$/i, '$1i');
-
-  Inflector.plural(/(alias|status)$/i, '$1es');
-
-  Inflector.plural(/(bu)s$/i, '$1ses');
-
-  Inflector.plural(/(buffal|tomat)o$/i, '$1oes');
-
-  Inflector.plural(/([ti])um$/i, '$1a');
-
-  Inflector.plural(/([ti])a$/i, '$1a');
-
-  Inflector.plural(/sis$/i, 'ses');
-
-  Inflector.plural(/(?:([^f])fe|([lr])f)$/i, '$1$2ves');
-
-  Inflector.plural(/(hive)$/i, '$1s');
-
-  Inflector.plural(/([^aeiouy]|qu)y$/i, '$1ies');
-
-  Inflector.plural(/(x|ch|ss|sh)$/i, '$1es');
-
-  Inflector.plural(/(matr|vert|ind)(?:ix|ex)$/i, '$1ices');
-
-  Inflector.plural(/([m|l])ouse$/i, '$1ice');
-
-  Inflector.plural(/([m|l])ice$/i, '$1ice');
-
-  Inflector.plural(/^(ox)$/i, '$1en');
-
-  Inflector.plural(/^(oxen)$/i, '$1');
-
-  Inflector.plural(/(quiz)$/i, '$1zes');
-
-  Inflector.singular(/s$/i, '');
-
-  Inflector.singular(/(n)ews$/i, '$1ews');
-
-  Inflector.singular(/([ti])a$/i, '$1um');
-
-  Inflector.singular(/((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$/i, '$1$2sis');
-
-  Inflector.singular(/(^analy)ses$/i, '$1sis');
-
-  Inflector.singular(/([^f])ves$/i, '$1fe');
-
-  Inflector.singular(/(hive)s$/i, '$1');
-
-  Inflector.singular(/(tive)s$/i, '$1');
-
-  Inflector.singular(/([lr])ves$/i, '$1f');
-
-  Inflector.singular(/([^aeiouy]|qu)ies$/i, '$1y');
-
-  Inflector.singular(/(s)eries$/i, '$1eries');
-
-  Inflector.singular(/(m)ovies$/i, '$1ovie');
-
-  Inflector.singular(/(x|ch|ss|sh)es$/i, '$1');
-
-  Inflector.singular(/([m|l])ice$/i, '$1ouse');
-
-  Inflector.singular(/(bus)es$/i, '$1');
-
-  Inflector.singular(/(o)es$/i, '$1');
-
-  Inflector.singular(/(shoe)s$/i, '$1');
-
-  Inflector.singular(/(cris|ax|test)es$/i, '$1is');
-
-  Inflector.singular(/(octop|vir)i$/i, '$1us');
-
-  Inflector.singular(/(alias|status)es$/i, '$1');
-
-  Inflector.singular(/^(ox)en/i, '$1');
-
-  Inflector.singular(/(vert|ind)ices$/i, '$1ex');
-
-  Inflector.singular(/(matr)ices$/i, '$1ix');
-
-  Inflector.singular(/(quiz)zes$/i, '$1');
-
-  Inflector.singular(/(database)s$/i, '$1');
-
-  Inflector.irregular('person', 'people');
-
-  Inflector.irregular('man', 'men');
-
-  Inflector.irregular('child', 'children');
-
-  Inflector.irregular('sex', 'sexes');
-
-  Inflector.irregular('move', 'moves');
-
-  Inflector.irregular('cow', 'kine');
-
-  Inflector.irregular('zombie', 'zombies');
-
-  Inflector.uncountable('equipment', 'information', 'rice', 'money', 'species', 'series', 'fish', 'sheep', 'jeans');
 
 }).call(this);
 
@@ -685,6 +364,329 @@
       return object._batman = new Batman._Batman(object);
     }
   };
+
+}).call(this);
+
+(function() {
+  var __slice = [].slice,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+  Batman.Inflector = (function() {
+
+    Inflector.prototype.plural = function(regex, replacement) {
+      return this._plural.unshift([regex, replacement]);
+    };
+
+    Inflector.prototype.singular = function(regex, replacement) {
+      return this._singular.unshift([regex, replacement]);
+    };
+
+    Inflector.prototype.human = function(regex, replacement) {
+      return this._human.unshift([regex, replacement]);
+    };
+
+    Inflector.prototype.uncountable = function() {
+      var strings;
+      strings = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return this._uncountable = this._uncountable.concat(strings.map(function(x) {
+        return new RegExp("" + x + "$", 'i');
+      }));
+    };
+
+    Inflector.prototype.irregular = function(singular, plural) {
+      if (singular.charAt(0) === plural.charAt(0)) {
+        this.plural(new RegExp("(" + (singular.charAt(0)) + ")" + (singular.slice(1)) + "$", "i"), "$1" + plural.slice(1));
+        this.plural(new RegExp("(" + (singular.charAt(0)) + ")" + (plural.slice(1)) + "$", "i"), "$1" + plural.slice(1));
+        return this.singular(new RegExp("(" + (plural.charAt(0)) + ")" + (plural.slice(1)) + "$", "i"), "$1" + singular.slice(1));
+      } else {
+        this.plural(new RegExp("" + singular + "$", 'i'), plural);
+        this.plural(new RegExp("" + plural + "$", 'i'), plural);
+        return this.singular(new RegExp("" + plural + "$", 'i'), singular);
+      }
+    };
+
+    function Inflector() {
+      this._plural = [];
+      this._singular = [];
+      this._uncountable = [];
+      this._human = [];
+    }
+
+    Inflector.prototype.ordinalize = function(number) {
+      var absNumber, _ref;
+      absNumber = Math.abs(parseInt(number));
+      if (_ref = absNumber % 100, __indexOf.call([11, 12, 13], _ref) >= 0) {
+        return number + "th";
+      } else {
+        switch (absNumber % 10) {
+          case 1:
+            return number + "st";
+          case 2:
+            return number + "nd";
+          case 3:
+            return number + "rd";
+          default:
+            return number + "th";
+        }
+      }
+    };
+
+    Inflector.prototype.pluralize = function(word) {
+      var regex, replace_string, uncountableRegex, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+      _ref = this._uncountable;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        uncountableRegex = _ref[_i];
+        if (uncountableRegex.test(word)) {
+          return word;
+        }
+      }
+      _ref1 = this._plural;
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        _ref2 = _ref1[_j], regex = _ref2[0], replace_string = _ref2[1];
+        if (regex.test(word)) {
+          return word.replace(regex, replace_string);
+        }
+      }
+      return word;
+    };
+
+    Inflector.prototype.singularize = function(word) {
+      var regex, replace_string, uncountableRegex, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+      _ref = this._uncountable;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        uncountableRegex = _ref[_i];
+        if (uncountableRegex.test(word)) {
+          return word;
+        }
+      }
+      _ref1 = this._singular;
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        _ref2 = _ref1[_j], regex = _ref2[0], replace_string = _ref2[1];
+        if (regex.test(word)) {
+          return word.replace(regex, replace_string);
+        }
+      }
+      return word;
+    };
+
+    Inflector.prototype.humanize = function(word) {
+      var regex, replace_string, _i, _len, _ref, _ref1;
+      _ref = this._human;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        _ref1 = _ref[_i], regex = _ref1[0], replace_string = _ref1[1];
+        if (regex.test(word)) {
+          return word.replace(regex, replace_string);
+        }
+      }
+      return word;
+    };
+
+    return Inflector;
+
+  })();
+
+}).call(this);
+
+(function() {
+  var Inflector, camelize_rx, capitalize_rx, humanize_rx1, humanize_rx2, humanize_rx3, underscore_rx1, underscore_rx2;
+
+  camelize_rx = /(?:^|_|\-)(.)/g;
+
+  capitalize_rx = /(^|\s)([a-z])/g;
+
+  underscore_rx1 = /([A-Z]+)([A-Z][a-z])/g;
+
+  underscore_rx2 = /([a-z\d])([A-Z])/g;
+
+  humanize_rx1 = /_id$/;
+
+  humanize_rx2 = /_|-/g;
+
+  humanize_rx3 = /^\w/g;
+
+  Batman.helpers = {
+    ordinalize: function() {
+      return Batman.helpers.inflector.ordinalize.apply(Batman.helpers.inflector, arguments);
+    },
+    singularize: function() {
+      return Batman.helpers.inflector.singularize.apply(Batman.helpers.inflector, arguments);
+    },
+    pluralize: function(count, singular, plural, includeCount) {
+      var result;
+      if (includeCount == null) {
+        includeCount = true;
+      }
+      if (arguments.length < 2) {
+        return Batman.helpers.inflector.pluralize(count);
+      } else {
+        result = +count === 1 ? singular : plural || Batman.helpers.inflector.pluralize(singular);
+        if (includeCount) {
+          result = ("" + (count || 0) + " ") + result;
+        }
+        return result;
+      }
+    },
+    camelize: function(string, firstLetterLower) {
+      string = string.replace(camelize_rx, function(str, p1) {
+        return p1.toUpperCase();
+      });
+      if (firstLetterLower) {
+        return string.substr(0, 1).toLowerCase() + string.substr(1);
+      } else {
+        return string;
+      }
+    },
+    underscore: function(string) {
+      return string.replace(underscore_rx1, '$1_$2').replace(underscore_rx2, '$1_$2').replace('-', '_').toLowerCase();
+    },
+    capitalize: function(string) {
+      return string.replace(capitalize_rx, function(m, p1, p2) {
+        return p1 + p2.toUpperCase();
+      });
+    },
+    trim: function(string) {
+      if (string) {
+        return string.trim();
+      } else {
+        return "";
+      }
+    },
+    interpolate: function(stringOrObject, keys) {
+      var key, string, value;
+      if (typeof stringOrObject === 'object') {
+        string = stringOrObject[keys.count];
+        if (!string) {
+          string = stringOrObject['other'];
+        }
+      } else {
+        string = stringOrObject;
+      }
+      for (key in keys) {
+        value = keys[key];
+        string = string.replace(new RegExp("%\\{" + key + "\\}", "g"), value);
+      }
+      return string;
+    },
+    humanize: function(string) {
+      string = Batman.helpers.underscore(string);
+      string = Batman.helpers.inflector.humanize(string);
+      return string.replace(humanize_rx1, '').replace(humanize_rx2, ' ').replace(humanize_rx3, function(match) {
+        return match.toUpperCase();
+      });
+    }
+  };
+
+  Inflector = new Batman.Inflector;
+
+  Batman.helpers.inflector = Inflector;
+
+  Inflector.plural(/$/, 's');
+
+  Inflector.plural(/s$/i, 's');
+
+  Inflector.plural(/(ax|test)is$/i, '$1es');
+
+  Inflector.plural(/(octop|vir)us$/i, '$1i');
+
+  Inflector.plural(/(octop|vir)i$/i, '$1i');
+
+  Inflector.plural(/(alias|status)$/i, '$1es');
+
+  Inflector.plural(/(bu)s$/i, '$1ses');
+
+  Inflector.plural(/(buffal|tomat)o$/i, '$1oes');
+
+  Inflector.plural(/([ti])um$/i, '$1a');
+
+  Inflector.plural(/([ti])a$/i, '$1a');
+
+  Inflector.plural(/sis$/i, 'ses');
+
+  Inflector.plural(/(?:([^f])fe|([lr])f)$/i, '$1$2ves');
+
+  Inflector.plural(/(hive)$/i, '$1s');
+
+  Inflector.plural(/([^aeiouy]|qu)y$/i, '$1ies');
+
+  Inflector.plural(/(x|ch|ss|sh)$/i, '$1es');
+
+  Inflector.plural(/(matr|vert|ind)(?:ix|ex)$/i, '$1ices');
+
+  Inflector.plural(/([m|l])ouse$/i, '$1ice');
+
+  Inflector.plural(/([m|l])ice$/i, '$1ice');
+
+  Inflector.plural(/^(ox)$/i, '$1en');
+
+  Inflector.plural(/^(oxen)$/i, '$1');
+
+  Inflector.plural(/(quiz)$/i, '$1zes');
+
+  Inflector.singular(/s$/i, '');
+
+  Inflector.singular(/(n)ews$/i, '$1ews');
+
+  Inflector.singular(/([ti])a$/i, '$1um');
+
+  Inflector.singular(/((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$/i, '$1$2sis');
+
+  Inflector.singular(/(^analy)ses$/i, '$1sis');
+
+  Inflector.singular(/([^f])ves$/i, '$1fe');
+
+  Inflector.singular(/(hive)s$/i, '$1');
+
+  Inflector.singular(/(tive)s$/i, '$1');
+
+  Inflector.singular(/([lr])ves$/i, '$1f');
+
+  Inflector.singular(/([^aeiouy]|qu)ies$/i, '$1y');
+
+  Inflector.singular(/(s)eries$/i, '$1eries');
+
+  Inflector.singular(/(m)ovies$/i, '$1ovie');
+
+  Inflector.singular(/(x|ch|ss|sh)es$/i, '$1');
+
+  Inflector.singular(/([m|l])ice$/i, '$1ouse');
+
+  Inflector.singular(/(bus)es$/i, '$1');
+
+  Inflector.singular(/(o)es$/i, '$1');
+
+  Inflector.singular(/(shoe)s$/i, '$1');
+
+  Inflector.singular(/(cris|ax|test)es$/i, '$1is');
+
+  Inflector.singular(/(octop|vir)i$/i, '$1us');
+
+  Inflector.singular(/(alias|status)es$/i, '$1');
+
+  Inflector.singular(/^(ox)en/i, '$1');
+
+  Inflector.singular(/(vert|ind)ices$/i, '$1ex');
+
+  Inflector.singular(/(matr)ices$/i, '$1ix');
+
+  Inflector.singular(/(quiz)zes$/i, '$1');
+
+  Inflector.singular(/(database)s$/i, '$1');
+
+  Inflector.irregular('person', 'people');
+
+  Inflector.irregular('man', 'men');
+
+  Inflector.irregular('child', 'children');
+
+  Inflector.irregular('sex', 'sexes');
+
+  Inflector.irregular('move', 'moves');
+
+  Inflector.irregular('cow', 'kine');
+
+  Inflector.irregular('zombie', 'zombies');
+
+  Inflector.uncountable('equipment', 'information', 'rice', 'money', 'species', 'series', 'fish', 'sheep', 'jeans');
 
 }).call(this);
 
@@ -1067,17 +1069,24 @@
         return newEvent;
       }
     },
-    on: function(key, handler) {
-      return this.event(key).addHandler(handler);
+    on: function() {
+      var handler, key, keys, _i, _j, _len, _results;
+      keys = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), handler = arguments[_i++];
+      _results = [];
+      for (_j = 0, _len = keys.length; _j < _len; _j++) {
+        key = keys[_j];
+        _results.push(this.event(key).addHandler(handler));
+      }
+      return _results;
     },
-    once: function(key, originalHandler) {
-      var event, handler;
+    once: function(key, handler) {
+      var event, handlerWrapper;
       event = this.event(key);
-      handler = function() {
-        originalHandler.apply(this, arguments);
-        return event.removeHandler(handler);
+      handlerWrapper = function() {
+        handler.apply(this, arguments);
+        return event.removeHandler(handlerWrapper);
       };
-      return event.addHandler(handler);
+      return event.addHandler(handlerWrapper);
     },
     registerAsMutableSource: function() {
       return Batman.Property.registerSource(this);
@@ -1712,6 +1721,7 @@
 }).call(this);
 
 (function() {
+  var __slice = [].slice;
 
   Batman.Property = (function() {
 
@@ -2033,7 +2043,7 @@
 
     Property.prototype.observeAndFire = function(handler) {
       this.observe(handler);
-      return handler.call(this.base, this.value, this.value);
+      return handler.call(this.base, this.value, this.value, this.key);
     };
 
     Property.prototype.observe = function(handler) {
@@ -2089,7 +2099,7 @@
 
     Property.prototype.fire = function() {
       var _ref;
-      return (_ref = this.changeEvent()).fire.apply(_ref, arguments);
+      return (_ref = this.changeEvent()).fire.apply(_ref, __slice.call(arguments).concat([this.key]));
     };
 
     Property.prototype.isolate = function() {
@@ -2269,12 +2279,12 @@
         context: context
       });
       return view.on('ready', function() {
-        Batman.setInnerHTML(container, '');
-        Batman.appendChild(container, view.get('node'));
+        Batman.DOM.setInnerHTML(container, '');
+        Batman.DOM.appendChild(container, view.get('node'));
         return renderer.allowAndFire('rendered');
       });
     },
-    propagateBindingEvent: Batman.propagateBindingEvent = function(binding, node) {
+    propagateBindingEvent: function(binding, node) {
       var current, parentBinding, parentBindings, _i, _len;
       while ((current = (current || node).parentNode)) {
         parentBindings = Batman._data(current, 'bindings');
@@ -2288,21 +2298,21 @@
         }
       }
     },
-    propagateBindingEvents: Batman.propagateBindingEvents = function(newNode) {
+    propagateBindingEvents: function(newNode) {
       var binding, bindings, child, _i, _j, _len, _len1, _ref;
       _ref = newNode.childNodes;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         child = _ref[_i];
-        Batman.propagateBindingEvents(child);
+        Batman.DOM.propagateBindingEvents(child);
       }
       if (bindings = Batman._data(newNode, 'bindings')) {
         for (_j = 0, _len1 = bindings.length; _j < _len1; _j++) {
           binding = bindings[_j];
-          Batman.propagateBindingEvent(binding, newNode);
+          Batman.DOM.propagateBindingEvent(binding, newNode);
         }
       }
     },
-    trackBinding: Batman.trackBinding = function(binding, node) {
+    trackBinding: function(binding, node) {
       var bindings;
       if (bindings = Batman._data(node, 'bindings')) {
         bindings.push(binding);
@@ -2310,10 +2320,10 @@
         Batman._data(node, 'bindings', [binding]);
       }
       Batman.DOM.fire('bindingAdded', binding);
-      Batman.propagateBindingEvent(binding, node);
+      Batman.DOM.propagateBindingEvent(binding, node);
       return true;
     },
-    onParseExit: Batman.onParseExit = function(node, callback) {
+    onParseExit: function(node, callback) {
       var set;
       set = Batman._data(node, 'onParseExit') || Batman._data(node, 'onParseExit', new Batman.SimpleSet);
       if (callback != null) {
@@ -2321,58 +2331,23 @@
       }
       return set;
     },
-    forgetParseExit: Batman.forgetParseExit = function(node, callback) {
+    forgetParseExit: function(node, callback) {
       return Batman.removeData(node, 'onParseExit', true);
     },
-    setInnerHTML: Batman.setInnerHTML = function(node, html) {
-      var child, childNodes, result, _i, _j, _len, _len1;
-      childNodes = (function() {
-        var _i, _len, _ref, _results;
-        _ref = node.childNodes;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          child = _ref[_i];
-          _results.push(child);
-        }
-        return _results;
-      })();
-      for (_i = 0, _len = childNodes.length; _i < _len; _i++) {
-        child = childNodes[_i];
-        Batman.DOM.willRemoveNode(child);
-      }
-      result = node.innerHTML = html;
-      for (_j = 0, _len1 = childNodes.length; _j < _len1; _j++) {
-        child = childNodes[_j];
-        Batman.DOM.didRemoveNode(child);
-      }
-      return result;
+    defineView: function(name, node) {
+      var contents;
+      contents = node.innerHTML;
+      Batman.View.store.set(Batman.Navigator.normalizePath(name), contents);
+      return contents;
     },
-    setStyleProperty: Batman.setStyleProperty = function(node, property, value, importance) {
+    setStyleProperty: function(node, property, value, importance) {
       if (node.style.setAttribute) {
         return node.style.setAttribute(property, value, importance);
       } else {
         return node.style.setProperty(property, value, importance);
       }
     },
-    removeNode: Batman.removeNode = function(node) {
-      var _ref;
-      Batman.DOM.willRemoveNode(node);
-      if ((_ref = node.parentNode) != null) {
-        _ref.removeChild(node);
-      }
-      return Batman.DOM.didRemoveNode(node);
-    },
-    destroyNode: Batman.destroyNode = function(node) {
-      Batman.DOM.willDestroyNode(node);
-      Batman.removeNode(node);
-      return Batman.DOM.didDestroyNode(node);
-    },
-    appendChild: Batman.appendChild = function(parent, child) {
-      Batman.DOM.willInsertNode(child);
-      parent.appendChild(child);
-      return Batman.DOM.didInsertNode(child);
-    },
-    removeOrDestroyNode: Batman.removeOrDestroyNode = function(node) {
+    removeOrDestroyNode: function(node) {
       var view;
       view = Batman._data(node, 'view');
       view || (view = Batman._data(node, 'yielder'));
@@ -2382,12 +2357,12 @@
         return Batman.DOM.destroyNode(node);
       }
     },
-    insertBefore: Batman.insertBefore = function(parentNode, newNode, referenceNode) {
+    insertBefore: function(parentNode, newNode, referenceNode) {
       if (referenceNode == null) {
         referenceNode = null;
       }
       if (!referenceNode || parentNode.childNodes.length <= 0) {
-        return Batman.appendChild(parentNode, newNode);
+        return Batman.DOM.appendChild(parentNode, newNode);
       } else {
         Batman.DOM.willInsertNode(newNode);
         parentNode.insertBefore(newNode, referenceNode);
@@ -2419,7 +2394,7 @@
           break;
         default:
           if (isSetting) {
-            return Batman.setInnerHTML(node, escapeValue ? Batman.escapeHTML(value) : value);
+            return Batman.DOM.setInnerHTML(node, escapeValue ? Batman.escapeHTML(value) : value);
           } else {
             return node.innerHTML;
           }
@@ -2429,7 +2404,7 @@
       var _ref;
       return (_ref = node.nodeName.toUpperCase()) === 'INPUT' || _ref === 'TEXTAREA' || _ref === 'SELECT';
     },
-    addEventListener: Batman.addEventListener = function(node, eventName, callback) {
+    addEventListener: function(node, eventName, callback) {
       var listeners;
       if (!(listeners = Batman._data(node, 'listeners'))) {
         listeners = Batman._data(node, 'listeners', {});
@@ -2438,13 +2413,13 @@
         listeners[eventName] = [];
       }
       listeners[eventName].push(callback);
-      if (Batman.hasAddEventListener) {
+      if (Batman.DOM.hasAddEventListener) {
         return node.addEventListener(eventName, callback, false);
       } else {
         return node.attachEvent("on" + eventName, callback);
       }
     },
-    removeEventListener: Batman.removeEventListener = function(node, eventName, callback) {
+    removeEventListener: function(node, eventName, callback) {
       var eventListeners, index, listeners;
       if (listeners = Batman._data(node, 'listeners')) {
         if (eventListeners = listeners[eventName]) {
@@ -2454,21 +2429,21 @@
           }
         }
       }
-      if (Batman.hasAddEventListener) {
+      if (Batman.DOM.hasAddEventListener) {
         return node.removeEventListener(eventName, callback, false);
       } else {
         return node.detachEvent('on' + eventName, callback);
       }
     },
-    hasAddEventListener: Batman.hasAddEventListener = !!(typeof window !== "undefined" && window !== null ? window.addEventListener : void 0),
-    preventDefault: Batman.preventDefault = function(e) {
+    hasAddEventListener: !!(typeof window !== "undefined" && window !== null ? window.addEventListener : void 0),
+    preventDefault: function(e) {
       if (typeof e.preventDefault === "function") {
         return e.preventDefault();
       } else {
         return e.returnValue = false;
       }
     },
-    stopPropagation: Batman.stopPropagation = function(e) {
+    stopPropagation: function(e) {
       if (e.stopPropagation) {
         return e.stopPropagation();
       } else {
@@ -2581,7 +2556,7 @@
         for (eventName in listeners) {
           eventListeners = listeners[eventName];
           eventListeners.forEach(function(listener) {
-            return Batman.removeEventListener(node, eventName, listener);
+            return Batman.DOM.removeEventListener(node, eventName, listener);
           });
         }
       }
@@ -2685,10 +2660,11 @@
       return true;
     },
     defineview: function(node, name, context, renderer) {
-      Batman.onParseExit(node, function() {
-        return Batman.destroyNode(node);
+      Batman.DOM.onParseExit(node, function() {
+        var _ref;
+        return (_ref = node.parentNode) != null ? _ref.removeChild(node) : void 0;
       });
-      Batman.View.store.set(Batman.Navigator.normalizePath(name), node.innerHTML);
+      Batman.DOM.defineView(name, node);
       return false;
     },
     renderif: function(node, key, context, renderer) {
@@ -2696,7 +2672,7 @@
       return false;
     },
     "yield": function(node, key) {
-      Batman.onParseExit(node, function() {
+      Batman.DOM.onParseExit(node, function() {
         return Batman.DOM.Yield.withName(key).set('containerNode', node);
       });
       return true;
@@ -2705,7 +2681,7 @@
       if (action == null) {
         action = 'append';
       }
-      Batman.onParseExit(node, function() {
+      Batman.DOM.onParseExit(node, function() {
         var _ref;
         if ((_ref = node.parentNode) != null) {
           _ref.removeChild(node);
@@ -2731,11 +2707,14 @@
       if (eventName == null) {
         eventName = 'click';
       }
-      Batman.addEventListener(node, eventName, function() {
-        var args;
-        args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-        callback.apply(null, [node].concat(__slice.call(args), [context]));
-        return Batman.preventDefault(args[0]);
+      Batman.DOM.addEventListener(node, eventName, function() {
+        var args, event;
+        event = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+        if (event.metaKey || event.ctrlKey) {
+          return;
+        }
+        callback.apply(null, [node, event].concat(__slice.call(args), [context]));
+        return Batman.DOM.preventDefault(event);
       });
       if (node.nodeName.toUpperCase() === 'A' && !node.href) {
         node.href = '#';
@@ -2773,7 +2752,7 @@
       _results = [];
       for (_i = 0, _len = eventNames.length; _i < _len; _i++) {
         eventName = eventNames[_i];
-        _results.push(Batman.addEventListener(node, eventName, function() {
+        _results.push(Batman.DOM.addEventListener(node, eventName, function() {
           var args;
           args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
           return callback.apply(null, [node].concat(__slice.call(args), [context]));
@@ -2787,36 +2766,36 @@
     },
     submit: function(node, callback, context) {
       if (Batman.DOM.nodeIsEditable(node)) {
-        Batman.addEventListener(node, 'keydown', function() {
+        Batman.DOM.addEventListener(node, 'keydown', function() {
           var args;
           args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
           if (Batman.DOM.events.isEnter(args[0])) {
             return Batman.DOM._keyCapturingNode = node;
           }
         });
-        Batman.addEventListener(node, 'keyup', function() {
+        Batman.DOM.addEventListener(node, 'keyup', function() {
           var args;
           args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
           if (Batman.DOM.events.isEnter(args[0])) {
             if (Batman.DOM._keyCapturingNode === node) {
-              Batman.preventDefault(args[0]);
+              Batman.DOM.preventDefault(args[0]);
               callback.apply(null, [node].concat(__slice.call(args), [context]));
             }
             return Batman.DOM._keyCapturingNode = null;
           }
         });
       } else {
-        Batman.addEventListener(node, 'submit', function() {
+        Batman.DOM.addEventListener(node, 'submit', function() {
           var args;
           args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-          Batman.preventDefault(args[0]);
+          Batman.DOM.preventDefault(args[0]);
           return callback.apply(null, [node].concat(__slice.call(args), [context]));
         });
       }
       return node;
     },
     other: function(node, eventName, callback, context) {
-      return Batman.addEventListener(node, eventName, function() {
+      return Batman.DOM.addEventListener(node, eventName, function() {
         var args;
         args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
         return callback.apply(null, [node].concat(__slice.call(args), [context]));
@@ -2908,19 +2887,148 @@
 }).call(this);
 
 (function() {
-  var BatmanObject,
+  var BatmanObject, ObjectFunctions, getAccessorObject, promiseWrapper, wrapSingleAccessor,
+    __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __slice = [].slice;
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  getAccessorObject = function(base, accessor) {
+    var deprecated, _i, _len, _ref;
+    if (typeof accessor === 'function') {
+      accessor = {
+        get: accessor
+      };
+    }
+    _ref = ['cachable', 'cacheable'];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      deprecated = _ref[_i];
+      if (deprecated in accessor) {
+        Batman.developer.warn("Property accessor option \"" + deprecated + "\" is deprecated. Use \"cache\" instead.");
+        if (!('cache' in accessor)) {
+          accessor.cache = accessor[deprecated];
+        }
+      }
+    }
+    return accessor;
+  };
+
+  promiseWrapper = function(fetcher) {
+    return function(defaultAccessor) {
+      return {
+        get: function(key) {
+          var asyncDeliver, existingValue, newValue, _base, _base1, _ref, _ref1,
+            _this = this;
+          if ((existingValue = defaultAccessor.get.apply(this, arguments)) != null) {
+            return existingValue;
+          }
+          asyncDeliver = false;
+          newValue = void 0;
+          if ((_ref = (_base = this._batman).promises) == null) {
+            _base.promises = {};
+          }
+          if ((_ref1 = (_base1 = this._batman.promises)[key]) == null) {
+            _base1[key] = (function() {
+              var deliver, returnValue;
+              deliver = function(err, result) {
+                if (asyncDeliver) {
+                  _this.set(key, result);
+                }
+                return newValue = result;
+              };
+              returnValue = fetcher.call(_this, deliver, key);
+              if (newValue == null) {
+                newValue = returnValue;
+              }
+              return true;
+            })();
+          }
+          asyncDeliver = true;
+          return newValue;
+        },
+        cache: true
+      };
+    };
+  };
+
+  wrapSingleAccessor = function(core, wrapper) {
+    var k, v;
+    wrapper = (typeof wrapper === "function" ? wrapper(core) : void 0) || wrapper;
+    for (k in core) {
+      v = core[k];
+      if (!(k in wrapper)) {
+        wrapper[k] = v;
+      }
+    }
+    return wrapper;
+  };
+
+  ObjectFunctions = {
+    _defineAccessor: function() {
+      var accessor, key, keys, _base, _i, _j, _len, _ref, _results;
+      keys = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), accessor = arguments[_i++];
+      if (!(accessor != null)) {
+        return Batman.Property.defaultAccessorForBase(this);
+      } else if (keys.length === 0 && ((_ref = Batman.typeOf(accessor)) !== 'Object' && _ref !== 'Function')) {
+        return Batman.Property.accessorForBaseAndKey(this, accessor);
+      } else if (typeof accessor.promise === 'function') {
+        return this._defineWrapAccessor.apply(this, __slice.call(keys).concat([promiseWrapper(accessor.promise)]));
+      }
+      Batman.initializeObject(this);
+      if (keys.length === 0) {
+        return this._batman.defaultAccessor = getAccessorObject(this, accessor);
+      } else {
+        (_base = this._batman).keyAccessors || (_base.keyAccessors = new Batman.SimpleHash);
+        _results = [];
+        for (_j = 0, _len = keys.length; _j < _len; _j++) {
+          key = keys[_j];
+          _results.push(this._batman.keyAccessors.set(key, getAccessorObject(this, accessor)));
+        }
+        return _results;
+      }
+    },
+    _defineWrapAccessor: function() {
+      var key, keys, wrapper, _i, _j, _len, _results;
+      keys = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), wrapper = arguments[_i++];
+      Batman.initializeObject(this);
+      if (keys.length === 0) {
+        return this._defineAccessor(wrapSingleAccessor(this._defineAccessor(), wrapper));
+      } else {
+        _results = [];
+        for (_j = 0, _len = keys.length; _j < _len; _j++) {
+          key = keys[_j];
+          _results.push(this._defineAccessor(key, wrapSingleAccessor(this._defineAccessor(key), wrapper)));
+        }
+        return _results;
+      }
+    },
+    _resetPromises: function() {
+      var key;
+      if (this._batman.promises == null) {
+        return;
+      }
+      for (key in this._batman.promises) {
+        this._resetPromise(key);
+      }
+    },
+    _resetPromise: function(key) {
+      this.unset(key);
+      this.property(key).cached = false;
+      delete this._batman.promises[key];
+    }
+  };
 
   BatmanObject = (function(_super) {
-    var counter, getAccessorObject, promiseWrapper, wrapSingleAccessor;
+    var counter;
 
     __extends(BatmanObject, _super);
 
     Batman.initializeObject(BatmanObject);
 
     Batman.initializeObject(BatmanObject.prototype);
+
+    Batman.mixin(BatmanObject.prototype, ObjectFunctions, Batman.EventEmitter, Batman.Observable);
+
+    Batman.mixin(BatmanObject, ObjectFunctions, Batman.EventEmitter, Batman.Observable);
 
     BatmanObject.classMixin = function() {
       return Batman.mixin.apply(Batman, [this].concat(__slice.call(arguments)));
@@ -2932,14 +3040,60 @@
 
     BatmanObject.prototype.mixin = BatmanObject.classMixin;
 
+    BatmanObject.classAccessor = BatmanObject._defineAccessor;
+
+    BatmanObject.accessor = function() {
+      var _ref;
+      return (_ref = this.prototype)._defineAccessor.apply(_ref, arguments);
+    };
+
+    BatmanObject.prototype.accessor = BatmanObject._defineAccessor;
+
+    BatmanObject.wrapClassAccessor = BatmanObject._defineWrapAccessor;
+
+    BatmanObject.wrapAccessor = function() {
+      var _ref;
+      return (_ref = this.prototype)._defineWrapAccessor.apply(_ref, arguments);
+    };
+
+    BatmanObject.prototype.wrapAccessor = BatmanObject._defineWrapAccessor;
+
+    BatmanObject.observeAll = function() {
+      return this.prototype.observe.apply(this.prototype, arguments);
+    };
+
+    BatmanObject.singleton = function(singletonMethodName) {
+      if (singletonMethodName == null) {
+        singletonMethodName = "sharedInstance";
+      }
+      return this.classAccessor(singletonMethodName, {
+        get: function() {
+          var _name;
+          return this[_name = "_" + singletonMethodName] || (this[_name] = new this);
+        }
+      });
+    };
+
+    BatmanObject.accessor('_batmanID', function() {
+      return this._batmanID();
+    });
+
+    function BatmanObject() {
+      var mixins;
+      mixins = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      this._batman = new Batman._Batman(this);
+      this.mixin.apply(this, mixins);
+    }
+
     counter = 0;
 
     BatmanObject.prototype._batmanID = function() {
-      var c;
-      this._batmanID = function() {
-        return c;
-      };
-      return c = counter++;
+      var _base, _ref;
+      this._batman.check(this);
+      if ((_ref = (_base = this._batman).id) == null) {
+        _base.id = counter++;
+      }
+      return this._batman.id;
     };
 
     BatmanObject.prototype.hashKey = function() {
@@ -2965,157 +3119,6 @@
       }
       return obj;
     };
-
-    getAccessorObject = function(base, accessor) {
-      var deprecated, _i, _len, _ref;
-      if (typeof accessor === 'function') {
-        accessor = {
-          get: accessor
-        };
-      }
-      _ref = ['cachable', 'cacheable'];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        deprecated = _ref[_i];
-        if (deprecated in accessor) {
-          Batman.developer.warn("Property accessor option \"" + deprecated + "\" is deprecated. Use \"cache\" instead.");
-          if (!('cache' in accessor)) {
-            accessor.cache = accessor[deprecated];
-          }
-        }
-      }
-      return accessor;
-    };
-
-    promiseWrapper = function(fetcher) {
-      return function(core) {
-        return {
-          get: function(key) {
-            var deliver, returned, val,
-              _this = this;
-            val = core.get.apply(this, arguments);
-            if (typeof val !== 'undefined') {
-              return val;
-            }
-            returned = false;
-            deliver = function(err, result) {
-              if (returned) {
-                _this.set(key, result);
-              }
-              return val = result;
-            };
-            fetcher.call(this, deliver, key);
-            returned = true;
-            return val;
-          },
-          cache: true
-        };
-      };
-    };
-
-    wrapSingleAccessor = function(core, wrapper) {
-      var k, v;
-      wrapper = (typeof wrapper === "function" ? wrapper(core) : void 0) || wrapper;
-      for (k in core) {
-        v = core[k];
-        if (!(k in wrapper)) {
-          wrapper[k] = v;
-        }
-      }
-      return wrapper;
-    };
-
-    BatmanObject._defineAccessor = function() {
-      var accessor, key, keys, _base, _i, _j, _len, _ref, _results;
-      keys = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), accessor = arguments[_i++];
-      if (!(accessor != null)) {
-        return Batman.Property.defaultAccessorForBase(this);
-      } else if (keys.length === 0 && ((_ref = Batman.typeOf(accessor)) !== 'Object' && _ref !== 'Function')) {
-        return Batman.Property.accessorForBaseAndKey(this, accessor);
-      } else if (typeof accessor.promise === 'function') {
-        return this._defineWrapAccessor.apply(this, __slice.call(keys).concat([promiseWrapper(accessor.promise)]));
-      }
-      Batman.initializeObject(this);
-      if (keys.length === 0) {
-        return this._batman.defaultAccessor = getAccessorObject(this, accessor);
-      } else {
-        (_base = this._batman).keyAccessors || (_base.keyAccessors = new Batman.SimpleHash);
-        _results = [];
-        for (_j = 0, _len = keys.length; _j < _len; _j++) {
-          key = keys[_j];
-          _results.push(this._batman.keyAccessors.set(key, getAccessorObject(this, accessor)));
-        }
-        return _results;
-      }
-    };
-
-    BatmanObject.prototype._defineAccessor = BatmanObject._defineAccessor;
-
-    BatmanObject._defineWrapAccessor = function() {
-      var key, keys, wrapper, _i, _j, _len, _results;
-      keys = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), wrapper = arguments[_i++];
-      Batman.initializeObject(this);
-      if (keys.length === 0) {
-        return this._defineAccessor(wrapSingleAccessor(this._defineAccessor(), wrapper));
-      } else {
-        _results = [];
-        for (_j = 0, _len = keys.length; _j < _len; _j++) {
-          key = keys[_j];
-          _results.push(this._defineAccessor(key, wrapSingleAccessor(this._defineAccessor(key), wrapper)));
-        }
-        return _results;
-      }
-    };
-
-    BatmanObject.prototype._defineWrapAccessor = BatmanObject._defineWrapAccessor;
-
-    BatmanObject.classAccessor = BatmanObject._defineAccessor;
-
-    BatmanObject.accessor = function() {
-      var _ref;
-      return (_ref = this.prototype)._defineAccessor.apply(_ref, arguments);
-    };
-
-    BatmanObject.prototype.accessor = BatmanObject._defineAccessor;
-
-    BatmanObject.wrapClassAccessor = BatmanObject._defineWrapAccessor;
-
-    BatmanObject.wrapAccessor = function() {
-      var _ref;
-      return (_ref = this.prototype)._defineWrapAccessor.apply(_ref, arguments);
-    };
-
-    BatmanObject.prototype.wrapAccessor = BatmanObject._defineWrapAccessor;
-
-    function BatmanObject() {
-      var mixins;
-      mixins = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      this._batman = new Batman._Batman(this);
-      this.mixin.apply(this, mixins);
-    }
-
-    BatmanObject.classMixin(Batman.EventEmitter, Batman.Observable);
-
-    BatmanObject.mixin(Batman.EventEmitter, Batman.Observable);
-
-    BatmanObject.observeAll = function() {
-      return this.prototype.observe.apply(this.prototype, arguments);
-    };
-
-    BatmanObject.singleton = function(singletonMethodName) {
-      if (singletonMethodName == null) {
-        singletonMethodName = "sharedInstance";
-      }
-      return this.classAccessor(singletonMethodName, {
-        get: function() {
-          var _name;
-          return this[_name = "_" + singletonMethodName] || (this[_name] = new this);
-        }
-      });
-    };
-
-    BatmanObject.accessor('_batmanID', function() {
-      return this._batmanID();
-    });
 
     return BatmanObject;
 
@@ -3154,6 +3157,8 @@
 
     Renderer.prototype.start = function() {
       this.startTime = new Date;
+      this.prevent('parsed');
+      this.prevent('rendered');
       return this.parseNode(this.node);
     };
 
@@ -3165,8 +3170,8 @@
     Renderer.prototype.finish = function() {
       this.startTime = null;
       this.prevent('stopped');
-      this.fire('parsed');
-      return this.fire('rendered');
+      this.allowAndFire('parsed');
+      return this.allowAndFire('rendered');
     };
 
     Renderer.prototype.stop = function() {
@@ -3243,7 +3248,7 @@
           } else if (result instanceof Batman.RenderContext) {
             oldContext = this.context;
             this.context = result;
-            Batman.onParseExit(node, function() {
+            Batman.DOM.onParseExit(node, function() {
               return _this.context = oldContext;
             });
           }
@@ -3265,12 +3270,12 @@
         }
       }
       sibling = node.nextSibling;
-      if ((_ref1 = Batman.onParseExit(node)) != null) {
+      if ((_ref1 = Batman.DOM.onParseExit(node)) != null) {
         _ref1.forEach(function(callback) {
           return callback();
         });
       }
-      Batman.forgetParseExit(node);
+      Batman.DOM.forgetParseExit(node);
       if (this.node === node) {
         return;
       }
@@ -3280,12 +3285,12 @@
       nextParent = node;
       while (nextParent = nextParent.parentNode) {
         parentSibling = nextParent.nextSibling;
-        if ((_ref2 = Batman.onParseExit(nextParent)) != null) {
+        if ((_ref2 = Batman.DOM.onParseExit(nextParent)) != null) {
           _ref2.forEach(function(callback) {
             return callback();
           });
         }
-        Batman.forgetParseExit(nextParent);
+        Batman.DOM.forgetParseExit(nextParent);
         if (this.node === nextParent) {
           return;
         }
@@ -3614,7 +3619,7 @@
         if (typeof (hide = Batman.data(this.node, 'hide')) === 'function') {
           hide.call(this.node);
         } else {
-          Batman.setStyleProperty(this.node, 'display', 'none', 'important');
+          Batman.DOM.setStyleProperty(this.node, 'display', 'none', 'important');
         }
         return view != null ? view.fire('disappear', this.node) : void 0;
       }
@@ -3637,7 +3642,7 @@
 
     SelectBinding.prototype.isInputBinding = true;
 
-    SelectBinding.prototype.firstBind = true;
+    SelectBinding.prototype.canSetImplicitly = true;
 
     function SelectBinding() {
       this.updateOptionBindings = __bind(this.updateOptionBindings, this);
@@ -3678,9 +3683,16 @@
       return this._fireDataChange(this.get('filteredValue'));
     };
 
+    SelectBinding.prototype.lastKeyContext = null;
+
     SelectBinding.prototype.dataChange = function(newValue) {
       var child, matches, valueToChild, _i, _len, _name, _ref,
         _this = this;
+      this.lastKeyContext || (this.lastKeyContext = this.get('keyContext'));
+      if (this.lastKeyContext !== this.get('keyContext')) {
+        this.canSetImplicitly = true;
+        this.lastKeyContext = this.get('keyContext');
+      }
       if (newValue != null ? newValue.forEach : void 0) {
         valueToChild = {};
         _ref = this.node.children;
@@ -3702,12 +3714,15 @@
           }
         });
       } else {
-        if (typeof newValue === 'undefined' && this.firstBind) {
-          this.set('unfilteredValue', this.node.value);
+        if (!(newValue != null) && this.canSetImplicitly) {
+          if (this.node.value) {
+            this.canSetImplicitly = false;
+            this.set('unfilteredValue', this.node.value);
+          }
         } else {
+          this.canSetImplicitly = false;
           Batman.DOM.valueForNode(this.node, newValue, this.escapeValue);
         }
-        this.firstBind = false;
       }
       this.updateOptionBindings();
     };
@@ -3790,7 +3805,7 @@
         path = this.pathFromValue(value);
       }
       if (this.onATag) {
-        if (path != null) {
+        if ((path != null) && (Batman.navigator != null)) {
           path = Batman.navigator.linkTo(path);
         } else {
           path = "#";
@@ -3828,20 +3843,28 @@
       return RadioBinding.__super__.constructor.apply(this, arguments);
     }
 
-    RadioBinding.prototype.isInputBinding = true;
+    RadioBinding.accessor('parsedNodeValue', function() {
+      return Batman.DOM.attrReaders._parseAttribute(this.node.value);
+    });
+
+    RadioBinding.prototype.firstBind = true;
 
     RadioBinding.prototype.dataChange = function(value) {
       var boundValue;
-      if ((boundValue = this.get('filteredValue')) != null) {
-        return this.node.checked = boundValue === this.node.value;
-      } else if (this.node.checked) {
-        return this.set('filteredValue', this.node.value);
+      boundValue = this.get('filteredValue');
+      if (boundValue != null) {
+        this.node.checked = boundValue === Batman.DOM.attrReaders._parseAttribute(this.node.value);
+      } else {
+        if (this.firstBind && this.node.checked) {
+          this.set('filteredValue', this.get('parsedNodeValue'));
+        }
       }
+      return this.firstBind = false;
     };
 
     RadioBinding.prototype.nodeChange = function(node) {
       if (this.isTwoWay()) {
-        return this.set('filteredValue', Batman.DOM.attrReaders._parseAttribute(node.value));
+        return this.set('filteredValue', this.get('parsedNodeValue'));
       }
     };
 
@@ -4017,7 +4040,7 @@
       this.contextName = contextName;
       delete this.attributeName;
       Batman.DOM.events.submit(this.get('node'), function(node, e) {
-        return Batman.preventDefault(e);
+        return Batman.DOM.preventDefault(e);
       });
       this.setupErrorsList();
     }
@@ -4034,9 +4057,8 @@
     };
 
     FormBinding.prototype.setupErrorsList = function() {
-      var _base;
-      if (this.errorsListNode = typeof (_base = this.get('node')).querySelector === "function" ? _base.querySelector(this.get('errorsListSelector')) : void 0) {
-        Batman.setInnerHTML(this.errorsListNode, this.errorsListHTML());
+      if (this.errorsListNode = Batman.DOM.querySelector(this.get('node'), this.get('errorsListSelector'))) {
+        Batman.DOM.setInnerHTML(this.errorsListNode, this.errorsListHTML());
         if (!this.errorsListNode.getAttribute('data-showif')) {
           return this.errorsListNode.setAttribute('data-showif', "" + this.contextName + ".errors.length");
         }
@@ -4064,15 +4086,11 @@
     EventBinding.prototype.bindImmediately = false;
 
     function EventBinding(node, eventName, key, context) {
-      var attacher, callback, confirmText,
+      var attacher, callback,
         _this = this;
       EventBinding.__super__.constructor.apply(this, arguments);
-      confirmText = this.node.getAttribute('data-confirm');
       callback = function() {
         var _ref;
-        if (confirmText && !confirm(confirmText)) {
-          return;
-        }
         return (_ref = _this.get('filteredValue')) != null ? _ref.apply(_this.get('callbackContext'), arguments) : void 0;
       };
       if (attacher = Batman.DOM.events[this.attributeName]) {
@@ -4103,8 +4121,8 @@
             if (keys.length > 1) {
               functionKey = keys.pop();
               keyContext = Batman.getPath(this, ['keyContext'].concat(keys));
+              keyContext = Batman.RenderContext.deProxy(keyContext);
               if (keyContext != null) {
-                keyContext = Batman.RenderContext.deProxy(keyContext);
                 return keyContext[functionKey];
               }
             }
@@ -4477,11 +4495,11 @@
       if (Batman.canDeleteExpando) {
         delete sourceNode[Batman.expando];
       }
-      Batman.insertBefore(sourceNode.parentNode, this.startNode, previousSiblingNode);
-      Batman.insertBefore(sourceNode.parentNode, this.endNode, previousSiblingNode);
+      Batman.DOM.insertBefore(sourceNode.parentNode, this.startNode, previousSiblingNode);
+      Batman.DOM.insertBefore(sourceNode.parentNode, this.endNode, previousSiblingNode);
       this.parentRenderer.prevent('rendered');
       Batman.DOM.onParseExit(sourceNode.parentNode, function() {
-        Batman.destroyNode(sourceNode);
+        Batman.DOM.destroyNode(sourceNode);
         _this.bind();
         return _this.parentRenderer.allowAndFire('rendered');
       });
@@ -4517,15 +4535,17 @@
       parentNode = this.parentNode();
       startIndex = this._getStartNodeIndex() + 1;
       unseenNodeMap = this.nodeMap.merge();
-      for (index = _i = 0, _len = newItems.length; _i < _len; index = ++_i) {
-        newItem = newItems[index];
-        nodeAtIndex = parentNode.childNodes[startIndex + index];
-        if ((nodeAtIndex != null) && this._itemForNode(nodeAtIndex) === newItem) {
-          unseenNodeMap.unset(newItem);
-          continue;
-        } else {
-          node = (existingNode = this.nodeMap.get(newItem)) ? (unseenNodeMap.unset(newItem), existingNode) : this._newNodeForItem(newItem);
-          Batman.insertBefore(this.parentNode(), node, nodeAtIndex);
+      if (newItems != null) {
+        for (index = _i = 0, _len = newItems.length; _i < _len; index = ++_i) {
+          newItem = newItems[index];
+          nodeAtIndex = parentNode.childNodes[startIndex + index];
+          if ((nodeAtIndex != null) && this._itemForNode(nodeAtIndex) === newItem) {
+            unseenNodeMap.unset(newItem);
+            continue;
+          } else {
+            node = (existingNode = this.nodeMap.get(newItem)) ? (unseenNodeMap.unset(newItem), existingNode) : this._newNodeForItem(newItem);
+            Batman.DOM.insertBefore(this.parentNode(), node, nodeAtIndex);
+          }
         }
       }
       unseenNodeMap.forEach(function(item, node) {
@@ -4546,7 +4566,7 @@
       this.parentRenderer.prevent('rendered');
       renderer = new Batman.Renderer(newNode, this.renderContext.descend(newItem, this.iteratorName), this.parentRenderer.view);
       renderer.on('rendered', function() {
-        Batman.propagateBindingEvents(newNode);
+        Batman.DOM.propagateBindingEvents(newNode);
         _this.fire('nodeAdded', newNode, newItem);
         return _this.parentRenderer.allowAndFire('rendered');
       });
@@ -4568,7 +4588,7 @@
     IteratorBinding.prototype._removeItem = function(item) {
       var node;
       node = this.nodeMap.unset(item);
-      Batman.destroyNode(node);
+      Batman.DOM.destroyNode(node);
       return this.fire('nodeRemoved', node, item);
     };
 
@@ -4717,6 +4737,76 @@
 
     })(StorageAdapter.StorageError);
 
+    StorageAdapter.NotAllowedError = (function(_super1) {
+
+      __extends(NotAllowedError, _super1);
+
+      NotAllowedError.prototype.name = "NotAllowedError";
+
+      function NotAllowedError(message) {
+        NotAllowedError.__super__.constructor.call(this, message || "Storage operation denied access to the operation!");
+      }
+
+      return NotAllowedError;
+
+    })(StorageAdapter.StorageError);
+
+    StorageAdapter.NotAcceptableError = (function(_super1) {
+
+      __extends(NotAcceptableError, _super1);
+
+      NotAcceptableError.prototype.name = "NotAcceptableError";
+
+      function NotAcceptableError(message) {
+        NotAcceptableError.__super__.constructor.call(this, message || "Storage operation permitted but the request was malformed!");
+      }
+
+      return NotAcceptableError;
+
+    })(StorageAdapter.StorageError);
+
+    StorageAdapter.UnprocessableRecordError = (function(_super1) {
+
+      __extends(UnprocessableRecordError, _super1);
+
+      UnprocessableRecordError.prototype.name = "UnprocessableRecordError";
+
+      function UnprocessableRecordError(message) {
+        UnprocessableRecordError.__super__.constructor.call(this, message || "Storage adapter could not process the record!");
+      }
+
+      return UnprocessableRecordError;
+
+    })(StorageAdapter.StorageError);
+
+    StorageAdapter.InternalStorageError = (function(_super1) {
+
+      __extends(InternalStorageError, _super1);
+
+      InternalStorageError.prototype.name = "InternalStorageError";
+
+      function InternalStorageError(message) {
+        InternalStorageError.__super__.constructor.call(this, message || "An error occured during the storage operation!");
+      }
+
+      return InternalStorageError;
+
+    })(StorageAdapter.StorageError);
+
+    StorageAdapter.NotImplementedError = (function(_super1) {
+
+      __extends(NotImplementedError, _super1);
+
+      NotImplementedError.prototype.name = "NotImplementedError";
+
+      function NotImplementedError(message) {
+        NotImplementedError.__super__.constructor.call(this, message || "This operation is not implemented by the storage adpater!");
+      }
+
+      return NotImplementedError;
+
+    })(StorageAdapter.StorageError);
+
     function StorageAdapter(model) {
       var constructor;
       StorageAdapter.__super__.constructor.call(this, {
@@ -4862,9 +4952,10 @@
         }
         return _this.runAfterFilter(key, env, callback);
       };
-      return this.runBeforeFilter(key, env, function(env) {
+      this.runBeforeFilter(key, env, function(env) {
         return this[key](env, next);
       });
+      return void 0;
     };
 
     return StorageAdapter;
@@ -4884,6 +4975,20 @@
       _this = this;
 
     __extends(RestStorage, _super);
+
+    RestStorage.CommunicationError = (function(_super1) {
+
+      __extends(CommunicationError, _super1);
+
+      CommunicationError.prototype.name = 'CommunicationError';
+
+      function CommunicationError(message) {
+        CommunicationError.__super__.constructor.call(this, message || "A communication error has occurred!");
+      }
+
+      return CommunicationError;
+
+    })(RestStorage.StorageError);
 
     RestStorage.JSONContentType = 'application/json';
 
@@ -4969,16 +5074,19 @@
       return Batman.helpers.pluralize(this.storageKey(constructor.prototype));
     };
 
-    RestStorage.prototype._execWithOptions = function(object, key, options) {
+    RestStorage.prototype._execWithOptions = function(object, key, options, context) {
+      if (context == null) {
+        context = object;
+      }
       if (typeof object[key] === 'function') {
-        return object[key](options);
+        return object[key].call(context, options);
       } else {
         return object[key];
       }
     };
 
     RestStorage.prototype._defaultCollectionUrl = function(model) {
-      return "/" + (this.storageKey(model.prototype));
+      return "" + (this.storageKey(model.prototype));
     };
 
     RestStorage.prototype._addParams = function(url, options) {
@@ -4989,9 +5097,32 @@
       return url;
     };
 
+    RestStorage.prototype._addUrlAffixes = function(url, subject, env) {
+      var prefix, segments;
+      segments = [url, this.urlSuffix(subject, env)];
+      if (url.charAt(0) !== '/') {
+        prefix = this.urlPrefix(subject, env);
+        if (prefix.charAt(prefix.length - 1) !== '/') {
+          segments.unshift('/');
+        }
+        segments.unshift(prefix);
+      }
+      return segments.join('');
+    };
+
+    RestStorage.prototype.urlPrefix = function(object, env) {
+      return this._execWithOptions(object, 'urlPrefix', env.options) || '';
+    };
+
+    RestStorage.prototype.urlSuffix = function(object, env) {
+      return this._execWithOptions(object, 'urlSuffix', env.options) || '';
+    };
+
     RestStorage.prototype.urlForRecord = function(record, env) {
-      var id, url;
-      if (record.url) {
+      var id, url, _ref;
+      if ((_ref = env.options) != null ? _ref.recordUrl : void 0) {
+        url = this._execWithOptions(env.options, 'recordUrl', env.options, record);
+      } else if (record.url) {
         url = this._execWithOptions(record, 'url', env.options);
       } else {
         url = record.constructor.url ? this._execWithOptions(record.constructor, 'url', env.options) : this._defaultCollectionUrl(record.constructor);
@@ -5003,23 +5134,13 @@
           }
         }
       }
-      url = this._addParams(url, env.options);
-      return this.urlPrefix(record, env) + url + this.urlSuffix(record, env);
+      return this._addUrlAffixes(this._addParams(url, env.options), record, env);
     };
 
     RestStorage.prototype.urlForCollection = function(model, env) {
-      var url;
-      url = model.url ? this._execWithOptions(model, 'url', env.options) : this._defaultCollectionUrl(model, env.options);
-      url = this._addParams(url, env.options);
-      return this.urlPrefix(model, env) + url + this.urlSuffix(model, env);
-    };
-
-    RestStorage.prototype.urlPrefix = function(object, env) {
-      return this._execWithOptions(object, 'urlPrefix', env.options) || '';
-    };
-
-    RestStorage.prototype.urlSuffix = function(object, env) {
-      return this._execWithOptions(object, 'urlSuffix', env.options) || '';
+      var url, _ref;
+      url = ((_ref = env.options) != null ? _ref.collectionUrl : void 0) ? this._execWithOptions(env.options, 'collectionUrl', env.options, env.options.urlContext) : model.url ? this._execWithOptions(model, 'url', env.options) : this._defaultCollectionUrl(model, env.options);
+      return this._addUrlAffixes(this._addParams(url, env.options), model, env);
     };
 
     RestStorage.prototype.request = function(env, next) {
@@ -5134,7 +5255,6 @@
     RestStorage.prototype.after('readAll', RestStorage.skipIfError(function(env, next) {
       var jsonRecordAttributes, namespace;
       namespace = this.collectionJsonNamespace(env.subject);
-      console.log("ololo", namespace, arguments);
       env.recordsAttributes = this.extractFromNamespace(env.json, namespace);
       if (Batman.typeOf(env.recordsAttributes) !== 'Array') {
         namespace = this.recordJsonNamespace(env.subject.prototype);
@@ -5183,6 +5303,37 @@
       key = _ref[_i];
       _fn(key);
     }
+
+    RestStorage.prototype.after('all', function(env, next) {
+      if (env.error) {
+        env.error = this._errorFor(env.error, env);
+      }
+      return next();
+    });
+
+    RestStorage._statusCodeErrors = {
+      '0': RestStorage.CommunicationError,
+      '403': RestStorage.NotAllowedError,
+      '404': RestStorage.NotFoundError,
+      '406': RestStorage.NotAcceptableError,
+      '422': RestStorage.UnprocessableRecordError,
+      '500': RestStorage.InternalStorageError,
+      '501': RestStorage.NotImplementedError
+    };
+
+    RestStorage.prototype._errorFor = function(error, env) {
+      var errorClass, request;
+      if (error instanceof Error || !(error.request != null)) {
+        return error;
+      }
+      if (errorClass = this.constructor._statusCodeErrors[error.request.status]) {
+        request = error.request;
+        error = new errorClass;
+        error.request = request;
+        error.env = env;
+      }
+      return error;
+    };
 
     return RestStorage;
 
@@ -5392,1132 +5543,6 @@
 (function() {
 
   Batman.Encoders = new Batman.Object;
-
-}).call(this);
-
-(function() {
-  var __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  Batman.AssociationProxy = (function(_super) {
-
-    __extends(AssociationProxy, _super);
-
-    AssociationProxy.prototype.isProxy = true;
-
-    function AssociationProxy(association, model) {
-      this.association = association;
-      this.model = model;
-    }
-
-    AssociationProxy.prototype.loaded = false;
-
-    AssociationProxy.prototype.toJSON = function() {
-      var target;
-      target = this.get('target');
-      if (target != null) {
-        return this.get('target').toJSON();
-      }
-    };
-
-    AssociationProxy.prototype.load = function(callback) {
-      var _this = this;
-      this.fetch(function(err, proxiedRecord) {
-        if (!err) {
-          _this.set('loaded', true);
-          _this.set('target', proxiedRecord);
-        }
-        return typeof callback === "function" ? callback(err, proxiedRecord) : void 0;
-      });
-      return this.get('target');
-    };
-
-    AssociationProxy.prototype.fetch = function(callback) {
-      var record;
-      if ((this.get('foreignValue') || this.get('primaryValue')) == null) {
-        return callback(void 0, void 0);
-      }
-      record = this.fetchFromLocal();
-      if (record) {
-        return callback(void 0, record);
-      } else {
-        return this.fetchFromRemote(callback);
-      }
-    };
-
-    AssociationProxy.accessor('loaded', Batman.Property.defaultAccessor);
-
-    AssociationProxy.accessor('target', {
-      get: function() {
-        return this.fetchFromLocal();
-      },
-      set: function(_, v) {
-        return v;
-      }
-    });
-
-    AssociationProxy.accessor({
-      get: function(k) {
-        var _ref;
-        return (_ref = this.get('target')) != null ? _ref.get(k) : void 0;
-      },
-      set: function(k, v) {
-        var _ref;
-        return (_ref = this.get('target')) != null ? _ref.set(k, v) : void 0;
-      }
-    });
-
-    return AssociationProxy;
-
-  })(Batman.Object);
-
-}).call(this);
-
-(function() {
-  var __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  Batman.HasOneProxy = (function(_super) {
-
-    __extends(HasOneProxy, _super);
-
-    function HasOneProxy() {
-      return HasOneProxy.__super__.constructor.apply(this, arguments);
-    }
-
-    HasOneProxy.accessor('primaryValue', function() {
-      return this.model.get(this.association.primaryKey);
-    });
-
-    HasOneProxy.prototype.fetchFromLocal = function() {
-      return this.association.setIndex().get(this.get('primaryValue'));
-    };
-
-    HasOneProxy.prototype.fetchFromRemote = function(callback) {
-      var loadOptions,
-        _this = this;
-      loadOptions = {};
-      loadOptions[this.association.foreignKey] = this.get('primaryValue');
-      return this.association.getRelatedModel().load(loadOptions, function(error, loadedRecords) {
-        if (error) {
-          throw error;
-        }
-        if (!loadedRecords || loadedRecords.length <= 0) {
-          return callback(new Error("Couldn't find related record!"), void 0);
-        } else {
-          return callback(void 0, loadedRecords[0]);
-        }
-      });
-    };
-
-    return HasOneProxy;
-
-  })(Batman.AssociationProxy);
-
-}).call(this);
-
-(function() {
-  var __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  Batman.BelongsToProxy = (function(_super) {
-
-    __extends(BelongsToProxy, _super);
-
-    function BelongsToProxy() {
-      return BelongsToProxy.__super__.constructor.apply(this, arguments);
-    }
-
-    BelongsToProxy.accessor('foreignValue', function() {
-      return this.model.get(this.association.foreignKey);
-    });
-
-    BelongsToProxy.prototype.fetchFromLocal = function() {
-      return this.association.setIndex().get(this.get('foreignValue'));
-    };
-
-    BelongsToProxy.prototype.fetchFromRemote = function(callback) {
-      var _this = this;
-      return this.association.getRelatedModel().find(this.get('foreignValue'), function(error, loadedRecord) {
-        if (error) {
-          throw error;
-        }
-        return callback(void 0, loadedRecord);
-      });
-    };
-
-    return BelongsToProxy;
-
-  })(Batman.AssociationProxy);
-
-}).call(this);
-
-(function() {
-  var __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  Batman.PolymorphicBelongsToProxy = (function(_super) {
-
-    __extends(PolymorphicBelongsToProxy, _super);
-
-    function PolymorphicBelongsToProxy() {
-      return PolymorphicBelongsToProxy.__super__.constructor.apply(this, arguments);
-    }
-
-    PolymorphicBelongsToProxy.accessor('foreignTypeValue', function() {
-      return this.model.get(this.association.foreignTypeKey);
-    });
-
-    PolymorphicBelongsToProxy.prototype.fetchFromLocal = function() {
-      return this.association.setIndexForType(this.get('foreignTypeValue')).get(this.get('foreignValue'));
-    };
-
-    PolymorphicBelongsToProxy.prototype.fetchFromRemote = function(callback) {
-      var _this = this;
-      return this.association.getRelatedModelForType(this.get('foreignTypeValue')).find(this.get('foreignValue'), function(error, loadedRecord) {
-        if (error) {
-          throw error;
-        }
-        return callback(void 0, loadedRecord);
-      });
-    };
-
-    return PolymorphicBelongsToProxy;
-
-  })(Batman.BelongsToProxy);
-
-}).call(this);
-
-(function() {
-  var __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __slice = [].slice;
-
-  Batman.StateMachine = (function(_super) {
-
-    __extends(StateMachine, _super);
-
-    StateMachine.InvalidTransitionError = function(message) {
-      this.message = message != null ? message : "";
-    };
-
-    StateMachine.InvalidTransitionError.prototype = new Error;
-
-    StateMachine.transitions = function(table) {
-      var definePredicate, fromState, k, object, predicateKeys, toState, transitions, v, _fn, _ref,
-        _this = this;
-      for (k in table) {
-        v = table[k];
-        if (!(v.from && v.to)) {
-          continue;
-        }
-        object = {};
-        if (v.from.forEach) {
-          v.from.forEach(function(fromKey) {
-            return object[fromKey] = v.to;
-          });
-        } else {
-          object[v.from] = v.to;
-        }
-        table[k] = object;
-      }
-      this.prototype.transitionTable = Batman.extend({}, this.prototype.transitionTable, table);
-      predicateKeys = [];
-      definePredicate = function(state) {
-        var key;
-        key = "is" + (Batman.helpers.capitalize(state));
-        if (_this.prototype[key] != null) {
-          return;
-        }
-        predicateKeys.push(key);
-        return _this.prototype[key] = function() {
-          return this.get('state') === state;
-        };
-      };
-      _ref = this.prototype.transitionTable;
-      _fn = function(k) {
-        return _this.prototype[k] = function() {
-          return this.startTransition(k);
-        };
-      };
-      for (k in _ref) {
-        transitions = _ref[k];
-        if (!(!this.prototype[k])) {
-          continue;
-        }
-        _fn(k);
-        for (fromState in transitions) {
-          toState = transitions[fromState];
-          definePredicate(fromState);
-          definePredicate(toState);
-        }
-      }
-      if (predicateKeys.length) {
-        this.accessor.apply(this, __slice.call(predicateKeys).concat([function(key) {
-          return this[key]();
-        }]));
-      }
-      return this;
-    };
-
-    function StateMachine(startState) {
-      this.nextEvents = [];
-      this.set('_state', startState);
-    }
-
-    StateMachine.accessor('state', function() {
-      return this.get('_state');
-    });
-
-    StateMachine.prototype.isTransitioning = false;
-
-    StateMachine.prototype.transitionTable = {};
-
-    StateMachine.prototype.onTransition = function(from, into, callback) {
-      return this.on("" + from + "->" + into, callback);
-    };
-
-    StateMachine.prototype.onEnter = function(into, callback) {
-      return this.on("enter " + into, callback);
-    };
-
-    StateMachine.prototype.onExit = function(from, callback) {
-      return this.on("exit " + from, callback);
-    };
-
-    StateMachine.prototype.startTransition = Batman.Property.wrapTrackingPrevention(function(event) {
-      var nextState, previousState;
-      if (this.isTransitioning) {
-        this.nextEvents.push(event);
-        return;
-      }
-      previousState = this.get('state');
-      nextState = this.nextStateForEvent(event);
-      if (!nextState) {
-        return false;
-      }
-      this.isTransitioning = true;
-      this.fire("exit " + previousState);
-      this.set('_state', nextState);
-      this.fire("" + previousState + "->" + nextState);
-      this.fire("enter " + nextState);
-      this.fire(event);
-      this.isTransitioning = false;
-      if (this.nextEvents.length > 0) {
-        this.startTransition(this.nextEvents.shift());
-      }
-      return true;
-    });
-
-    StateMachine.prototype.canStartTransition = function(event, fromState) {
-      if (fromState == null) {
-        fromState = this.get('state');
-      }
-      return !!this.nextStateForEvent(event, fromState);
-    };
-
-    StateMachine.prototype.nextStateForEvent = function(event, fromState) {
-      var _ref;
-      if (fromState == null) {
-        fromState = this.get('state');
-      }
-      return (_ref = this.transitionTable[event]) != null ? _ref[fromState] : void 0;
-    };
-
-    return StateMachine;
-
-  })(Batman.Object);
-
-  Batman.DelegatingStateMachine = (function(_super) {
-
-    __extends(DelegatingStateMachine, _super);
-
-    function DelegatingStateMachine(startState, base) {
-      this.base = base;
-      DelegatingStateMachine.__super__.constructor.call(this, startState);
-    }
-
-    DelegatingStateMachine.prototype.fire = function() {
-      var result, _ref;
-      result = DelegatingStateMachine.__super__.fire.apply(this, arguments);
-      (_ref = this.base).fire.apply(_ref, arguments);
-      return result;
-    };
-
-    return DelegatingStateMachine;
-
-  })(Batman.StateMachine);
-
-}).call(this);
-
-(function() {
-  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __slice = [].slice;
-
-  Batman.Model = (function(_super) {
-    var functionName, _i, _j, _len, _len1, _ref, _ref1;
-
-    __extends(Model, _super);
-
-    Model.primaryKey = 'id';
-
-    Model.storageKey = null;
-
-    Model.persist = function(mechanism, options) {
-      Batman.initializeObject(this.prototype);
-      mechanism = mechanism.isStorageAdapter ? mechanism : new mechanism(this);
-      if (options) {
-        Batman.mixin(mechanism, options);
-      }
-      this.prototype._batman.storage = mechanism;
-      return mechanism;
-    };
-
-    Model.storageAdapter = function() {
-      Batman.initializeObject(this.prototype);
-      return this.prototype._batman.storage;
-    };
-
-    Model.encode = function() {
-      var encoder, encoderOrLastKey, hash, key, keys, operation, _base, _base1, _i, _j, _k, _len, _len1, _ref;
-      keys = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), encoderOrLastKey = arguments[_i++];
-      Batman.initializeObject(this.prototype);
-      (_base = this.prototype._batman).encoders || (_base.encoders = new Batman.SimpleHash);
-      (_base1 = this.prototype._batman).decoders || (_base1.decoders = new Batman.SimpleHash);
-      encoder = {};
-      switch (Batman.typeOf(encoderOrLastKey)) {
-        case 'String':
-          keys.push(encoderOrLastKey);
-          break;
-        case 'Function':
-          encoder.encode = encoderOrLastKey;
-          break;
-        default:
-          if (encoderOrLastKey.encode != null) {
-            encoder.encode = encoderOrLastKey.encode;
-          }
-          if (encoderOrLastKey.decode != null) {
-            encoder.decode = encoderOrLastKey.decode;
-          }
-      }
-      encoder = Batman.extend({}, this.defaultEncoder, encoder);
-      _ref = ['encode', 'decode'];
-      for (_j = 0, _len = _ref.length; _j < _len; _j++) {
-        operation = _ref[_j];
-        for (_k = 0, _len1 = keys.length; _k < _len1; _k++) {
-          key = keys[_k];
-          hash = this.prototype._batman["" + operation + "rs"];
-          if (encoder[operation]) {
-            hash.set(key, encoder[operation]);
-          } else {
-            hash.unset(key);
-          }
-        }
-      }
-    };
-
-    Model.defaultEncoder = {
-      encode: function(x) {
-        return x;
-      },
-      decode: function(x) {
-        return x;
-      }
-    };
-
-    Model.observeAndFire('primaryKey', function(newPrimaryKey, oldPrimaryKey) {
-      this.encode(oldPrimaryKey, {
-        encode: false,
-        decode: false
-      });
-      return this.encode(newPrimaryKey, {
-        encode: false,
-        decode: this.defaultEncoder.decode
-      });
-    });
-
-    Model.validate = function() {
-      var keys, match, matches, options, optionsOrFunction, validator, validators, _base, _i, _j, _k, _len, _len1, _ref, _results;
-      keys = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), optionsOrFunction = arguments[_i++];
-      Batman.initializeObject(this.prototype);
-      validators = (_base = this.prototype._batman).validators || (_base.validators = []);
-      if (typeof optionsOrFunction === 'function') {
-        return validators.push({
-          keys: keys,
-          callback: optionsOrFunction
-        });
-      } else {
-        options = optionsOrFunction;
-        _ref = Batman.Validators;
-        _results = [];
-        for (_j = 0, _len = _ref.length; _j < _len; _j++) {
-          validator = _ref[_j];
-          if ((matches = validator.matches(options))) {
-            for (_k = 0, _len1 = matches.length; _k < _len1; _k++) {
-              match = matches[_k];
-              delete options[match];
-            }
-            _results.push(validators.push({
-              keys: keys,
-              validator: new validator(matches)
-            }));
-          } else {
-            _results.push(void 0);
-          }
-        }
-        return _results;
-      }
-    };
-
-    Model.LifecycleStateMachine = (function(_super1) {
-
-      __extends(LifecycleStateMachine, _super1);
-
-      function LifecycleStateMachine() {
-        return LifecycleStateMachine.__super__.constructor.apply(this, arguments);
-      }
-
-      LifecycleStateMachine.transitions({
-        load: {
-          empty: 'loading',
-          loaded: 'loading',
-          loading: 'loading'
-        },
-        loaded: {
-          loading: 'loaded'
-        },
-        error: {
-          loading: 'error'
-        }
-      });
-
-      return LifecycleStateMachine;
-
-    })(Batman.DelegatingStateMachine);
-
-    Model.classAccessor('lifecycle', function() {
-      var _base;
-      this._batman.check(this);
-      return (_base = this._batman).lifecycle || (_base.lifecycle = new this.LifecycleStateMachine('empty', this));
-    });
-
-    Model.classAccessor('resourceName', {
-      get: function() {
-        if (this.resourceName != null) {
-          return this.resourceName;
-        } else {
-          if (Batman.config.minificationErrors) {
-            Batman.developer.error("Please define " + (Batman.functionName(this)) + ".resourceName in order for your model to be minification safe.");
-          }
-          return Batman.helpers.underscore(Batman.functionName(this));
-        }
-      }
-    });
-
-    Model.classAccessor('all', {
-      get: function() {
-        this._batman.check(this);
-        if (this.prototype.hasStorage() && !this._batman.allLoadTriggered) {
-          this.load();
-          this._batman.allLoadTriggered = true;
-        }
-        return this.get('loaded');
-      },
-      set: function(k, v) {
-        return this.set('loaded', v);
-      }
-    });
-
-    Model.classAccessor('loaded', {
-      get: function() {
-        return this._loaded || (this._loaded = new Batman.Set);
-      },
-      set: function(k, v) {
-        return this._loaded = v;
-      }
-    });
-
-    Model.classAccessor('first', function() {
-      return this.get('all').toArray()[0];
-    });
-
-    Model.classAccessor('last', function() {
-      var x;
-      x = this.get('all').toArray();
-      return x[x.length - 1];
-    });
-
-    Model.clear = function() {
-      var result, _ref;
-      Batman.initializeObject(this);
-      result = this.get('loaded').clear();
-      if ((_ref = this._batman.get('associations')) != null) {
-        _ref.reset();
-      }
-      return result;
-    };
-
-    Model.find = function(id, callback) {
-      var record;
-      Batman.developer.assert(callback, "Must call find with a callback!");
-      record = new this();
-      record._withoutDirtyTracking(function() {
-        return this.set('id', id);
-      });
-      record.load(callback);
-      return record;
-    };
-
-    Model.load = function(options, callback) {
-      var lifecycle, _ref,
-        _this = this;
-      if ((_ref = typeof options) === 'function' || _ref === 'undefined') {
-        callback = options;
-        options = {};
-      }
-      lifecycle = this.get('lifecycle');
-      if (lifecycle.load()) {
-        return this._doStorageOperation('readAll', {
-          data: options
-        }, function(err, records, env) {
-          var mappedRecords, record;
-          if (err != null) {
-            lifecycle.error();
-            return typeof callback === "function" ? callback(err, []) : void 0;
-          } else {
-            mappedRecords = (function() {
-              var _i, _len, _results;
-              _results = [];
-              for (_i = 0, _len = records.length; _i < _len; _i++) {
-                record = records[_i];
-                _results.push(this._mapIdentity(record));
-              }
-              return _results;
-            }).call(_this);
-            lifecycle.loaded();
-            return typeof callback === "function" ? callback(err, mappedRecords, env) : void 0;
-          }
-        });
-      } else {
-        return callback(new Batman.StateMachine.InvalidTransitionError("Can't load while in state " + (lifecycle.get('state'))));
-      }
-    };
-
-    Model.create = function(attrs, callback) {
-      var obj, _ref;
-      if (!callback) {
-        _ref = [{}, attrs], attrs = _ref[0], callback = _ref[1];
-      }
-      obj = new this(attrs);
-      obj.save(callback);
-      return obj;
-    };
-
-    Model.findOrCreate = function(attrs, callback) {
-      var foundRecord, record;
-      record = new this(attrs);
-      if (record.isNew()) {
-        record.save(callback);
-      } else {
-        foundRecord = this._mapIdentity(record);
-        callback(void 0, foundRecord);
-      }
-      return record;
-    };
-
-    Model._mapIdentity = function(record) {
-      var existing, id, _ref;
-      if (typeof (id = record.get('id')) === 'undefined' || id === '') {
-        return record;
-      } else {
-        existing = (_ref = this.get("loaded.indexedBy.id").get(id)) != null ? _ref.toArray()[0] : void 0;
-        if (existing) {
-          existing._withoutDirtyTracking(function() {
-            var _ref1;
-            return this.updateAttributes(((_ref1 = record.get('attributes')) != null ? _ref1.toObject() : void 0) || {});
-          });
-          return existing;
-        } else {
-          this.get('loaded').add(record);
-          return record;
-        }
-      }
-    };
-
-    Model._doStorageOperation = function(operation, options, callback) {
-      var adapter;
-      Batman.developer.assert(this.prototype.hasStorage(), "Can't " + operation + " model " + (Batman.functionName(this.constructor)) + " without any storage adapters!");
-      adapter = this.prototype._batman.get('storage');
-      return adapter.perform(operation, this, options, callback);
-    };
-
-    _ref = ['find', 'load', 'create'];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      functionName = _ref[_i];
-      Model[functionName] = Batman.Property.wrapTrackingPrevention(Model[functionName]);
-    }
-
-    Model.InstanceLifecycleStateMachine = (function(_super1) {
-
-      __extends(InstanceLifecycleStateMachine, _super1);
-
-      function InstanceLifecycleStateMachine() {
-        return InstanceLifecycleStateMachine.__super__.constructor.apply(this, arguments);
-      }
-
-      InstanceLifecycleStateMachine.transitions({
-        load: {
-          from: ['dirty', 'clean'],
-          to: 'loading'
-        },
-        create: {
-          from: ['dirty', 'clean'],
-          to: 'creating'
-        },
-        save: {
-          from: ['dirty', 'clean'],
-          to: 'saving'
-        },
-        destroy: {
-          from: ['dirty', 'clean'],
-          to: 'destroying'
-        },
-        failedValidation: {
-          from: ['saving', 'creating'],
-          to: 'dirty'
-        },
-        loaded: {
-          loading: 'clean'
-        },
-        created: {
-          creating: 'clean'
-        },
-        saved: {
-          saving: 'clean'
-        },
-        destroyed: {
-          destroying: 'destroyed'
-        },
-        set: {
-          from: ['dirty', 'clean'],
-          to: 'dirty'
-        },
-        error: {
-          from: ['saving', 'creating', 'loading', 'destroying'],
-          to: 'error'
-        }
-      });
-
-      return InstanceLifecycleStateMachine;
-
-    })(Batman.DelegatingStateMachine);
-
-    function Model(idOrAttributes) {
-      if (idOrAttributes == null) {
-        idOrAttributes = {};
-      }
-      this.destroy = __bind(this.destroy, this);
-
-      this.save = __bind(this.save, this);
-
-      this.load = __bind(this.load, this);
-
-      Batman.developer.assert(this instanceof Batman.Object, "constructors must be called with new");
-      if (Batman.typeOf(idOrAttributes) === 'Object') {
-        Model.__super__.constructor.call(this, idOrAttributes);
-      } else {
-        Model.__super__.constructor.call(this);
-        this.set('id', idOrAttributes);
-      }
-    }
-
-    Model.accessor('lifecycle', function() {
-      return this.lifecycle || (this.lifecycle = new Batman.Model.InstanceLifecycleStateMachine('clean', this));
-    });
-
-    Model.accessor('attributes', function() {
-      return this.attributes || (this.attributes = new Batman.Hash);
-    });
-
-    Model.accessor('dirtyKeys', function() {
-      return this.dirtyKeys || (this.dirtyKeys = new Batman.Hash);
-    });
-
-    Model.accessor('_dirtiedKeys', function() {
-      return this._dirtiedKeys || (this._dirtiedKeys = new Batman.SimpleSet);
-    });
-
-    Model.accessor('errors', function() {
-      return this.errors || (this.errors = new Batman.ErrorsSet);
-    });
-
-    Model.accessor('isNew', function() {
-      return this.isNew();
-    });
-
-    Model.accessor(Model.defaultAccessor = {
-      get: function(k) {
-        return Batman.getPath(this, ['attributes', k]);
-      },
-      set: function(k, v) {
-        if (this._willSet(k)) {
-          return this.get('attributes').set(k, v);
-        } else {
-          return this.get(k);
-        }
-      },
-      unset: function(k) {
-        return this.get('attributes').unset(k);
-      }
-    });
-
-    Model.wrapAccessor('id', function(core) {
-      return {
-        get: function() {
-          var primaryKey;
-          primaryKey = this.constructor.primaryKey;
-          if (primaryKey === 'id') {
-            return core.get.apply(this, arguments);
-          } else {
-            return this.get(primaryKey);
-          }
-        },
-        set: function(key, value) {
-          var parsedValue, primaryKey;
-          if ((typeof value === "string") && (value.match(/[^0-9]/) === null) && (("" + (parsedValue = parseInt(value, 10))) === value)) {
-            value = parsedValue;
-          }
-          primaryKey = this.constructor.primaryKey;
-          if (primaryKey === 'id') {
-            this._willSet(key);
-            return core.set.apply(this, arguments);
-          } else {
-            return this.set(primaryKey, value);
-          }
-        }
-      };
-    });
-
-    Model.prototype.isNew = function() {
-      return typeof this.get('id') === 'undefined';
-    };
-
-    Model.prototype.updateAttributes = function(attrs) {
-      this.mixin(attrs);
-      return this;
-    };
-
-    Model.prototype.toString = function() {
-      return "" + (this.constructor.get('resourceName')) + ": " + (this.get('id'));
-    };
-
-    Model.prototype.toParam = function() {
-      return this.get('id');
-    };
-
-    Model.prototype.toJSON = function() {
-      var encoders, obj,
-        _this = this;
-      obj = {};
-      encoders = this._batman.get('encoders');
-      if (!(!encoders || encoders.isEmpty())) {
-        encoders.forEach(function(key, encoder) {
-          var encodedVal, val;
-          val = _this.get(key);
-          if (typeof val !== 'undefined') {
-            encodedVal = encoder(val, key, obj, _this);
-            if (typeof encodedVal !== 'undefined') {
-              return obj[key] = encodedVal;
-            }
-          }
-        });
-      }
-      return obj;
-    };
-
-    Model.prototype.fromJSON = function(data) {
-      var decoders, key, obj, value,
-        _this = this;
-      obj = {};
-      decoders = this._batman.get('decoders');
-      if (!decoders || decoders.isEmpty()) {
-        for (key in data) {
-          value = data[key];
-          obj[key] = value;
-        }
-      } else {
-        decoders.forEach(function(key, decoder) {
-          if (typeof data[key] !== 'undefined') {
-            return obj[key] = decoder(data[key], key, data, obj, _this);
-          }
-        });
-      }
-      if (this.constructor.primaryKey !== 'id') {
-        obj.id = data[this.constructor.primaryKey];
-      }
-      Batman.developer["do"](function() {
-        if ((!decoders) || decoders.length <= 1) {
-          return Batman.developer.warn("Warning: Model " + (Batman.functionName(_this.constructor)) + " has suspiciously few decoders!");
-        }
-      });
-      return this.mixin(obj);
-    };
-
-    Model.prototype.hasStorage = function() {
-      return this._batman.get('storage') != null;
-    };
-
-    Model.prototype.load = function(options, callback) {
-      var callbackQueue, hasOptions, _ref1, _ref2,
-        _this = this;
-      if (!callback) {
-        _ref1 = [{}, options], options = _ref1[0], callback = _ref1[1];
-      }
-      hasOptions = Object.keys(options).length !== 0;
-      if ((_ref2 = this.get('lifecycle.state')) === 'destroying' || _ref2 === 'destroyed') {
-        if (typeof callback === "function") {
-          callback(new Error("Can't load a destroyed record!"));
-        }
-        return;
-      }
-      if (this.get('lifecycle').load()) {
-        callbackQueue = [];
-        if (callback != null) {
-          callbackQueue.push(callback);
-        }
-        if (!hasOptions) {
-          this._currentLoad = callbackQueue;
-        }
-        return this._doStorageOperation('read', {
-          data: options
-        }, function(err, record, env) {
-          var _j, _len1;
-          if (!err) {
-            _this.get('lifecycle').loaded();
-            record = _this.constructor._mapIdentity(record);
-          } else {
-            _this.get('lifecycle').error();
-          }
-          if (!hasOptions) {
-            _this._currentLoad = null;
-          }
-          for (_j = 0, _len1 = callbackQueue.length; _j < _len1; _j++) {
-            callback = callbackQueue[_j];
-            callback(err, record, env);
-          }
-        });
-      } else {
-        if (this.get('lifecycle.state') === 'loading' && !hasOptions) {
-          if (callback != null) {
-            return this._currentLoad.push(callback);
-          }
-        } else {
-          return typeof callback === "function" ? callback(new Batman.StateMachine.InvalidTransitionError("Can't load while in state " + (this.get('lifecycle.state')))) : void 0;
-        }
-      }
-    };
-
-    Model.prototype.save = function(options, callback) {
-      var endState, isNew, startState, storageOperation, _ref1, _ref2, _ref3,
-        _this = this;
-      if (!callback) {
-        _ref1 = [{}, options], options = _ref1[0], callback = _ref1[1];
-      }
-      if ((_ref2 = this.get('lifecycle').get('state')) === 'destroying' || _ref2 === 'destroyed') {
-        if (typeof callback === "function") {
-          callback(new Error("Can't save a destroyed record!"));
-        }
-        return;
-      }
-      isNew = this.isNew();
-      _ref3 = isNew ? ['create', 'create', 'created'] : ['save', 'update', 'saved'], startState = _ref3[0], storageOperation = _ref3[1], endState = _ref3[2];
-      return this.validate(function(error, errors) {
-        var associations, creating;
-        if (error || errors.length) {
-          _this.get('lifecycle').failedValidation();
-          if (typeof callback === "function") {
-            callback(error || errors, _this);
-          }
-          return;
-        }
-        creating = _this.isNew();
-        if (_this.get('lifecycle').startTransition(startState)) {
-          associations = _this.constructor._batman.get('associations');
-          _this._withoutDirtyTracking(function() {
-            var _ref4,
-              _this = this;
-            return associations != null ? (_ref4 = associations.getByType('belongsTo')) != null ? _ref4.forEach(function(association, label) {
-              return association.apply(_this);
-            }) : void 0 : void 0;
-          });
-          return _this._doStorageOperation(storageOperation, {
-            data: options
-          }, function(err, record, env) {
-            if (!err) {
-              _this.get('dirtyKeys').clear();
-              _this.get('_dirtiedKeys').clear();
-              if (associations) {
-                record._withoutDirtyTracking(function() {
-                  var _ref4, _ref5;
-                  if ((_ref4 = associations.getByType('hasOne')) != null) {
-                    _ref4.forEach(function(association, label) {
-                      return association.apply(err, record);
-                    });
-                  }
-                  return (_ref5 = associations.getByType('hasMany')) != null ? _ref5.forEach(function(association, label) {
-                    return association.apply(err, record);
-                  }) : void 0;
-                });
-              }
-              record = _this.constructor._mapIdentity(record);
-              _this.get('lifecycle').startTransition(endState);
-            } else {
-              if (err instanceof Batman.ErrorsSet) {
-                _this.get('lifecycle').failedValidation();
-              } else {
-                _this.get('lifecycle').error();
-              }
-            }
-            return typeof callback === "function" ? callback(err, record || _this, env) : void 0;
-          });
-        } else {
-          return typeof callback === "function" ? callback(new Batman.StateMachine.InvalidTransitionError("Can't save while in state " + (_this.get('lifecycle.state')))) : void 0;
-        }
-      });
-    };
-
-    Model.prototype.destroy = function(options, callback) {
-      var _ref1,
-        _this = this;
-      if (!callback) {
-        _ref1 = [{}, options], options = _ref1[0], callback = _ref1[1];
-      }
-      if (this.get('lifecycle').destroy()) {
-        return this._doStorageOperation('destroy', {
-          data: options
-        }, function(err, record, env) {
-          if (!err) {
-            _this.constructor.get('loaded').remove(_this);
-            _this.get('lifecycle').destroyed();
-          } else {
-            _this.get('lifecycle').error();
-          }
-          return typeof callback === "function" ? callback(err, record, env) : void 0;
-        });
-      } else {
-        return typeof callback === "function" ? callback(new Batman.StateMachine.InvalidTransitionError("Can't destroy while in state " + (this.get('lifecycle.state')))) : void 0;
-      }
-    };
-
-    Model.prototype.validate = function(callback) {
-      var args, count, errors, finishedValidation, key, validator, validators, _j, _k, _len1, _len2, _ref1;
-      errors = this.get('errors');
-      errors.clear();
-      validators = this._batman.get('validators') || [];
-      if (!validators || validators.length === 0) {
-        if (typeof callback === "function") {
-          callback(void 0, errors);
-        }
-        return true;
-      }
-      count = validators.length;
-      finishedValidation = function() {
-        if (--count === 0) {
-          return typeof callback === "function" ? callback(void 0, errors) : void 0;
-        }
-      };
-      for (_j = 0, _len1 = validators.length; _j < _len1; _j++) {
-        validator = validators[_j];
-        _ref1 = validator.keys;
-        for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
-          key = _ref1[_k];
-          args = [errors, this, key, finishedValidation];
-          try {
-            if (validator.validator) {
-              validator.validator.validateEach.apply(validator.validator, args);
-            } else {
-              validator.callback.apply(validator, args);
-            }
-          } catch (e) {
-            if (typeof callback === "function") {
-              callback(e, errors);
-            }
-          }
-        }
-      }
-    };
-
-    Model.prototype.associationProxy = function(association) {
-      var proxies, _base, _name;
-      Batman.initializeObject(this);
-      proxies = (_base = this._batman).associationProxies || (_base.associationProxies = {});
-      proxies[_name = association.label] || (proxies[_name] = new association.proxyClass(association, this));
-      return proxies[association.label];
-    };
-
-    Model.prototype._willSet = function(key) {
-      if (this._pauseDirtyTracking) {
-        return true;
-      }
-      if (this.get('lifecycle').startTransition('set')) {
-        if (!this.get('_dirtiedKeys').has(key)) {
-          this.set("dirtyKeys." + key, this.get(key));
-        }
-        return true;
-      } else {
-        return false;
-      }
-    };
-
-    Model.prototype._doStorageOperation = function(operation, options, callback) {
-      var adapter,
-        _this = this;
-      Batman.developer.assert(this.hasStorage(), "Can't " + operation + " model " + (Batman.functionName(this.constructor)) + " without any storage adapters!");
-      adapter = this._batman.get('storage');
-      return adapter.perform(operation, this, options, function() {
-        return callback.apply(null, arguments);
-      });
-    };
-
-    Model.prototype._withoutDirtyTracking = function(block) {
-      var result;
-      this._pauseDirtyTracking = true;
-      result = block.call(this);
-      this._pauseDirtyTracking = false;
-      return result;
-    };
-
-    _ref1 = ['load', 'save', 'validate', 'destroy'];
-    for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-      functionName = _ref1[_j];
-      Model.prototype[functionName] = Batman.Property.wrapTrackingPrevention(Model.prototype[functionName]);
-    }
-
-    return Model;
-
-  }).call(this, Batman.Object);
-
-}).call(this);
-
-(function() {
-  var k, _fn, _i, _len, _ref,
-    _this = this;
-
-  _ref = Batman.AssociationCurator.availableAssociations;
-  _fn = function(k) {
-    return Batman.Model[k] = function(label, scope) {
-      var collection, _base;
-      Batman.initializeObject(this);
-      collection = (_base = this._batman).associations || (_base.associations = new Batman.AssociationCurator(this));
-      return collection.add(new Batman["" + (Batman.helpers.capitalize(k)) + "Association"](this, label, scope));
-    };
-  };
-  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-    k = _ref[_i];
-    _fn(k);
-  }
 
 }).call(this);
 
@@ -6841,7 +5866,7 @@
     };
 
     Dispatcher.prototype.dispatch = function(params) {
-      var inferredParams, path, route, _ref;
+      var error, inferredParams, path, route, _ref, _ref1;
       inferredParams = this.constructor.paramsFromArgument(params);
       route = this.routeForParams(inferredParams);
       if (route) {
@@ -6855,6 +5880,19 @@
           return this.get('app.currentParams').replace(params);
         } else {
           this.get('app.currentParams').clear();
+        }
+        error = {
+          type: '404',
+          isPrevented: false,
+          preventDefault: function() {
+            return this.isPrevented = true;
+          }
+        };
+        if ((_ref1 = Batman.currentApp) != null) {
+          _ref1.fire('error', error);
+        }
+        if (error.isPrevented) {
+          return params;
         }
         if (params !== '/404') {
           return Batman.redirect('/404');
@@ -6883,7 +5921,9 @@
       queryParam: '(?:\\?.+)?',
       namedOrSplat: /[:|\*]([\w\d]+)/g,
       namePrefix: '[:|\*]',
-      escapeRegExp: /[-[\]{}()+?.,\\^$|#\s]/g
+      escapeRegExp: /[-[\]{}+?.,\\^$|#\s]/g,
+      openOptParam: /\(/g,
+      closeOptParam: /\)/g
     };
 
     Route.prototype.optionKeys = ['member', 'collection'];
@@ -6899,7 +5939,8 @@
         templatePath = "/" + templatePath;
       }
       pattern = templatePath.replace(regexps.escapeRegExp, '\\$&');
-      regexp = RegExp("^" + (pattern.replace(regexps.namedParam, '([^\/]+)').replace(regexps.splatParam, '(.*?)')) + regexps.queryParam + "$");
+      regexp = RegExp("^" + (pattern.replace(regexps.openOptParam, '(?:').replace(regexps.closeOptParam, ')?').replace(regexps.namedParam, '([^\/]+)').replace(regexps.splatParam, '(.*?)')) + regexps.queryParam + "$");
+      regexps.namedOrSplat.lastIndex = 0;
       namedArguments = ((function() {
         var _results;
         _results = [];
@@ -6941,19 +5982,21 @@
     };
 
     Route.prototype.pathFromParams = function(argumentParams) {
-      var hash, key, name, newPath, params, path, query, regexp, _i, _j, _len, _len1, _ref, _ref1;
+      var hash, key, name, newPath, params, path, query, regexp, regexps, _i, _j, _len, _len1, _ref, _ref1;
       params = Batman.extend({}, argumentParams);
       path = this.get('templatePath');
+      regexps = this.constructor.regexps;
       _ref = this.get('namedArguments');
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         name = _ref[_i];
-        regexp = RegExp("" + this.constructor.regexps.namePrefix + name);
+        regexp = RegExp("" + regexps.namePrefix + name);
         newPath = path.replace(regexp, (params[name] != null ? params[name] : ''));
         if (newPath !== path) {
           delete params[name];
           path = newPath;
         }
       }
+      path = path.replace(regexps.openOptParam, '').replace(regexps.closeOptParam, '').replace(/([^\/])\/+$/, '$1');
       _ref1 = this.testKeys;
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         key = _ref1[_j];
@@ -7323,6 +6366,17 @@
       return true;
     };
 
+    RenderCache.prototype.reset = function() {
+      var key, _i, _len, _ref, _results;
+      _ref = this.keyQueue.slice(0);
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        key = _ref[_i];
+        _results.push(this.unset(key));
+      }
+      return _results;
+    };
+
     RenderCache.prototype._addOrBubbleKey = function(key) {
       this._removeKeyFromQueue(key);
       return this.keyQueue.unshift(key);
@@ -7364,6 +6418,7 @@
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __slice = [].slice,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   Batman.Controller = (function(_super) {
@@ -7418,16 +6473,16 @@
       var filters, options, _base;
       Batman.initializeObject(this);
       options = _optionsFromFilterArguments.apply(null, arguments);
-      filters = (_base = this._batman).beforeFilters || (_base.beforeFilters = new Batman.SimpleHash);
-      return filters.set(options.block, options);
+      filters = (_base = this._batman).beforeFilters || (_base.beforeFilters = []);
+      return filters.push(options);
     };
 
     Controller.afterFilter = function() {
       var filters, options, _base;
       Batman.initializeObject(this);
       options = _optionsFromFilterArguments.apply(null, arguments);
-      filters = (_base = this._batman).afterFilters || (_base.afterFilters = new Batman.SimpleHash);
-      return filters.set(options.block, options);
+      filters = (_base = this._batman).afterFilters || (_base.afterFilters = []);
+      return filters.push(options);
     };
 
     Controller.afterFilter(function(params) {
@@ -7436,10 +6491,73 @@
       }
     });
 
+    Controller.catchError = function() {
+      var currentHandlers, error, errors, handlers, options, _base, _i, _j, _len, _results;
+      errors = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), options = arguments[_i++];
+      Batman.initializeObject(this);
+      (_base = this._batman).errorHandlers || (_base.errorHandlers = new Batman.SimpleHash);
+      handlers = Batman.typeOf(options["with"]) === 'Array' ? options["with"] : [options["with"]];
+      _results = [];
+      for (_j = 0, _len = errors.length; _j < _len; _j++) {
+        error = errors[_j];
+        currentHandlers = this._batman.errorHandlers.get(error) || [];
+        _results.push(this._batman.errorHandlers.set(error, currentHandlers.concat(handlers)));
+      }
+      return _results;
+    };
+
+    Controller.prototype.errorHandler = function(callback) {
+      var errorFrame, _ref,
+        _this = this;
+      errorFrame = (_ref = this._actionFrames) != null ? _ref[this._actionFrames.length - 1] : void 0;
+      return function(err, result, env) {
+        if (err) {
+          if (errorFrame != null ? errorFrame.error : void 0) {
+            return;
+          }
+          if (errorFrame != null) {
+            errorFrame.error = err;
+          }
+          if (!_this.handleError(err)) {
+            throw err;
+          }
+        } else {
+          return typeof callback === "function" ? callback(result, env) : void 0;
+        }
+      };
+    };
+
+    Controller.prototype.handleError = function(error) {
+      var handled, _ref,
+        _this = this;
+      handled = false;
+      if ((_ref = this.constructor._batman.getAll('errorHandlers')) != null) {
+        _ref.forEach(function(hash) {
+          return hash.forEach(function(key, value) {
+            var handler, _i, _len, _results;
+            if (error instanceof key) {
+              handled = true;
+              _results = [];
+              for (_i = 0, _len = value.length; _i < _len; _i++) {
+                handler = value[_i];
+                _results.push(handler.call(_this, error));
+              }
+              return _results;
+            }
+          });
+        });
+      }
+      return handled;
+    };
+
     function Controller() {
       this.redirect = __bind(this.redirect, this);
-      this._actionFrames = [];
+
+      this.handleError = __bind(this.handleError, this);
+
+      this.errorHandler = __bind(this.errorHandler, this);
       Controller.__super__.constructor.apply(this, arguments);
+      this._resetActionFrames();
     }
 
     Controller.prototype.renderCache = new Batman.RenderCache;
@@ -7456,7 +6574,7 @@
       params.controller || (params.controller = this.get('routingKey'));
       params.action || (params.action = action);
       params.target || (params.target = this);
-      this._actionFrames = [];
+      this._resetActionFrames();
       this.set('action', action);
       this.set('params', params);
       Batman.DOM.Yield.cycleAll();
@@ -7482,7 +6600,10 @@
         action: action
       }, function() {
         var _ref;
-        _this._runFilters(action, params, 'afterFilters');
+        if (!_this._afterFilterRedirect) {
+          _this._runFilters(action, params, 'afterFilters');
+        }
+        _this._resetActionFrames();
         return (_ref = Batman.navigator) != null ? _ref.redirect = oldRedirect : void 0;
       });
       this._actionFrames.push(frame);
@@ -7494,7 +6615,9 @@
         _ref1.redirect = this.redirect;
       }
       this._runFilters(action, params, 'beforeFilters');
-      result = this[action](params);
+      if (!this._afterFilterRedirect) {
+        result = this[action](params);
+      }
       if (!frame.operationOccurred) {
         this.render();
       }
@@ -7507,10 +6630,10 @@
       frame = this._actionFrames[this._actionFrames.length - 1];
       if (frame) {
         if (frame.operationOccurred) {
-          Batman.developer.warn("Warning! Trying to redirect but an action has already be taken during " + (this.get('routingKey')) + "." + (frame.action || this.get('action')) + "}");
+          Batman.developer.warn("Warning! Trying to redirect but an action has already been taken during " + (this.get('routingKey')) + "." + (frame.action || this.get('action')));
         }
         frame.startAndFinishOperation();
-        if (this._afterFilterRedirect) {
+        if (this._afterFilterRedirect != null) {
           return Batman.developer.warn("Warning! Multiple actions trying to redirect!");
         } else {
           return this._afterFilterRedirect = url;
@@ -7526,7 +6649,7 @@
     };
 
     Controller.prototype.render = function(options) {
-      var action, frame, view, _ref, _ref1, _ref2,
+      var action, frame, view, _ref, _ref1,
         _this = this;
       if (options == null) {
         options = {};
@@ -7543,7 +6666,7 @@
         options.into || (options.into = this.defaultRenderYield);
       }
       if (!options.view) {
-        options.viewClass || (options.viewClass = ((_ref1 = Batman.currentApp) != null ? _ref1[Batman.helpers.camelize("" + (this.get('routingKey')) + "_" + action + "_view")] : void 0) || Batman.View);
+        options.viewClass || (options.viewClass = this._viewClassForAction(action));
         options.context || (options.context = this.get('_renderContext'));
         options.source || (options.source = Batman.helpers.underscore(this.get('routingKey') + '/' + action));
         view = this.renderCache.viewForOptions(options);
@@ -7552,14 +6675,14 @@
         options.view = null;
       }
       if (view) {
-        if ((_ref2 = Batman.currentApp) != null) {
-          _ref2.prevent('ready');
+        if ((_ref1 = Batman.currentApp) != null) {
+          _ref1.prevent('ready');
         }
         view.on('ready', function() {
-          var _ref3;
+          var _ref2;
           Batman.DOM.Yield.withName(options.into).replace(view.get('node'));
-          if ((_ref3 = Batman.currentApp) != null) {
-            _ref3.allowAndFire('ready');
+          if ((_ref2 = Batman.currentApp) != null) {
+            _ref2.allowAndFire('ready');
           }
           return frame != null ? frame.finishOperation() : void 0;
         });
@@ -7574,25 +6697,39 @@
       return Batman.DOM.scrollIntoView(hash);
     };
 
+    Controller.prototype._resetActionFrames = function() {
+      return this._actionFrames = [];
+    };
+
+    Controller.prototype._viewClassForAction = function(action) {
+      var classPrefix, _ref;
+      classPrefix = this.get('routingKey').replace('/', '_');
+      return ((_ref = Batman.currentApp) != null ? _ref[Batman.helpers.camelize("" + classPrefix + "_" + action + "_view")] : void 0) || Batman.View;
+    };
+
     Controller.prototype._runFilters = function(action, params, filters) {
-      var _ref,
-        _this = this;
+      var block, options, _i, _len, _ref;
       if (filters = (_ref = this.constructor._batman) != null ? _ref.get(filters) : void 0) {
-        return filters.forEach(function(_, options) {
-          var block;
+        for (_i = 0, _len = filters.length; _i < _len; _i++) {
+          options = filters[_i];
           if (options.only && __indexOf.call(options.only, action) < 0) {
-            return;
+            continue;
           }
           if (options.except && __indexOf.call(options.except, action) >= 0) {
+            continue;
+          }
+          if (this._afterFilterRedirect) {
             return;
           }
           block = options.block;
           if (typeof block === 'function') {
-            return block.call(_this, params);
+            block.call(this, params);
           } else {
-            return typeof _this[block] === "function" ? _this[block](params) : void 0;
+            if (typeof this[block] === "function") {
+              this[block](params);
+            }
           }
-        });
+        }
       }
     };
 
@@ -8035,8 +7172,1177 @@
 }).call(this);
 
 (function() {
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __slice = [].slice;
 
-  Batman.mixins = new Batman.Object;
+  Batman.StateMachine = (function(_super) {
+
+    __extends(StateMachine, _super);
+
+    StateMachine.InvalidTransitionError = function(message) {
+      this.message = message != null ? message : "";
+    };
+
+    StateMachine.InvalidTransitionError.prototype = new Error;
+
+    StateMachine.transitions = function(table) {
+      var definePredicate, fromState, k, object, predicateKeys, toState, transitions, v, _fn, _ref,
+        _this = this;
+      for (k in table) {
+        v = table[k];
+        if (!(v.from && v.to)) {
+          continue;
+        }
+        object = {};
+        if (v.from.forEach) {
+          v.from.forEach(function(fromKey) {
+            return object[fromKey] = v.to;
+          });
+        } else {
+          object[v.from] = v.to;
+        }
+        table[k] = object;
+      }
+      this.prototype.transitionTable = Batman.extend({}, this.prototype.transitionTable, table);
+      predicateKeys = [];
+      definePredicate = function(state) {
+        var key;
+        key = "is" + (Batman.helpers.capitalize(state));
+        if (_this.prototype[key] != null) {
+          return;
+        }
+        predicateKeys.push(key);
+        return _this.prototype[key] = function() {
+          return this.get('state') === state;
+        };
+      };
+      _ref = this.prototype.transitionTable;
+      _fn = function(k) {
+        return _this.prototype[k] = function() {
+          return this.startTransition(k);
+        };
+      };
+      for (k in _ref) {
+        transitions = _ref[k];
+        if (!(!this.prototype[k])) {
+          continue;
+        }
+        _fn(k);
+        for (fromState in transitions) {
+          toState = transitions[fromState];
+          definePredicate(fromState);
+          definePredicate(toState);
+        }
+      }
+      if (predicateKeys.length) {
+        this.accessor.apply(this, __slice.call(predicateKeys).concat([function(key) {
+          return this[key]();
+        }]));
+      }
+      return this;
+    };
+
+    function StateMachine(startState) {
+      this.nextEvents = [];
+      this.set('_state', startState);
+    }
+
+    StateMachine.accessor('state', function() {
+      return this.get('_state');
+    });
+
+    StateMachine.prototype.isTransitioning = false;
+
+    StateMachine.prototype.transitionTable = {};
+
+    StateMachine.prototype.onTransition = function(from, into, callback) {
+      return this.on("" + from + "->" + into, callback);
+    };
+
+    StateMachine.prototype.onEnter = function(into, callback) {
+      return this.on("enter " + into, callback);
+    };
+
+    StateMachine.prototype.onExit = function(from, callback) {
+      return this.on("exit " + from, callback);
+    };
+
+    StateMachine.prototype.startTransition = Batman.Property.wrapTrackingPrevention(function(event) {
+      var nextState, previousState;
+      if (this.isTransitioning) {
+        this.nextEvents.push(event);
+        return;
+      }
+      previousState = this.get('state');
+      nextState = this.nextStateForEvent(event);
+      if (!nextState) {
+        return false;
+      }
+      this.isTransitioning = true;
+      this.fire("exit " + previousState);
+      this.set('_state', nextState);
+      this.fire("" + previousState + "->" + nextState);
+      this.fire("enter " + nextState);
+      this.fire(event);
+      this.isTransitioning = false;
+      if (this.nextEvents.length > 0) {
+        this.startTransition(this.nextEvents.shift());
+      }
+      return true;
+    });
+
+    StateMachine.prototype.canStartTransition = function(event, fromState) {
+      if (fromState == null) {
+        fromState = this.get('state');
+      }
+      return !!this.nextStateForEvent(event, fromState);
+    };
+
+    StateMachine.prototype.nextStateForEvent = function(event, fromState) {
+      var _ref;
+      if (fromState == null) {
+        fromState = this.get('state');
+      }
+      return (_ref = this.transitionTable[event]) != null ? _ref[fromState] : void 0;
+    };
+
+    return StateMachine;
+
+  })(Batman.Object);
+
+  Batman.DelegatingStateMachine = (function(_super) {
+
+    __extends(DelegatingStateMachine, _super);
+
+    function DelegatingStateMachine(startState, base) {
+      this.base = base;
+      DelegatingStateMachine.__super__.constructor.call(this, startState);
+    }
+
+    DelegatingStateMachine.prototype.fire = function() {
+      var result, _ref;
+      result = DelegatingStateMachine.__super__.fire.apply(this, arguments);
+      (_ref = this.base).fire.apply(_ref, arguments);
+      return result;
+    };
+
+    return DelegatingStateMachine;
+
+  })(Batman.StateMachine);
+
+}).call(this);
+
+(function() {
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __slice = [].slice;
+
+  Batman.Model = (function(_super) {
+    var functionName, _i, _j, _len, _len1, _ref, _ref1;
+
+    __extends(Model, _super);
+
+    Model.storageKey = null;
+
+    Model.primaryKey = 'id';
+
+    Model.persist = function() {
+      var mechanism, options;
+      mechanism = arguments[0], options = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      Batman.initializeObject(this.prototype);
+      mechanism = mechanism.isStorageAdapter ? mechanism : new mechanism(this);
+      if (options.length > 0) {
+        Batman.mixin.apply(Batman, [mechanism].concat(__slice.call(options)));
+      }
+      this.prototype._batman.storage = mechanism;
+      return mechanism;
+    };
+
+    Model.storageAdapter = function() {
+      Batman.initializeObject(this.prototype);
+      return this.prototype._batman.storage;
+    };
+
+    Model.encode = function() {
+      var encoder, encoderForKey, encoderOrLastKey, key, keys, _base, _i, _j, _len;
+      keys = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), encoderOrLastKey = arguments[_i++];
+      Batman.initializeObject(this.prototype);
+      (_base = this.prototype._batman).encoders || (_base.encoders = new Batman.SimpleHash);
+      encoder = {};
+      switch (Batman.typeOf(encoderOrLastKey)) {
+        case 'String':
+          keys.push(encoderOrLastKey);
+          break;
+        case 'Function':
+          encoder.encode = encoderOrLastKey;
+          break;
+        default:
+          encoder = encoderOrLastKey;
+      }
+      for (_j = 0, _len = keys.length; _j < _len; _j++) {
+        key = keys[_j];
+        encoderForKey = Batman.extend({
+          as: key
+        }, this.defaultEncoder, encoder);
+        this.prototype._batman.encoders.set(key, encoderForKey);
+      }
+    };
+
+    Model.defaultEncoder = {
+      encode: function(x) {
+        return x;
+      },
+      decode: function(x) {
+        return x;
+      }
+    };
+
+    Model.observeAndFire('primaryKey', function(newPrimaryKey, oldPrimaryKey) {
+      this.encode(oldPrimaryKey, {
+        encode: false,
+        decode: false
+      });
+      return this.encode(newPrimaryKey, {
+        encode: false,
+        decode: this.defaultEncoder.decode
+      });
+    });
+
+    Model.validate = function() {
+      var keys, matches, optionsOrFunction, validatorClass, validators, _base, _i, _j, _len, _ref, _results;
+      keys = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), optionsOrFunction = arguments[_i++];
+      Batman.initializeObject(this.prototype);
+      validators = (_base = this.prototype._batman).validators || (_base.validators = []);
+      if (typeof optionsOrFunction === 'function') {
+        return validators.push({
+          keys: keys,
+          callback: optionsOrFunction
+        });
+      } else {
+        _ref = Batman.Validators;
+        _results = [];
+        for (_j = 0, _len = _ref.length; _j < _len; _j++) {
+          validatorClass = _ref[_j];
+          if ((matches = validatorClass.matches(optionsOrFunction))) {
+            _results.push(validators.push({
+              keys: keys,
+              validator: new validatorClass(matches)
+            }));
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+      }
+    };
+
+    Model.classAccessor('resourceName', {
+      get: function() {
+        if (this.resourceName != null) {
+          return this.resourceName;
+        } else {
+          if (Batman.config.minificationErrors) {
+            Batman.developer.error("Please define " + (Batman.functionName(this)) + ".resourceName in order for your model to be minification safe.");
+          }
+          return Batman.helpers.underscore(Batman.functionName(this));
+        }
+      }
+    });
+
+    Model.classAccessor('all', {
+      get: function() {
+        this._batman.check(this);
+        if (this.prototype.hasStorage() && !this._batman.allLoadTriggered) {
+          this.load();
+          this._batman.allLoadTriggered = true;
+        }
+        return this.get('loaded');
+      },
+      set: function(k, v) {
+        return this.set('loaded', v);
+      }
+    });
+
+    Model.classAccessor('loaded', {
+      get: function() {
+        return this._loaded || (this._loaded = new Batman.Set);
+      },
+      set: function(k, v) {
+        return this._loaded = v;
+      }
+    });
+
+    Model.classAccessor('first', function() {
+      return this.get('all').toArray()[0];
+    });
+
+    Model.classAccessor('last', function() {
+      var x;
+      x = this.get('all').toArray();
+      return x[x.length - 1];
+    });
+
+    Model.clear = function() {
+      var result, _ref;
+      Batman.initializeObject(this);
+      result = this.get('loaded').clear();
+      if ((_ref = this._batman.get('associations')) != null) {
+        _ref.reset();
+      }
+      this._resetPromises();
+      return result;
+    };
+
+    Model.find = function(id, callback) {
+      return this.findWithOptions(id, void 0, callback);
+    };
+
+    Model.findWithOptions = function(id, options, callback) {
+      var record;
+      if (options == null) {
+        options = {};
+      }
+      Batman.developer.assert(callback, "Must call find with a callback!");
+      record = new this();
+      record._withoutDirtyTracking(function() {
+        return this.set('id', id);
+      });
+      record.loadWithOptions(options, callback);
+      return record;
+    };
+
+    Model.load = function(options, callback) {
+      var _ref;
+      if ((_ref = typeof options) === 'function' || _ref === 'undefined') {
+        callback = options;
+        options = {};
+      } else {
+        options = {
+          data: options
+        };
+      }
+      return this.loadWithOptions(options, callback);
+    };
+
+    Model.loadWithOptions = function(options, callback) {
+      var _this = this;
+      this.fire('loading', options);
+      return this._doStorageOperation('readAll', options, function(err, records, env) {
+        var mappedRecords, record;
+        if (err != null) {
+          _this.fire('error', err);
+          return typeof callback === "function" ? callback(err, []) : void 0;
+        } else {
+          mappedRecords = (function() {
+            var _i, _len, _results;
+            _results = [];
+            for (_i = 0, _len = records.length; _i < _len; _i++) {
+              record = records[_i];
+              _results.push(this._mapIdentity(record));
+            }
+            return _results;
+          }).call(_this);
+          _this.fire('loaded', mappedRecords, env);
+          return typeof callback === "function" ? callback(err, mappedRecords, env) : void 0;
+        }
+      });
+    };
+
+    Model.create = function(attrs, callback) {
+      var obj, _ref;
+      if (!callback) {
+        _ref = [{}, attrs], attrs = _ref[0], callback = _ref[1];
+      }
+      obj = new this(attrs);
+      obj.save(callback);
+      return obj;
+    };
+
+    Model.findOrCreate = function(attrs, callback) {
+      var foundRecord, record;
+      record = new this(attrs);
+      if (record.isNew()) {
+        record.save(callback);
+      } else {
+        foundRecord = this._mapIdentity(record);
+        callback(void 0, foundRecord);
+      }
+      return record;
+    };
+
+    Model.createFromJSON = function(json) {
+      var record;
+      record = new this;
+      record._withoutDirtyTracking(function() {
+        return this.fromJSON(json);
+      });
+      return this._mapIdentity(record);
+    };
+
+    Model._mapIdentity = function(record) {
+      var existing, id, _ref;
+      if (typeof (id = record.get('id')) === 'undefined' || id === '') {
+        return record;
+      } else {
+        existing = (_ref = this.get("loaded.indexedBy.id").get(id)) != null ? _ref.toArray()[0] : void 0;
+        if (existing) {
+          existing._withoutDirtyTracking(function() {
+            var _ref1;
+            return this.updateAttributes(((_ref1 = record.get('attributes')) != null ? _ref1.toObject() : void 0) || {});
+          });
+          return existing;
+        } else {
+          this.get('loaded').add(record);
+          return record;
+        }
+      }
+    };
+
+    Model._doStorageOperation = function(operation, options, callback) {
+      var adapter;
+      Batman.developer.assert(this.prototype.hasStorage(), "Can't " + operation + " model " + (Batman.functionName(this.constructor)) + " without any storage adapters!");
+      adapter = this.prototype._batman.get('storage');
+      return adapter.perform(operation, this, options, callback);
+    };
+
+    _ref = ['find', 'load', 'create'];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      functionName = _ref[_i];
+      Model[functionName] = Batman.Property.wrapTrackingPrevention(Model[functionName]);
+    }
+
+    Model.InstanceLifecycleStateMachine = (function(_super1) {
+
+      __extends(InstanceLifecycleStateMachine, _super1);
+
+      function InstanceLifecycleStateMachine() {
+        return InstanceLifecycleStateMachine.__super__.constructor.apply(this, arguments);
+      }
+
+      InstanceLifecycleStateMachine.transitions({
+        load: {
+          from: ['dirty', 'clean'],
+          to: 'loading'
+        },
+        create: {
+          from: ['dirty', 'clean'],
+          to: 'creating'
+        },
+        save: {
+          from: ['dirty', 'clean'],
+          to: 'saving'
+        },
+        destroy: {
+          from: ['dirty', 'clean'],
+          to: 'destroying'
+        },
+        failedValidation: {
+          from: ['saving', 'creating'],
+          to: 'dirty'
+        },
+        loaded: {
+          loading: 'clean'
+        },
+        created: {
+          creating: 'clean'
+        },
+        saved: {
+          saving: 'clean'
+        },
+        destroyed: {
+          destroying: 'destroyed'
+        },
+        set: {
+          from: ['dirty', 'clean'],
+          to: 'dirty'
+        },
+        error: {
+          from: ['saving', 'creating', 'loading', 'destroying'],
+          to: 'error'
+        }
+      });
+
+      return InstanceLifecycleStateMachine;
+
+    })(Batman.DelegatingStateMachine);
+
+    function Model(idOrAttributes) {
+      if (idOrAttributes == null) {
+        idOrAttributes = {};
+      }
+      this.destroy = __bind(this.destroy, this);
+
+      this.save = __bind(this.save, this);
+
+      this.loadWithOptions = __bind(this.loadWithOptions, this);
+
+      this.load = __bind(this.load, this);
+
+      Batman.developer.assert(this instanceof Batman.Object, "constructors must be called with new");
+      if (Batman.typeOf(idOrAttributes) === 'Object') {
+        Model.__super__.constructor.call(this, idOrAttributes);
+      } else {
+        Model.__super__.constructor.call(this);
+        this.set('id', idOrAttributes);
+      }
+    }
+
+    Model.accessor('lifecycle', function() {
+      return this.lifecycle || (this.lifecycle = new Batman.Model.InstanceLifecycleStateMachine('clean', this));
+    });
+
+    Model.accessor('attributes', function() {
+      return this.attributes || (this.attributes = new Batman.Hash);
+    });
+
+    Model.accessor('dirtyKeys', function() {
+      return this.dirtyKeys || (this.dirtyKeys = new Batman.Hash);
+    });
+
+    Model.accessor('_dirtiedKeys', function() {
+      return this._dirtiedKeys || (this._dirtiedKeys = new Batman.SimpleSet);
+    });
+
+    Model.accessor('errors', function() {
+      return this.errors || (this.errors = new Batman.ErrorsSet);
+    });
+
+    Model.accessor('isNew', function() {
+      return this.isNew();
+    });
+
+    Model.accessor('isDirty', function() {
+      return this.isDirty();
+    });
+
+    Model.accessor(Model.defaultAccessor = {
+      get: function(k) {
+        return Batman.getPath(this, ['attributes', k]);
+      },
+      set: function(k, v) {
+        if (this._willSet(k)) {
+          return this.get('attributes').set(k, v);
+        } else {
+          return this.get(k);
+        }
+      },
+      unset: function(k) {
+        return this.get('attributes').unset(k);
+      }
+    });
+
+    Model.wrapAccessor('id', function(core) {
+      return {
+        get: function() {
+          var primaryKey;
+          primaryKey = this.constructor.primaryKey;
+          if (primaryKey === 'id') {
+            return core.get.apply(this, arguments);
+          } else {
+            return this.get(primaryKey);
+          }
+        },
+        set: function(key, value) {
+          var parsedValue, primaryKey;
+          if ((typeof value === "string") && (value.match(/[^0-9]/) === null) && (("" + (parsedValue = parseInt(value, 10))) === value)) {
+            value = parsedValue;
+          }
+          primaryKey = this.constructor.primaryKey;
+          if (primaryKey === 'id') {
+            this._willSet(key);
+            return core.set.apply(this, arguments);
+          } else {
+            return this.set(primaryKey, value);
+          }
+        }
+      };
+    });
+
+    Model.prototype.isNew = function() {
+      return typeof this.get('id') === 'undefined';
+    };
+
+    Model.prototype.isDirty = function() {
+      return this.get('lifecycle.state') === 'dirty';
+    };
+
+    Model.prototype.updateAttributes = function(attrs) {
+      this.mixin(attrs);
+      return this;
+    };
+
+    Model.prototype.toString = function() {
+      return "" + (this.constructor.get('resourceName')) + ": " + (this.get('id'));
+    };
+
+    Model.prototype.toParam = function() {
+      return this.get('id');
+    };
+
+    Model.prototype.toJSON = function() {
+      var encoders, obj,
+        _this = this;
+      obj = {};
+      encoders = this._batman.get('encoders');
+      if (!(!encoders || encoders.isEmpty())) {
+        encoders.forEach(function(key, encoder) {
+          var encodedVal, val;
+          if (encoder.encode) {
+            val = _this.get(key);
+            if (typeof val !== 'undefined') {
+              encodedVal = encoder.encode(val, key, obj, _this);
+              if (typeof encodedVal !== 'undefined') {
+                return obj[encoder.as] = encodedVal;
+              }
+            }
+          }
+        });
+      }
+      return obj;
+    };
+
+    Model.prototype.fromJSON = function(data) {
+      var encoders, key, obj, value,
+        _this = this;
+      obj = {};
+      encoders = this._batman.get('encoders');
+      if (!encoders || encoders.isEmpty() || !encoders.some(function(key, encoder) {
+        return encoder.decode != null;
+      })) {
+        for (key in data) {
+          value = data[key];
+          obj[key] = value;
+        }
+      } else {
+        encoders.forEach(function(key, encoder) {
+          if (encoder.decode && typeof data[encoder.as] !== 'undefined') {
+            return obj[key] = encoder.decode(data[encoder.as], encoder.as, data, obj, _this);
+          }
+        });
+      }
+      if (this.constructor.primaryKey !== 'id') {
+        obj.id = data[this.constructor.primaryKey];
+      }
+      Batman.developer["do"](function() {
+        if ((!encoders) || encoders.length <= 1) {
+          return Batman.developer.warn("Warning: Model " + (Batman.functionName(_this.constructor)) + " has suspiciously few decoders!");
+        }
+      });
+      return this.mixin(obj);
+    };
+
+    Model.prototype.hasStorage = function() {
+      return this._batman.get('storage') != null;
+    };
+
+    Model.prototype.load = function(options, callback) {
+      var _ref1;
+      if (!callback) {
+        _ref1 = [{}, options], options = _ref1[0], callback = _ref1[1];
+      } else {
+        options = {
+          data: options
+        };
+      }
+      return this.loadWithOptions(options, callback);
+    };
+
+    Model.prototype.loadWithOptions = function(options, callback) {
+      var callbackQueue, hasOptions, _ref1,
+        _this = this;
+      hasOptions = Object.keys(options).length !== 0;
+      if ((_ref1 = this.get('lifecycle.state')) === 'destroying' || _ref1 === 'destroyed') {
+        if (typeof callback === "function") {
+          callback(new Error("Can't load a destroyed record!"));
+        }
+        return;
+      }
+      if (this.get('lifecycle').load()) {
+        callbackQueue = [];
+        if (callback != null) {
+          callbackQueue.push(callback);
+        }
+        if (!hasOptions) {
+          this._currentLoad = callbackQueue;
+        }
+        return this._doStorageOperation('read', options, function(err, record, env) {
+          var _j, _len1;
+          if (!err) {
+            _this.get('lifecycle').loaded();
+            record = _this.constructor._mapIdentity(record);
+          } else {
+            _this.get('lifecycle').error();
+          }
+          if (!hasOptions) {
+            _this._currentLoad = null;
+          }
+          for (_j = 0, _len1 = callbackQueue.length; _j < _len1; _j++) {
+            callback = callbackQueue[_j];
+            callback(err, record, env);
+          }
+        });
+      } else {
+        if (this.get('lifecycle.state') === 'loading' && !hasOptions) {
+          if (callback != null) {
+            return this._currentLoad.push(callback);
+          }
+        } else {
+          return typeof callback === "function" ? callback(new Batman.StateMachine.InvalidTransitionError("Can't load while in state " + (this.get('lifecycle.state')))) : void 0;
+        }
+      }
+    };
+
+    Model.prototype.save = function(options, callback) {
+      var endState, isNew, startState, storageOperation, _ref1, _ref2,
+        _this = this;
+      if (!callback) {
+        _ref1 = [{}, options], options = _ref1[0], callback = _ref1[1];
+      }
+      isNew = this.isNew();
+      _ref2 = isNew ? ['create', 'create', 'created'] : ['save', 'update', 'saved'], startState = _ref2[0], storageOperation = _ref2[1], endState = _ref2[2];
+      if (this.get('lifecycle').startTransition(startState)) {
+        return this.validate(function(error, errors) {
+          var associations;
+          if (error || errors.length) {
+            _this.get('lifecycle').failedValidation();
+            return typeof callback === "function" ? callback(error || errors, _this) : void 0;
+          }
+          associations = _this.constructor._batman.get('associations');
+          _this._withoutDirtyTracking(function() {
+            var _ref3,
+              _this = this;
+            return associations != null ? (_ref3 = associations.getByType('belongsTo')) != null ? _ref3.forEach(function(association, label) {
+              return association.apply(_this);
+            }) : void 0 : void 0;
+          });
+          return _this._doStorageOperation(storageOperation, {
+            data: options
+          }, function(err, record, env) {
+            if (!err) {
+              _this.get('dirtyKeys').clear();
+              _this.get('_dirtiedKeys').clear();
+              if (associations) {
+                record._withoutDirtyTracking(function() {
+                  var _ref3, _ref4;
+                  if ((_ref3 = associations.getByType('hasOne')) != null) {
+                    _ref3.forEach(function(association, label) {
+                      return association.apply(err, record);
+                    });
+                  }
+                  return (_ref4 = associations.getByType('hasMany')) != null ? _ref4.forEach(function(association, label) {
+                    return association.apply(err, record);
+                  }) : void 0;
+                });
+              }
+              record = _this.constructor._mapIdentity(record);
+              _this.get('lifecycle').startTransition(endState);
+            } else {
+              if (err instanceof Batman.ErrorsSet) {
+                _this.get('lifecycle').failedValidation();
+              } else {
+                _this.get('lifecycle').error();
+              }
+            }
+            return typeof callback === "function" ? callback(err, record || _this, env) : void 0;
+          });
+        });
+      } else {
+        return typeof callback === "function" ? callback(new Batman.StateMachine.InvalidTransitionError("Can't save while in state " + (this.get('lifecycle.state')))) : void 0;
+      }
+    };
+
+    Model.prototype.destroy = function(options, callback) {
+      var _ref1,
+        _this = this;
+      if (!callback) {
+        _ref1 = [{}, options], options = _ref1[0], callback = _ref1[1];
+      }
+      if (this.get('lifecycle').destroy()) {
+        return this._doStorageOperation('destroy', {
+          data: options
+        }, function(err, record, env) {
+          if (!err) {
+            _this.constructor.get('loaded').remove(_this);
+            _this.get('lifecycle').destroyed();
+          } else {
+            _this.get('lifecycle').error();
+          }
+          return typeof callback === "function" ? callback(err, record, env) : void 0;
+        });
+      } else {
+        return typeof callback === "function" ? callback(new Batman.StateMachine.InvalidTransitionError("Can't destroy while in state " + (this.get('lifecycle.state')))) : void 0;
+      }
+    };
+
+    Model.prototype.validate = function(callback) {
+      var args, count, errors, finishedValidation, key, validator, validators, _j, _k, _len1, _len2, _ref1;
+      errors = this.get('errors');
+      errors.clear();
+      validators = this._batman.get('validators') || [];
+      if (!validators || validators.length === 0) {
+        if (typeof callback === "function") {
+          callback(void 0, errors);
+        }
+        return true;
+      }
+      count = validators.reduce((function(acc, validator) {
+        return acc + validator.keys.length;
+      }), 0);
+      finishedValidation = function() {
+        if (--count === 0) {
+          return typeof callback === "function" ? callback(void 0, errors) : void 0;
+        }
+      };
+      for (_j = 0, _len1 = validators.length; _j < _len1; _j++) {
+        validator = validators[_j];
+        _ref1 = validator.keys;
+        for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
+          key = _ref1[_k];
+          args = [errors, this, key, finishedValidation];
+          try {
+            if (validator.validator) {
+              validator.validator.validateEach.apply(validator.validator, args);
+            } else {
+              validator.callback.apply(validator, args);
+            }
+          } catch (e) {
+            if (typeof callback === "function") {
+              callback(e, errors);
+            }
+          }
+        }
+      }
+    };
+
+    Model.prototype.associationProxy = function(association) {
+      var proxies, _base, _name;
+      Batman.initializeObject(this);
+      proxies = (_base = this._batman).associationProxies || (_base.associationProxies = {});
+      proxies[_name = association.label] || (proxies[_name] = new association.proxyClass(association, this));
+      return proxies[association.label];
+    };
+
+    Model.prototype._willSet = function(key) {
+      if (this._pauseDirtyTracking) {
+        return true;
+      }
+      if (this.get('lifecycle').startTransition('set')) {
+        if (!this.get('_dirtiedKeys').has(key)) {
+          this.set("dirtyKeys." + key, this.get(key));
+          this.get('_dirtiedKeys').add(key);
+        }
+        return true;
+      } else {
+        return false;
+      }
+    };
+
+    Model.prototype._doStorageOperation = function(operation, options, callback) {
+      var adapter,
+        _this = this;
+      Batman.developer.assert(this.hasStorage(), "Can't " + operation + " model " + (Batman.functionName(this.constructor)) + " without any storage adapters!");
+      adapter = this._batman.get('storage');
+      return adapter.perform(operation, this, options, function() {
+        return callback.apply(null, arguments);
+      });
+    };
+
+    Model.prototype._withoutDirtyTracking = function(block) {
+      var result;
+      this._pauseDirtyTracking = true;
+      result = block.call(this);
+      this._pauseDirtyTracking = false;
+      return result;
+    };
+
+    _ref1 = ['load', 'save', 'validate', 'destroy'];
+    for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+      functionName = _ref1[_j];
+      Model.prototype[functionName] = Batman.Property.wrapTrackingPrevention(Model.prototype[functionName]);
+    }
+
+    return Model;
+
+  }).call(this, Batman.Object);
+
+}).call(this);
+
+(function() {
+  var k, _fn, _i, _len, _ref,
+    _this = this;
+
+  _ref = Batman.AssociationCurator.availableAssociations;
+  _fn = function(k) {
+    return Batman.Model[k] = function(label, scope) {
+      var collection, _base;
+      Batman.initializeObject(this);
+      collection = (_base = this._batman).associations || (_base.associations = new Batman.AssociationCurator(this));
+      return collection.add(new Batman["" + (Batman.helpers.capitalize(k)) + "Association"](this, label, scope));
+    };
+  };
+  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+    k = _ref[_i];
+    _fn(k);
+  }
+
+}).call(this);
+
+(function() {
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Batman.Proxy = (function(_super) {
+
+    __extends(Proxy, _super);
+
+    Proxy.prototype.isProxy = true;
+
+    function Proxy(target) {
+      Proxy.__super__.constructor.call(this);
+      if (target != null) {
+        this.set('target', target);
+      }
+    }
+
+    Proxy.accessor('target', Batman.Property.defaultAccessor);
+
+    Proxy.accessor({
+      get: function(key) {
+        var _ref;
+        return (_ref = this.get('target')) != null ? _ref.get(key) : void 0;
+      },
+      set: function(key, value) {
+        var _ref;
+        return (_ref = this.get('target')) != null ? _ref.set(key, value) : void 0;
+      },
+      unset: function(key) {
+        var _ref;
+        return (_ref = this.get('target')) != null ? _ref.unset(key) : void 0;
+      }
+    });
+
+    return Proxy;
+
+  })(Batman.Object);
+
+}).call(this);
+
+(function() {
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Batman.AssociationProxy = (function(_super) {
+
+    __extends(AssociationProxy, _super);
+
+    AssociationProxy.prototype.loaded = false;
+
+    function AssociationProxy(association, model) {
+      this.association = association;
+      this.model = model;
+      AssociationProxy.__super__.constructor.call(this);
+    }
+
+    AssociationProxy.prototype.toJSON = function() {
+      var target;
+      target = this.get('target');
+      if (target != null) {
+        return this.get('target').toJSON();
+      }
+    };
+
+    AssociationProxy.prototype.load = function(callback) {
+      var _this = this;
+      this.fetch(function(err, proxiedRecord) {
+        if (!err) {
+          _this._setTarget(proxiedRecord);
+        }
+        return typeof callback === "function" ? callback(err, proxiedRecord) : void 0;
+      });
+      return this.get('target');
+    };
+
+    AssociationProxy.prototype.loadFromLocal = function() {
+      var target;
+      if (!this._canLoad()) {
+        return;
+      }
+      if (target = this.fetchFromLocal()) {
+        this._setTarget(target);
+      }
+      return target;
+    };
+
+    AssociationProxy.prototype.fetch = function(callback) {
+      var record;
+      if (!this._canLoad()) {
+        return callback(void 0, void 0);
+      }
+      record = this.fetchFromLocal();
+      if (record) {
+        return callback(void 0, record);
+      } else {
+        return this.fetchFromRemote(callback);
+      }
+    };
+
+    AssociationProxy.accessor('loaded', Batman.Property.defaultAccessor);
+
+    AssociationProxy.accessor('target', {
+      get: function() {
+        return this.fetchFromLocal();
+      },
+      set: function(_, v) {
+        return v;
+      }
+    });
+
+    AssociationProxy.prototype._canLoad = function() {
+      return (this.get('foreignValue') || this.get('primaryValue')) != null;
+    };
+
+    AssociationProxy.prototype._setTarget = function(target) {
+      this.set('target', target);
+      this.set('loaded', true);
+      return this.fire('loaded', target);
+    };
+
+    return AssociationProxy;
+
+  })(Batman.Proxy);
+
+}).call(this);
+
+(function() {
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Batman.HasOneProxy = (function(_super) {
+
+    __extends(HasOneProxy, _super);
+
+    function HasOneProxy() {
+      return HasOneProxy.__super__.constructor.apply(this, arguments);
+    }
+
+    HasOneProxy.accessor('primaryValue', function() {
+      return this.model.get(this.association.primaryKey);
+    });
+
+    HasOneProxy.prototype.fetchFromLocal = function() {
+      return this.association.setIndex().get(this.get('primaryValue'));
+    };
+
+    HasOneProxy.prototype.fetchFromRemote = function(callback) {
+      var loadOptions,
+        _this = this;
+      loadOptions = {
+        data: {}
+      };
+      loadOptions.data[this.association.foreignKey] = this.get('primaryValue');
+      if (this.association.options.url) {
+        loadOptions.collectionUrl = this.association.options.url;
+        loadOptions.urlContext = this.model;
+      }
+      return this.association.getRelatedModel().loadWithOptions(loadOptions, function(error, loadedRecords) {
+        if (error) {
+          throw error;
+        }
+        if (!loadedRecords || loadedRecords.length <= 0) {
+          return callback(new Error("Couldn't find related record!"), void 0);
+        } else {
+          return callback(void 0, loadedRecords[0]);
+        }
+      });
+    };
+
+    return HasOneProxy;
+
+  })(Batman.AssociationProxy);
+
+}).call(this);
+
+(function() {
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Batman.BelongsToProxy = (function(_super) {
+
+    __extends(BelongsToProxy, _super);
+
+    function BelongsToProxy() {
+      return BelongsToProxy.__super__.constructor.apply(this, arguments);
+    }
+
+    BelongsToProxy.accessor('foreignValue', function() {
+      return this.model.get(this.association.foreignKey);
+    });
+
+    BelongsToProxy.prototype.fetchFromLocal = function() {
+      return this.association.setIndex().get(this.get('foreignValue'));
+    };
+
+    BelongsToProxy.prototype.fetchFromRemote = function(callback) {
+      var loadOptions,
+        _this = this;
+      loadOptions = {};
+      if (this.association.options.url) {
+        loadOptions.recordUrl = this.association.options.url;
+      }
+      return this.association.getRelatedModel().findWithOptions(this.get('foreignValue'), loadOptions, function(error, loadedRecord) {
+        if (error) {
+          throw error;
+        }
+        return callback(void 0, loadedRecord);
+      });
+    };
+
+    return BelongsToProxy;
+
+  })(Batman.AssociationProxy);
+
+}).call(this);
+
+(function() {
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Batman.PolymorphicBelongsToProxy = (function(_super) {
+
+    __extends(PolymorphicBelongsToProxy, _super);
+
+    function PolymorphicBelongsToProxy() {
+      return PolymorphicBelongsToProxy.__super__.constructor.apply(this, arguments);
+    }
+
+    PolymorphicBelongsToProxy.accessor('foreignTypeValue', function() {
+      return this.model.get(this.association.foreignTypeKey);
+    });
+
+    PolymorphicBelongsToProxy.prototype.fetchFromLocal = function() {
+      return this.association.setIndexForType(this.get('foreignTypeValue')).get(this.get('foreignValue'));
+    };
+
+    PolymorphicBelongsToProxy.prototype.fetchFromRemote = function(callback) {
+      var loadOptions,
+        _this = this;
+      loadOptions = {};
+      if (this.association.options.url) {
+        loadOptions.recordUrl = this.association.options.url;
+      }
+      return this.association.getRelatedModelForType(this.get('foreignTypeValue')).findWithOptions(this.get('foreignValue'), loadOptions, function(error, loadedRecord) {
+        if (error) {
+          throw error;
+        }
+        return callback(void 0, loadedRecord);
+      });
+    };
+
+    return PolymorphicBelongsToProxy;
+
+  })(Batman.BelongsToProxy);
 
 }).call(this);
 
@@ -8069,6 +8375,358 @@
     return TerminalAccessible;
 
   })(Batman.Accessible);
+
+}).call(this);
+
+(function() {
+
+  Batman.mixins = new Batman.Object;
+
+}).call(this);
+
+(function() {
+
+  Batman.URI = (function() {
+    /*
+      # URI parsing
+    */
+
+    var attributes, childKeyMatchers, decodeQueryComponent, encodeComponent, encodeQueryComponent, keyVal, nameParser, normalizeParams, plus, queryFromParams, r20, strictParser;
+
+    strictParser = /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/;
+
+    attributes = ["source", "protocol", "authority", "userInfo", "user", "password", "hostname", "port", "relative", "path", "directory", "file", "query", "hash"];
+
+    function URI(str) {
+      var i, matches;
+      matches = strictParser.exec(str);
+      i = 14;
+      while (i--) {
+        this[attributes[i]] = matches[i] || '';
+      }
+      this.queryParams = this.constructor.paramsFromQuery(this.query);
+      delete this.authority;
+      delete this.userInfo;
+      delete this.relative;
+      delete this.directory;
+      delete this.file;
+      delete this.query;
+    }
+
+    URI.prototype.queryString = function() {
+      return this.constructor.queryFromParams(this.queryParams);
+    };
+
+    URI.prototype.toString = function() {
+      return [this.protocol ? "" + this.protocol + ":" : void 0, this.authority() ? "//" : void 0, this.authority(), this.relative()].join("");
+    };
+
+    URI.prototype.userInfo = function() {
+      return [this.user, this.password ? ":" + this.password : void 0].join("");
+    };
+
+    URI.prototype.authority = function() {
+      return [this.userInfo(), this.user || this.password ? "@" : void 0, this.hostname, this.port ? ":" + this.port : void 0].join("");
+    };
+
+    URI.prototype.relative = function() {
+      var query;
+      query = this.queryString();
+      return [this.path, query ? "?" + query : void 0, this.hash ? "#" + this.hash : void 0].join("");
+    };
+
+    URI.prototype.directory = function() {
+      var splitPath;
+      splitPath = this.path.split('/');
+      if (splitPath.length > 1) {
+        return splitPath.slice(0, splitPath.length - 1).join('/') + "/";
+      } else {
+        return "";
+      }
+    };
+
+    URI.prototype.file = function() {
+      var splitPath;
+      splitPath = this.path.split("/");
+      return splitPath[splitPath.length - 1];
+    };
+
+    /*
+      # query parsing
+    */
+
+
+    URI.paramsFromQuery = function(query) {
+      var matches, params, segment, _i, _len, _ref;
+      params = {};
+      _ref = query.split('&');
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        segment = _ref[_i];
+        if (matches = segment.match(keyVal)) {
+          normalizeParams(params, decodeQueryComponent(matches[1]), decodeQueryComponent(matches[2]));
+        } else {
+          normalizeParams(params, decodeQueryComponent(segment), null);
+        }
+      }
+      return params;
+    };
+
+    URI.decodeQueryComponent = decodeQueryComponent = function(str) {
+      return decodeURIComponent(str.replace(plus, '%20'));
+    };
+
+    nameParser = /^[\[\]]*([^\[\]]+)\]*(.*)/;
+
+    childKeyMatchers = [/^\[\]\[([^\[\]]+)\]$/, /^\[\](.+)$/];
+
+    plus = /\+/g;
+
+    r20 = /%20/g;
+
+    keyVal = /^([^=]*)=(.*)/;
+
+    normalizeParams = function(params, name, v) {
+      var after, childKey, k, last, matches, _ref, _ref1, _ref2;
+      if (matches = name.match(nameParser)) {
+        k = matches[1];
+        after = matches[2];
+      } else {
+        return;
+      }
+      if (after === '') {
+        params[k] = v;
+      } else if (after === '[]') {
+        if ((_ref = params[k]) == null) {
+          params[k] = [];
+        }
+        if (Batman.typeOf(params[k]) !== 'Array') {
+          throw new Error("expected Array (got " + (Batman.typeOf(params[k])) + ") for param \"" + k + "\"");
+        }
+        params[k].push(v);
+      } else if (matches = after.match(childKeyMatchers[0]) || after.match(childKeyMatchers[1])) {
+        childKey = matches[1];
+        if ((_ref1 = params[k]) == null) {
+          params[k] = [];
+        }
+        if (Batman.typeOf(params[k]) !== 'Array') {
+          throw new Error("expected Array (got " + (Batman.typeOf(params[k])) + ") for param \"" + k + "\"");
+        }
+        last = params[k][params[k].length - 1];
+        if (Batman.typeOf(last) === 'Object' && !(childKey in last)) {
+          normalizeParams(last, childKey, v);
+        } else {
+          params[k].push(normalizeParams({}, childKey, v));
+        }
+      } else {
+        if ((_ref2 = params[k]) == null) {
+          params[k] = {};
+        }
+        if (Batman.typeOf(params[k]) !== 'Object') {
+          throw new Error("expected Object (got " + (Batman.typeOf(params[k])) + ") for param \"" + k + "\"");
+        }
+        params[k] = normalizeParams(params[k], after, v);
+      }
+      return params;
+    };
+
+    /*
+      # query building
+    */
+
+
+    URI.queryFromParams = queryFromParams = function(value, prefix) {
+      var arrayResults, k, v, valueType;
+      if (value == null) {
+        return prefix;
+      }
+      valueType = Batman.typeOf(value);
+      if (!((prefix != null) || valueType === 'Object')) {
+        throw new Error("value must be an Object");
+      }
+      switch (valueType) {
+        case 'Array':
+          return ((function() {
+            var _i, _len;
+            arrayResults = [];
+            if (value.length === 0) {
+              arrayResults.push(queryFromParams(null, "" + prefix + "[]"));
+            } else {
+              for (_i = 0, _len = value.length; _i < _len; _i++) {
+                v = value[_i];
+                arrayResults.push(queryFromParams(v, "" + prefix + "[]"));
+              }
+            }
+            return arrayResults;
+          })()).join("&");
+        case 'Object':
+          return ((function() {
+            var _results;
+            _results = [];
+            for (k in value) {
+              v = value[k];
+              _results.push(queryFromParams(v, prefix ? "" + prefix + "[" + (encodeQueryComponent(k)) + "]" : encodeQueryComponent(k)));
+            }
+            return _results;
+          })()).join("&");
+        default:
+          if (prefix != null) {
+            return "" + prefix + "=" + (encodeQueryComponent(value));
+          } else {
+            return encodeQueryComponent(value);
+          }
+      }
+    };
+
+    URI.encodeComponent = encodeComponent = function(str) {
+      if (str != null) {
+        return encodeURIComponent(str);
+      } else {
+        return '';
+      }
+    };
+
+    URI.encodeQueryComponent = encodeQueryComponent = function(str) {
+      return encodeComponent(str).replace(r20, '+');
+    };
+
+    return URI;
+
+  })();
+
+}).call(this);
+
+(function() {
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Batman.Request = (function(_super) {
+    var dataHasFileUploads;
+
+    __extends(Request, _super);
+
+    Request.objectToFormData = function(data) {
+      var formData, key, pairForList, val, _i, _len, _ref, _ref1;
+      pairForList = function(key, object, first) {
+        var k, list, v;
+        if (first == null) {
+          first = false;
+        }
+        if (object instanceof Batman.container.File) {
+          return [[key, object]];
+        }
+        return list = (function() {
+          switch (Batman.typeOf(object)) {
+            case 'Object':
+              list = (function() {
+                var _results;
+                _results = [];
+                for (k in object) {
+                  v = object[k];
+                  _results.push(pairForList((first ? k : "" + key + "[" + k + "]"), v));
+                }
+                return _results;
+              })();
+              return list.reduce(function(acc, list) {
+                return acc.concat(list);
+              }, []);
+            case 'Array':
+              return object.reduce(function(acc, element) {
+                return acc.concat(pairForList("" + key + "[]", element));
+              }, []);
+            default:
+              return [[key, object != null ? object : ""]];
+          }
+        })();
+      };
+      formData = new Batman.container.FormData();
+      _ref = pairForList("", data, true);
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        _ref1 = _ref[_i], key = _ref1[0], val = _ref1[1];
+        formData.append(key, val);
+      }
+      return formData;
+    };
+
+    Request.dataHasFileUploads = dataHasFileUploads = function(data) {
+      var k, type, v, _i, _len;
+      if ((typeof File !== "undefined" && File !== null) && data instanceof File) {
+        return true;
+      }
+      type = Batman.typeOf(data);
+      switch (type) {
+        case 'Object':
+          for (k in data) {
+            v = data[k];
+            if (dataHasFileUploads(v)) {
+              return true;
+            }
+          }
+          break;
+        case 'Array':
+          for (_i = 0, _len = data.length; _i < _len; _i++) {
+            v = data[_i];
+            if (dataHasFileUploads(v)) {
+              return true;
+            }
+          }
+      }
+      return false;
+    };
+
+    Request.wrapAccessor('method', function(core) {
+      return {
+        set: function(k, val) {
+          return core.set.call(this, k, val != null ? typeof val.toUpperCase === "function" ? val.toUpperCase() : void 0 : void 0);
+        }
+      };
+    });
+
+    Request.prototype.method = 'GET';
+
+    Request.prototype.hasFileUploads = function() {
+      return dataHasFileUploads(this.data);
+    };
+
+    Request.prototype.contentType = 'application/x-www-form-urlencoded';
+
+    Request.prototype.autosend = true;
+
+    function Request(options) {
+      var handler, handlers, k, _ref;
+      handlers = {};
+      for (k in options) {
+        handler = options[k];
+        if (!(k === 'success' || k === 'error' || k === 'loading' || k === 'loaded')) {
+          continue;
+        }
+        handlers[k] = handler;
+        delete options[k];
+      }
+      Request.__super__.constructor.call(this, options);
+      for (k in handlers) {
+        handler = handlers[k];
+        this.on(k, handler);
+      }
+      if (((_ref = this.get('url')) != null ? _ref.length : void 0) > 0) {
+        if (this.autosend) {
+          this.send();
+        }
+      } else {
+        this.observe('url', function(url) {
+          if (url != null) {
+            return this.send();
+          }
+        });
+      }
+    }
+
+    Request.prototype.send = function() {
+      return Batman.developer.error("Please source a dependency file for a request implementation");
+    };
+
+    return Request;
+
+  })(Batman.Object);
 
 }).call(this);
 
@@ -8330,7 +8988,7 @@
       this.foreignKeyValue = foreignKeyValue;
       this.association = association;
       base = new Batman.Set;
-      AssociationSet.__super__.constructor.call(this, base, 'hashKey');
+      AssociationSet.__super__.constructor.call(this, base, '_batmanID');
     }
 
     AssociationSet.prototype.loaded = false;
@@ -8340,23 +8998,33 @@
       if (this.foreignKeyValue == null) {
         return callback(void 0, this);
       }
-      return this.association.getRelatedModel().load(this._getLoadOptions(), function(err, records) {
+      return this.association.getRelatedModel().loadWithOptions(this._getLoadOptions(), function(err, records) {
         if (!err) {
-          _this.set('loaded', true);
+          _this.markAsLoaded();
         }
-        _this.fire('loaded');
         return callback(err, _this);
       });
     };
 
     AssociationSet.prototype._getLoadOptions = function() {
       var loadOptions;
-      loadOptions = {};
-      loadOptions[this.association.foreignKey] = this.foreignKeyValue;
+      loadOptions = {
+        data: {}
+      };
+      loadOptions.data[this.association.foreignKey] = this.foreignKeyValue;
+      if (this.association.options.url) {
+        loadOptions.collectionUrl = this.association.options.url;
+        loadOptions.urlContext = this.association.parentSetIndex().get(this.foreignKeyValue);
+      }
       return loadOptions;
     };
 
     AssociationSet.accessor('loaded', Batman.Property.defaultAccessor);
+
+    AssociationSet.prototype.markAsLoaded = function() {
+      this.set('loaded', true);
+      return this.fire('loaded');
+    };
 
     return AssociationSet;
 
@@ -8381,9 +9049,15 @@
 
     PolymorphicAssociationSet.prototype._getLoadOptions = function() {
       var loadOptions;
-      loadOptions = {};
-      loadOptions[this.association.foreignKey] = this.foreignKeyValue;
-      loadOptions[this.association.foreignTypeKey] = this.foreignTypeKeyValue;
+      loadOptions = {
+        data: {}
+      };
+      loadOptions.data[this.association.foreignKey] = this.foreignKeyValue;
+      loadOptions.data[this.association.foreignTypeKey] = this.foreignTypeKeyValue;
+      if (this.association.options.url) {
+        loadOptions.collectionUrl = this.association.options.url;
+        loadOptions.urlContext = this.association.parentSetIndex().get(this.foreignKeyValue);
+      }
       return loadOptions;
     };
 
@@ -8536,7 +9210,7 @@
     PolymorphicAssociationSetIndex.prototype._resultSetForKey = function(key) {
       var _this = this;
       return this._storage.getOrSet(key, function() {
-        return new Batman.PolymorphicAssociationSet(key, _this.type, _this.association);
+        return new _this.association.proxyClass(key, _this.type, _this.association);
       });
     };
 
@@ -8560,14 +9234,27 @@
     }
 
     AssociationSetIndex.prototype._resultSetForKey = function(key) {
+      return this.association.setForKey(key);
+    };
+
+    AssociationSetIndex.prototype.forEach = function(iterator, ctx) {
       var _this = this;
-      return this._storage.getOrSet(key, function() {
-        return new Batman.AssociationSet(key, _this.association);
+      return this.association.proxies.forEach(function(record, set) {
+        var key;
+        key = _this.association.indexValueForRecord(record);
+        if (set.get('length') > 0) {
+          return iterator.call(ctx, key, set, _this);
+        }
       });
     };
 
-    AssociationSetIndex.prototype._setResultSet = function(key, set) {
-      return this._storage.set(key, set);
+    AssociationSetIndex.prototype.toArray = function() {
+      var results;
+      results = [];
+      this.forEach(function(key) {
+        return results.push(key);
+      });
+      return results;
     };
 
     return AssociationSetIndex;
@@ -8657,349 +9344,6 @@
 }).call(this);
 
 (function() {
-
-  Batman.URI = (function() {
-    /*
-      # URI parsing
-    */
-
-    var attributes, childKeyMatchers, decodeQueryComponent, encodeComponent, encodeQueryComponent, keyVal, nameParser, normalizeParams, plus, queryFromParams, r20, strictParser;
-
-    strictParser = /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/;
-
-    attributes = ["source", "protocol", "authority", "userInfo", "user", "password", "hostname", "port", "relative", "path", "directory", "file", "query", "hash"];
-
-    function URI(str) {
-      var i, matches;
-      matches = strictParser.exec(str);
-      i = 14;
-      while (i--) {
-        this[attributes[i]] = matches[i] || '';
-      }
-      this.queryParams = this.constructor.paramsFromQuery(this.query);
-      delete this.authority;
-      delete this.userInfo;
-      delete this.relative;
-      delete this.directory;
-      delete this.file;
-      delete this.query;
-    }
-
-    URI.prototype.queryString = function() {
-      return this.constructor.queryFromParams(this.queryParams);
-    };
-
-    URI.prototype.toString = function() {
-      return [this.protocol ? "" + this.protocol + ":" : void 0, this.authority() ? "//" : void 0, this.authority(), this.relative()].join("");
-    };
-
-    URI.prototype.userInfo = function() {
-      return [this.user, this.password ? ":" + this.password : void 0].join("");
-    };
-
-    URI.prototype.authority = function() {
-      return [this.userInfo(), this.user || this.password ? "@" : void 0, this.hostname, this.port ? ":" + this.port : void 0].join("");
-    };
-
-    URI.prototype.relative = function() {
-      var query;
-      query = this.queryString();
-      return [this.path, query ? "?" + query : void 0, this.hash ? "#" + this.hash : void 0].join("");
-    };
-
-    URI.prototype.directory = function() {
-      var splitPath;
-      splitPath = this.path.split('/');
-      if (splitPath.length > 1) {
-        return splitPath.slice(0, splitPath.length - 1).join('/') + "/";
-      } else {
-        return "";
-      }
-    };
-
-    URI.prototype.file = function() {
-      var splitPath;
-      splitPath = this.path.split("/");
-      return splitPath[splitPath.length - 1];
-    };
-
-    /*
-      # query parsing
-    */
-
-
-    URI.paramsFromQuery = function(query) {
-      var matches, params, segment, _i, _len, _ref;
-      params = {};
-      _ref = query.split('&');
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        segment = _ref[_i];
-        if (matches = segment.match(keyVal)) {
-          normalizeParams(params, decodeQueryComponent(matches[1]), decodeQueryComponent(matches[2]));
-        } else {
-          normalizeParams(params, decodeQueryComponent(segment), null);
-        }
-      }
-      return params;
-    };
-
-    URI.decodeQueryComponent = decodeQueryComponent = function(str) {
-      return decodeURIComponent(str.replace(plus, '%20'));
-    };
-
-    nameParser = /^[\[\]]*([^\[\]]+)\]*(.*)/;
-
-    childKeyMatchers = [/^\[\]\[([^\[\]]+)\]$/, /^\[\](.+)$/];
-
-    plus = /\+/g;
-
-    r20 = /%20/g;
-
-    keyVal = /^([^=]*)=(.*)/;
-
-    normalizeParams = function(params, name, v) {
-      var after, childKey, k, last, matches, _ref, _ref1, _ref2;
-      if (matches = name.match(nameParser)) {
-        k = matches[1];
-        after = matches[2];
-      } else {
-        return;
-      }
-      if (after === '') {
-        params[k] = v;
-      } else if (after === '[]') {
-        if ((_ref = params[k]) == null) {
-          params[k] = [];
-        }
-        if (Batman.typeOf(params[k]) !== 'Array') {
-          throw new Error("expected Array (got " + (Batman.typeOf(params[k])) + ") for param \"" + k + "\"");
-        }
-        params[k].push(v);
-      } else if (matches = after.match(childKeyMatchers[0]) || after.match(childKeyMatchers[1])) {
-        childKey = matches[1];
-        if ((_ref1 = params[k]) == null) {
-          params[k] = [];
-        }
-        if (Batman.typeOf(params[k]) !== 'Array') {
-          throw new Error("expected Array (got " + (Batman.typeOf(params[k])) + ") for param \"" + k + "\"");
-        }
-        last = params[k][params[k].length - 1];
-        if (Batman.typeOf(last) === 'Object' && !(childKey in last)) {
-          normalizeParams(last, childKey, v);
-        } else {
-          params[k].push(normalizeParams({}, childKey, v));
-        }
-      } else {
-        if ((_ref2 = params[k]) == null) {
-          params[k] = {};
-        }
-        if (Batman.typeOf(params[k]) !== 'Object') {
-          throw new Error("expected Object (got " + (Batman.typeOf(params[k])) + ") for param \"" + k + "\"");
-        }
-        params[k] = normalizeParams(params[k], after, v);
-      }
-      return params;
-    };
-
-    /*
-      # query building
-    */
-
-
-    URI.queryFromParams = queryFromParams = function(value, prefix) {
-      var arrayResults, k, v, valueType;
-      if (value == null) {
-        return prefix;
-      }
-      valueType = Batman.typeOf(value);
-      if (!((prefix != null) || valueType === 'Object')) {
-        throw new Error("value must be an Object");
-      }
-      switch (valueType) {
-        case 'Array':
-          return ((function() {
-            var _i, _len;
-            arrayResults = [];
-            if (value.length === 0) {
-              arrayResults.push(queryFromParams(null, "" + prefix + "[]"));
-            } else {
-              for (_i = 0, _len = value.length; _i < _len; _i++) {
-                v = value[_i];
-                arrayResults.push(queryFromParams(v, "" + prefix + "[]"));
-              }
-            }
-            return arrayResults;
-          })()).join("&");
-        case 'Object':
-          return ((function() {
-            var _results;
-            _results = [];
-            for (k in value) {
-              v = value[k];
-              _results.push(queryFromParams(v, prefix ? "" + prefix + "[" + (encodeQueryComponent(k)) + "]" : encodeQueryComponent(k)));
-            }
-            return _results;
-          })()).join("&");
-        default:
-          if (prefix != null) {
-            return "" + prefix + "=" + (encodeQueryComponent(value));
-          } else {
-            return encodeQueryComponent(value);
-          }
-      }
-    };
-
-    URI.encodeComponent = encodeComponent = function(str) {
-      if (str != null) {
-        return encodeURIComponent(str);
-      } else {
-        return '';
-      }
-    };
-
-    URI.encodeQueryComponent = encodeQueryComponent = function(str) {
-      return encodeComponent(str).replace(r20, '+');
-    };
-
-    return URI;
-
-  })();
-
-}).call(this);
-
-(function() {
-  var __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  Batman.Request = (function(_super) {
-    var dataHasFileUploads;
-
-    __extends(Request, _super);
-
-    Request.objectToFormData = function(data) {
-      var formData, key, pairForList, val, _i, _len, _ref, _ref1;
-      pairForList = function(key, object, first) {
-        var k, list, v;
-        if (first == null) {
-          first = false;
-        }
-        return list = (function() {
-          switch (Batman.typeOf(object)) {
-            case 'Object':
-              list = (function() {
-                var _results;
-                _results = [];
-                for (k in object) {
-                  v = object[k];
-                  _results.push(pairForList((first ? k : "" + key + "[" + k + "]"), v));
-                }
-                return _results;
-              })();
-              return list.reduce(function(acc, list) {
-                return acc.concat(list);
-              }, []);
-            case 'Array':
-              return object.reduce(function(acc, element) {
-                return acc.concat(pairForList("" + key + "[]", element));
-              }, []);
-            default:
-              return [[key, object]];
-          }
-        })();
-      };
-      formData = new Batman.container.FormData();
-      _ref = pairForList("", data, true);
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        _ref1 = _ref[_i], key = _ref1[0], val = _ref1[1];
-        formData.append(key, val);
-      }
-      return formData;
-    };
-
-    Request.dataHasFileUploads = dataHasFileUploads = function(data) {
-      var k, type, v, _i, _len;
-      if ((typeof File !== "undefined" && File !== null) && data instanceof File) {
-        return true;
-      }
-      type = Batman.typeOf(data);
-      switch (type) {
-        case 'Object':
-          for (k in data) {
-            v = data[k];
-            if (dataHasFileUploads(v)) {
-              return true;
-            }
-          }
-          break;
-        case 'Array':
-          for (_i = 0, _len = data.length; _i < _len; _i++) {
-            v = data[_i];
-            if (dataHasFileUploads(v)) {
-              return true;
-            }
-          }
-      }
-      return false;
-    };
-
-    Request.wrapAccessor('method', function(core) {
-      return {
-        set: function(k, val) {
-          return core.set.call(this, k, val != null ? typeof val.toUpperCase === "function" ? val.toUpperCase() : void 0 : void 0);
-        }
-      };
-    });
-
-    Request.prototype.method = 'GET';
-
-    Request.prototype.hasFileUploads = function() {
-      return dataHasFileUploads(this.data);
-    };
-
-    Request.prototype.contentType = 'application/x-www-form-urlencoded';
-
-    Request.prototype.autosend = true;
-
-    function Request(options) {
-      var handler, handlers, k, _ref;
-      handlers = {};
-      for (k in options) {
-        handler = options[k];
-        if (!(k === 'success' || k === 'error' || k === 'loading' || k === 'loaded')) {
-          continue;
-        }
-        handlers[k] = handler;
-        delete options[k];
-      }
-      Request.__super__.constructor.call(this, options);
-      for (k in handlers) {
-        handler = handlers[k];
-        this.on(k, handler);
-      }
-      if (((_ref = this.get('url')) != null ? _ref.length : void 0) > 0) {
-        if (this.autosend) {
-          this.send();
-        }
-      } else {
-        this.observe('url', function(url) {
-          if (url != null) {
-            return this.send();
-          }
-        });
-      }
-    }
-
-    Request.prototype.send = function() {
-      return Batman.developer.error("Please source a dependency file for a request implementation");
-    };
-
-    return Request;
-
-  })(Batman.Object);
-
-}).call(this);
-
-(function() {
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __slice = [].slice;
 
@@ -9061,20 +9405,36 @@
     };
 
     Navigator.prototype.dispatch = function(params) {
-      return this.cachedPath = this.app.get('dispatcher').dispatch(params);
+      this.cachedPath = this.app.get('dispatcher').dispatch(params);
+      if (this._lastRedirect) {
+        this.cachedPath = this._lastRedirect;
+      }
+      return this.cachedPath;
     };
 
     Navigator.prototype.push = function(params) {
-      var path;
+      var path, pathFromParams, _base;
+      pathFromParams = typeof (_base = this.app.get('dispatcher')).pathFromParams === "function" ? _base.pathFromParams(params) : void 0;
+      if (pathFromParams) {
+        this._lastRedirect = pathFromParams;
+      }
       path = this.dispatch(params);
-      this.pushState(null, '', path);
+      if (!this._lastRedirect || this._lastRedirect === path) {
+        this.pushState(null, '', path);
+      }
       return path;
     };
 
     Navigator.prototype.replace = function(params) {
-      var path;
+      var path, pathFromParams, _base;
+      pathFromParams = typeof (_base = this.app.get('dispatcher')).pathFromParams === "function" ? _base.pathFromParams(params) : void 0;
+      if (pathFromParams) {
+        this._lastRedirect = pathFromParams;
+      }
       path = this.dispatch(params);
-      this.replaceState(null, '', path);
+      if (!this._lastRedirect || this._lastRedirect === path) {
+        this.replaceState(null, '', path);
+      }
       return path;
     };
 
@@ -9121,11 +9481,11 @@
     };
 
     PushStateNavigator.prototype.startWatching = function() {
-      return Batman.addEventListener(window, 'popstate', this.handleCurrentLocation);
+      return Batman.DOM.addEventListener(window, 'popstate', this.handleCurrentLocation);
     };
 
     PushStateNavigator.prototype.stopWatching = function() {
-      return Batman.removeEventListener(window, 'popstate', this.handleCurrentLocation);
+      return Batman.DOM.removeEventListener(window, 'popstate', this.handleCurrentLocation);
     };
 
     PushStateNavigator.prototype.pushState = function(stateObject, title, path) {
@@ -9179,10 +9539,10 @@
 
     if ((typeof window !== "undefined" && window !== null) && 'onhashchange' in window) {
       HashbangNavigator.prototype.startWatching = function() {
-        return Batman.addEventListener(window, 'hashchange', this.handleCurrentLocation);
+        return Batman.DOM.addEventListener(window, 'hashchange', this.handleCurrentLocation);
       };
       HashbangNavigator.prototype.stopWatching = function() {
-        return Batman.removeEventListener(window, 'hashchange', this.handleCurrentLocation);
+        return Batman.DOM.removeEventListener(window, 'hashchange', this.handleCurrentLocation);
       };
     } else {
       HashbangNavigator.prototype.startWatching = function() {
@@ -9376,7 +9736,7 @@
     }
 
     RouteMapBuilder.prototype.resources = function() {
-      var action, actions, arg, args, as, callback, childBuilder, controller, included, k, options, path, resourceName, resourceNames, resourceRoot, route, routeOptions, v, _i, _j, _k, _len, _len1, _len2, _ref, _ref1;
+      var action, actions, arg, args, as, callback, childBuilder, controller, included, k, options, path, resourceName, resourceNames, resourceRoot, routeOptions, routeTemplate, v, _i, _j, _k, _len, _len1, _len2, _ref, _ref1;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       resourceNames = (function() {
         var _i, _len, _results;
@@ -9437,16 +9797,16 @@
           if (!(included)) {
             continue;
           }
-          route = this.constructor.ROUTES[action];
-          as = route.name(resourceRoot);
-          path = route.path(resourceRoot);
+          routeTemplate = this.constructor.ROUTES[action];
+          as = routeTemplate.name(resourceRoot);
+          path = routeTemplate.path(resourceRoot);
           routeOptions = Batman.extend({
             controller: controller,
             action: action,
             path: path,
             as: as
           }, options);
-          childBuilder[route.cardinality](action, routeOptions);
+          childBuilder[routeTemplate.cardinality](action, routeOptions);
         }
       }
       return true;
@@ -9497,7 +9857,7 @@
     };
 
     RouteMapBuilder.prototype._addRoutesWithCardinality = function() {
-      var cardinality, name, names, options, resourceRoot, route, routeOptions, _i, _j, _len;
+      var cardinality, name, names, options, resourceRoot, routeOptions, routeTemplate, _i, _j, _len;
       cardinality = arguments[0], names = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), options = arguments[_i++];
       if (typeof options === 'string') {
         names.push(options);
@@ -9505,18 +9865,18 @@
       }
       options = Batman.extend({}, this.baseOptions, options);
       options[cardinality] = true;
-      route = this.constructor.ROUTES[cardinality];
-      resourceRoot = options.controller;
+      routeTemplate = this.constructor.ROUTES[cardinality];
+      resourceRoot = Batman.helpers.underscore(options.controller);
       for (_j = 0, _len = names.length; _j < _len; _j++) {
         name = names[_j];
         routeOptions = Batman.extend({
           action: name
         }, options);
         if (routeOptions.path == null) {
-          routeOptions.path = route.path(resourceRoot, name);
+          routeOptions.path = routeTemplate.path(resourceRoot, name);
         }
         if (routeOptions.as == null) {
-          routeOptions.as = route.name(resourceRoot, name);
+          routeOptions.as = routeTemplate.name(resourceRoot, name);
         }
         this._addRoute(routeOptions);
       }
@@ -9539,10 +9899,8 @@
     };
 
     RouteMapBuilder.prototype._nameFromPath = function(path) {
-      var name, underscored;
-      underscored = path.replace(Batman.Route.regexps.namedOrSplat, '').replace(/\/+/g, '_').replace(/(^_)|(_$)/g, '');
-      name = Batman.helpers.camelize(underscored);
-      return name.charAt(0).toLowerCase() + name.slice(1);
+      path = path.replace(Batman.Route.regexps.namedOrSplat, '').replace(/\/+/g, '.').replace(/(^\.)|(\.$)/g, '');
+      return path;
     };
 
     RouteMapBuilder.prototype._nestingPath = function() {
@@ -9816,11 +10174,20 @@
         name: Batman.helpers.camelize(Batman.helpers.singularize(this.label))
       };
       this.options = Batman.extend(defaultOptions, this.defaultOptions, options);
-      encoder = this.encoder();
-      if (!this.options.saveInline) {
-        encoder.encode = false;
+      if (this.options.nestUrl) {
+        if (!(this.model.urlNestsUnder != null)) {
+          developer.error("You must persist the the model " + this.model.constructor.name + " to use the url helpers on an association");
+        }
+        this.model.urlNestsUnder(Batman.helpers.underscore(this.getRelatedModel().get('resourceName')));
       }
-      this.model.encode(label, encoder);
+      if (this.options.extend != null) {
+        Batman.extend(this, this.options.extend);
+      }
+      encoder = {
+        encode: this.options.saveInline ? this.encoder() : false,
+        decode: this.decoder()
+      };
+      this.model.encode(this.label, encoder);
       self = this;
       getAccessor = function() {
         return self.getAccessor.call(this, self, this.model, this.label);
@@ -9830,12 +10197,6 @@
         set: model.defaultAccessor.set,
         unset: model.defaultAccessor.unset
       });
-      if (this.options.nestUrl) {
-        if (!(this.model.urlNestsUnder != null)) {
-          developer.error("You must persist the the model " + this.model.constructor.name + " to use the url helpers on an association");
-        }
-        this.model.urlNestsUnder(Batman.helpers.underscore(this.getRelatedModel().get('resourceName')));
-      }
     }
 
     Association.prototype.getRelatedModel = function() {
@@ -9857,14 +10218,6 @@
 
     Association.prototype.setIntoAttributes = function(record, value) {
       return record.get('attributes').set(this.label, value);
-    };
-
-    Association.prototype.encoder = function() {
-      return Batman.developer.error("You must override encoder in Batman.Association subclasses.");
-    };
-
-    Association.prototype.setIndex = function() {
-      return Batman.developer.error("You must override setIndex in Batman.Association subclasses.");
     };
 
     Association.prototype.inverse = function() {
@@ -9903,19 +10256,62 @@
 
     __extends(PluralAssociation, _super);
 
-    function PluralAssociation() {
-      return PluralAssociation.__super__.constructor.apply(this, arguments);
-    }
+    PluralAssociation.prototype.proxyClass = Batman.AssociationSet;
 
     PluralAssociation.prototype.isSingular = false;
 
-    PluralAssociation.prototype.setForRecord = Batman.Property.wrapTrackingPrevention(function(record) {
-      var id;
-      if (id = record.get(this.primaryKey)) {
-        return this.setIndex().get(id);
+    function PluralAssociation() {
+      PluralAssociation.__super__.constructor.apply(this, arguments);
+      this._resetSetHashes();
+    }
+
+    PluralAssociation.prototype.setForRecord = function(record) {
+      var childModelSetIndex, indexValue,
+        _this = this;
+      indexValue = this.indexValueForRecord(record);
+      childModelSetIndex = this.setIndex();
+      Batman.Property.withoutTracking(function() {
+        return _this._setsByRecord.getOrSet(record, function() {
+          var existingValueSet, newSet;
+          if (indexValue != null) {
+            existingValueSet = _this._setsByValue.get(indexValue);
+            if (existingValueSet != null) {
+              return existingValueSet;
+            }
+          }
+          newSet = new _this.proxyClass(indexValue, _this);
+          if (indexValue != null) {
+            _this._setsByValue.set(indexValue, newSet);
+          }
+          return newSet;
+        });
+      });
+      if (indexValue != null) {
+        return childModelSetIndex.get(indexValue);
       } else {
-        return new Batman.AssociationSet(void 0, this);
+        return this._setsByRecord.get(record);
       }
+    };
+
+    PluralAssociation.prototype.setForKey = Batman.Property.wrapTrackingPrevention(function(indexValue) {
+      var foundSet,
+        _this = this;
+      foundSet = void 0;
+      this._setsByRecord.forEach(function(record, set) {
+        if (foundSet != null) {
+          return;
+        }
+        if (_this.indexValueForRecord(record) === indexValue) {
+          return foundSet = set;
+        }
+      });
+      if (foundSet != null) {
+        foundSet.foreignKeyValue = indexValue;
+        return foundSet;
+      }
+      return this._setsByValue.getOrSet(indexValue, function() {
+        return new _this.proxyClass(indexValue, _this);
+      });
     });
 
     PluralAssociation.prototype.getAccessor = function(self, model, label) {
@@ -9942,9 +10338,28 @@
       }
     };
 
+    PluralAssociation.prototype.parentSetIndex = function() {
+      this.parentIndex || (this.parentIndex = this.model.get('loaded').indexedByUnique(this.primaryKey));
+      return this.parentIndex;
+    };
+
     PluralAssociation.prototype.setIndex = function() {
       this.index || (this.index = new Batman.AssociationSetIndex(this, this[this.indexRelatedModelOn]));
       return this.index;
+    };
+
+    PluralAssociation.prototype.indexValueForRecord = function(record) {
+      return record.get(this.primaryKey);
+    };
+
+    PluralAssociation.prototype.reset = function() {
+      PluralAssociation.__super__.reset.apply(this, arguments);
+      return this._resetSetHashes();
+    };
+
+    PluralAssociation.prototype._resetSetHashes = function() {
+      this._setsByRecord = new Batman.SimpleHash;
+      return this._setsByValue = new Batman.SimpleHash;
     };
 
     return PluralAssociation;
@@ -9979,7 +10394,7 @@
     }
 
     HasManyAssociation.prototype.apply = function(baseSaveError, base) {
-      var relations,
+      var relations, set,
         _this = this;
       if (!baseSaveError) {
         if (relations = this.getFromAttributes(base)) {
@@ -9987,75 +10402,75 @@
             return model.set(_this.foreignKey, base.get(_this.primaryKey));
           });
         }
-        return base.set(this.label, this.setForRecord(base));
+        base.set(this.label, set = this.setForRecord(base));
+        if (base.lifecycle.get('state') === 'creating') {
+          return set.markAsLoaded();
+        }
       }
     };
 
     HasManyAssociation.prototype.encoder = function() {
       var association;
       association = this;
-      return {
-        encode: function(relationSet, _, __, record) {
-          var jsonArray;
-          if (association._beingEncoded) {
-            return;
-          }
-          association._beingEncoded = true;
-          if (!association.options.saveInline) {
-            return;
-          }
-          if (relationSet != null) {
-            jsonArray = [];
-            relationSet.forEach(function(relation) {
-              var relationJSON;
-              relationJSON = relation.toJSON();
+      return function(relationSet, _, __, record) {
+        var jsonArray;
+        if (relationSet != null) {
+          jsonArray = [];
+          relationSet.forEach(function(relation) {
+            var relationJSON;
+            relationJSON = relation.toJSON();
+            if (!association.inverse() || association.inverse().options.encodeForeignKey) {
               relationJSON[association.foreignKey] = record.get(association.primaryKey);
-              return jsonArray.push(relationJSON);
+            }
+            return jsonArray.push(relationJSON);
+          });
+        }
+        return jsonArray;
+      };
+    };
+
+    HasManyAssociation.prototype.decoder = function() {
+      var association;
+      association = this;
+      return function(data, key, _, __, parentRecord) {
+        var existingRecord, existingRelations, jsonObject, newRelations, record, relatedModel, savedRecord, _i, _len;
+        if (relatedModel = association.getRelatedModel()) {
+          existingRelations = association.getFromAttributes(parentRecord) || association.setForRecord(parentRecord);
+          newRelations = existingRelations.filter(function(relation) {
+            return relation.isNew();
+          }).toArray();
+          for (_i = 0, _len = data.length; _i < _len; _i++) {
+            jsonObject = data[_i];
+            record = new relatedModel();
+            record._withoutDirtyTracking(function() {
+              return this.fromJSON(jsonObject);
             });
-          }
-          delete association._beingEncoded;
-          return jsonArray;
-        },
-        decode: function(data, key, _, __, parentRecord) {
-          var existingRecord, existingRelations, jsonObject, newRelations, record, relatedModel, savedRecord, _i, _len;
-          if (relatedModel = association.getRelatedModel()) {
-            existingRelations = association.getFromAttributes(parentRecord) || association.setForRecord(parentRecord);
-            newRelations = existingRelations.filter(function(relation) {
-              return relation.isNew();
-            }).toArray();
-            for (_i = 0, _len = data.length; _i < _len; _i++) {
-              jsonObject = data[_i];
-              record = new relatedModel();
-              record._withoutDirtyTracking(function() {
+            existingRecord = relatedModel.get('loaded').indexedByUnique('id').get(record.get('id'));
+            if (existingRecord != null) {
+              existingRecord._withoutDirtyTracking(function() {
                 return this.fromJSON(jsonObject);
               });
-              existingRecord = relatedModel.get('loaded').indexedByUnique('id').get(record.get('id'));
-              if (existingRecord != null) {
-                existingRecord._withoutDirtyTracking(function() {
+              record = existingRecord;
+            } else {
+              if (newRelations.length > 0) {
+                savedRecord = newRelations.shift();
+                savedRecord._withoutDirtyTracking(function() {
                   return this.fromJSON(jsonObject);
                 });
-                record = existingRecord;
-              } else {
-                if (newRelations.length > 0) {
-                  savedRecord = newRelations.shift();
-                  savedRecord._withoutDirtyTracking(function() {
-                    return this.fromJSON(jsonObject);
-                  });
-                  record = savedRecord;
-                }
-              }
-              record = relatedModel._mapIdentity(record);
-              existingRelations.add(record);
-              if (association.options.inverseOf) {
-                record.set(association.options.inverseOf, parentRecord);
+                record = savedRecord;
               }
             }
-            existingRelations.set('loaded', true);
-          } else {
-            Batman.developer.error("Can't decode model " + association.options.name + " because it hasn't been loaded yet!");
+            record = relatedModel._mapIdentity(record);
+            existingRelations.add(record);
+            if (association.options.inverseOf) {
+              record.set(association.options.inverseOf, parentRecord);
+            }
           }
-          return existingRelations;
+          existingRelations.markAsLoaded();
+        } else {
+          Batman.developer.error("Can't decode model " + association.options.name + " because it hasn't been loaded yet!");
         }
+        return existingRelations;
       };
     };
 
@@ -10072,6 +10487,8 @@
   Batman.PolymorphicHasManyAssociation = (function(_super) {
 
     __extends(PolymorphicHasManyAssociation, _super);
+
+    PolymorphicHasManyAssociation.prototype.proxyClass = Batman.PolymorphicAssociationSet;
 
     PolymorphicHasManyAssociation.prototype.isPolymorphic = true;
 
@@ -10114,18 +10531,10 @@
     };
 
     PolymorphicHasManyAssociation.prototype.encoder = function() {
-      var association, encoder;
+      var association;
       association = this;
-      encoder = PolymorphicHasManyAssociation.__super__.encoder.apply(this, arguments);
-      encoder.encode = function(relationSet, _, __, record) {
+      return function(relationSet, _, __, record) {
         var jsonArray;
-        if (association._beingEncoded) {
-          return;
-        }
-        association._beingEncoded = true;
-        if (!association.options.saveInline) {
-          return;
-        }
         if (relationSet != null) {
           jsonArray = [];
           relationSet.forEach(function(relation) {
@@ -10136,10 +10545,8 @@
             return jsonArray.push(relationJSON);
           });
         }
-        delete association._beingEncoded;
         return jsonArray;
       };
-      return encoder;
     };
 
     return PolymorphicHasManyAssociation;
@@ -10163,18 +10570,33 @@
     SingularAssociation.prototype.isSingular = true;
 
     SingularAssociation.prototype.getAccessor = function(self, model, label) {
-      var proxy, recordInAttributes;
+      var parent, proxy, record, recordInAttributes, _ref;
       if (recordInAttributes = self.getFromAttributes(this)) {
         return recordInAttributes;
       }
       if (self.getRelatedModel()) {
         proxy = this.associationProxy(self);
-        Batman.Property.withoutTracking(function() {
-          if (!proxy.get('loaded') && self.options.autoload) {
-            return proxy.load();
+        record = false;
+        parent = this;
+        if ((_ref = proxy._loadSetter) == null) {
+          proxy._loadSetter = proxy.once('loaded', function(child) {
+            return parent._withoutDirtyTracking(function() {
+              return this.set(self.label, child);
+            });
+          });
+        }
+        if (!Batman.Property.withoutTracking(function() {
+          return proxy.get('loaded');
+        })) {
+          if (self.options.autoload) {
+            Batman.Property.withoutTracking(function() {
+              return proxy.load();
+            });
+          } else {
+            record = proxy.loadFromLocal();
           }
-        });
-        return proxy;
+        }
+        return record || proxy;
       }
     };
 
@@ -10219,30 +10641,32 @@
     HasOneAssociation.prototype.encoder = function() {
       var association;
       association = this;
-      return {
-        encode: function(val, key, object, record) {
-          var json;
-          if (!association.options.saveInline) {
-            return;
-          }
-          if (json = val.toJSON()) {
-            json[association.foreignKey] = record.get(association.primaryKey);
-          }
-          return json;
-        },
-        decode: function(data, _, __, ___, parentRecord) {
-          var record, relatedModel;
-          relatedModel = association.getRelatedModel();
-          record = new relatedModel();
-          record._withoutDirtyTracking(function() {
-            return this.fromJSON(data);
-          });
-          if (association.options.inverseOf) {
-            record.set(association.options.inverseOf, parentRecord);
-          }
-          record = relatedModel._mapIdentity(record);
-          return record;
+      return function(val, key, object, record) {
+        var json;
+        if (!association.options.saveInline) {
+          return;
         }
+        if (json = val.toJSON()) {
+          json[association.foreignKey] = record.get(association.primaryKey);
+        }
+        return json;
+      };
+    };
+
+    HasOneAssociation.prototype.decoder = function() {
+      var association;
+      association = this;
+      return function(data, _, __, ___, parentRecord) {
+        var record, relatedModel;
+        if (!data) {
+          return;
+        }
+        relatedModel = association.getRelatedModel();
+        record = relatedModel.createFromJSON(data);
+        if (association.options.inverseOf) {
+          record.set(association.options.inverseOf, parentRecord);
+        }
+        return record;
       };
     };
 
@@ -10268,7 +10692,8 @@
 
     BelongsToAssociation.prototype.defaultOptions = {
       saveInline: false,
-      autoload: true
+      autoload: true,
+      encodeForeignKey: true
     };
 
     function BelongsToAssociation(model, label, options) {
@@ -10283,41 +10708,36 @@
       BelongsToAssociation.__super__.constructor.apply(this, arguments);
       this.foreignKey = this.options.foreignKey || ("" + this.label + "_id");
       this.primaryKey = this.options.primaryKey || "id";
-      this.model.encode(this.foreignKey);
+      if (this.options.encodeForeignKey) {
+        this.model.encode(this.foreignKey);
+      }
     }
 
     BelongsToAssociation.prototype.encoder = function() {
-      var association, encoder;
+      return function(val) {
+        return val.toJSON();
+      };
+    };
+
+    BelongsToAssociation.prototype.decoder = function() {
+      var association;
       association = this;
-      encoder = {
-        encode: false,
-        decode: function(data, _, __, ___, childRecord) {
-          var inverse, record, relatedModel;
-          relatedModel = association.getRelatedModel();
-          record = new relatedModel();
-          record._withoutDirtyTracking(function() {
-            return this.fromJSON(data);
-          });
-          record = relatedModel._mapIdentity(record);
-          if (association.options.inverseOf) {
-            if (inverse = association.inverse()) {
-              if (inverse instanceof Batman.HasManyAssociation) {
-                childRecord.set(association.foreignKey, record.get(association.primaryKey));
-              } else {
-                record.set(inverse.label, childRecord);
-              }
+      return function(data, _, __, ___, childRecord) {
+        var inverse, record, relatedModel;
+        relatedModel = association.getRelatedModel();
+        record = relatedModel.createFromJSON(data);
+        if (association.options.inverseOf) {
+          if (inverse = association.inverse()) {
+            if (inverse instanceof Batman.HasManyAssociation) {
+              childRecord.set(association.foreignKey, record.get(association.primaryKey));
+            } else {
+              record.set(inverse.label, childRecord);
             }
           }
-          childRecord.set(association.label, record);
-          return record;
         }
+        childRecord.set(association.label, record);
+        return record;
       };
-      if (this.options.saveInline) {
-        encoder.encode = function(val) {
-          return val.toJSON();
-        };
-      }
-      return encoder;
     };
 
     BelongsToAssociation.prototype.apply = function(base) {
@@ -10348,10 +10768,16 @@
 
     PolymorphicBelongsToAssociation.prototype.proxyClass = Batman.PolymorphicBelongsToProxy;
 
+    PolymorphicBelongsToAssociation.prototype.defaultOptions = Batman.mixin({}, Batman.BelongsToAssociation.prototype.defaultOptions, {
+      encodeForeignTypeKey: true
+    });
+
     function PolymorphicBelongsToAssociation() {
       PolymorphicBelongsToAssociation.__super__.constructor.apply(this, arguments);
       this.foreignTypeKey = this.options.foreignTypeKey || ("" + this.label + "_type");
-      this.model.encode(this.foreignTypeKey);
+      if (this.options.encodeForeignTypeKey) {
+        this.model.encode(this.foreignTypeKey);
+      }
       this.typeIndicies = {};
     }
 
@@ -10412,7 +10838,7 @@
       }
       Batman.developer["do"](function() {
         if ((Batman.currentApp != null) && !relatedModel) {
-          return Batman.developer.warn("Related model " + type + " for polymorhic association not found.");
+          return Batman.developer.warn("Related model " + type + " for polymorphic association not found.");
         }
       });
       return relatedModel;
@@ -10441,40 +10867,27 @@
       }
     };
 
-    PolymorphicBelongsToAssociation.prototype.encoder = function() {
-      var association, encoder;
+    PolymorphicBelongsToAssociation.prototype.decoder = function() {
+      var association;
       association = this;
-      encoder = {
-        encode: false,
-        decode: function(data, key, response, ___, childRecord) {
-          var foreignTypeValue, inverse, record, relatedModel;
-          foreignTypeValue = response[association.foreignTypeKey] || childRecord.get(association.foreignTypeKey);
-          relatedModel = association.getRelatedModelForType(foreignTypeValue);
-          record = new relatedModel();
-          record._withoutDirtyTracking(function() {
-            return this.fromJSON(data);
-          });
-          record = relatedModel._mapIdentity(record);
-          if (association.options.inverseOf) {
-            if (inverse = association.inverseForType(foreignTypeValue)) {
-              if (inverse instanceof Batman.PolymorphicHasManyAssociation) {
-                childRecord.set(association.foreignKey, record.get(association.primaryKey));
-                childRecord.set(association.foreignTypeKey, foreignTypeValue);
-              } else {
-                record.set(inverse.label, childRecord);
-              }
+      return function(data, key, response, ___, childRecord) {
+        var foreignTypeValue, inverse, record, relatedModel;
+        foreignTypeValue = response[association.foreignTypeKey] || childRecord.get(association.foreignTypeKey);
+        relatedModel = association.getRelatedModelForType(foreignTypeValue);
+        record = relatedModel.createFromJSON(data);
+        if (association.options.inverseOf) {
+          if (inverse = association.inverseForType(foreignTypeValue)) {
+            if (inverse instanceof Batman.PolymorphicHasManyAssociation) {
+              childRecord.set(association.foreignKey, record.get(association.primaryKey));
+              childRecord.set(association.foreignTypeKey, foreignTypeValue);
+            } else {
+              record.set(inverse.label, childRecord);
             }
           }
-          childRecord.set(association.label, record);
-          return record;
         }
+        childRecord.set(association.label, record);
+        return record;
       };
-      if (this.options.saveInline) {
-        encoder.encode = function(val) {
-          return val.toJSON();
-        };
-      }
-      return encoder;
     };
 
     return PolymorphicBelongsToAssociation;
@@ -10492,6 +10905,45 @@
 
     __extends(Validator, _super);
 
+    Validator.triggers = function() {
+      var triggers;
+      triggers = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      if (this._triggers != null) {
+        return this._triggers.concat(triggers);
+      } else {
+        return this._triggers = triggers;
+      }
+    };
+
+    Validator.options = function() {
+      var options;
+      options = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      if (this._options != null) {
+        return this._options.concat(options);
+      } else {
+        return this._options = options;
+      }
+    };
+
+    Validator.matches = function(options) {
+      var key, results, shouldReturn, value, _ref, _ref1;
+      results = {};
+      shouldReturn = false;
+      for (key in options) {
+        value = options[key];
+        if (~((_ref = this._options) != null ? _ref.indexOf(key) : void 0)) {
+          results[key] = value;
+        }
+        if (~((_ref1 = this._triggers) != null ? _ref1.indexOf(key) : void 0)) {
+          results[key] = value;
+          shouldReturn = true;
+        }
+      }
+      if (shouldReturn) {
+        return results;
+      }
+    };
+
     function Validator() {
       var mixins, options;
       options = arguments[0], mixins = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
@@ -10507,30 +10959,9 @@
       return Batman.t("errors.messages." + messageKey, interpolations);
     };
 
-    Validator.options = function() {
-      var options;
-      options = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      Batman.initializeObject(this);
-      if (this._batman.options) {
-        return this._batman.options.concat(options);
-      } else {
-        return this._batman.options = options;
-      }
-    };
-
-    Validator.matches = function(options) {
-      var key, results, shouldReturn, value, _ref, _ref1;
-      results = {};
-      shouldReturn = false;
-      for (key in options) {
-        value = options[key];
-        if (~((_ref = this._batman) != null ? (_ref1 = _ref.options) != null ? _ref1.indexOf(key) : void 0 : void 0)) {
-          results[key] = value;
-          shouldReturn = true;
-        }
-      }
-      if (shouldReturn) {
-        return results;
+    Validator.prototype.handleBlank = function(value) {
+      if (this.options.allowBlank && !Batman.PresenceValidator.prototype.isPresent(value)) {
+        return true;
       }
     };
 
@@ -10553,7 +10984,8 @@
         wrong_length: "must be %{count} characters",
         blank: "can't be blank",
         not_numeric: "must be a number",
-        not_matching: "is not valid"
+        not_matching: "is not valid",
+        invalid_association: "is not valid"
       }
     }
   });
@@ -10568,7 +11000,9 @@
 
     __extends(RegExpValidator, _super);
 
-    RegExpValidator.options('regexp', 'pattern');
+    RegExpValidator.triggers('regexp', 'pattern');
+
+    RegExpValidator.options('allowBlank');
 
     function RegExpValidator(options) {
       var _ref;
@@ -10579,10 +11013,11 @@
     RegExpValidator.prototype.validateEach = function(errors, record, key, callback) {
       var value;
       value = record.get(key);
-      if ((value != null) && value !== '') {
-        if (!this.regexp.test(value)) {
-          errors.add(key, this.format(key, 'not_matching'));
-        }
+      if (this.handleBlank(value)) {
+        return callback();
+      }
+      if (!(value != null) || value === '' || !this.regexp.test(value)) {
+        errors.add(key, this.format(key, 'not_matching'));
       }
       return callback();
     };
@@ -10607,15 +11042,19 @@
       return PresenceValidator.__super__.constructor.apply(this, arguments);
     }
 
-    PresenceValidator.options('presence');
+    PresenceValidator.triggers('presence');
 
     PresenceValidator.prototype.validateEach = function(errors, record, key, callback) {
       var value;
       value = record.get(key);
-      if (this.options.presence && (!(value != null) || value === '')) {
+      if (!this.isPresent(value)) {
         errors.add(key, this.format(key, 'blank'));
       }
       return callback();
+    };
+
+    PresenceValidator.prototype.isPresent = function(value) {
+      return (value != null) && value !== '';
     };
 
     return PresenceValidator;
@@ -10638,15 +11077,28 @@
       return NumericValidator.__super__.constructor.apply(this, arguments);
     }
 
-    NumericValidator.options('numeric');
+    NumericValidator.triggers('numeric');
+
+    NumericValidator.options('allowBlank');
 
     NumericValidator.prototype.validateEach = function(errors, record, key, callback) {
       var value;
       value = record.get(key);
-      if (this.options.numeric && isNaN(parseFloat(value))) {
+      if (this.handleBlank(value)) {
+        return callback();
+      }
+      if (!(value != null) || !(this.isNumeric(value) || this.canCoerceToNumeric(value))) {
         errors.add(key, this.format(key, 'not_numeric'));
       }
       return callback();
+    };
+
+    NumericValidator.prototype.isNumeric = function(value) {
+      return !isNaN(parseFloat(value)) && isFinite(value);
+    };
+
+    NumericValidator.prototype.canCoerceToNumeric = function(value) {
+      return (value - 0) == value && value.length > 0;
     };
 
     return NumericValidator;
@@ -10665,7 +11117,9 @@
 
     __extends(LengthValidator, _super);
 
-    LengthValidator.options('minLength', 'maxLength', 'length', 'lengthWithin', 'lengthIn');
+    LengthValidator.triggers('minLength', 'maxLength', 'length', 'lengthWithin', 'lengthIn');
+
+    LengthValidator.options('allowBlank');
 
     function LengthValidator(options) {
       var range;
@@ -10679,9 +11133,15 @@
     }
 
     LengthValidator.prototype.validateEach = function(errors, record, key, callback) {
-      var options, value, _ref;
+      var options, value;
       options = this.options;
-      value = (_ref = record.get(key)) != null ? _ref : [];
+      value = record.get(key);
+      if (value !== '' && this.handleBlank(value)) {
+        return callback();
+      }
+      if (value == null) {
+        value = [];
+      }
       if (options.minLength && value.length < options.minLength) {
         errors.add(key, this.format(key, 'too_short', {
           count: options.minLength
@@ -10705,6 +11165,60 @@
   })(Batman.Validator);
 
   Batman.Validators.push(Batman.LengthValidator);
+
+}).call(this);
+
+(function() {
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Batman.AssociatedValidator = (function(_super) {
+
+    __extends(AssociatedValidator, _super);
+
+    function AssociatedValidator() {
+      return AssociatedValidator.__super__.constructor.apply(this, arguments);
+    }
+
+    AssociatedValidator.triggers('associated');
+
+    AssociatedValidator.prototype.validateEach = function(errors, record, key, callback) {
+      var childFinished, count, value,
+        _this = this;
+      value = record.get(key);
+      if (value != null) {
+        if (value instanceof Batman.AssociationProxy) {
+          value = typeof value.get === "function" ? value.get('target') : void 0;
+        }
+        count = 1;
+        childFinished = function(err, childErrors) {
+          if (childErrors.length > 0) {
+            errors.add(key, _this.format(key, 'invalid_association'));
+          }
+          if (--count === 0) {
+            return callback();
+          }
+        };
+        if ((value != null ? value.forEach : void 0) != null) {
+          value.forEach(function(record) {
+            count += 1;
+            return record.validate(childFinished);
+          });
+        } else if ((value != null ? value.validate : void 0) != null) {
+          count += 1;
+          value.validate(childFinished);
+        }
+        return childFinished(null, []);
+      } else {
+        return callback();
+      }
+    };
+
+    return AssociatedValidator;
+
+  })(Batman.Validator);
+
+  Batman.Validators.push(Batman.AssociatedValidator);
 
 }).call(this);
 
@@ -10803,8 +11317,10 @@
           return parentNode.removeChild(this.placeholderNode);
         }
       } else {
-        parentNode.insertBefore(this.placeholderNode, this.node);
-        return Batman.DOM.removeNode(this.node);
+        if (this.node.parentNode != null) {
+          parentNode.insertBefore(this.placeholderNode, this.node);
+          return Batman.DOM.removeNode(this.node);
+        }
       }
     };
 
@@ -10972,7 +11488,7 @@
 
   buntUndefined = function(f) {
     return function(value) {
-      if (typeof value === 'undefined') {
+      if (value == null) {
         return void 0;
       } else {
         return f.apply(this, arguments);
@@ -11002,10 +11518,15 @@
     and: function(lhs, rhs) {
       return lhs && rhs;
     },
-    or: defaultAndOr,
-    not: function(value, binding) {
-      return !!!value;
+    or: function(lhs, rhs, binding) {
+      return lhs || rhs;
     },
+    not: function(value, binding) {
+      return !value;
+    },
+    trim: buntUndefined(function(value, binding) {
+      return value.trim();
+    }),
     matches: buntUndefined(function(value, searchFor) {
       return value.indexOf(searchFor) !== -1;
     }),
@@ -11022,12 +11543,18 @@
       }
       return value;
     }),
-    "default": defaultAndOr,
+    "default": function(value, defaultValue, binding) {
+      if ((value != null) && value !== '') {
+        return value;
+      } else {
+        return defaultValue;
+      }
+    },
     prepend: function(value, string, binding) {
-      return string + value;
+      return string + (value != null ? value : '');
     },
     append: function(value, string, binding) {
-      return value + string;
+      return (value != null ? value : '') + string;
     },
     replace: buntUndefined(function(value, searchFor, replaceWith, flags, binding) {
       if (!binding) {
@@ -11055,7 +11582,7 @@
           count = void 0;
         }
       }
-      if (count) {
+      if (count != null) {
         return Batman.helpers.pluralize(count, string, void 0, includeCount);
       } else {
         return Batman.helpers.pluralize(string);
@@ -11282,8 +11809,6 @@
 
     __extends(ViewStore, _super);
 
-    ViewStore.prefix = 'views';
-
     function ViewStore() {
       ViewStore.__super__.constructor.apply(this, arguments);
       this._viewContents = {};
@@ -11294,13 +11819,8 @@
 
     ViewStore.prototype.fetchView = function(path) {
       var _this = this;
-      Batman.developer["do"](function() {
-        if (typeof Batman.View.prototype.prefix !== 'undefined') {
-          return Batman.developer.warn("Batman.View.prototype.prefix has been removed, please use Batman.ViewStore.prefix instead.");
-        }
-      });
       return new Batman.Request({
-        url: Batman.Navigator.normalizePath(this.constructor.prefix, "" + path + ".html"),
+        url: Batman.Navigator.normalizePath(Batman.config.viewPrefix, "" + path + ".html"),
         type: 'html',
         success: function(response) {
           return _this.set(path, response);
@@ -11314,6 +11834,7 @@
     ViewStore.accessor({
       'final': true,
       get: function(path) {
+        var contents;
         if (path[0] !== '/') {
           return this.get("/" + path);
         }
@@ -11323,7 +11844,14 @@
         if (this._requestedPaths.has(path)) {
           return;
         }
-        this.fetchView(path);
+        if (contents = this._sourceFromDOM(path)) {
+          return contents;
+        }
+        if (Batman.config.fetchRemoteViews) {
+          this.fetchView(path);
+        } else {
+          throw new Error("Couldn't find view source for \'" + path + "\'!");
+        }
       },
       set: function(path, content) {
         if (path[0] !== '/') {
@@ -11337,6 +11865,18 @@
     ViewStore.prototype.prefetch = function(path) {
       this.get(path);
       return true;
+    };
+
+    ViewStore.prototype._sourceFromDOM = function(path) {
+      var node, relativePath;
+      relativePath = path.slice(1);
+      if (node = Batman.DOM.querySelector(document, "[data-defineview*='" + relativePath + "']")) {
+        Batman.setImmediate(function() {
+          var _ref;
+          return (_ref = node.parentNode) != null ? _ref.removeChild(node) : void 0;
+        });
+        return Batman.DOM.defineView(path, node);
+      }
     };
 
     return ViewStore;
@@ -11354,31 +11894,49 @@
 
     __extends(View, _super);
 
+    View.YieldStorage = (function(_super1) {
+
+      __extends(YieldStorage, _super1);
+
+      function YieldStorage() {
+        return YieldStorage.__super__.constructor.apply(this, arguments);
+      }
+
+      YieldStorage.wrapAccessor(function(core) {
+        return {
+          get: function(key) {
+            var val;
+            val = core.get.call(this, key);
+            if (!(val != null)) {
+              val = this.set(key, []);
+            }
+            return val;
+          }
+        };
+      });
+
+      return YieldStorage;
+
+    })(Batman.Hash);
+
     View.store = new Batman.ViewStore();
 
     View.option = function() {
-      var keys,
-        _this = this;
+      var keys;
       keys = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      keys.forEach(function(key) {
-        return _this.accessor(_this.prototype._argumentBindingKey(key), function(bindingKey) {
-          var context, keyPath, node, _ref;
-          if (!((node = this.get('node')) && (context = this.get('context')))) {
-            return;
-          }
-          keyPath = node.getAttribute(("data-view-" + key).toLowerCase());
-          if (keyPath == null) {
-            return;
-          }
-          if ((_ref = this[bindingKey]) != null) {
-            _ref.die();
-          }
-          return this[bindingKey] = new Batman.DOM.ViewArgumentBinding(node, keyPath, context);
-        });
-      });
-      return this.accessor.apply(this, __slice.call(keys).concat([function(key) {
-        var _ref;
-        return (_ref = this.get(this._argumentBindingKey(key))) != null ? _ref.get('filteredValue') : void 0;
+      return this.accessor.apply(this, __slice.call(keys).concat([{
+        get: function(key) {
+          var _ref;
+          return (_ref = this.get("argumentBindings." + key)) != null ? _ref.get('filteredValue') : void 0;
+        },
+        set: function(key, value) {
+          var _ref;
+          return (_ref = this.get("argumentBindings." + key)) != null ? _ref.set('filteredValue', value) : void 0;
+        },
+        unset: function(key) {
+          var _ref;
+          return (_ref = this.get("argumentBindings." + key)) != null ? _ref.unset('filteredValue') : void 0;
+        }
       }]));
     };
 
@@ -11388,13 +11946,28 @@
 
     View.prototype._rendered = false;
 
-    View.prototype.source = '';
-
-    View.prototype.html = '';
-
     View.prototype.node = null;
 
     View.prototype.event('ready').oneShot = true;
+
+    View.accessor('argumentBindings', function() {
+      var _this = this;
+      return new Batman.TerminalAccessible(function(key) {
+        var bindingKey, context, keyPath, node, _ref;
+        if (!((node = _this.get('node')) && (context = _this.get('context')))) {
+          return;
+        }
+        keyPath = node.getAttribute(("data-view-" + key).toLowerCase());
+        if (keyPath == null) {
+          return;
+        }
+        bindingKey = "_argumentBinding" + key;
+        if ((_ref = _this[bindingKey]) != null) {
+          _ref.die();
+        }
+        return _this[bindingKey] = new Batman.DOM.ViewArgumentBinding(node, keyPath, context);
+      });
+    });
 
     View.accessor('html', {
       get: function() {
@@ -11423,7 +11996,7 @@
           }
           this.node = document.createElement('div');
           this._setNodeOwner(this.node);
-          Batman.setInnerHTML(this.node, html);
+          Batman.DOM.setInnerHTML(this.node, html);
         }
         return this.node;
       },
@@ -11434,7 +12007,7 @@
         this._setNodeOwner(node);
         updateHTML = function(html) {
           if (html != null) {
-            Batman.setInnerHTML(_this.node, html);
+            Batman.DOM.setInnerHTML(_this.node, html);
             return _this.forget('html', updateHTML);
           }
         };
@@ -11443,33 +12016,17 @@
       }
     });
 
-    View.YieldStorage = (function(_super1) {
-
-      __extends(YieldStorage, _super1);
-
-      function YieldStorage() {
-        return YieldStorage.__super__.constructor.apply(this, arguments);
-      }
-
-      YieldStorage.wrapAccessor(function(core) {
-        return {
-          get: function(key) {
-            var val;
-            val = core.get.call(this, key);
-            if (!(val != null)) {
-              val = this.set(key, []);
-            }
-            return val;
-          }
-        };
-      });
-
-      return YieldStorage;
-
-    })(Batman.Hash);
-
     View.accessor('yields', function() {
       return new this.constructor.YieldStorage;
+    });
+
+    View.accessor('fetched?', function() {
+      return this.get('source') != null;
+    });
+
+    View.accessor('readyToRender', function() {
+      var _ref;
+      return this.get('node') && (this.get('fetched?') ? ((_ref = this.get('html')) != null ? _ref.length : void 0) > 0 : true);
     });
 
     function View(options) {
@@ -11489,30 +12046,25 @@
       options.context = context.descend(this);
       View.__super__.constructor.call(this, options);
       Batman.Property.withoutTracking(function() {
-        var node;
-        if (node = _this.get('node')) {
-          return _this.render(node);
-        } else {
-          return _this.observeOnce('node', function(node) {
-            return _this.render(node);
-          });
-        }
+        return _this.observeAndFire('readyToRender', function(ready) {
+          if (ready) {
+            return _this.render();
+          }
+        });
       });
     }
 
-    View.prototype.render = function(node) {
-      var _this = this;
+    View.prototype.render = function() {
+      var node,
+        _this = this;
       if (this._rendered) {
         return;
       }
       this._rendered = true;
-      this.event('ready').resetOneShot();
-      if (node) {
-        this._renderer = new Batman.Renderer(node, this.context, this);
-        return this._renderer.on('rendered', function() {
-          return _this.fire('ready', node);
-        });
-      }
+      this._renderer = new Batman.Renderer(node = this.get('node'), this.get('context'), this);
+      return this._renderer.on('rendered', function() {
+        return _this.fire('ready', node);
+      });
     };
 
     View.prototype.isInDOM = function() {
@@ -11564,10 +12116,6 @@
         node: node,
         action: action
       });
-    };
-
-    View.prototype._argumentBindingKey = function(key) {
-      return "_" + key + "ArgumentBinding";
     };
 
     View.prototype._setNodeOwner = function(node) {
@@ -11697,7 +12245,7 @@
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         child = _ref[_i];
-        _results.push(Batman.removeOrDestroyNode(child));
+        _results.push(Batman.DOM.removeOrDestroyNode(child));
       }
       return _results;
     });
@@ -11718,7 +12266,7 @@
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         child = _ref[_i];
         if (!~this.currentVersionNodes.indexOf(child)) {
-          _results.push(Batman.removeOrDestroyNode(child));
+          _results.push(Batman.DOM.removeOrDestroyNode(child));
         }
       }
       return _results;
@@ -11726,7 +12274,7 @@
 
     Yield.prototype.append = Yield.queued(function(node) {
       this.currentVersionNodes.push(node);
-      return Batman.appendChild(this.containerNode, node, true);
+      return Batman.DOM.appendChild(this.containerNode, node, true);
     });
 
     Yield.prototype.replace = Yield.queued(function(node) {
@@ -11737,517 +12285,6 @@
     return Yield;
 
   })(Batman.Object);
-
-}).call(this);
-
-(function() {
-
-
-
-}).call(this);
-
-(function() {
-  
-/*!
-  * Reqwest! A general purpose XHR connection manager
-  * (c) Dustin Diaz 2011
-  * https://github.com/ded/reqwest
-  * license MIT
-  */
-!function (name, definition) {
-  if (typeof module != 'undefined') module.exports = definition()
-  else if (typeof define == 'function' && define.amd) define(name, definition)
-  else this[name] = definition()
-}('reqwest', function () {
-
-  var context = this
-    , win = window
-    , doc = document
-    , old = context.reqwest
-    , twoHundo = /^20\d$/
-    , byTag = 'getElementsByTagName'
-    , readyState = 'readyState'
-    , contentType = 'Content-Type'
-    , requestedWith = 'X-Requested-With'
-    , head = doc[byTag]('head')[0]
-    , uniqid = 0
-    , lastValue // data stored by the most recent JSONP callback
-    , xmlHttpRequest = 'XMLHttpRequest'
-    , isArray = typeof Array.isArray == 'function' ? Array.isArray : function (a) {
-        return a instanceof Array
-      }
-    , defaultHeaders = {
-          contentType: 'application/x-www-form-urlencoded'
-        , accept: {
-              '*':  'text/javascript, text/html, application/xml, text/xml, */*'
-            , xml:  'application/xml, text/xml'
-            , html: 'text/html'
-            , text: 'text/plain'
-            , json: 'application/json, text/javascript'
-            , js:   'application/javascript, text/javascript'
-          }
-        , requestedWith: xmlHttpRequest
-      }
-    , xhr = win[xmlHttpRequest] ?
-        function () {
-          return new XMLHttpRequest()
-        } :
-        function () {
-          return new ActiveXObject('Microsoft.XMLHTTP')
-        }
-
-  function handleReadyState(o, success, error) {
-    return function () {
-      if (o && o[readyState] == 4) {
-        if (twoHundo.test(o.status)) {
-          success(o)
-        } else {
-          error(o)
-        }
-      }
-    }
-  }
-
-  function setHeaders(http, o) {
-    var headers = o.headers || {}, h
-    headers.Accept = headers.Accept || defaultHeaders.accept[o.type] || defaultHeaders.accept['*']
-    // breaks cross-origin requests with legacy browsers
-    if (!o.crossOrigin && !headers[requestedWith]) headers[requestedWith] = defaultHeaders.requestedWith
-    if (!headers[contentType]) headers[contentType] = o.contentType || defaultHeaders.contentType
-    for (h in headers) {
-      headers.hasOwnProperty(h) && http.setRequestHeader(h, headers[h])
-    }
-  }
-
-  function generalCallback(data) {
-    lastValue = data
-  }
-
-  function urlappend(url, s) {
-    return url + (/\?/.test(url) ? '&' : '?') + s
-  }
-
-  function handleJsonp(o, fn, err, url) {
-    var reqId = uniqid++
-      , cbkey = o.jsonpCallback || 'callback' // the 'callback' key
-      , cbval = o.jsonpCallbackName || ('reqwest_' + reqId) // the 'callback' value
-      , cbreg = new RegExp('((^|\\?|&)' + cbkey + ')=([^&]+)')
-      , match = url.match(cbreg)
-      , script = doc.createElement('script')
-      , loaded = 0
-
-    if (match) {
-      if (match[3] === '?') {
-        url = url.replace(cbreg, '$1=' + cbval) // wildcard callback func name
-      } else {
-        cbval = match[3] // provided callback func name
-      }
-    } else {
-      url = urlappend(url, cbkey + '=' + cbval) // no callback details, add 'em
-    }
-
-    win[cbval] = generalCallback
-
-    script.type = 'text/javascript'
-    script.src = url
-    script.async = true
-    if (typeof script.onreadystatechange !== 'undefined') {
-        // need this for IE due to out-of-order onreadystatechange(), binding script
-        // execution to an event listener gives us control over when the script
-        // is executed. See http://jaubourg.net/2010/07/loading-script-as-onclick-handler-of.html
-        script.event = 'onclick'
-        script.htmlFor = script.id = '_reqwest_' + reqId
-    }
-
-    script.onload = script.onreadystatechange = function () {
-      if ((script[readyState] && script[readyState] !== 'complete' && script[readyState] !== 'loaded') || loaded) {
-        return false
-      }
-      script.onload = script.onreadystatechange = null
-      script.onclick && script.onclick()
-      // Call the user callback with the last value stored and clean up values and scripts.
-      o.success && o.success(lastValue)
-      lastValue = undefined
-      head.removeChild(script)
-      loaded = 1
-    }
-
-    // Add the script to the DOM head
-    head.appendChild(script)
-  }
-
-  function getRequest(o, fn, err) {
-    var method = (o.method || 'GET').toUpperCase()
-      , url = typeof o === 'string' ? o : o.url
-      // convert non-string objects to query-string form unless o.processData is false
-      , data = (o.processData !== false && o.data && typeof o.data !== 'string')
-        ? reqwest.toQueryString(o.data)
-        : (o.data || null)
-      , http
-
-    // if we're working on a GET request and we have data then we should append
-    // query string to end of URL and not post data
-    if ((o.type == 'jsonp' || method == 'GET') && data) {
-      url = urlappend(url, data)
-      data = null
-    }
-
-    if (o.type == 'jsonp') return handleJsonp(o, fn, err, url)
-
-    http = xhr()
-    http.open(method, url, true)
-    setHeaders(http, o)
-    http.onreadystatechange = handleReadyState(http, fn, err)
-    o.before && o.before(http)
-    http.send(data)
-    return http
-  }
-
-  function Reqwest(o, fn) {
-    this.o = o
-    this.fn = fn
-    init.apply(this, arguments)
-  }
-
-  function setType(url) {
-    var m = url.match(/\.(json|jsonp|html|xml)(\?|$)/)
-    return m ? m[1] : 'js'
-  }
-
-  function init(o, fn) {
-    this.url = typeof o == 'string' ? o : o.url
-    this.timeout = null
-    var type = o.type || setType(this.url)
-      , self = this
-    fn = fn || function () {}
-
-    if (o.timeout) {
-      this.timeout = setTimeout(function () {
-        self.abort()
-      }, o.timeout)
-    }
-
-    function complete(resp) {
-      o.timeout && clearTimeout(self.timeout)
-      self.timeout = null
-      o.complete && o.complete(resp)
-    }
-
-    function success(resp) {
-      var r = resp.responseText
-      if (r) {
-        switch (type) {
-        case 'json':
-          try {
-            resp = win.JSON ? win.JSON.parse(r) : eval('(' + r + ')')
-          } catch (err) {
-            return error(resp, 'Could not parse JSON in response', err)
-          }
-          break;
-        case 'js':
-          resp = eval(r)
-          break;
-        case 'html':
-          resp = r
-          break;
-        }
-      }
-
-      fn(resp)
-      o.success && o.success(resp)
-
-      complete(resp)
-    }
-
-    function error(resp, msg, t) {
-      o.error && o.error(resp, msg, t)
-      complete(resp)
-    }
-
-    this.request = getRequest(o, success, error)
-  }
-
-  Reqwest.prototype = {
-    abort: function () {
-      this.request.abort()
-    }
-
-  , retry: function () {
-      init.call(this, this.o, this.fn)
-    }
-  }
-
-  function reqwest(o, fn) {
-    return new Reqwest(o, fn)
-  }
-
-  // normalize newline variants according to spec -> CRLF
-  function normalize(s) {
-    return s ? s.replace(/\r?\n/g, '\r\n') : ''
-  }
-
-  function serial(el, cb) {
-    var n = el.name
-      , t = el.tagName.toLowerCase()
-      , optCb = function(o) {
-          // IE gives value="" even where there is no value attribute
-          // 'specified' ref: http://www.w3.org/TR/DOM-Level-3-Core/core.html#ID-862529273
-          if (o && !o.disabled)
-            cb(n, normalize(o.attributes.value && o.attributes.value.specified ? o.value : o.text))
-        }
-
-    // don't serialize elements that are disabled or without a name
-    if (el.disabled || !n) return;
-
-    switch (t) {
-    case 'input':
-      if (!/reset|button|image|file/i.test(el.type)) {
-        var ch = /checkbox/i.test(el.type)
-          , ra = /radio/i.test(el.type)
-          , val = el.value;
-        // WebKit gives us "" instead of "on" if a checkbox has no value, so correct it here
-        (!(ch || ra) || el.checked) && cb(n, normalize(ch && val === '' ? 'on' : val))
-      }
-      break;
-    case 'textarea':
-      cb(n, normalize(el.value))
-      break;
-    case 'select':
-      if (el.type.toLowerCase() === 'select-one') {
-        optCb(el.selectedIndex >= 0 ? el.options[el.selectedIndex] : null)
-      } else {
-        for (var i = 0; el.length && i < el.length; i++) {
-          el.options[i].selected && optCb(el.options[i])
-        }
-      }
-      break;
-    }
-  }
-
-  // collect up all form elements found from the passed argument elements all
-  // the way down to child elements; pass a '<form>' or form fields.
-  // called with 'this'=callback to use for serial() on each element
-  function eachFormElement() {
-    var cb = this
-      , e, i, j
-      , serializeSubtags = function(e, tags) {
-        for (var i = 0; i < tags.length; i++) {
-          var fa = e[byTag](tags[i])
-          for (j = 0; j < fa.length; j++) serial(fa[j], cb)
-        }
-      }
-
-    for (i = 0; i < arguments.length; i++) {
-      e = arguments[i]
-      if (/input|select|textarea/i.test(e.tagName)) serial(e, cb)
-      serializeSubtags(e, [ 'input', 'select', 'textarea' ])
-    }
-  }
-
-  // standard query string style serialization
-  function serializeQueryString() {
-    return reqwest.toQueryString(reqwest.serializeArray.apply(null, arguments))
-  }
-
-  // { 'name': 'value', ... } style serialization
-  function serializeHash() {
-    var hash = {}
-    eachFormElement.apply(function (name, value) {
-      if (name in hash) {
-        hash[name] && !isArray(hash[name]) && (hash[name] = [hash[name]])
-        hash[name].push(value)
-      } else hash[name] = value
-    }, arguments)
-    return hash
-  }
-
-  // [ { name: 'name', value: 'value' }, ... ] style serialization
-  reqwest.serializeArray = function () {
-    var arr = []
-    eachFormElement.apply(function(name, value) {
-      arr.push({name: name, value: value})
-    }, arguments)
-    return arr
-  }
-
-  reqwest.serialize = function () {
-    if (arguments.length === 0) return ''
-    var opt, fn
-      , args = Array.prototype.slice.call(arguments, 0)
-
-    opt = args.pop()
-    opt && opt.nodeType && args.push(opt) && (opt = null)
-    opt && (opt = opt.type)
-
-    if (opt == 'map') fn = serializeHash
-    else if (opt == 'array') fn = reqwest.serializeArray
-    else fn = serializeQueryString
-
-    return fn.apply(null, args)
-  }
-
-  reqwest.toQueryString = function (o) {
-    var qs = '', i
-      , enc = encodeURIComponent
-      , push = function (k, v) {
-          qs += enc(k) + '=' + enc(v) + '&'
-        }
-
-    if (isArray(o)) {
-      for (i = 0; o && i < o.length; i++) push(o[i].name, o[i].value)
-    } else {
-      for (var k in o) {
-        if (!Object.hasOwnProperty.call(o, k)) continue;
-        var v = o[k]
-        if (isArray(v)) {
-          for (i = 0; i < v.length; i++) push(k, v[i])
-        } else push(k, o[k])
-      }
-    }
-
-    // spaces should be + according to spec
-    return qs.replace(/&$/, '').replace(/%20/g,'+')
-  }
-
-  // jQuery and Zepto compatibility, differences can be remapped here so you can call
-  // .ajax.compat(options, callback)
-  reqwest.compat = function (o, fn) {
-    if (o) {
-      o.type && (o.method = o.type) && delete o.type
-      o.dataType && (o.type = o.dataType)
-      o.jsonpCallback && (o.jsonpCallbackName = o.jsonpCallback) && delete o.jsonpCallback
-      o.jsonp && (o.jsonpCallback = o.jsonp)
-    }
-    return new Reqwest(o, fn)
-  }
-
-  return reqwest
-})
-
-;
-
-  var prefixes;
-
-  (typeof exports !== "undefined" && exports !== null ? exports : this).reqwest = typeof window !== "undefined" && window !== null ? window.reqwest : reqwest;
-
-  Batman.Request.prototype._parseResponseHeaders = function(xhr) {
-    var headers;
-    return headers = xhr.getAllResponseHeaders().split('\n').reduce(function(acc, header) {
-      var key, matches, value;
-      if (matches = header.match(/([^:]*):\s*(.*)/)) {
-        key = matches[1];
-        value = matches[2];
-        acc[key] = value;
-      }
-      return acc;
-    }, {});
-  };
-
-  Batman.Request.prototype.send = function(data) {
-    var options, xhr, _ref,
-      _this = this;
-    if (data == null) {
-      data = this.get('data');
-    }
-    this.fire('loading');
-    options = {
-      url: this.get('url'),
-      method: this.get('method'),
-      type: this.get('type'),
-      headers: this.get('headers'),
-      success: function(response) {
-        _this.mixin({
-          xhr: xhr,
-          response: response,
-          status: typeof xhr !== "undefined" && xhr !== null ? xhr.status : void 0,
-          responseHeaders: _this._parseResponseHeaders(xhr)
-        });
-        return _this.fire('success', response);
-      },
-      error: function(xhr) {
-        _this.mixin({
-          xhr: xhr,
-          response: xhr.responseText || xhr.content,
-          status: xhr.status,
-          responseHeaders: _this._parseResponseHeaders(xhr)
-        });
-        xhr.request = _this;
-        return _this.fire('error', xhr);
-      },
-      complete: function() {
-        return _this.fire('loaded');
-      }
-    };
-    if ((_ref = options.method) === 'PUT' || _ref === 'POST') {
-      if (this.hasFileUploads()) {
-        options.data = this.constructor.objectToFormData(data);
-      } else {
-        options.contentType = this.get('contentType');
-        options.data = Batman.URI.queryFromParams(data);
-      }
-    } else {
-      options.data = data;
-    }
-    return xhr = (reqwest(options)).request;
-  };
-
-  prefixes = ['Webkit', 'Moz', 'O', 'ms', ''];
-
-  Batman.mixins.animation = {
-    initialize: function() {
-      var prefix, _i, _len;
-      for (_i = 0, _len = prefixes.length; _i < _len; _i++) {
-        prefix = prefixes[_i];
-        this.style["" + prefix + "Transform"] = 'scale(1, 1)';
-        this.style.opacity = 1;
-        this.style["" + prefix + "TransitionProperty"] = "" + (prefix ? '-' + prefix.toLowerCase() + '-' : '') + "transform, opacity";
-        this.style["" + prefix + "TransitionDuration"] = "0.8s, 0.55s";
-        this.style["" + prefix + "TransformOrigin"] = "left top";
-      }
-      return this;
-    },
-    show: function(addToParent) {
-      var show, _ref, _ref1,
-        _this = this;
-      show = function() {
-        var prefix, _i, _len;
-        _this.style.opacity = 1;
-        for (_i = 0, _len = prefixes.length; _i < _len; _i++) {
-          prefix = prefixes[_i];
-          _this.style["" + prefix + "Transform"] = 'scale(1, 1)';
-        }
-        return _this;
-      };
-      if (addToParent) {
-        if ((_ref = addToParent.append) != null) {
-          _ref.appendChild(this);
-        }
-        if ((_ref1 = addToParent.before) != null) {
-          _ref1.parentNode.insertBefore(this, addToParent.before);
-        }
-        setTimeout(show, 0);
-      } else {
-        show();
-      }
-      return this;
-    },
-    hide: function(shouldRemove) {
-      var prefix, _i, _len,
-        _this = this;
-      this.style.opacity = 0;
-      for (_i = 0, _len = prefixes.length; _i < _len; _i++) {
-        prefix = prefixes[_i];
-        this.style["" + prefix + "Transform"] = 'scale(0, 0)';
-      }
-      if (shouldRemove) {
-        setTimeout((function() {
-          var _ref;
-          return (_ref = _this.parentNode) != null ? _ref.removeChild(_this) : void 0;
-        }), 600);
-      }
-      return this;
-    }
-  };
 
 }).call(this);
 
