@@ -18,17 +18,25 @@ def gettext(elem):
     return ' '.join(parts).strip()
 
 
-def normalized_text(elem):
-    text = gettext(elem)
+def normalized_text(text):
+    nl = '__new_line__'
+    text = re.sub(u'\n', nl, text)
     text = re.sub(u'\xa0', ' ', text)
+    text = re.sub(u'\xe2\x80\x99|\u2019', '\'', text)
+    text = re.sub(u'\s*(\xe2\x80\x94|\u2014)\s*', ' - ', text)
+    text = re.sub(r'\s+', ' ', text)
     text = re.sub(r'\(\s+', '(', text)
     text = re.sub(r'\s+\)', ')', text)
     text = re.sub(r'(?<!\(|\{|\s)\{', ' {', text)
     text = re.sub(r'\}(?!=\)|\}|\s|\:)', '} ', text)
     text = re.sub(r'}\s+{', '}{', text)
-    text = re.sub(u'\xe2\x80\x99|\u2019', '\'', text)
-    text = re.sub(u'\s*(\xe2\x80\x94|\u2014)\s*', ' - ', text)
-    return re.sub(r'\s+', ' ', text)
+    text = re.sub(u'{0}\s*'.format(nl), '\n', text)
+    return text.strip()
+
+
+def normalized_element_text(elem):
+    text = gettext(elem)
+    return normalized_text(text)
 
 
 class GathererPage(ProviderPage):
@@ -64,13 +72,13 @@ class GathererCard(ProviderCardPage, GathererPage):
 
     def parse_mana(self, html_el):
         self._encode_mana(html_el)
-        return normalized_text(html_el)
+        return normalized_element_text(html_el)
 
     def parse_text(self, html_el):
         blocks = []
         for block in html_el.cssselect('div.cardtextbox'):
             self._encode_mana(block)
-            blocks.append(normalized_text(block))
+            blocks.append(normalized_element_text(block))
         return '\n'.join(blocks)
 
     @cache_parsed()
@@ -119,7 +127,7 @@ class GathererCard(ProviderCardPage, GathererPage):
                     if hasattr(self, parse_method_name):
                         v = getattr(self, parse_method_name)(el)
                     else:
-                        v = normalized_text(el)
+                        v = normalized_element_text(el)
                     if k == name_row_key and v != self.name:
                         break
                     details[k] = v.strip()
@@ -148,7 +156,7 @@ class GathererCard(ProviderCardPage, GathererPage):
         other_names = parts.keys()
         if not other_names:
             for name_block in self.doc.cssselect('td.rightCol div[id$="nameRow"] div.value'):
-                value = normalized_text(name_block)
+                value = normalized_element_text(name_block)
                 if value != self.name:
                     other_names.append(value)
         if other_names:
@@ -194,7 +202,7 @@ class GathererCardList(ProviderCardListPage, GathererPage):
         '''
         urls = []
         for card_link in self.doc.cssselect('tr.cardItem td.name a'):
-            name = normalized_text(card_link)
+            name = normalized_element_text(card_link)
             if names and name not in names:
                 continue
             urls.append((name, card_link.get('href')))

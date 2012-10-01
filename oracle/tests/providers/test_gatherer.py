@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import urllib
 from StringIO import StringIO
 
@@ -7,7 +9,7 @@ from oracle.models import DataSource, CardSet, DataProviderPage
 from oracle.providers import Page
 from oracle.providers.gatherer import (
     GathererPage, GathererHomePage, GathererCardList, GathererCard,
-    GathererCardPrint, GathererCardLanguages
+    GathererCardPrint, GathererCardLanguages, normalized_text
 )
 from oracle.tests.helpers import get_html_fixture
 from oracle.tests.providers.base import ProviderTest
@@ -566,3 +568,21 @@ class GathererWizardsComParsingTest(ProviderTest):
             ('Portuguese', 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=86783'),
             ('Spanish', 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=87090'),
         ])
+
+    def test_normalize_text(self):
+        self.assertEqual(normalized_text(
+            '( abc )'),
+            '(abc)'
+        )
+        self.assertEqual(normalized_text(
+            '{G} {W}'),
+            '{G}{W}'
+        )
+        self.assertEqual(normalized_text(
+            u'abc—dfg'),
+            'abc - dfg'
+        )
+        self.assertEqual(normalized_text(
+            u'abc\n—dfg'),
+            'abc\n- dfg'
+        )
