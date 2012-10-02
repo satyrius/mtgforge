@@ -327,6 +327,13 @@ class GathererWizardsComParsingTest(ProviderTest):
             ('Kor Duelist', u'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=177542'),
         ])
 
+    def assert_dict_items(self, subject, standard):
+        for k, v in standard.items():
+            self.assertIn(k, subject)
+            self.assertEqual(subject[k], standard[k])
+        for k, v in subject.items():
+            self.assertIn(k, standard)
+
     @patch.object(Page, 'get_content')
     def test_card_oracle_details(self, get_content):
         get_content.return_value = get_html_fixture('gatherer_angel_oracle')
@@ -334,7 +341,7 @@ class GathererWizardsComParsingTest(ProviderTest):
         name = u'Avacyn, Angel of Hope'
         page = GathererCard(url, name=name)
         details = page.details()
-        self.assertEqual(details, dict(
+        self.assert_dict_items(details, dict(
             set='Avacyn Restored',
             art='http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=239961&type=card',
             name='Avacyn, Angel of Hope',
@@ -373,7 +380,7 @@ class GathererWizardsComParsingTest(ProviderTest):
         name = u'Adventuring Gear'
         page = GathererCard(url, name=name)
         details = page.details()
-        self.assertEqual(details, dict(
+        self.assert_dict_items(details, dict(
             set='Zendikar',
             art='http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=178135&type=card',
             name='Adventuring Gear',
@@ -405,7 +412,7 @@ class GathererWizardsComParsingTest(ProviderTest):
         front_name = u'Hanweir Watchkeep'
         page = GathererCard(url, name=front_name)
         details = page.details()
-        self.assertEqual(details, dict(
+        self.assert_dict_items(details, dict(
             set='Innistrad',
             art='http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=244683&type=card',
             name='Hanweir Watchkeep',
@@ -439,7 +446,7 @@ class GathererWizardsComParsingTest(ProviderTest):
         back_name = u'Bane of Hanweir'
         page = GathererCard(url, name=back_name)
         details = page.details()
-        self.assertEqual(details, dict(
+        self.assert_dict_items(details, dict(
             set='Innistrad',
             art='http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=244687&type=card',
             name='Bane of Hanweir',
@@ -465,7 +472,7 @@ class GathererWizardsComParsingTest(ProviderTest):
         front_name = u'Akki Lavarunner'
         page = GathererCard(url, name=front_name)
         details = page.details()
-        self.assertEqual(details, dict(
+        self.assert_dict_items(details, dict(
             set='Champions of Kamigawa',
             art='http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=78694&type=card',
             name='Akki Lavarunner',
@@ -498,7 +505,7 @@ class GathererWizardsComParsingTest(ProviderTest):
         fliped_name = u'Akki Lavarunner (Tok-Tok, Volcano Born)'
         page = GathererCard(url, name=fliped_name)
         details = page.details()
-        self.assertEqual(details, dict(
+        self.assert_dict_items(details, dict(
             set='Champions of Kamigawa',
             art='http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=78694&type=card&options=rotate180',
             name='Tok-Tok, Volcano Born',
@@ -529,7 +536,7 @@ class GathererWizardsComParsingTest(ProviderTest):
         page = GathererCard(page_url, name=name)
         details = page.details()
         self.assertEqual(urlopen.call_args_list, [call(page_url), call(fire_url)])
-        self.assertEqual(details, dict(
+        self.assert_dict_items(details, dict(
             set='Apocalypse',
             art='http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=27166&type=card',
             name='Fire',
@@ -552,6 +559,66 @@ class GathererWizardsComParsingTest(ProviderTest):
         self.assertEqual(
             printed_page.url,
             'http://gatherer.wizards.com/Pages/Card/Details.aspx?printed=true&multiverseid=27166'
+        )
+
+    @patch.object(Page, 'get_content')
+    def test_land_card_details(self, get_content):
+        get_content.return_value = get_html_fixture('gatherer_forest')
+        url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=289326'
+        name = u'Forest'
+        page = GathererCard(url, name=name)
+        details = page.details()
+        self.assert_dict_items(details, dict(
+            set='Return to Ravnica',
+            art='http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=289326&type=card',
+            name='Forest',
+            artist='Yeong-Hao Han',
+            url='http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=289326',
+            text='G',
+            number='271',
+            mvid='289326',
+            rarity='Common',
+            playerRating='Rating: 5.000 / 5 (3 votes)',
+            otherSets='',
+            type='Basic Land - Forest',
+        ))
+
+        printed_page = page.printed_card_page()
+        self.assertIsInstance(printed_page, GathererCardPrint)
+        self.assertEqual(
+            printed_page.url,
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?printed=true&multiverseid=289326'
+        )
+
+    @patch.object(Page, 'get_content')
+    def test_vanilla_creature(self, get_content):
+        get_content.return_value = get_html_fixture('gatherer_vanilla_creature')
+        url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=265383'
+        name = u'Axebane Stag'
+        page = GathererCard(url, name=name)
+        details = page.details()
+        self.assert_dict_items(details, dict(
+            set='Return to Ravnica',
+            art='http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=265383&type=card',
+            name='Axebane Stag',
+            pt='6 / 7',
+            artist='Martina Pilcerova',
+            url='http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=265383',
+            number='116',
+            mvid='265383',
+            rarity='Common',
+            playerRating='Rating: 2.735 / 5 (17 votes)',
+            type='Creature - Elk',
+            cmc='7',
+            mana='{6}{G}',
+            flavor='"When the spires have burned and the cobblestones are dust, he will take his rightful place as king of the wilds."\n- Kirce, Axebane guardian',
+        ))
+
+        printed_page = page.printed_card_page()
+        self.assertIsInstance(printed_page, GathererCardPrint)
+        self.assertEqual(
+            printed_page.url,
+            'http://gatherer.wizards.com/Pages/Card/Details.aspx?printed=true&multiverseid=265383'
         )
 
     @patch.object(Page, 'get_content')

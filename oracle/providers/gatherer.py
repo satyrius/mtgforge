@@ -81,6 +81,16 @@ class GathererCard(ProviderCardPage, GathererPage):
             blocks.append(normalized_element_text(block))
         return '\n'.join(blocks)
 
+    def parse_flavor(self, html_el):
+        return self.parse_text(html_el)
+
+    def parse_rarity(self, html_el):
+        value = normalized_element_text(html_el)
+        # Workaround with Wizards' dummies
+        if value == u'Basic Land':
+            value = u'Common'
+        return value
+
     @cache_parsed()
     def details(self, forward=True):
         """Return card face details from current page. Matches given card name
