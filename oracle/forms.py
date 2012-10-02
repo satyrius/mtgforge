@@ -30,6 +30,10 @@ class CardFaceForm(forms.ModelForm):
         ),
         required=False,
     )
+    rules = forms.CharField(required=False, widget=forms.Textarea)
+    flavor = forms.CharField(required=False, widget=forms.Textarea)
+    cmc = forms.IntegerField(required=False)
+    mana_cost = forms.CharField(max_length=20, required=False)
 
     class Meta:
         model = models.CardFace
