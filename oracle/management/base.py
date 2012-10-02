@@ -20,5 +20,5 @@ class BaseCommand(base.BaseCommand):
         self.writeln(colorized_message)
 
     def error(self, message):
-        colorized_message = self.style.NOTICE(u'Notice: {0}\n'.format(message))
+        colorized_message = self.style.NOTICE(u'{0}\n'.format(message))
         self.stderr.write(base.smart_str(colorized_message))
