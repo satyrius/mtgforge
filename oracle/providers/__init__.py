@@ -10,10 +10,14 @@ from django.core.cache import get_cache
 from django.utils.functional import wraps, curry
 from django.utils.encoding import smart_str
 
-from oracle.models import DataProvider, CardSet
+from oracle.models import DataProvider, CardSet, PageState
 
 
 class BadPageSource(Exception):
+    pass
+
+
+class NoContent(Exception):
     pass
 
 
@@ -22,6 +26,7 @@ class Page(object):
         self.url = self._source_url(source)
         self.name = name
         self._content = None
+        self._state = None
         self._doc = None
         self._use_cache = use_cache
         self._cache = get_cache('provider_page')
@@ -31,25 +36,33 @@ class Page(object):
             return source
         raise BadPageSource(u'Invalid page source: {0}'.format(source))
 
+    def _get_cached_or_modified(self):
+        name, content, state = self._cache.get(self)
+        return \
+            self._name or name, \
+            self._content or content, \
+            self._state or state
+
     def get_content(self):
         """Return page content as a string."""
         if self._content is None:
+            # Get cached page content
             if self._use_cache:
-                name, self._content = self._cache.get(self)
-                if self._name is None:
-                    self.name = name
+                self.name, self._content, self.state = \
+                    self._get_cached_or_modified()
+            # Download content of nothing was cached
             if not self._content:
                 self._content = urllib2.urlopen(self.url).read()
+                # Save the page content
                 if self._use_cache:
                     self._cache.set(self, self._content)
-        return smart_str(self._content)
+        return self._content is not None and smart_str(self._content) or None
 
     @property
     def name(self):
         if self._name is None and self._use_cache:
-            self.name, content = self._cache.get(self)
-            if self._content is None:
-                self._content = content
+            self.name, self._content, self.state = \
+                self._get_cached_or_modified()
         return self._name
 
     @name.setter
@@ -59,6 +72,28 @@ class Page(object):
             if matches:
                 value = matches.group(1)
         self._name = value
+
+    @property
+    def state(self):
+        if self._state is None:
+            if self._use_cache:
+                self.name, self._content, self.state = \
+                    self._get_cached_or_modified()
+        return self._state
+
+    @state.setter
+    def state(self, value):
+        self._state = value or PageState.INITIAL
+
+    def change_state(self, state):
+        # Set new state or use current state as default value. Also load
+        # cached name and content while calling 'state' field getter
+        self.state = state or self.state
+        if self._use_cache:
+            if self._content is None:
+                raise NoContent(
+                    'You should download page before changing it\'s state')
+            self._cache.set(self, self._content)
 
     def get_url_hash(self):
         return hashlib.sha1(self.url).hexdigest()

@@ -3,8 +3,8 @@ from StringIO import StringIO
 from lxml.html import HtmlElement
 from mock import patch
 
-from oracle.models import DataProvider, DataProviderPage
-from oracle.providers import BadPageSource, Page
+from oracle.models import DataProvider, DataProviderPage, PageState
+from oracle.providers import BadPageSource, Page, NoContent
 from oracle.providers.gatherer import GathererHomePage
 from oracle.providers.magiccards import MagiccardsHomePage
 from oracle.providers.wizards import WizardsHomePage
@@ -85,17 +85,52 @@ class DataProvidersTest(ProviderTest):
         self.assertIsNone(cache_entry.name)
         self.assertEqual(cache_entry.class_name, page.__class__.__name__)
 
+    @patch('urllib2.urlopen')
+    def test_cache_page_name(self, urlopen):
+        page_content = get_html_fixture('gatherer_list')
+        urlopen.return_value = StringIO(page_content)
+        dummy_url = 'http://example.com/foo/bar.html'
+
         # Assert page name saved to cache
         title = 'The Epic Page'
-        dummy_url_2 = 'http://example.com/foo/baz.html'
         urlopen.return_value = StringIO(page_content)
-        page2 = Page(dummy_url_2, name=title)
-        content2 = page2.get_content()
-        self.assertIsNotNone(content2)
-        self.assertEqual(content2, page_content)
-        cache_entry = DataProviderPage.objects.get(url=dummy_url_2)
+        page = Page(dummy_url, name=title)
+        content = page.get_content()
+        self.assertIsNotNone(content)
+        self.assertEqual(content, page_content)
+        cache_entry = DataProviderPage.objects.get(url=dummy_url)
         self.assertEqual(cache_entry.name, title)
 
         # Test restoring page name from cache
+        page2 = Page(dummy_url)
+        self.assertEqual(page2.name, title)
+
+    @patch('urllib2.urlopen')
+    def test_page_state(self, urlopen):
+        page_content = get_html_fixture('gatherer_list')
+        urlopen.return_value = StringIO(page_content)
+        dummy_url = 'http://example.com/foo/bar.html'
+
+        # Assert page name saved to cache
+        urlopen.return_value = StringIO(page_content)
+        page = Page(dummy_url)
+        self.assertEqual(page.state, PageState.INITIAL)
+        content = page.get_content()
+        self.assertIsNotNone(content)
+        self.assertEqual(content, page_content)
+
+        state = PageState.PARSED
+        page.change_state(state)
+        self.assertEqual(page.state, state)
+        cache_entry = DataProviderPage.objects.get(url=dummy_url)
+        self.assertEqual(cache_entry.state, state)
+
+        # Test restoring page state from cache
+        page2 = Page(dummy_url)
+        self.assertEqual(page2.state, state)
+
+        # Test change state for page without content
+        dummy_url_2 = 'http://example.com/foo/baz.html'
         page3 = Page(dummy_url_2)
-        self.assertEqual(page3.name, title)
+        with self.assertRaises(NoContent):
+            page3.change_state(state)

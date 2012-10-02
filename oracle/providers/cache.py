@@ -23,9 +23,9 @@ class PageCache(BaseCache):
         try:
             key = self.make_key(key)
             entry = DataProviderPage.objects.get(**key)
-            return entry.name, entry.content
+            return entry.name, entry.content, entry.state
         except DataProviderPage.DoesNotExist:
-            return None, default
+            return None, default, 0
 
     def set(self, key, value, timeout=None, version=None):
         page = key
@@ -33,7 +33,7 @@ class PageCache(BaseCache):
         DataProviderPage.objects.filter(**key).delete()
         dp = isinstance(page, ProviderPage) and page.get_provider() or None
         DataProviderPage.objects.create(
-            url=page.url, name=page.name,
+            url=page.url, name=page.name, state=page.state,
             data_provider=dp, content=value, **key)
 
     def clear(self):
