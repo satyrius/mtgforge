@@ -37,6 +37,11 @@ class Command(BaseCommand):
             action='store_true',
             default=False,
             help='Invalidate pages cache'),
+        make_option('--sim', '--simultaneously-parse',
+            dest='simultaneously',
+            action='store_true',
+            default=False,
+            help='Parse page right after it has been dowloaded'),
         make_option('--no-update',
             action='store_true',
             dest='no_update',
@@ -72,22 +77,38 @@ class Command(BaseCommand):
                 pagination.append(page)
 
         self.notice('Fetch card list pages for each set')
-        i = 0
-        for cs_page in self.process_pages(pagination):
-            self.notice('Fetch card pages for list {}'.format(cs_page.url))
-            cards = cs_page.cards_list()
-            for card_page in self.process_pages(cards, i):
-                self.save_card_face(card_page.details(), cs_page.card_set)
-                i += 1
+        simultaneously = options['simultaneously']
+        total = self.fetch_card_pages(pagination, save=simultaneously)
+        if not simultaneously:
+            self.notice('Go through all card pages and save card data')
+            self.fetch_card_pages(pagination, print_url=False, total=total)
 
-    def process_pages(self, pages, i=0):
+    def fetch_card_pages(self, pagination, save=True, print_url=True, total=None):
+        i = 0
+        for cs_page in self.process_pages(pagination, print_url=print_url):
+            if print_url:
+                self.notice(u'Fetch card pages for list {}'.format(cs_page.url))
+            cards = cs_page.cards_list()
+            for card_page in self.process_pages(cards, i, print_url=print_url):
+                if save:
+                    card_face = self.save_card_face(
+                        card_page.details(), cs_page.card_set)
+                    if total:
+                        self.writeln(u'[*] {1:5}/{2} {0}'.format(card_face.name, i, total))
+                    else:
+                        self.writeln(u'[*] {1:5} {0}'.format(card_face.name, i))
+                i += 1
+        return i
+
+    def process_pages(self, pages, i=0, print_url=True):
         chunk = self.threads_count
         failed = []
         for pages_chunk in itertools.izip_longest(*([iter(pages)] * chunk)):
             for result in self.process_chunk(pages_chunk):
                 if isinstance(result, GathererPage):
                     i += 1
-                    self.writeln(u'>>> {1:3} {0}'.format(result.url, i))
+                    if print_url:
+                        self.writeln(u'>>> {1:5} {0}'.format(result.url, i))
                 else:
                     page = result.args[0]
                     self.error(
