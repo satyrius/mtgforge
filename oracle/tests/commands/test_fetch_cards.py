@@ -68,3 +68,22 @@ class FetchCardsCommandTest(ProviderTest):
         release = card.cardrelease_set.get(card_set=cs)
         self.assertEqual(release.rarity, CardRelease.COMMON)
         self.assertEqual(release.card_number, 271)
+
+    @patch.object(GathererCard, 'get_content')
+    def test_save_card_with_no_number(self, get_content):
+        cmd = Command()
+        self.assertFalse(cmd.no_update)
+
+        cs = CardSet.objects.create(name='Portal Second Age')
+        get_content.return_value = get_html_fixture('gatherer_no_number')
+        url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=6567'
+        name = u'Abyssal Nightstalker'
+        page = GathererCard(url, name=name)
+
+        card_face = cmd.save_card_face(page.details(), cs)
+        card = card_face.card
+        self.assertIsInstance(card_face, CardFace)
+
+        release = card.cardrelease_set.get(card_set=cs)
+        self.assertEqual(release.rarity, CardRelease.UNCOMMON)
+        self.assertIsNone(release.card_number)
