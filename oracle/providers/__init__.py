@@ -58,6 +58,9 @@ class Page(object):
                     self._cache.set(self, self._content)
         return self._content is not None and smart_str(self._content) or None
 
+    def delete_cache(self):
+        self._cache.delete(self)
+
     @property
     def name(self):
         if self._name is None and self._use_cache:

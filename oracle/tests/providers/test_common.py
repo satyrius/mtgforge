@@ -134,3 +134,39 @@ class DataProvidersTest(ProviderTest):
         page3 = Page(dummy_url_2)
         with self.assertRaises(NoContent):
             page3.change_state(state)
+
+    @patch('urllib2.urlopen')
+    def test_page_cache_delete(self, urlopen):
+        page1_content = '<html><h1>1</h1></html>'
+        page2_content = '<html><h1>2</h1></html>'
+        page3_content = '<html><h1>3</h1></html>'
+
+        # Get content of gatherer home page
+        urlopen.return_value = StringIO(page1_content)
+        self.assertEqual(urlopen.call_count, 0)
+        gatherer_page = GathererHomePage()
+        self.assertEqual(gatherer_page.get_content(), page1_content)
+        self.assertEqual(urlopen.call_count, 1)
+
+        # Create gatherer page again and assert that content is from cache
+        gatherer_page = GathererHomePage()
+        self.assertEqual(gatherer_page.get_content(), page1_content)
+        self.assertEqual(urlopen.call_count, 1)
+
+        # Get content of wizards home page
+        urlopen.return_value = StringIO(page2_content)
+        wizards_page = WizardsHomePage()
+        self.assertEqual(wizards_page.get_content(), page2_content)
+        self.assertEqual(urlopen.call_count, 2)
+
+        # Reset gatherer home page content cache
+        urlopen.return_value = StringIO(page3_content)
+        gatherer_page = GathererHomePage()
+        gatherer_page.delete_cache()
+        self.assertEqual(gatherer_page.get_content(), page3_content)
+        self.assertEqual(urlopen.call_count, 3)
+
+        # Wizards page is still cached
+        wizards_page = WizardsHomePage()
+        self.assertEqual(wizards_page.get_content(), page2_content)
+        self.assertEqual(urlopen.call_count, 3)
