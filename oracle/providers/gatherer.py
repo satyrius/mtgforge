@@ -98,7 +98,6 @@ class GathererCard(ProviderCardPage, GathererPage):
             value = u'Common'
         return value
 
-    @cache_parsed()
     def details(self, forward=True):
         """Return card face details from current page. Matches given card name
         with the found one.
@@ -106,12 +105,13 @@ class GathererCard(ProviderCardPage, GathererPage):
         Keyword argumets:
         forward -- navigate to related pages for additional info
         """
-        if not self.name:
-            raise Exception('Cannot get details for page with unknown name')
-
         faces = self.doc.cssselect('table.cardDetails')
         if not faces:
             raise ParseError('No one card face found on this page')
+
+        if len(faces) > 1 and not self.name:
+            raise Exception('Cannot get details for page with unknown name '
+                            'and two or more faces')
 
         parts = {}
         # Workaround with multipart (splited) cards. Splited card page content
@@ -145,7 +145,8 @@ class GathererCard(ProviderCardPage, GathererPage):
                         v = getattr(self, parse_method_name)(el)
                     else:
                         v = normalized_element_text(el)
-                    if k == name_row_key and v != self.name:
+                    # Break if it is not the card face you are looking for
+                    if self.name and k == name_row_key and v != self.name:
                         break
                     details[k] = v.strip()
             if name_row_key in details:

@@ -1,19 +1,16 @@
 import itertools
 import logging
-import re
 from optparse import make_option
 
 import gevent
-import xact
 from django.conf import settings
 from django.core.cache import get_cache
-from django.core.exceptions import ValidationError
 from gevent import monkey
 
 from contrib.utils import measureit
-from oracle.forms import CardFaceForm
 from oracle.management.base import BaseCommand
-from oracle.models import CardSet, CardFace, Card, CardRelease
+from oracle.management.commands import save_card_face
+from oracle.models import CardSet
 from oracle.providers.gatherer import GathererCardList, GathererPage
 
 
@@ -101,7 +98,8 @@ class Command(BaseCommand):
                     self.writeln(u'[*] {1:5}/{2} {0} from {3}'.format(
                         page.name, i, total or '?', page.url))
                     if not self.skip_parsed or not page.is_parsed():
-                        self.save_card_face(page.details(), cs_page.card_set)
+                        save_card_face(
+                            page.details(), cs_page.card_set, self.no_update)
                         page.set_parsed()
                 i += 1
         return i
@@ -135,53 +133,3 @@ class Command(BaseCommand):
         for job in jobs:
             # Return fetched page or job to try again
             yield job.successful() and job.value or job
-
-    @xact.xact
-    def save_card_face(self, card_details, card_set):
-        #
-        # Get or create the Card instance
-        #
-        card = None
-        face = None
-        try:
-            face = CardFace.objects.get(name=card_details['name'])
-            if self.no_update:
-                return face
-            card = face.card
-        except CardFace.DoesNotExist:
-            pass
-        finally:
-            if 'other_faces' in card_details:
-                for f in CardFace.objects.filter(name__in=card_details['other_faces']):
-                    if not card:
-                        card = f.card
-                        break
-                    if card.id != f.card_id:
-                        # Delete duplicate and link with right card
-                        f.card.delete()
-                        f.card = card
-                        f.save()
-            if not card:
-                card = Card.objects.create()
-            if not face:
-                face = CardFace(card=card)
-
-        form = CardFaceForm(card_details, instance=face)
-        if not form.is_valid():
-            raise ValidationError(form.errors)
-        face = form.save()
-
-        #
-        # Card release notes
-        #
-        try:
-            release = CardRelease.objects.get(card_set=card_set, card=card)
-        except CardRelease.DoesNotExist:
-            release = CardRelease(card_set=card_set, card=card)
-        release.rarity = card_details['rarity'].lower()[0]
-        match = re.match(r'(\d+)\w?', card_details.get('number', ''))
-        if match :
-            release.card_number = match.group(1)
-        release.save()
-
-        return face

@@ -24,12 +24,13 @@ class NoContent(Exception):
 class Page(object):
     def __init__(self, source, name=None, use_cache=True):
         self.url = self._source_url(source)
-        self.name = name
         self._content = None
         self._state = None
+        self._name = None
         self._doc = None
         self._use_cache = use_cache
         self._cache = get_cache('provider_page')
+        self.name = name
 
     def _source_url(self, source):
         if isinstance(source, basestring):
@@ -70,11 +71,12 @@ class Page(object):
 
     @name.setter
     def name(self, value):
+        # Do not set empty name
         if value is not None:
             matches = re.match(r'[^(]+\(([^)]+)\)$', value)
             if matches:
                 value = matches.group(1)
-        self._name = value
+            self._name = value
 
     @property
     def state(self):
