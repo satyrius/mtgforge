@@ -22,17 +22,20 @@ class Forge.CardsController extends Batman.Controller
         false
     
     setQuery: (params) ->
-        @set "query.q", params.q
+        if @get("query.q") != params.q
+            @set "query.q", params.q
 
-        if params.color
-            color = @get("query.color")
-            color.clear()
-            color.add(params.color)
+        if params.color && !@get("query.color").length
+            console.log("params color:", params.color, "get color:", @get "query.color") 
+            #color = @get("query.color")
+            #color.clear()
+            @set "query.color", params.color
 
         if params.type
-            type = @get("query.type")
-            type.clear()
-            type.add(params.type)
+            #type = @get("query.type")
+            #type.clear()
+            #type.add(params.type)
+            @set "query.type", params.type
 
     advancedToggle: (element, event, context) =>
         if @get "advancedEnabled"
@@ -51,7 +54,7 @@ class Forge.CardsController extends Batman.Controller
         type: new Batman.Set
     })
 
-    advancedEnabled: false
+    advancedEnabled: true
 
     @accessor "serializedQuery",
         get: () ->

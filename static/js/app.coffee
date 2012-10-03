@@ -1,9 +1,5 @@
 window.Forge = class Forge extends Batman.App
-    Batman.ViewStore.prefix = 'static/views'
-    
-    #Batman.config =
-        #pathPrefix: "/"
-        #usePushState: true
+    Batman.config.viewPrefix = '/static/views/'
     @resources 'cards', 'index'
     @root 'index#index'
     @route '/search', 'cards#search'#, resource: 'cards', action: 'search'

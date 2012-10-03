@@ -18,6 +18,7 @@ MEDIA_BUNDLES = (
         #'bootstrap/js/bootstrap.js',
         'js/lib/batman.js',
         'js/lib/batman.jquery.js',
+        'js/lib/batman.solo.js'
     ),
     ( 'common.js',
         'js/app.coffee',
