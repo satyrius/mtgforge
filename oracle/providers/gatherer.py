@@ -211,11 +211,33 @@ class GathererCardList(ProviderCardListPage, GathererPage):
         only for those cards.
         '''
         urls = []
-        for card_link in self.doc.cssselect('tr.cardItem td.name a'):
+        # Iterate through card item rows
+        for card_item in self.doc.cssselect('tr.cardItem'):
+            # Get card name block to parse card name and url
+            card_link = card_item.cssselect('td.name a')[0]
             name = normalized_element_text(card_link)
             if names and name not in names:
                 continue
-            urls.append((name, card_link.get('href')))
+            url = card_link.get('href')
+            # Next we should parse 'printings' block. It contains card links
+            # for all card releases in all sets. We will get all links for
+            # current set. We should use these links because some cards might
+            # have several printing in one set (e.g. Forest, High Tide)
+            printings = card_item.cssselect('td.printings a')
+            # Get card set acronym to identify other links from this set
+            cs_name = None
+            for a in printings:
+                if a.get('href') == url:
+                    cs_name = a.cssselect('img')[0].get('alt')
+                    break
+            if cs_name is None:
+                raise Exception(
+                    u'Cannot find any printings link for "{0}"'.format(name))
+            # Get all printings links
+            for a in printings:
+                if a.cssselect('img')[0].get('alt') == cs_name:
+                    card_info = (name, a.get('href'))
+                    urls.append(card_info)
         return urls
 
     @map_result_as_pages(map_data=map_card_set_to_pagination)
