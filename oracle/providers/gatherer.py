@@ -3,6 +3,7 @@ import urllib
 from lxml import etree
 from urlparse import urlparse, urlunparse
 
+from oracle.models import PageState
 from oracle.providers import (
     HomePage, ProviderPage, ProviderCardListPage, ProviderCardPage,
     map_result_as_pages, cache_parsed
@@ -41,6 +42,12 @@ def normalized_element_text(elem):
 
 class GathererPage(ProviderPage):
     provider_name = 'gatherer'
+
+    def set_parsed(self):
+        self.change_state(PageState.PARSED)
+
+    def is_parsed(self):
+        return self.state == PageState.PARSED
 
 
 class GathererHomePage(HomePage, GathererPage):

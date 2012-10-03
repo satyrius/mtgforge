@@ -47,11 +47,17 @@ class Command(BaseCommand):
             dest='no_update',
             default=False,
             help='Do not update existing card faces'),
+        make_option('--skip-parsed',
+            action='store_true',
+            dest='skip_parsed',
+            default=False,
+            help='Skip parsing pages already parsed'),
         )
 
     def __init__(self):
         super(Command, self).__init__()
         self.no_update = False
+        self.skip_parsed = False
 
     @measureit(logger=logger)
     def handle(self, *args, **options):
@@ -65,6 +71,7 @@ class Command(BaseCommand):
             sets = sets.filter(acronym__in=args)
 
         self.no_update = options['no_update']
+        self.skip_parsed = options['skip_parsed']
 
         pagination = []
         self.notice('Fetch home page for each card set')
@@ -89,14 +96,13 @@ class Command(BaseCommand):
             if print_url:
                 self.notice(u'Fetch card pages for list {}'.format(cs_page.url))
             cards = cs_page.cards_list()
-            for card_page in self.process_pages(cards, i, print_url=print_url):
+            for page in self.process_pages(cards, i, print_url=print_url):
                 if save:
-                    card_face = self.save_card_face(
-                        card_page.details(), cs_page.card_set)
-                    if total:
-                        self.writeln(u'[*] {1:5}/{2} {0}'.format(card_face.name, i, total))
-                    else:
-                        self.writeln(u'[*] {1:5} {0}'.format(card_face.name, i))
+                    self.writeln(u'[*] {1:5}/{2} {0} from {3}'.format(
+                        page.name, i, total or '?', page.url))
+                    if not self.skip_parsed or not page.is_parsed():
+                        self.save_card_face(page.details(), cs_page.card_set)
+                        page.set_parsed()
                 i += 1
         return i
 
