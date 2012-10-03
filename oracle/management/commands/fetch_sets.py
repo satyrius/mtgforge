@@ -34,6 +34,11 @@ class Command(BaseCommand):
             dest='fetch_acronyms',
             default=False,
             help='Fetch acronyms from magiccards.info'),
+        make_option('-c', '--clear-cache',
+            dest='clear',
+            action='store_true',
+            default=False,
+            help='Invalidate pages cache'),
         )
 
     _acronyms = {}
@@ -130,8 +135,11 @@ class Command(BaseCommand):
 
         wizards = WizardsHomePage()
         gatherer = GathererHomePage()
-        gatherer_products = filter(ignored_filter, gatherer.products_list())
         magiccards = MagiccardsHomePage()
+        if options['clear']:
+            for page in (wizards, gatherer, magiccards):
+                page.delete_cache()
+        gatherer_products = filter(ignored_filter, gatherer.products_list())
         magiccards_products = filter(ignored_filter, magiccards.products_list())
 
         # Wizards
@@ -184,7 +192,8 @@ class Command(BaseCommand):
                     data['released_at'] = cs.released_at
 
                 form = CardSetForm(data, instance=cs)
-                form.is_valid()
+                if not form.is_valid():
+                    raise Exception(form.errors.as_text())
                 cs = form.save()
                 for page, ds_url in (
                         (wizards, url),
