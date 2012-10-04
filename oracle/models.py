@@ -220,7 +220,7 @@ class CardRelease(models.Model):
     card_set = models.ForeignKey(CardSet)
 
     rarity = NullCharField(max_length=1, choices=RARITY_CHOICES)
-    card_number = NullCharField(max_length=4, null=True, blank=True)
+    card_number = models.PositiveIntegerField(null=True, blank=True)
 
     def __unicode__(self):
         return u'{0} ({1})'.format(self.card.name, self.card_set.name)
