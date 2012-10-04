@@ -18,10 +18,6 @@ class CardSetForm(forms.ModelForm):
 
 
 class CardFaceForm(forms.ModelForm):
-    power = forms.CharField(max_length=10, required=False)
-    thoughtness = forms.CharField(max_length=10, required=False)
-    fixed_power = forms.IntegerField(required=False)
-    fixed_thoughtness = forms.IntegerField(required=False)
     types = forms.ModelMultipleChoiceField(
         models.CardType.objects.all().order_by('name'),
         widget=FilteredSelectMultiple(
@@ -54,12 +50,10 @@ class CardFaceForm(forms.ModelForm):
             self._fix_data(data, 'thoughtness', 'thoughtness')
             self._fix_data(data, 'loyality', 'loyality')
             if 'pt' in data:
-                pt = re.split(u'\s*/\s*', data['pt'], 2)
+                pt = re.split(u'\s+/\s+', data['pt'], 2)
                 if len(pt) == 2:
                     # Power and Thoughtness for creatures
                     data['power'], data['thoughtness'] = p, t = pt
-                    data['fixed_power'] = (p is not None and p.isdigit() and [int(p)] or [None])[0]
-                    data['fixed_thoughtness'] = (t is not None and t.isdigit() and [int(t)] or [None])[0]
                 else:
                     data['loyality'] = int(pt[0])
 

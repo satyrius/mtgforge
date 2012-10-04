@@ -17,12 +17,12 @@ class FetchCardsCommandTest(ProviderTest):
         cs = CardSet.objects.create(name='Avacyn Restored')
         get_content.return_value = get_html_fixture('gatherer_angel_oracle')
         url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=239961'
-        name = u'Avacyn, Angel of Hope'
-        page = GathererCard(url, name=name)
+        page = GathererCard(url)
 
         card_face = save_card_face(page.details(), cs)
-        card = card_face.card
         self.assertIsInstance(card_face, CardFace)
+        self.assertEqual(card_face.name, u'Avacyn, Angel of Hope')
+        card = card_face.card
 
         release = card.cardrelease_set.get(card_set=cs)
         self.assertEqual(release.rarity, CardRelease.MYTHIC)
@@ -33,45 +33,37 @@ class FetchCardsCommandTest(ProviderTest):
         cs = CardSet.objects.create(name='Return to Ravnica')
         get_content.return_value = get_html_fixture('gatherer_vanilla_creature')
         url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=265383'
-        name = u'Axebane Stag'
-        page = GathererCard(url, name=name)
+        page = GathererCard(url)
 
         card_face = save_card_face(page.details(), cs)
-        card = card_face.card
-        self.assertIsInstance(card_face, CardFace)
-
-        release = card.cardrelease_set.get(card_set=cs)
-        self.assertEqual(release.rarity, CardRelease.COMMON)
-        self.assertEqual(release.card_number, 116)
+        self.assertEqual(card_face.name, u'Axebane Stag')
+        self.assertIsNone(card_face.rules)
 
     @patch.object(GathererCard, 'get_content')
     def test_save_land_card(self, get_content):
         cs = CardSet.objects.create(name='Return to Ravnica')
         get_content.return_value = get_html_fixture('gatherer_forest')
         url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=289326'
-        name = u'Forest'
-        page = GathererCard(url, name=name)
+        page = GathererCard(url)
 
         card_face = save_card_face(page.details(), cs)
-        card = card_face.card
-        self.assertIsInstance(card_face, CardFace)
-
-        release = card.cardrelease_set.get(card_set=cs)
-        self.assertEqual(release.rarity, CardRelease.COMMON)
-        self.assertEqual(release.card_number, 271)
+        self.assertEqual(card_face.name, u'Forest')
+        self.assertIsNone(card_face.flavor)
+        self.assertIsNone(card_face.power)
+        self.assertIsNone(card_face.thoughtness)
+        self.assertIsNone(card_face.fixed_power)
+        self.assertIsNone(card_face.fixed_thoughtness)
+        self.assertIsNone(card_face.loyality)
 
     @patch.object(GathererCard, 'get_content')
     def test_save_card_with_no_number(self, get_content):
         cs = CardSet.objects.create(name='Portal Second Age')
         get_content.return_value = get_html_fixture('gatherer_no_number')
         url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=6567'
-        name = u'Abyssal Nightstalker'
-        page = GathererCard(url, name=name)
+        page = GathererCard(url)
 
         card_face = save_card_face(page.details(), cs)
-        card = card_face.card
-        self.assertIsInstance(card_face, CardFace)
-
-        release = card.cardrelease_set.get(card_set=cs)
+        self.assertEqual(card_face.name, u'Abyssal Nightstalker')
+        release = card_face.card.cardrelease_set.get(card_set=cs)
         self.assertEqual(release.rarity, CardRelease.UNCOMMON)
         self.assertIsNone(release.card_number)

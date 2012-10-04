@@ -34,3 +34,26 @@ class TestCardFaceForm(TestCase):
         self.assertEqual(saved_face.thoughtness, '5')
         self.assertEqual(saved_face.fixed_power, 1)
         self.assertEqual(saved_face.fixed_thoughtness, 5)
+        self.assertIsNone(saved_face.loyality)
+
+    @patch.object(GathererCard, 'get_content')
+    def test_fractional_pt(self, get_content):
+        get_content.return_value = get_html_fixture('complex_power_and_thoughtness')
+        url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=74251'
+        page = GathererCard(url)
+        data = page.details()
+        self.assertIn('pt', data)
+        self.assertEqual(data['pt'], '3{1/2} / 3{1/2}')
+
+        card = Card.objects.create()
+        face = CardFace(card=card)
+        form = CardFaceForm(data, instance=face)
+        self.assertTrue(form.is_valid(), '\n' + form.errors.as_text())
+
+        saved_face = form.save()
+        self.assertIsInstance(saved_face, CardFace)
+        self.assertEqual(saved_face.power, '3{1/2}')
+        self.assertEqual(saved_face.fixed_power, 3)
+        self.assertEqual(saved_face.thoughtness, '3{1/2}')
+        self.assertEqual(saved_face.fixed_thoughtness, 3)
+        self.assertIsNone(saved_face.loyality)

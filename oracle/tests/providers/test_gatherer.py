@@ -667,3 +667,7 @@ class GathererWizardsComParsingTest(ProviderTest):
             u'abc\n—dfg'),
             'abc\n- dfg'
         )
+        self.assertEqual(normalized_text(
+            '3{1/2} / 3{1/2}'),
+            '3{1/2} / 3{1/2}'
+        )

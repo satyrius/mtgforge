@@ -28,7 +28,7 @@ def normalized_text(text):
     text = re.sub(r'\s+', ' ', text)
     text = re.sub(r'\(\s+', '(', text)
     text = re.sub(r'\s+\)', ')', text)
-    text = re.sub(r'(?<!\(|\{|\s)\{', ' {', text)
+    text = re.sub(r'(?<!\(|\{|\s|\d)\{', ' {', text)
     text = re.sub(r'\}(?!=\)|\}|\s|\:)', '} ', text)
     text = re.sub(r'}\s+{', '}{', text)
     text = re.sub(u'{0}\s*'.format(nl), '\n', text)

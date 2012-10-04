@@ -1,3 +1,5 @@
+import re
+
 from arrayfields import IntegerArrayField
 from django.conf import settings
 from django.contrib.contenttypes import generic
@@ -149,11 +151,11 @@ class CardFace(models.Model):
 
     # Store power and thoughtness as strings because of */*, *^2/*^2, 2{1/2}/1
     # and other variants of calculated or strange values.
-    power = NullCharField(max_length=10, null=True)
-    thoughtness = NullCharField(max_length=10, null=True)
+    power = NullCharField(max_length=10, null=True, blank=True)
+    thoughtness = NullCharField(max_length=10, null=True, blank=True)
     # Store parsed power and thoughtness if they are integers
-    fixed_power = models.PositiveSmallIntegerField(null=True)
-    fixed_thoughtness = models.PositiveSmallIntegerField(null=True)
+    fixed_power = models.PositiveSmallIntegerField(null=True, blank=True)
+    fixed_thoughtness = models.PositiveSmallIntegerField(null=True, blank=True)
     # Planeswalker's loyality counters
     loyality = models.PositiveSmallIntegerField(null=True, blank=True)
 
@@ -173,8 +175,14 @@ def update_color_identity(sender, **kwargs):
 def update_fixed_power_and_thoughtness(sender, **kwargs):
     card_face = kwargs['instance']
     p, t = card_face.power, card_face.thoughtness
-    card_face.fixed_power = (p is not None and p.isdigit() and [int(p)] or [None])[0]
-    card_face.fixed_thoughtness = (t is not None and t.isdigit() and [int(t)] or [None])[0]
+    for field, value in (('fixed_power', p), ('fixed_thoughtness', t)):
+        if value is not None:
+            m = re.match('^(\d+)', value)
+            if m:
+                value = int(m.group(1))
+            else:
+                value = None
+        setattr(card_face, field, value)
 
 
 @receiver(post_save, sender=CardFace)
