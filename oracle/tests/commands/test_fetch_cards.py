@@ -23,6 +23,7 @@ class FetchCardsCommandTest(ProviderTest):
         self.assertIsInstance(card_face, CardFace)
         self.assertEqual(card_face.name, u'Avacyn, Angel of Hope')
         card = card_face.card
+        self.assertEqual(card_face.name, card.name)
 
         release = card.cardrelease_set.get(card_set=cs)
         self.assertEqual(release.rarity, CardRelease.MYTHIC)
@@ -67,3 +68,16 @@ class FetchCardsCommandTest(ProviderTest):
         release = card_face.card.cardrelease_set.get(card_set=cs)
         self.assertEqual(release.rarity, CardRelease.UNCOMMON)
         self.assertIsNone(release.card_number)
+
+    @patch.object(GathererCard, 'get_content')
+    def test_save_splited_card(self, get_content):
+        cs = CardSet.objects.create(name='Apocalypse')
+        get_content.return_value = get_html_fixture('gatherer_fire_oracle')
+        url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?part=Fire&multiverseid=27166'
+        page = GathererCard(url)
+
+        card_face = save_card_face(page.details(), cs)
+        self.assertIsInstance(card_face, CardFace)
+        self.assertEqual(card_face.name, u'Fire')
+        card = card_face.card
+        self.assertEqual(card.name, 'Fire // Ice')

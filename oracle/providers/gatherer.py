@@ -171,6 +171,9 @@ class GathererCard(ProviderCardPage, GathererPage):
             raise Exception('Cannot get multiverseid for {0}'.format(self.name))
         details['mvid'] = m.group('id')
 
+        title_span = self.doc.cssselect('div.contentTitle span')[0]
+        details['title'] = normalized_element_text(title_span)
+
         other_names = parts.keys()
         if not other_names:
             for name_block in self.doc.cssselect('td.rightCol div[id$="nameRow"] div.value'):

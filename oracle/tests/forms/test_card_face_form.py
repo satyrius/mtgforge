@@ -15,7 +15,7 @@ class TestCardFaceForm(TestCase):
         page = GathererCard(url, name=name)
         data = page.details()
 
-        card = Card.objects.create()
+        card = Card.objects.create(name=name)
         face = CardFace(card=card)
         form = CardFaceForm(data, instance=face)
         self.assertTrue(form.is_valid(), '\n' + form.errors.as_text())
@@ -45,7 +45,7 @@ class TestCardFaceForm(TestCase):
         self.assertIn('pt', data)
         self.assertEqual(data['pt'], '3{1/2} / 3{1/2}')
 
-        card = Card.objects.create()
+        card = Card.objects.create(name='Assquatch')
         face = CardFace(card=card)
         form = CardFaceForm(data, instance=face)
         self.assertTrue(form.is_valid(), '\n' + form.errors.as_text())
@@ -67,7 +67,7 @@ class TestCardFaceForm(TestCase):
         self.assertIn('pt', data)
         self.assertEqual(data['pt'], '* / 1+*')
 
-        card = Card.objects.create()
+        card = Card.objects.create(name='Tarmogoyf')
         face = CardFace(card=card)
         form = CardFaceForm(data, instance=face)
         self.assertTrue(form.is_valid(), '\n' + form.errors.as_text())

@@ -73,8 +73,14 @@ def save_card_face(card_details, card_set, no_update=False):
                     f.card.delete()
                     f.card = card
                     f.save()
+        title = card_details['title']
         if not card:
-            card = Card.objects.create()
+            # Create card with name equal to card page title
+            card = Card.objects.create(name=title)
+        elif re.match('\d+a', card_details.get('number', '')):
+            # Update title for multipart card, get it from first part
+            card.name = title
+            card.save()
         if not face:
             face = CardFace(card=card)
 
@@ -97,4 +103,3 @@ def save_card_face(card_details, card_set, no_update=False):
     release.save()
 
     return face
-

@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models.signals import pre_save, post_save
+from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
 from contrib.cdn import CDNFileField
@@ -66,10 +66,10 @@ class DataProviderPage(models.Model):
 # {{{ Cards and faces
 
 class Card(models.Model):
-    name = NullCharField(max_length=255, null=True, blank=True)
+    name = NullCharField(max_length=255)
 
     def __unicode__(self):
-        return self.name or 'Card #{}'.format(self.id)
+        return self.name
 
 
 class CardType(models.Model):
@@ -183,15 +183,6 @@ def update_fixed_power_and_thoughtness(sender, **kwargs):
             else:
                 value = None
         setattr(card_face, field, value)
-
-
-@receiver(post_save, sender=CardFace)
-def update_card_name(sender, **kwargs):
-    card_face = kwargs['instance']
-    card = card_face.card
-    if card_face.place == card_face.FRONT or not card.name:
-        card.name = card_face.name
-        card.save()
 
 # }}}
 
