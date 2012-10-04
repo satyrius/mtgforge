@@ -177,7 +177,7 @@ def update_fixed_power_and_thoughtness(sender, **kwargs):
     p, t = card_face.power, card_face.thoughtness
     for field, value in (('fixed_power', p), ('fixed_thoughtness', t)):
         if value is not None:
-            m = re.match('^(\d+)', value)
+            m = re.match('^(\d+)[^*]*$', value)
             if m:
                 value = int(m.group(1))
             else:

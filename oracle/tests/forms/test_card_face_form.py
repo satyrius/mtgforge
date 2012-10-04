@@ -57,3 +57,25 @@ class TestCardFaceForm(TestCase):
         self.assertEqual(saved_face.thoughtness, '3{1/2}')
         self.assertEqual(saved_face.fixed_thoughtness, 3)
         self.assertIsNone(saved_face.loyality)
+
+    @patch.object(GathererCard, 'get_content')
+    def test_pt_with_stats(self, get_content):
+        get_content.return_value = get_html_fixture('gatherer_tarmogoyf')
+        url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=136142'
+        page = GathererCard(url)
+        data = page.details()
+        self.assertIn('pt', data)
+        self.assertEqual(data['pt'], '* / 1+*')
+
+        card = Card.objects.create()
+        face = CardFace(card=card)
+        form = CardFaceForm(data, instance=face)
+        self.assertTrue(form.is_valid(), '\n' + form.errors.as_text())
+
+        saved_face = form.save()
+        self.assertIsInstance(saved_face, CardFace)
+        self.assertEqual(saved_face.power, '*')
+        self.assertIsNone(saved_face.fixed_power)
+        self.assertEqual(saved_face.thoughtness, '1+*')
+        self.assertIsNone(saved_face.fixed_thoughtness)
+        self.assertIsNone(saved_face.loyality)
