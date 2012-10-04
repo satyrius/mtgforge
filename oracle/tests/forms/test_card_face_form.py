@@ -38,7 +38,7 @@ class TestCardFaceForm(TestCase):
 
     @patch.object(GathererCard, 'get_content')
     def test_fractional_pt(self, get_content):
-        get_content.return_value = get_html_fixture('complex_power_and_thoughtness')
+        get_content.return_value = get_html_fixture('gatherer_fractional_pt')
         url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=74251'
         page = GathererCard(url)
         data = page.details()
