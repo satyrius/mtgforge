@@ -93,7 +93,8 @@ class Page(object):
     def change_state(self, state):
         # Set new state or use current state as default value. Also load
         # cached name and content while calling 'state' field getter
-        self.state = state or self.state
+        if state is not None:
+            self.state = state
         if self._use_cache:
             if self._content is None:
                 raise NoContent(
