@@ -89,6 +89,7 @@ class Command(BaseCommand):
 
     def fetch_card_pages(self, pagination, save=True, print_url=True, total=None):
         i = 0
+        failed_pages = []
         for cs_page in self.process_pages(pagination, print_url=print_url):
             if print_url:
                 self.notice(u'Fetch card pages for list {}'.format(cs_page.url))
@@ -96,12 +97,20 @@ class Command(BaseCommand):
             for page in self.process_pages(cards, i, print_url=print_url):
                 if save:
                     self.writeln(u'[*] {1:5}/{2} {0} from {3}'.format(
-                        page.name, i, total or '?', page.url))
+                        page.name, i+1, total or '?', page.url))
                     if not self.skip_parsed or not page.is_parsed():
-                        save_card_face(
-                            page.details(), cs_page.card_set, self.no_update)
-                        page.set_parsed()
+                        try:
+                            save_card_face(
+                                page.details(), cs_page.card_set, self.no_update)
+                            page.set_parsed()
+                        except Exception, e:
+                            self.error(e)
+                            failed_pages.append((page.name, page.url))
                 i += 1
+        if failed_pages:
+            self.error('The following card pages parsing failed:')
+            for name, url in failed_pages:
+                self.error(u'{0} from {1}'.format(name, url))
         return i
 
     def process_pages(self, pages, i=0, print_url=True):
