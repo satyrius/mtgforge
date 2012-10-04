@@ -97,9 +97,11 @@ def save_card_face(card_details, card_set, no_update=False):
     except CardRelease.DoesNotExist:
         release = CardRelease(card_set=card_set, card=card)
     release.rarity = card_details['rarity'].lower()[0]
-    match = re.match(r'(\d+)\w?', card_details.get('number', ''))
-    if match :
-        release.card_number = match.group(1)
+    number = card_details['number']
+    if number:
+        match = re.match(r'(\d+)\w?', number)
+        if match :
+            release.card_number = match.group(1)
     release.save()
 
     return face

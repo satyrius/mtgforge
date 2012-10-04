@@ -183,6 +183,9 @@ class GathererCard(ProviderCardPage, GathererPage):
         if other_names:
             details['other_faces'] = other_names
 
+        if 'number' not in details:
+            details['number'] = None
+
         return details
 
     def printed_card_page(self):
