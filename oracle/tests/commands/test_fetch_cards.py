@@ -27,7 +27,7 @@ class FetchCardsCommandTest(ProviderTest):
 
         release = card.cardrelease_set.get(card_set=cs)
         self.assertEqual(release.rarity, CardRelease.MYTHIC)
-        self.assertEqual(release.card_number, 6)
+        self.assertEqual(release.card_number, '6')
 
     @patch.object(GathererCard, 'get_content')
     def test_save_card_with_no_text(self, get_content):
