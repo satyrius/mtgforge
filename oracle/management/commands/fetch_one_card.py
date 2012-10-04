@@ -41,9 +41,11 @@ class Command(BaseCommand):
         if options['clear']:
             page.delete_cache()
         details = page.details()
-        save_card_face(details, card_set, options['no_update'])
+        card_face = save_card_face(details, card_set, options['no_update'])
         page.set_parsed()
-        self.writeln('Card face data was saved.')
+        for field in card_face._meta.fields:
+            self.writeln(u'{0}: {1}'.format(
+                field.name, getattr(card_face, field.name)))
 
 
 @xact.xact
