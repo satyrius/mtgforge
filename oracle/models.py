@@ -221,6 +221,8 @@ class CardRelease(models.Model):
 
     rarity = NullCharField(max_length=1, choices=RARITY_CHOICES)
     card_number = models.PositiveIntegerField(null=True, blank=True)
+    mvid = models.PositiveIntegerField(
+        help_text='Multiverse ID of english card oracle page', unique=True)
 
     def __unicode__(self):
         return u'{0} ({1})'.format(self.card.name, self.card_set.name)

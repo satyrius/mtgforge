@@ -55,6 +55,18 @@ def save_card_face(card_details, card_set, no_update=False):
     #
     card = None
     face = None
+
+    number = None
+    sub_number = None
+    cn = card_details['number']
+    if cn:
+        match = re.match('^(\d+)([a-z])?', cn)
+        if not match:
+            raise ValidationError(
+                'Collector\'s number "{}" does not match format'.format(cn))
+        number = int(match.group(1))
+        sub_number = match.group(2)
+
     try:
         face = CardFace.objects.get(name=card_details['name'])
         if no_update:
@@ -77,7 +89,7 @@ def save_card_face(card_details, card_set, no_update=False):
         if not card:
             # Create card with name equal to card page title
             card = Card.objects.create(name=title)
-        elif re.match('\d+a', card_details.get('number', '')):
+        elif sub_number == 'a':
             # Update title for multipart card, get it from first part
             card.name = title
             card.save()
@@ -92,16 +104,30 @@ def save_card_face(card_details, card_set, no_update=False):
     #
     # Card release notes
     #
+    mvid = int(card_details['mvid'])
+    rarity = card_details['rarity'].lower()[0]
     try:
-        release = CardRelease.objects.get(card_set=card_set, card=card)
+        # Try to get existing card by its id
+        release = CardRelease.objects.get(mvid=mvid)
+        if release.card_id != card.id:
+            raise Exception(
+                u'Card release for MVID {0} card id is {1}, expected {1}'.format(
+                    mvid, release.card_id, card.id))
     except CardRelease.DoesNotExist:
-        release = CardRelease(card_set=card_set, card=card)
-    release.rarity = card_details['rarity'].lower()[0]
-    number = card_details['number']
-    if number:
-        match = re.match(r'(\d+)\w?', number)
-        if match :
-            release.card_number = match.group(1)
+        new_card_release = lambda: CardRelease(
+            card_set=card_set, card=card, mvid=mvid,
+            card_number=number, rarity=rarity)
+        if number:
+            try:
+                release = CardRelease.objects.get(
+                    card_set=card_set, card=card, card_number=number)
+                # Update multiverseid when process card front face
+                if sub_number == 'a':
+                    release.mvid = mvid
+            except CardRelease.DoesNotExist:
+                release = new_card_release()
+        else:
+            release = new_card_release()
     release.save()
 
     return face
