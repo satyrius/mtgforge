@@ -121,7 +121,9 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
+INTERNAL_IPS = ('127.0.0.1',)
 
 ROOT_URLCONF = 'urls'
 
@@ -142,6 +144,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
 
     # Third-party apps
+    'debug_toolbar',
     'django_extensions',
     'mediagenerator',
     'modeltranslation',
