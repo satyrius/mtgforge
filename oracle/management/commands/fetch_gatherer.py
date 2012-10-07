@@ -100,9 +100,7 @@ class Command(BaseCommand):
                         page.name, i+1, total or '?', page.url))
                     if not self.skip_parsed or not page.is_parsed():
                         try:
-                            save_card_face(
-                                page.details(), cs_page.card_set, self.no_update)
-                            page.set_parsed()
+                            save_card_face(page, cs_page.card_set, self.no_update)
                         except Exception, e:
                             self.error(e)
                             failed_pages.append((page.name, page.url))

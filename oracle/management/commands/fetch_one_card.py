@@ -2,11 +2,12 @@ import re
 from optparse import make_option
 
 import xact
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 
 from oracle.forms import CardFaceForm
 from oracle.management.base import BaseCommand
-from oracle.models import CardFace, Card, CardRelease, CardSet
+from oracle.models import CardFace, Card, CardRelease, CardSet, DataSource
 from oracle.providers.gatherer import GathererCard
 
 
@@ -49,7 +50,8 @@ class Command(BaseCommand):
 
 
 @xact.xact
-def save_card_face(card_details, card_set, no_update=False):
+def save_card_face(page, card_set, no_update=False):
+    card_details = page.details()
     #
     # Get or create the Card instance
     #
@@ -104,6 +106,7 @@ def save_card_face(card_details, card_set, no_update=False):
     #
     # Card release notes
     #
+
     mvid = int(card_details['mvid'])
     rarity = card_details['rarity'].lower()[0]
     try:
@@ -130,4 +133,19 @@ def save_card_face(card_details, card_set, no_update=False):
             release = new_card_release()
     release.save()
 
+    # Remember card release source
+    provider = page.get_provider()
+    release_type = ContentType.objects.get_for_model(release)
+    try:
+        source = DataSource.objects.get(content_type__pk=release_type.pk,
+                                        object_id=release.id,
+                                        data_provider=provider)
+    except DataSource.DoesNotExist:
+        source = DataSource(content_object=release, data_provider=provider)
+    finally:
+        if not source.url or sub_number == 'a':
+            source.url = card_details['url']
+        source.save()
+
+    page.set_parsed()
     return face

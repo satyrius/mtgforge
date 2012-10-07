@@ -224,6 +224,8 @@ class CardRelease(models.Model):
     mvid = models.PositiveIntegerField(
         help_text='Multiverse ID of english card oracle page', unique=True)
 
+    sources = generic.GenericRelation(DataSource)
+
     def __unicode__(self):
         return u'{0} ({1})'.format(self.card.name, self.card_set.name)
 
