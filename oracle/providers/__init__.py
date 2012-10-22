@@ -1,9 +1,9 @@
 import hashlib
 import os
 import re
-import urllib2
 from urlparse import urlparse, urlunparse
 
+import requests
 from lxml.html import document_fromstring
 from django.conf import settings
 from django.core.cache import get_cache
@@ -44,6 +44,9 @@ class Page(object):
             self._content or content, \
             self._state or state
 
+    def _dowload_content(self, url):
+        return requests.get(url).text
+
     def get_content(self):
         """Return page content as a string."""
         if self._content is None:
@@ -53,7 +56,7 @@ class Page(object):
                     self._get_cached_or_modified()
             # Download content of nothing was cached
             if not self._content:
-                self._content = urllib2.urlopen(self.url).read()
+                self._content = self._dowload_content(self.url)
                 # Save the page content
                 if self._use_cache:
                     self._cache.set(self, self._content)

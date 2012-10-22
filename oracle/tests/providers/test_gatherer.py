@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import urllib
-from StringIO import StringIO
 
 from mock import patch, call
 
@@ -189,18 +188,18 @@ class GathererWizardsComParsingTest(ProviderTest):
             'http://gatherer.wizards.com/Pages/Search/Default.aspx?page=2&action=advanced&set=+%5b%22Zendikar%22%5d&output=compact'
         ])
 
-    @patch('urllib2.urlopen')
-    def test_cache(self, urlopen):
+    @patch.object(Page, '_dowload_content')
+    def test_cache(self, _dowload_content):
         page_content = get_html_fixture('gatherer_list')
-        urlopen.return_value = StringIO(page_content)
-        self.assertEqual(urlopen.call_count, 0)
+        _dowload_content.return_value = page_content
+        self.assertEqual(_dowload_content.call_count, 0)
 
         # Create a page, get its content, and assert http request called
         page1 = GathererCardList(self.zen_url)
         # Access doc property to trigger lxml parser
         page1.doc
         self.assertEqual(page1.get_content(), page_content)
-        self.assertEqual(urlopen.call_count, 1)
+        self.assertEqual(_dowload_content.call_count, 1)
         cache_entry = DataProviderPage.objects.get(url=page1.url)
         self.assertEqual(cache_entry.data_provider, page1.get_provider())
 
@@ -209,10 +208,10 @@ class GathererWizardsComParsingTest(ProviderTest):
         page2 = GathererCardList(self.zen_url)
         page2.doc
         self.assertEqual(page2.get_content(), page_content)
-        self.assertEqual(urlopen.call_count, 1)
+        self.assertEqual(_dowload_content.call_count, 1)
 
         self.assertTrue(page1.url.startswith(self.zen_url))
-        urlopen.assert_called_once_with(page1.url)
+        _dowload_content.assert_called_once_with(page1.url)
 
     @patch.object(Page, 'get_content')
     def test_get_cards_urls(self, get_content):
@@ -543,13 +542,13 @@ class GathererWizardsComParsingTest(ProviderTest):
             type='Legendary Creature - Goblin Shaman',
         ))
 
-    @patch('urllib2.urlopen')
+    @patch.object(Page, '_dowload_content')
     def test_splited_card(self, urlopen):
         page_url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=27166'
         fire_url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?part=Fire&multiverseid=27166'
 
-        card_page = StringIO(get_html_fixture('gatherer_split_oracle'))
-        fire_page = StringIO(get_html_fixture('gatherer_fire_oracle'))
+        card_page = get_html_fixture('gatherer_split_oracle')
+        fire_page = get_html_fixture('gatherer_fire_oracle')
         urlopen.side_effect = [card_page, fire_page]
 
         name = u'Fire'

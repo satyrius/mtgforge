@@ -1,5 +1,3 @@
-from StringIO import StringIO
-
 from lxml.html import HtmlElement
 from mock import patch
 
@@ -71,10 +69,10 @@ class DataProvidersTest(ProviderTest):
         self.assertNotEqual(magiccards_page.url, gatherer_page.url)
         self.assertNotEqual(magiccards_page.url, wizards_page.url)
 
-    @patch('urllib2.urlopen')
-    def test_common_page_cache(self, urlopen):
+    @patch.object(Page, '_dowload_content')
+    def test_common_page_cache(self, _dowload_content):
         page_content = get_html_fixture('gatherer_list')
-        urlopen.return_value = StringIO(page_content)
+        _dowload_content.return_value = page_content
         dummy_url = 'http://example.com/foo/bar.html'
 
         # Common page has empty provider FK
@@ -85,15 +83,15 @@ class DataProvidersTest(ProviderTest):
         self.assertIsNone(cache_entry.name)
         self.assertEqual(cache_entry.class_name, page.__class__.__name__)
 
-    @patch('urllib2.urlopen')
-    def test_cache_page_name(self, urlopen):
+    @patch.object(Page, '_dowload_content')
+    def test_cache_page_name(self, _dowload_content):
         page_content = get_html_fixture('gatherer_list')
-        urlopen.return_value = StringIO(page_content)
+        _dowload_content.return_value = page_content
         dummy_url = 'http://example.com/foo/bar.html'
 
         # Assert page name saved to cache
         title = 'The Epic Page'
-        urlopen.return_value = StringIO(page_content)
+        _dowload_content.return_value = page_content
         page = Page(dummy_url, name=title)
         content = page.get_content()
         self.assertIsNotNone(content)
@@ -105,14 +103,14 @@ class DataProvidersTest(ProviderTest):
         page2 = Page(dummy_url)
         self.assertEqual(page2.name, title)
 
-    @patch('urllib2.urlopen')
-    def test_page_state(self, urlopen):
+    @patch.object(Page, '_dowload_content')
+    def test_page_state(self, _dowload_content):
         page_content = get_html_fixture('gatherer_list')
-        urlopen.return_value = StringIO(page_content)
+        _dowload_content.return_value = page_content
         dummy_url = 'http://example.com/foo/bar.html'
 
         # Assert page name saved to cache
-        urlopen.return_value = StringIO(page_content)
+        _dowload_content.return_value = page_content
         page = Page(dummy_url)
         self.assertEqual(page.state, PageState.INITIAL)
         content = page.get_content()
@@ -135,38 +133,38 @@ class DataProvidersTest(ProviderTest):
         with self.assertRaises(NoContent):
             page3.change_state(state)
 
-    @patch('urllib2.urlopen')
-    def test_page_cache_delete(self, urlopen):
+    @patch.object(Page, '_dowload_content')
+    def test_page_cache_delete(self, _dowload_content):
         page1_content = '<html><h1>1</h1></html>'
         page2_content = '<html><h1>2</h1></html>'
         page3_content = '<html><h1>3</h1></html>'
 
         # Get content of gatherer home page
-        urlopen.return_value = StringIO(page1_content)
-        self.assertEqual(urlopen.call_count, 0)
+        _dowload_content.return_value = page1_content
+        self.assertEqual(_dowload_content.call_count, 0)
         gatherer_page = GathererHomePage()
         self.assertEqual(gatherer_page.get_content(), page1_content)
-        self.assertEqual(urlopen.call_count, 1)
+        self.assertEqual(_dowload_content.call_count, 1)
 
         # Create gatherer page again and assert that content is from cache
         gatherer_page = GathererHomePage()
         self.assertEqual(gatherer_page.get_content(), page1_content)
-        self.assertEqual(urlopen.call_count, 1)
+        self.assertEqual(_dowload_content.call_count, 1)
 
         # Get content of wizards home page
-        urlopen.return_value = StringIO(page2_content)
+        _dowload_content.return_value = page2_content
         wizards_page = WizardsHomePage()
         self.assertEqual(wizards_page.get_content(), page2_content)
-        self.assertEqual(urlopen.call_count, 2)
+        self.assertEqual(_dowload_content.call_count, 2)
 
         # Reset gatherer home page content cache
-        urlopen.return_value = StringIO(page3_content)
+        _dowload_content.return_value = page3_content
         gatherer_page = GathererHomePage()
         gatherer_page.delete_cache()
         self.assertEqual(gatherer_page.get_content(), page3_content)
-        self.assertEqual(urlopen.call_count, 3)
+        self.assertEqual(_dowload_content.call_count, 3)
 
         # Wizards page is still cached
         wizards_page = WizardsHomePage()
         self.assertEqual(wizards_page.get_content(), page2_content)
-        self.assertEqual(urlopen.call_count, 3)
+        self.assertEqual(_dowload_content.call_count, 3)
