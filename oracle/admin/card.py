@@ -24,7 +24,7 @@ class PartsCountFilter(SimpleListFilter):
         )
 
     def queryset(self, request, queryset):
-        queryset = queryset.annotate(num_faces=Count('cardface'))
+        queryset = queryset.annotate(num_faces=Count('cardface')).order_by('cardrelease__mvid')
         if self.value() == 'multipart':
             return queryset.filter(num_faces__gt=1)
         if self.value() == 'normal':
