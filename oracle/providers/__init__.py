@@ -22,13 +22,13 @@ class NoContent(Exception):
 
 
 class Page(object):
-    def __init__(self, source, name=None, use_cache=True):
+    def __init__(self, source, name=None, read_cache=True):
         self.url = self._source_url(source)
         self._content = None
         self._state = None
         self._name = None
         self._doc = None
-        self._use_cache = use_cache
+        self._read_cache = read_cache
         self._cache = get_cache('provider_page')
         self.name = name
 
@@ -51,15 +51,14 @@ class Page(object):
         """Return page content as a string."""
         if self._content is None:
             # Get cached page content
-            if self._use_cache:
+            if self._read_cache:
                 self.name, self._content, self.state = \
                     self._get_cached_or_modified()
             # Download content of nothing was cached
             if not self._content:
                 self._content = self._dowload_content(self.url)
                 # Save the page content
-                if self._use_cache:
-                    self._cache.set(self, self._content)
+                self._cache.set(self, self._content)
         return self._content is not None and smart_str(self._content) or None
 
     def delete_cache(self):
@@ -67,7 +66,7 @@ class Page(object):
 
     @property
     def name(self):
-        if self._name is None and self._use_cache:
+        if self._name is None and self._read_cache:
             self.name, self._content, self.state = \
                 self._get_cached_or_modified()
         return self._name
@@ -83,11 +82,10 @@ class Page(object):
 
     @property
     def state(self):
-        if self._state is None:
-            if self._use_cache:
-                self.name, self._content, self.state = \
-                    self._get_cached_or_modified()
-        return self._state
+        if self._state is None and self._read_cache:
+            self.name, self._content, self.state = \
+                self._get_cached_or_modified()
+        return self._state or PageState.INITIAL
 
     @state.setter
     def state(self, value):
@@ -98,11 +96,10 @@ class Page(object):
         # cached name and content while calling 'state' field getter
         if state is not None:
             self.state = state
-        if self._use_cache:
-            if self._content is None:
-                raise NoContent(
-                    'You should download page before changing it\'s state')
-            self._cache.set(self, self._content)
+        if self._content is None:
+            raise NoContent(
+                'You should download page before changing it\'s state')
+        self._cache.set(self, self._content)
 
     def get_url_hash(self):
         return hashlib.sha1(self.url).hexdigest()
@@ -192,7 +189,8 @@ def map_result_as_pages(page_class=None, map_data=None):
             result = func(self, *args, **kwargs)
             page_class = page_class or self.__class__
             cls = lambda r: isinstance(r, tuple) and \
-                    page_class(r[1], name=r[0]) or page_class(r)
+                    page_class(r[1], name=r[0], read_cache=self._read_cache) or \
+                    page_class(r, read_cache=self._read_cache)
             pages = map(cls, result)
             if map_data:
                 map(curry(map_data, self), pages)
@@ -205,21 +203,17 @@ def cache_parsed():
     def decorator(func):
         @wraps(func)
         def result_wrapper(self, *args, **kwargs):
-            if self._use_cache:
-                cache = get_cache(
-                    'default',
-                    TIMEOUT=settings.DATA_PROVIDER_CACHE_TIMEOUT,
-                    KEY_PREFIX=func.__name__)
-                key = self.get_url_hash()
-                result = cache.get(key, default=[])
-            else:
-                result = None
+            cache = get_cache(
+                'default',
+                TIMEOUT=settings.DATA_PROVIDER_CACHE_TIMEOUT,
+                KEY_PREFIX=func.__name__)
+            key = self.get_url_hash()
 
+            result = self._read_cache and cache.get(key, default=[]) or None
             if not result:
                 result = func(self, *args, **kwargs)
 
-            if self._use_cache:
-                cache.set(key, result)
+            cache.set(key, result)
 
             return result
         return curry(result_wrapper)

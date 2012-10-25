@@ -34,6 +34,11 @@ class Command(BaseCommand):
             action='store_true',
             default=False,
             help='Invalidate pages cache'),
+        make_option('--ignore-cache',
+            dest='ignore_cache',
+            action='store_true',
+            default=False,
+            help='Ignore cached paged and download content again'),
         make_option('--sim', '--simultaneously-parse',
             dest='simultaneously',
             action='store_true',
@@ -68,6 +73,7 @@ class Command(BaseCommand):
 
         self.no_update = options['no_update']
         self.skip_parsed = options['skip_parsed']
+        self.ignore_cache = options['ignore_cache']
 
     @measureit(logger=logger)
     def handle(self, *args, **options):
@@ -76,7 +82,9 @@ class Command(BaseCommand):
         pagination = []
         self.notice('Fetch home page for each card set')
         message_shown = False
-        for cs_page in self.process_pages(map(GathererCardList, sets)):
+        create_cs_page = lambda cs: GathererCardList(
+            cs, read_cache=(not self.ignore_cache))
+        for cs_page in self.process_pages(map(create_cs_page, self.sets)):
             if not message_shown:
                 self.notice('Parse card sets pages to get pagination')
                 message_shown = True
