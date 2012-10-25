@@ -38,6 +38,11 @@ class FetchCardsCommandTest(ProviderTest):
         source = release.sources.get(data_provider=provider)
         self.assertEqual(source.url, url)
 
+        # And we can get source page for card face released
+        restored_page = get_release_page(release)
+        self.assertIsInstance(restored_page, GathererCard)
+        self.assertEqual(restored_page.url, url)
+
     def test_save_card_with_no_text(self, _dowload_content):
         cs = CardSet.objects.create(name='Return to Ravnica')
         _dowload_content.return_value = get_html_fixture('gatherer_vanilla_creature')

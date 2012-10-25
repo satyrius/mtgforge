@@ -56,19 +56,22 @@ class Command(BaseCommand):
         self.no_update = False
         self.skip_parsed = False
 
-    @measureit(logger=logger)
-    def handle(self, *args, **options):
+    def handle_args(self, *args, **options):
         if options['clear']:
             get_cache('provider_page').clear()
             get_cache('default', KEY_PREFIX='pagination').clear()
 
         self.threads_count = int(options['threads'])
-        sets = CardSet.objects.all()
+        self.sets = CardSet.objects.all()
         if args:
-            sets = sets.filter(acronym__in=args)
+            self.sets = self.sets.filter(acronym__in=args)
 
         self.no_update = options['no_update']
         self.skip_parsed = options['skip_parsed']
+
+    @measureit(logger=logger)
+    def handle(self, *args, **options):
+        self.handle_args(*args, **options)
 
         pagination = []
         self.notice('Fetch home page for each card set')
@@ -111,11 +114,12 @@ class Command(BaseCommand):
                 self.error(u'{0} from {1}'.format(name, url))
         return i
 
-    def process_pages(self, pages, i=0, print_url=True):
+    def process_pages(self, pages, i=0, print_url=True, run=None):
+        '''Process list of pages chunk by chunk. Use ``run`` for job'''
         chunk = self.threads_count
         failed = []
         for pages_chunk in itertools.izip_longest(*([iter(pages)] * chunk)):
-            for result in self.process_chunk(pages_chunk):
+            for result in self.process_chunk(pages_chunk, run):
                 if isinstance(result, GathererPage):
                     i += 1
                     if print_url:
@@ -131,11 +135,12 @@ class Command(BaseCommand):
             self.process_pages(failed, i)
         return pages
 
-    def process_chunk(self, pages):
-        def fetch_page(page):
-            page.get_content()
-            return page
-        jobs = [gevent.spawn(fetch_page, page) for page in filter(None, pages)]
+    def fetch_page(self, page):
+        page.get_content()
+        return page
+
+    def process_chunk(self, pages, run=None):
+        jobs = [gevent.spawn(run or self.fetch_page, page) for page in filter(None, pages)]
         gevent.joinall(jobs, timeout=settings.DATA_PROVIDER_TIMEOUT)
         for job in jobs:
             # Return fetched page or job to try again
