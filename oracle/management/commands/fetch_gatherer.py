@@ -97,8 +97,8 @@ class Command(BaseCommand):
         if not simultaneously:
             self.notice('Go through all card pages and save card data')
             self.fetch_card_pages(
-                map(lambda p: page.force_read_cache(), pagination),
-                print_url=True, total=total)
+                map(lambda p: p.force_read_cache(), pagination),
+                print_url=False, total=total)
 
     def fetch_card_pages(self, pagination, save=True, print_url=True, total=None):
         i = 0
