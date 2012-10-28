@@ -47,6 +47,10 @@ class Page(object):
     def _dowload_content(self, url):
         return requests.get(url).text
 
+    def force_read_cache(self):
+        self._read_cache = True
+        return self
+
     def get_content(self):
         """Return page content as a string."""
         if self._content is None:
