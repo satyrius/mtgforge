@@ -11,7 +11,7 @@ from contrib.utils import measureit
 from oracle.management.base import BaseCommand
 from oracle.management.commands import save_card_face
 from oracle.models import CardSet
-from oracle.providers.gatherer import GathererCardList, GathererPage
+from oracle.providers.gatherer import GathererCardList
 
 
 logger = logging.getLogger(__name__)
@@ -80,78 +80,83 @@ class Command(BaseCommand):
         self.handle_args(*args, **options)
 
         pagination = []
-        self.notice('Fetch home page for each card set')
+        self.notice(u'(1) Fetch home page for each card set')
         message_shown = False
         create_cs_page = lambda cs: GathererCardList(
             cs, read_cache=(not self.ignore_cache))
         for cs_page in self.process_pages(map(create_cs_page, self.sets)):
             if not message_shown:
-                self.notice('Parse card sets pages to get pagination')
+                self.notice(u'(2) Parse card sets pages to get pagination')
                 message_shown = True
             for page in cs_page.pages():
                 pagination.append(page)
 
-        self.notice('Fetch card list pages for each set')
         simultaneously = options['simultaneously']
+        self.notice(u'(3{0}) Fetch card list pages for each set'.format(
+            not simultaneously and 'a' or ''))
         total = self.fetch_card_pages(pagination, save=simultaneously)
         if not simultaneously:
-            self.notice('Go through all card pages and save card data')
+            self.notice(u'(3b) Go through all card pages and save card data')
             self.fetch_card_pages(
-                map(lambda p: p.force_read_cache(), pagination),
-                print_url=False, total=total)
+                map(lambda p: p.force_read_cache(), pagination), total=total)
 
-    def fetch_card_pages(self, pagination, save=True, print_url=True, total=None):
-        i = 0
+    def fetch_card_pages(self, pagination, save=True, total=None):
+        cards_counter = 0
+        pages_counter, total_pages = 0, len(pagination)
         failed_pages = []
-        for cs_page in self.process_pages(pagination, print_url=print_url):
-            if print_url:
-                self.notice(u'Fetch card pages for list {}'.format(cs_page.url))
+        for cs_page in self.process_pages(pagination):
+            pages_counter += 1
+            self.notice(u'{1:3}/{2} Process cards for list {0}'.format(
+                cs_page.url, pages_counter, total_pages))
             cards = cs_page.cards_list()
-            for page in self.process_pages(cards, i, print_url=print_url):
+            for page in self.process_pages(cards):
                 if save:
                     self.writeln(u'[*] {1:5}/{2} {0} from {3}'.format(
-                        page.name, i+1, total or '?', page.url))
+                        page.name, cards_counter + 1, total or '?', page.url))
                     if not self.skip_parsed or not page.is_parsed():
                         try:
                             save_card_face(page, cs_page.card_set, self.no_update)
                         except Exception, e:
                             self.error(e)
                             failed_pages.append((page.name, page.url))
-                i += 1
+                cards_counter += 1
         if failed_pages:
             self.error('The following card pages parsing failed:')
             for name, url in failed_pages:
                 self.error(u'{0} from {1}'.format(name, url))
-        return i
+        return cards_counter
 
-    def process_pages(self, pages, i=0, print_url=True, run=None):
+    def process_pages(self, pages, run=None):
         '''Process list of pages chunk by chunk. Use ``run`` for job'''
         chunk = self.threads_count
+        result = []
         failed = []
         for pages_chunk in itertools.izip_longest(*([iter(pages)] * chunk)):
-            for result in self.process_chunk(pages_chunk, run):
-                if isinstance(result, GathererPage):
-                    i += 1
-                    if print_url:
-                        self.writeln(u'>>> {1:5} {0}'.format(result.url, i))
+            for job, page in self.process_chunk(pages_chunk, run):
+                # Report successful job or try again
+                if job.successful():
+                    result.append(job.value)
                 else:
-                    page = result.args[0]
-                    self.error(
-                        u'Cannot download page {0}, try again later'.format(
-                            page.url))
                     failed.append(page)
+                    self.error(
+                        u'Cannot complete job for page {0}, try again later'.format(
+                            page.url))
+
         # Try again for failed downloads
         if failed:
-            self.process_pages(failed, i)
-        return pages
+            result.extend(self.process_pages(failed))
+        return result
+
+    def log_request(self, response):
+        self.writeln(u'>>> {0}'.format(response.url))
 
     def fetch_page(self, page):
-        page.get_content()
+        page.get_content(hooks=dict(response=self.log_request))
         return page
 
     def process_chunk(self, pages, run=None):
-        jobs = [gevent.spawn(run or self.fetch_page, page) for page in filter(None, pages)]
+        pages = filter(None, pages)
+        jobs = [gevent.spawn(run or self.fetch_page, page) for page in pages]
         gevent.joinall(jobs, timeout=settings.DATA_PROVIDER_TIMEOUT)
-        for job in jobs:
-            # Return fetched page or job to try again
-            yield job.successful() and job.value or job
+        for job, page in zip(jobs, pages):
+            yield job, page

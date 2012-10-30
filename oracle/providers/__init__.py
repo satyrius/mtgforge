@@ -44,14 +44,14 @@ class Page(object):
             self._content or content, \
             self._state or state
 
-    def _dowload_content(self, url):
-        return requests.get(url).text
+    def _dowload_content(self, url, hooks=None):
+        return requests.get(url, hooks=hooks).text
 
     def force_read_cache(self):
         self._read_cache = True
         return self
 
-    def get_content(self):
+    def get_content(self, hooks=None):
         """Return page content as a string."""
         if self._content is None:
             # Get cached page content
@@ -60,7 +60,7 @@ class Page(object):
                     self._get_cached_or_modified()
             # Download content of nothing was cached
             if not self._content:
-                self._content = self._dowload_content(self.url)
+                self._content = self._dowload_content(self.url, hooks=hooks)
                 # Save the page content
                 self._cache.set(self, self._content)
         return self._content is not None and smart_str(self._content) or None
