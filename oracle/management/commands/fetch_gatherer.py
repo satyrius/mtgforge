@@ -5,12 +5,14 @@ from optparse import make_option
 import gevent
 from django.conf import settings
 from django.core.cache import get_cache
+from django.utils.functional import curry
 from gevent import monkey
 
 from contrib.utils import measureit
 from oracle.management.base import BaseCommand
 from oracle.management.commands import save_card_face
 from oracle.models import CardSet
+from oracle.providers import Page
 from oracle.providers.gatherer import GathererCardList
 
 
@@ -60,6 +62,9 @@ class Command(BaseCommand):
         super(Command, self).__init__()
         self.no_update = False
         self.skip_parsed = False
+        # Patch page _dowload_content to log requests
+        Page._dowload_content = curry(Page._dowload_content,
+                                      hooks=dict(response=self.log_request))
 
     def handle_args(self, *args, **options):
         if options['clear']:
@@ -151,7 +156,7 @@ class Command(BaseCommand):
         self.writeln(u'>>> {0}'.format(response.url))
 
     def fetch_page(self, page):
-        page.get_content(hooks=dict(response=self.log_request))
+        page.get_content()
         return page
 
     def process_chunk(self, pages, run=None):

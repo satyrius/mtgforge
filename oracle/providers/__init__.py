@@ -51,7 +51,7 @@ class Page(object):
         self._read_cache = True
         return self
 
-    def get_content(self, hooks=None):
+    def get_content(self):
         """Return page content as a string."""
         if self._content is None:
             # Get cached page content
@@ -60,7 +60,7 @@ class Page(object):
                     self._get_cached_or_modified()
             # Download content of nothing was cached
             if not self._content:
-                self._content = self._dowload_content(self.url, hooks=hooks)
+                self._content = self._dowload_content(self.url)
                 # Save the page content
                 self._cache.set(self, self._content)
         return self._content is not None and smart_str(self._content) or None
