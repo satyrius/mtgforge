@@ -191,12 +191,12 @@ class GathererCard(ProviderCardPage, GathererPage):
     def printed_card_page(self):
         print_link = self.doc.cssselect('a#cardTextSwitchLink2')[0]
         url = print_link.get('href')
-        return GathererCardPrint(url)
+        return GathererCardPrint(url, read_cache=self._read_cache)
 
     def languages_page(self):
         print_link = self.doc.cssselect('a#ctl00_ctl00_ctl00_MainContent_SubContent_SubContentAnchors_DetailsAnchors_LanguagesLink')[0]
         url = print_link.get('href')
-        return GathererCardLanguages(url)
+        return GathererCardLanguages(url, read_cache=self._read_cache)
 
 
 class GathererCardPrint(GathererCard):
