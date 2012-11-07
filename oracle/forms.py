@@ -17,7 +17,33 @@ class CardSetForm(forms.ModelForm):
         model = models.CardSet
 
 
-class CardFaceForm(forms.ModelForm):
+class CardPageForm(forms.ModelForm):
+    def _fix_data(self, data, field_name, alt_name, default=None, cast=None):
+        if not field_name in data:
+            data[field_name] = alt_name in data and data[alt_name] or default
+        if cast and data[field_name] != default:
+            data[field_name] = cast(data[field_name])
+
+    def clean(self):
+        '''Copy default data from instance or get its default values'''
+        instance = self.instance
+        cleaned_data = self.cleaned_data
+
+        if not instance:
+            return cleaned_data
+
+        opts = instance._meta
+        for f in opts.fields:
+            if f.name in cleaned_data and (
+                cleaned_data[f.name] is None or cleaned_data[f.name] == ''
+            ):
+                value = getattr(instance, f.name)
+                cleaned_data[f.name] = (
+                    value is not None and [value] or [f.get_default()])[0]
+        return self.cleaned_data
+
+
+class CardFaceForm(CardPageForm):
     types = forms.ModelMultipleChoiceField(
         models.CardType.objects.all().order_by('name'),
         widget=FilteredSelectMultiple(
@@ -33,12 +59,6 @@ class CardFaceForm(forms.ModelForm):
 
     class Meta:
         model = models.CardFace
-
-    def _fix_data(self, data, field_name, alt_name, default=None, cast=None):
-        if not field_name in data:
-            data[field_name] = alt_name in data and data[alt_name] or default
-        if cast and data[field_name] != default:
-            data[field_name] = cast(data[field_name])
 
     def __init__(self, data=None, **kwargs):
         if data:
@@ -59,20 +79,15 @@ class CardFaceForm(forms.ModelForm):
 
         super(CardFaceForm, self).__init__(data=data, **kwargs)
 
-    def clean(self):
-        '''Copy default data from instance or get its default values'''
-        instance = self.instance
-        cleaned_data = self.cleaned_data
 
-        if not instance:
-            return cleaned_data
+class CardL10nForm(CardPageForm):
+    class Meta:
+        model = models.CardL10n
 
-        opts = instance._meta
-        for f in opts.fields:
-            if f.name in cleaned_data and (
-                cleaned_data[f.name] is None or cleaned_data[f.name] == ''
-            ):
-                value = getattr(instance, f.name)
-                cleaned_data[f.name] = (
-                    value is not None and [value] or [f.get_default()])[0]
-        return self.cleaned_data
+    def __init__(self, data=None, **kwargs):
+        if data:
+            self._fix_data(data, 'type_line', 'type')
+            self._fix_data(data, 'rules', 'text')
+            self._fix_data(data, 'scan', 'art')
+
+        super(CardL10nForm, self).__init__(data=data, **kwargs)

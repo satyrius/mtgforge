@@ -182,6 +182,15 @@ gettext = lambda s: s
 LANGUAGES = (
     ('en', gettext('English')),
     ('ru', gettext('Русский')),
+    ('tw', gettext('繁體中文')),
+    ('cn', gettext('简体中文')),
+    ('de', gettext('Deutsch')),
+    ('fr', gettext('Français')),
+    ('it', gettext('Italiano')),
+    ('jp', gettext('日本語')),
+    ('ko', gettext('한국어')),
+    ('pt', gettext('Português')),
+    ('es', gettext('Español')),
 )
 MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
 MODELTRANSLATION_TRANSLATION_REGISTRY = 'translation'

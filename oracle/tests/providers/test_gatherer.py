@@ -648,14 +648,14 @@ class GathererWizardsComParsingTest(ProviderTest):
         get_content.return_value = get_html_fixture('gatherer_glimpse_languages')
         url = 'http://gatherer.wizards.com/Pages/Card/Languages.aspx?multiverseid=75241'
         page = GathererCardLanguages(url)
-        self.assertEqual([(p.name, p.url) for p in page.languages()], [
-            ('German', 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=85862'),
-            ('French', 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=85555'),
-            ('Italian', 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=86169'),
-            ('Japanese', 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=86476'),
-            ('Chinese Simplified', 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=85248'),
-            ('Portuguese', 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=86783'),
-            ('Spanish', 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=87090'),
+        self.assertEqual([(p.language, p.url) for p in page.languages()], [
+            ('de', 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=85862&printed=true'),
+            ('fr', 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=85555&printed=true'),
+            ('it', 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=86169&printed=true'),
+            ('jp', 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=86476&printed=true'),
+            ('cn', 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=85248&printed=true'),
+            ('pt', 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=86783&printed=true'),
+            ('es', 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=87090&printed=true'),
         ])
 
     def test_normalize_text(self):

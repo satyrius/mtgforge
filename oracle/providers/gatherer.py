@@ -98,18 +98,20 @@ class GathererCard(ProviderCardPage, GathererPage):
             value = u'Common'
         return value
 
-    def details(self, forward=True):
+    def details(self, forward=True, name=None):
         """Return card face details from current page. Matches given card name
         with the found one.
 
         Keyword argumets:
         forward -- navigate to related pages for additional info
+        name -- card face name to override page name
         """
         faces = self.doc.cssselect('table.cardDetails')
         if not faces:
             raise ParseError('No one card face found on this page')
 
-        if len(faces) > 1 and not self.name:
+        name = name or self.name
+        if len(faces) > 1 and not name:
             raise Exception('Cannot get details for page with unknown name '
                             'and two or more faces')
 
@@ -146,7 +148,7 @@ class GathererCard(ProviderCardPage, GathererPage):
                     else:
                         v = normalized_element_text(el)
                     # Break if it is not the card face you are looking for
-                    if self.name and k == name_row_key and v != self.name:
+                    if name and k == name_row_key and v != name:
                         break
                     details[k] = v.strip()
             if name_row_key in details:
@@ -157,18 +159,18 @@ class GathererCard(ProviderCardPage, GathererPage):
 
         if not found:
             # Navigate to part page if able
-            if len(faces) == 1 and forward and self.name in parts:
-                part_page = self.__class__(parts[self.name], self.name)
+            if len(faces) == 1 and forward and name in parts:
+                part_page = self.__class__(parts[name], name)
                 return part_page.details(forward=False)
 
             # Otherwise raise exception
             raise CardNotFound(u'Card \'{0}\' not found on page \'{1}\''.format(
-                self.name, self.url))
+                name, self.url))
 
         details['url'] = self.url
         m = mvid_re.search(self.url)
         if not m:
-            raise Exception('Cannot get multiverseid for {0}'.format(self.name))
+            raise Exception('Cannot get multiverseid for {0}'.format(name))
         details['mvid'] = m.group('id')
 
         title_span = self.doc.cssselect('div.contentTitle span')[0]
@@ -178,7 +180,7 @@ class GathererCard(ProviderCardPage, GathererPage):
         if not other_names:
             for name_block in self.doc.cssselect('td.rightCol div[id$="nameRow"] div.value'):
                 value = normalized_element_text(name_block)
-                if value != self.name:
+                if value != name:
                     other_names.append(value)
         if other_names:
             details['other_faces'] = other_names
@@ -191,12 +193,16 @@ class GathererCard(ProviderCardPage, GathererPage):
     def printed_card_page(self):
         print_link = self.doc.cssselect('a#cardTextSwitchLink2')[0]
         url = print_link.get('href')
-        return GathererCardPrint(url, read_cache=self._read_cache)
+        page = GathererCardPrint(url, read_cache=self._read_cache)
+        page.card_release = self.card_release
+        return page
 
     def languages_page(self):
         print_link = self.doc.cssselect('a#ctl00_ctl00_ctl00_MainContent_SubContent_SubContentAnchors_DetailsAnchors_LanguagesLink')[0]
         url = print_link.get('href')
-        return GathererCardLanguages(url, read_cache=self._read_cache)
+        page = GathererCardLanguages(url, read_cache=self._read_cache)
+        page.card_release = self.card_release
+        return page
 
 
 class GathererCardPrint(GathererCard):
@@ -250,7 +256,7 @@ class GathererCardList(ProviderCardListPage, GathererPage):
             # Get all printings links
             for a in printings:
                 if a.cssselect('img')[0].get('alt') == cs_name:
-                    card_info = (name, a.get('href'))
+                    card_info = dict(name=name, url=a.get('href'))
                     urls.append(card_info)
         return urls
 
@@ -277,7 +283,8 @@ class GathererCardLanguages(GathererPage):
         urls = []
         for lang_row in self.doc.cssselect('table.cardList tr.cardItem'):
             cells = [td for td in lang_row.iterchildren('td')]
+            name = gettext(cells[0])
             lang = gettext(cells[1])
-            url = cells[0].getchildren()[0].get('href')
-            urls.append((lang, url))
+            url = cells[0].getchildren()[0].get('href') + u'&printed=true'
+            urls.append(dict(name=name, url=url, lang=lang))
         return urls

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from mock import patch
 
-from oracle.management.commands import save_card_face, get_release_page
+from oracle.management.commands import save_card_face
 from oracle.models import CardFace, CardRelease, CardSet
 from oracle.providers.gatherer import GathererCard
 from oracle.tests.helpers import get_html_fixture
@@ -39,7 +39,7 @@ class FetchCardsCommandTest(ProviderTest):
         self.assertEqual(source.url, url)
 
         # And we can get source page for card face released
-        restored_page = get_release_page(release)
+        restored_page = GathererCard(release)
         self.assertIsInstance(restored_page, GathererCard)
         self.assertEqual(restored_page.url, url)
 

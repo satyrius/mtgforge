@@ -10,7 +10,7 @@ from django.core.cache import get_cache
 from django.utils.functional import wraps, curry
 from django.utils.encoding import smart_str
 
-from oracle.models import DataProvider, CardSet, PageState
+from oracle.models import DataProvider, CardSet, PageState, CardRelease
 
 
 class BadPageSource(Exception):
@@ -21,8 +21,35 @@ class NoContent(Exception):
     pass
 
 
+def canonocal_language(language):
+    if language == 'English' or language is None:
+        return 'en'
+    elif language == 'Russian':
+        return 'ru'
+    elif language == 'Chinese Traditional':
+        return 'tw'
+    elif language == 'Chinese Simplified':
+        return 'cn'
+    elif language == 'German':
+        return 'de'
+    elif language == 'French':
+        return 'fr'
+    elif language == 'Italian':
+        return 'it'
+    elif language == 'Japanese':
+        return 'jp'
+    elif language == 'Korean':
+        return 'ko'
+    elif language in ('Portuguese', 'Portuguese (Brazil)',):
+        return 'pt'
+    elif language == 'Spanish':
+        return 'es'
+    else:
+        raise Exception(u'Unknown language "{0}"'.format(language))
+
+
 class Page(object):
-    def __init__(self, source, name=None, read_cache=True):
+    def __init__(self, source, name=None, read_cache=True, language=None):
         self.url = self._source_url(source)
         self._content = None
         self._state = None
@@ -31,6 +58,7 @@ class Page(object):
         self._read_cache = read_cache
         self._cache = get_cache('provider_page')
         self.name = name
+        self.language = canonocal_language(language)
 
     def _source_url(self, source):
         if isinstance(source, basestring):
@@ -68,15 +96,13 @@ class Page(object):
     def delete_cache(self):
         self._cache.delete(self)
 
-    @property
-    def name(self):
+    def _get_name(self):
         if self._name is None and self._read_cache:
             self.name, self._content, self.state = \
                 self._get_cached_or_modified()
         return self._name
 
-    @name.setter
-    def name(self, value):
+    def _set_name(self, value):
         # Do not set empty name
         if value is not None:
             matches = re.match(r'[^(]+\(([^)]+)\)$', value)
@@ -84,16 +110,18 @@ class Page(object):
                 value = matches.group(1)
             self._name = value
 
-    @property
-    def state(self):
+    name = property(_get_name, _set_name)
+
+    def _get_state(self):
         if self._state is None and self._read_cache:
             self.name, self._content, self.state = \
                 self._get_cached_or_modified()
         return self._state or PageState.INITIAL
 
-    @state.setter
-    def state(self, value):
+    def _set_state(self, value):
         self._state = value or PageState.INITIAL
+
+    state = property(_get_state, _set_state)
 
     def change_state(self, state):
         # Set new state or use current state as default value. Also load
@@ -180,7 +208,13 @@ class ProviderCardListPage(CardListPage, ProviderPage):
 
 
 class ProviderCardPage(CardPage, ProviderPage):
-    pass
+    def _source_url(self, source):
+        self.card_release = None
+        if isinstance(source, CardRelease):
+            self.card_release = source
+            return self.card_release.sources.get(
+                data_provider=self.get_provider()).url
+        return super(CardPage, self)._source_url(source)
 
 
 def map_result_as_pages(page_class=None, map_data=None):
@@ -192,9 +226,16 @@ def map_result_as_pages(page_class=None, map_data=None):
         def result_wrapper(self, page_class=None, *args, **kwargs):
             result = func(self, *args, **kwargs)
             page_class = page_class or self.__class__
-            cls = lambda r: isinstance(r, tuple) and \
-                    page_class(r[1], name=r[0], read_cache=self._read_cache) or \
-                    page_class(r, read_cache=self._read_cache)
+            def cls(r):
+                if isinstance(r, dict):
+                    page = page_class(
+                        r['url'], language=r.get('lang', None),
+                        name=r['name'], read_cache=self._read_cache)
+                else:
+                    page = page_class(r, read_cache=self._read_cache)
+                if hasattr(self, 'card_release'):
+                    page.card_release = self.card_release
+                return page
             pages = map(cls, result)
             if map_data:
                 map(curry(map_data, self), pages)

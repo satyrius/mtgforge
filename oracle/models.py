@@ -235,10 +235,11 @@ IMAGE_FORMATS = ['orig', 'x220']
 
 
 class CardL10n(models.Model):
-    card_face = models.ForeignKey(CardFace)
-    card_release = models.ForeignKey(CardRelease)
-    language = NullCharField(max_length=2, choices=settings.LANGUAGES,
-                            default=settings.MODELTRANSLATION_DEFAULT_LANGUAGE)
+    card_face = models.ForeignKey(CardFace, blank=True)
+    card_release = models.ForeignKey(CardRelease, blank=True)
+    language = NullCharField(
+        max_length=2, choices=settings.LANGUAGES, blank=True,
+        default=settings.MODELTRANSLATION_DEFAULT_LANGUAGE)
 
     name = NullCharField(max_length=255)
     type_line = NullCharField(max_length=255)
