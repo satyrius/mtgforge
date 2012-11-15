@@ -1,10 +1,5 @@
 include uwsgi_params;
 
-set $https off;
-if ($scheme = 'https') {
-    set $https on;
-}
-
 uwsgi_param HTTPS $https;
 uwsgi_param HTTP_SCHEME $scheme;
 
