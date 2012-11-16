@@ -34,15 +34,26 @@ class Command(FetchCardsCommand):
         self.notice(u'(1) Walk though card release print and languages pages')
         message_shown = False
         self.cards_total = i = 0
+        failed_pages = []
         for page in self.process_pages(chain(*self.l10n_pages_generator())):
             if not message_shown:
                 message_shown = True
                 self.notice(u'(2) Save localization')
             i += 1
-            for saved_face_l10n in save_l10n(page):
-                self.writeln(u'[*] {2}/{3} {4} {0} from {1}'.format(
-                    saved_face_l10n.name, page.url, i,
-                    self.cards_total, page.language))
+            try:
+                for saved_face_l10n in save_l10n(page):
+                    self.writeln(u'[*] {2}/{3} {4} {0} from {1}'.format(
+                        saved_face_l10n.name, page.url, i,
+                        self.cards_total, page.language))
+            except Exception, e:
+                self.error(e)
+                failed_pages.append(page)
+
+        if failed_pages:
+            self.error('The following card pages parsing failed:')
+            for name, url in failed_pages:
+                self.error(u'{0} from {1}'.format(page.name, page.url))
+
 
     def pages_generator(self):
         for cs in self.sets:
@@ -66,7 +77,7 @@ class Command(FetchCardsCommand):
 def save_l10n(card_page):
     release = card_page.card_release
     for card_face in release.card.cardface_set.all():
-        card_details = card_page.details()
+        card_details = card_page.details(name=card_face.name)
         data = dict(
             card_face=card_face,
             card_release=release,
