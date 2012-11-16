@@ -26,7 +26,7 @@ class Command(BaseCommand):
             types = main_types[-1:]
             supertypes = main_types[:-1]
 
-            for exclude in ['Land', 'Artifact']:
+            for exclude in ['Land', 'Artifact', 'Enchantment']:
                 if exclude in supertypes:
                     types.append(exclude)
                     supertypes = filter(lambda t: t != exclude, supertypes)
