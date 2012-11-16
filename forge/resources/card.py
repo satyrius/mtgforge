@@ -81,16 +81,16 @@ class CardResource(ModelResource):
             filters['search_filter'] = 'AND i.fts @@ to_tsquery(%s)'
             args.append(search)
 
-        if request.GET.get('sets[]', []):
-            sets = [str(int(s)) for s in request.GET.getlist('sets[]')]
-            extra_url_args['sets[]'] = sets
+        sets = [str(int(s)) for s in request.GET.getlist('sets', [])]
+        if sets:
+            extra_url_args['sets'] = sets
             sets = '|'.join(sets)
             sets = "AND i.sets @@ '%s'::query_int" % sets
             filters['set_filter'] = sets
 
-        if request.GET.get('color[]', []):
-            colors = request.GET.getlist('color[]')
-            extra_url_args['color[]'] = colors
+        colors = request.GET.getlist('color', [])
+        if colors:
+            extra_url_args['color'] = colors
             if 'a' in colors:
                 colors.remove('a')
                 operator = ' & '
@@ -102,9 +102,9 @@ class CardResource(ModelResource):
             # identity_query = '1 | 12 | 56'
             filters['color_filter'] = 'AND color_identity_idx @@ %s' % identity_query
 
-        if request.GET.get('type[]', False):
-            type_query = request.GET.getlist('type[]')
-            extra_url_args['type[]'] = type_query
+        type_query = request.GET.getlist('type', [])
+        if type_query:
+            extra_url_args['type'] = type_query
             type_query = ['%s:B*' % q.strip(' \n\t') for q in type_query]
             type_query = ' | '.join(type_query)
             # type_query = 'red:B* & creature:B* with:B* flying:B*'
@@ -135,7 +135,7 @@ class CardResource(ModelResource):
             limit = limit,
             offset=offset
         )
-        
+
         # make an ordered and limited query
         query = query + """
             order by  ts_rank_cd(
@@ -168,16 +168,16 @@ def similarity_check(cursor, query):
     original = query
     query = re.split('[^\w]', query.lower(), flags=re.I)
     cursor.execute("""
-        SELECT DISTINCT ON (sim.keyword) src.kw, sim.keyword 
+        SELECT DISTINCT ON (sim.keyword) src.kw, sim.keyword
         FROM (
             SELECT UNNEST(ARRAY[%s]) kw
         ) src, forge_cardsimilarity sim
-        WHERE 
+        WHERE
             NOT EXISTS(
-                SELECT id 
-                FROM forge_cardsimilarity 
+                SELECT id
+                FROM forge_cardsimilarity
                 WHERE keyword = src.kw
-            ) 
+            )
             AND sim.keyword %% src.kw
         ORDER BY sim.keyword, similarity(sim.keyword, src.kw)
     """, [query])
