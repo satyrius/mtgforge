@@ -29,7 +29,6 @@ MEDIA_BUNDLES = (
     ( 'helpers.js',
     ),
     ( 'controllers.js',
-        'js/controllers/search.coffee',
         'js/controllers/cards.coffee',
         'js/controllers/index.coffee',
         'js/controllers/decks.coffee',

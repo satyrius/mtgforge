@@ -13,10 +13,11 @@
     {% include_media 'views.js' %}
 </head>
 <body id="app">
-    <div id="wrapper">
         <div id="app-main">
-            <div data-yield="main"></div>
-        </div>
+            <div id="sidebar">
+                <div id="app-search" data-partial="search/_search"></div>
+            </div>
+            <div id="main" data-yield="main"></div>
     </div>
 </body>
 </html>

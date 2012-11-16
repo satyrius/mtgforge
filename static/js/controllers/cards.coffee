@@ -1,15 +1,17 @@
 class Forge.CardsController extends Batman.Controller
     routingKey: 'cards'
-
     cards: new Batman.Set
     meta: null
     index: (params) ->
         Forge.Card.load (err) -> throw err if err
 
-
     search: (params) ->
         @setQuery params
-        Forge.Card.load {q: params.q, color: params.color, type: params.type}, (err, records, env) =>
+        loadParams =
+            q: params.q
+        loadParams.color = params.color if params.color
+        loadParams.type = params.type if params.type
+        Forge.Card.load loadParams, (err, records, env) =>
             @set "cards", records
             @set "meta", env.json.meta
 
@@ -26,16 +28,12 @@ class Forge.CardsController extends Batman.Controller
             @set "query.q", params.q
 
         if params.color && !@get("query.color").length
-            console.log("params color:", params.color, "get color:", @get "query.color") 
-            #color = @get("query.color")
-            #color.clear()
-            @set "query.color", params.color
+            @get("query.color").clear()
+            @get("query.color").add(params.color)
 
-        if params.type
-            #type = @get("query.type")
-            #type.clear()
-            #type.add(params.type)
-            @set "query.type", params.type
+        if params.type && !@get("query.type").length
+            @get("query.type").clear()
+            @get("query.type").add(params.type)
 
     advancedToggle: (element, event, context) =>
         if @get "advancedEnabled"
@@ -59,7 +57,6 @@ class Forge.CardsController extends Batman.Controller
     @accessor "serializedQuery",
         get: () ->
             query = @get("query").toJSON()
-            console.log(query, @get("query"))
             for key, param of query
                 if !param.length
                     delete query[key]
@@ -70,6 +67,7 @@ class Forge.CardsController extends Batman.Controller
         typeAndValue = $(event.target).closest("button").attr("id").split("-toggle-")
         type = typeAndValue[0]
         value = typeAndValue[1]
+        console.log @get("query")
         query = @get "query.#{type}"
         isEnabled = query.has(value)
 
