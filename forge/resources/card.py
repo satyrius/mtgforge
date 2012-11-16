@@ -50,7 +50,7 @@ class CardResource(ModelResource):
 
         # prepare base query
         query = """
-            select distinct on (r.card_id) l.* from forge_cardftsindex i
+            select distinct on ({rank}, r.card_id) l.* from forge_cardftsindex i
             join oracle_cardl10n l on (i.card_face_id = l.card_face_id and l.language='en')
             join oracle_cardrelease r on r.id = l.card_release_id
             join oracle_cardset cs on cs.id = r.card_set_id
@@ -60,17 +60,19 @@ class CardResource(ModelResource):
                 {set_filter}
                 {color_filter}
                 {type_filter}
-            order by r.card_id, cs.released_at desc
+            order by {rank}, r.card_id, cs.released_at desc
         """
         count_query = """select count(1) from ({query}) as t""".format(query=query)
 
         args = []
         filters = dict(
-            search_filter = '',
-            set_filter = '',
-            set_joins = '',
-            color_filter = '',
-            type_filter = ''
+            search_filter='',
+            set_filter='',
+            set_joins='',
+            color_filter='',
+            type_filter='',
+            order='',
+            rank='ts_rank_cd(array[1.0,0.9,0.8,0.7], i.fts, to_tsquery(%s))'
         )
 
         # custom filters
@@ -85,6 +87,7 @@ class CardResource(ModelResource):
             search = ["%s:*" % s for s in search]
             search = " & ".join(search)
             filters['search_filter'] = 'AND i.fts @@ to_tsquery(%s)'
+            args.append(search)
             args.append(search)
 
         sets = [str(int(s)) for s in request.GET.getlist('sets', [])]
@@ -120,6 +123,7 @@ class CardResource(ModelResource):
 
 
         # fetch total objects count and build metadata
+        args.append(search)
         cursor.execute(count_query.format(**filters), args)
         total_count = cursor.fetchone()[0]
         limit = int(request.GET.get('limit', 20))
@@ -134,7 +138,6 @@ class CardResource(ModelResource):
                 **extra_url_args
             ), doseq=True)
 
-
         meta.update(
             next = next_url,
             total_count = total_count,
@@ -143,15 +146,11 @@ class CardResource(ModelResource):
         )
 
         # make an ordered and limited query
-        query = query + """, ts_rank_cd(
-                ARRAY[1.0,0.9,0.8,0.7],
-                i.fts,
-                to_tsquery(%s)
-            )
+        query = query + """
             limit %s
             offset %s
         """
-        args += [search, limit, offset]
+        args += [limit, offset]
         query = query.format(**filters)
         query = CardL10n.objects.raw(query, args)
 
