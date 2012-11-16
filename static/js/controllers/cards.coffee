@@ -18,7 +18,12 @@ class Forge.CardsController extends Batman.Controller
     loadNext: () ->
         params = @params
         meta = @get "meta"
-        Forge.Card.load {q: params.q, color: params.color, type: params.type, limit: meta.limit, offset: meta.offset + meta.limit}, (err, records, env) => 
+        Forge.Card.load {
+            q: params.q
+            color: params.color
+            type: params.type
+            limit: meta.limit
+            offset: meta.offset + meta.limit}, (err, records, env) =>
             @set "cards", Forge.Card.get('loaded')
             @set "meta", env.json.meta
         false
@@ -64,7 +69,8 @@ class Forge.CardsController extends Batman.Controller
         cache: false
 
     toggle: (element, event, context) =>
-        typeAndValue = $(event.target).closest("button").attr("id").split("-toggle-")
+        typeAndValue = $(event.target).closest("button").attr("id").
+            split("-toggle-")
         type = typeAndValue[0]
         value = typeAndValue[1]
         console.log @get("query")
