@@ -51,7 +51,7 @@ class Command(FetchCardsCommand):
 
         if failed_pages:
             self.error('The following card pages parsing failed:')
-            for name, url in failed_pages:
+            for page in failed_pages:
                 self.error(u'{0} from {1}'.format(page.name, page.url))
 
 
