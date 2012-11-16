@@ -2,9 +2,11 @@ import re
 import urllib
 
 from django.db import connection
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import url
+from django.core.urlresolvers import NoReverseMatch
 from oracle.models import CardL10n, Color
 from . import ModelResource
+
 
 class CardResource(ModelResource):
     class Meta:
@@ -48,15 +50,19 @@ class CardResource(ModelResource):
 
         # prepare base query
         query = """
-            select {select_type} from forge_cardftsindex i
+            select distinct on (r.card_id) l.* from forge_cardftsindex i
             join oracle_cardl10n l on (i.card_face_id = l.card_face_id and l.language='en')
+            join oracle_cardrelease r on r.id = l.card_release_id
+            join oracle_cardset cs on cs.id = r.card_set_id
             where
                 True
                 {search_filter}
                 {set_filter}
                 {color_filter}
                 {type_filter}
+            order by r.card_id, cs.released_at desc
         """
+        count_query = """select count(1) from ({query}) as t""".format(query=query)
 
         args = []
         filters = dict(
@@ -114,7 +120,7 @@ class CardResource(ModelResource):
 
 
         # fetch total objects count and build metadata
-        cursor.execute(query.format(select_type="count(*)", **filters), args)
+        cursor.execute(count_query.format(**filters), args)
         total_count = cursor.fetchone()[0]
         limit = int(request.GET.get('limit', 20))
         offset = int(request.GET.get('offset', 0))
@@ -137,8 +143,7 @@ class CardResource(ModelResource):
         )
 
         # make an ordered and limited query
-        query = query + """
-            order by  ts_rank_cd(
+        query = query + """, ts_rank_cd(
                 ARRAY[1.0,0.9,0.8,0.7],
                 i.fts,
                 to_tsquery(%s)
@@ -147,7 +152,7 @@ class CardResource(ModelResource):
             offset %s
         """
         args += [search, limit, offset]
-        query = query.format(select_type = 'l.*', **filters)
+        query = query.format(**filters)
         query = CardL10n.objects.raw(query, args)
 
         # serialize objects for tastypy response
