@@ -18,7 +18,13 @@ class Command(BaseCommand):
                     face.place = CardFace.SPLIT
                     face.save()
                 continue
-            face = card.cardface_set.get(mana_cost=None)
+            try:
+                face = card.cardface_set.get(mana_cost=None)
+            except CardFace.DoesNotExist:
+                self.error(u'There is not face without mana cost for "{0}", '
+                           'cannot choose back/splited face'.format(card.name))
+                continue
+
             if cs in fliped:
                 self.writeln(u'"{0}" is treated as FLIPED face'.format(face.name))
                 face.place = CardFace.FLIP
