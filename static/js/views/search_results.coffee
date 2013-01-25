@@ -5,11 +5,13 @@ class Forge.SearchResultsView extends Backbone.View
     subscriptions:
         'cards:fetched': 'render'
 
+    events:
+        'click .card img' : 'showCard'
+
     render: (data) ->
         @$el.html(@template({cards: data}))
-        #@$el.find('.card').popover({
-            #title: 'lol'
-            #content:'lol'
-            #trigger: 'hover'
-            #placement: 'top'
-        #})
+
+    showCard: (event) ->
+        $(event.target).animate({
+            'padding-top': '200px'
+        }, 300)
