@@ -4,20 +4,31 @@
 <html>
 <head>
     <title>MTG Forge</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% include_media 'libs.css' %}
-    {% include_media 'libs.js' %}
     {% include_media 'common.css' %}
-    {% include_media 'common.js' %}
-    {% include_media 'models.js' %}
-    {% include_media 'controllers.js' %}
-    {% include_media 'views.js' %}
 </head>
 <body id="app">
-        <div id="app-main">
-            <div id="sidebar">
-                <div id="app-search" data-partial="search/_search"></div>
+    <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container-fluid" id="search">
             </div>
-            <div id="main" data-yield="main"></div>
+        </div>
+    </div>
+    <div class="container-fliud" id="app-main">
+        <div class="row-fluid">
+            <div id="sidebar" class="span2">
+            </div>
+            <div id="main" class="span10">
+            </div>
+        </div>
     </div>
 </body>
+{% include_media 'libs.js' %}
+{% include_media 'templates.js' %}
+{% include_media 'init.js' %}
+{% include_media 'router.js' %}
+{% include_media 'models.js' %}
+{% include_media 'collections.js' %}
+{% include_media 'views.js' %}
 </html>

@@ -5,7 +5,6 @@
             str = str.slice(1);
         }
 		var pairs = str.split('&');
-        console.log("sfasfasf", pairs);
         
 		var obj = {};
         for (var p in pairs) {

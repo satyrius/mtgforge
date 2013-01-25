@@ -1,9 +1,9 @@
 Backbone.Model.prototype.parse = function(resp, xhr) {
-	return (resp && 'objects' in resp) ? (resp['objects'][0] || {}) : resp;
+	return (resp && 'cards' in resp) ? (resp['cards'][0] || {}) : resp;
 };
 
 Backbone.Collection.prototype.parse = function(resp, xhr) {
-	return (resp && 'objects' in resp) ? resp['objects'] : resp;
+	return (resp && 'cards' in resp) ? resp['cards'] : resp;
 };
 
 Backbone.Model.prototype.fetch =  function(options) {
