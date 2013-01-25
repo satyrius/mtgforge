@@ -12,7 +12,7 @@ class Forge.SearchView extends Backbone.View
         @render()
 
     updateForm: (query) ->
-        q = $.unserialize(query).q
+        q = $.unserialize(query).q.replace('+', ' ')
         @$el.find('#q-input').val(q)
 
     render: () ->
