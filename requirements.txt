@@ -1,5 +1,6 @@
 -e git+ssh://git@git.ostrovok.ru/common@54212c1#egg=ostrovok_common
--e git+git://github.com/ostrovok-team/django-mediagenerator.git@d5f63f867619c9afcf6d1b09860fdcc89fd00a16#egg=mediagenerator
+-e git+git://github.com/ostrovok-team/js-beautify@ccd8f219a87aea16cebe5661008e9d93c9b62efb#egg=jsbeautifier
+-e git+git://github.com/ostrovok-team/django-mediagenerator.git@ddcbaf24bb1bb7cc83ad8fa4d9bd80a890d7d650#egg=mediagenerator
 -e git+git://github.com/ostrovok-team/xact.git@65e19094#egg=xact
 BeautifulSoup==3.2.0
 Django==1.4.1
