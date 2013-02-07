@@ -24,39 +24,45 @@ monkey.patch_all(thread=False, select=False)
 class Command(BaseCommand):
     args = '<card_set_1 card_set_2 ...>'
     help = ('Fetched pages from Gatherer and save then to the storage. This '
-            'data will bu used to fill cards database.self')
+            'data will be used to fill cards database.self')
 
     option_list = BaseCommand.option_list + (
-        make_option('-t', '--threads',
+        make_option(
+            '-t', '--threads',
             dest='threads',
             default=30,
             help='Number of threads will be spawn to download content'),
-        make_option('-c', '--clear-cache',
+        make_option(
+            '-c', '--clear-cache',
             dest='clear',
             action='store_true',
             default=False,
             help='Invalidate pages cache'),
-        make_option('--ignore-cache',
+        make_option(
+            '--ignore-cache',
             dest='ignore_cache',
             action='store_true',
             default=False,
             help='Ignore cached paged and download content again'),
-        make_option('--sim', '--simultaneously-parse',
+        make_option(
+            '--sim', '--simultaneously-parse',
             dest='simultaneously',
             action='store_true',
             default=False,
             help='Parse page right after it has been dowloaded'),
-        make_option('--no-update',
+        make_option(
+            '--no-update',
             action='store_true',
             dest='no_update',
             default=False,
             help='Do not update existing card faces'),
-        make_option('--skip-parsed',
+        make_option(
+            '--skip-parsed',
             action='store_true',
             dest='skip_parsed',
             default=False,
             help='Skip parsing pages already parsed'),
-        )
+    )
 
     def __init__(self):
         super(Command, self).__init__()
@@ -120,7 +126,8 @@ class Command(BaseCommand):
                         page.name, cards_counter + 1, total or '?', page.url))
                     if not self.skip_parsed or not page.is_parsed():
                         try:
-                            save_card_face(page, cs_page.card_set, self.no_update)
+                            save_card_face(
+                                page, cs_page.card_set, self.no_update)
                         except Exception, e:
                             self.error(e)
                             failed_pages.append((page.name, page.url))
@@ -144,8 +151,8 @@ class Command(BaseCommand):
                 else:
                     failed.append(page)
                     self.error(
-                        u'Cannot complete job for page {0}, try again later'.format(
-                            page.url))
+                        u'Cannot complete job for page {0}, '
+                        u'try again later'.format(page.url))
 
         # Try again for failed downloads
         if failed:
