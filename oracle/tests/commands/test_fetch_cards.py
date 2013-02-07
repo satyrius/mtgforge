@@ -25,6 +25,7 @@ class FetchCardsCommandTest(ProviderTest):
         self.assertEqual(card_face.name, u'Avacyn, Angel of Hope')
         card = card_face.card
         self.assertEqual(card_face.name, card.name)
+        self.assertEqual(card.faces_count, 1)
 
         # Release record was created too
         release = card.cardrelease_set.get(card_set=cs)
@@ -91,3 +92,4 @@ class FetchCardsCommandTest(ProviderTest):
         self.assertEqual(card_face.name, u'Fire')
         card = card_face.card
         self.assertEqual(card.name, 'Fire // Ice')
+        self.assertEqual(card.faces_count, 2)

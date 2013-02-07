@@ -3,7 +3,6 @@ from oracle import models
 from oracle.admin.card_face import CardFaceInline
 from django.contrib.admin import SimpleListFilter
 from django.utils.translation import ugettext_lazy as _
-from django.db.models import Count
 
 
 class CardReleaseInline(admin.TabularInline):
@@ -24,18 +23,17 @@ class PartsCountFilter(SimpleListFilter):
         )
 
     def queryset(self, request, queryset):
-        queryset = queryset.annotate(num_faces=Count('cardface')).order_by('cardrelease__mvid')
         if self.value() == 'multipart':
-            return queryset.filter(num_faces__gt=1)
+            return queryset.filter(faces_count__gt=1)
         if self.value() == 'normal':
-            return queryset.filter(num_faces=1)
+            return queryset.filter(faces_count__lte=1)
 
 
 class CardAdmin(admin.ModelAdmin):
     inlines = [CardReleaseInline, CardFaceInline]
     list_filter = (PartsCountFilter, 'cardrelease__card_set__name',)
     ordering = ('name',)
-    readonly_fields = ('name',)
+    readonly_fields = ('name', 'faces_count',)
     search_fields = ('name', 'cardface__cardl10n__name',)
 
 admin.site.register(models.Card, CardAdmin)

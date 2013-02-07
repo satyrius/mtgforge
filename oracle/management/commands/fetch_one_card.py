@@ -77,7 +77,8 @@ def save_card_face(page, card_set, no_update=False):
     except CardFace.DoesNotExist:
         pass
     finally:
-        if 'other_faces' in card_details:
+        multifaced = 'other_faces' in card_details
+        if multifaced:
             for f in CardFace.objects.filter(name__in=card_details['other_faces']):
                 if not card:
                     card = f.card
@@ -102,6 +103,9 @@ def save_card_face(page, card_set, no_update=False):
     if not form.is_valid():
         raise ValidationError(form.errors)
     face = form.save()
+    if multifaced:
+        card.faces_count = len(card_details['other_faces']) + 1
+        card.save()
 
     #
     # Card release notes
