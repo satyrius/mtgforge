@@ -40,10 +40,7 @@ class CompleteResource(Resource):
         args.append(meta.limit)
 
         cursor.execute(query.format(**filters), args)
-        objects = [dict(name=r[0]) for r in cursor.fetchall()]
+        objects = [r[0] for r in cursor.fetchall()]
 
-        to_be_serialized = dict(
-            objects=objects,
-            meta=dict(limit=meta.limit, offset=0),
-        )
+        to_be_serialized = objects
         return self.create_response(request, to_be_serialized)
