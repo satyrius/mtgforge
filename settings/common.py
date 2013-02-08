@@ -17,12 +17,12 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'mtgforge',                      # Or path to database file if using sqlite3.
-        'USER': 'postgres',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'mtgforge',
+        'USER': 'postgres',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
         'OPTIONS': {
             'autocommit': True,
         }
@@ -89,14 +89,14 @@ STATICFILES_DIRS = [
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    #'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # experiment with mediagenerator (alternative asset manager and compression tool)
 MEDIA_DEV_MODE = 'runserver' in sys.argv  # do not compress media under ./manage.py runserver
 PRODUCTION_MEDIA_URL = '/static/gm/'
 GENERATED_MEDIA_DIR = os.path.join(DIR_NAME, '_generated_media/gm')
-GLOBAL_MEDIA_DIRS = STATICFILES_DIRS[:] # force mediagenerator to do not walk over _generated_media dir
+GLOBAL_MEDIA_DIRS = STATICFILES_DIRS[:]  # force mediagenerator to do not walk over _generated_media dir
 DEV_MEDIA_URL = '/static-dev/'
 ROOT_MEDIA_FILTERS = {}
 MEDIA_BLOCKS = False
@@ -111,7 +111,6 @@ SECRET_KEY = '32fcsn31khb%-3m$iu1hs@i_l$)woq88m*_*$-k31z-9z3m!c^'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -154,7 +153,7 @@ INSTALLED_APPS = (
     'forge',
     'south',
 
-    'django_nose', # it should be after south (http://pypi.python.org/pypi/django-nose, Caveats)
+    'django_nose',  # it should be after south (http://pypi.python.org/pypi/django-nose, Caveats)
 )
 
 CACHES = {
@@ -195,8 +194,8 @@ MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
 MODELTRANSLATION_TRANSLATION_REGISTRY = 'translation'
 
 # Data provider settings
-DATA_PROVIDER_TIMEOUT = 10 # Ten seconds
-DATA_PROVIDER_CACHE_TIMEOUT = 60 * 60 * 2 # Two hours
+DATA_PROVIDER_TIMEOUT = 10  # Ten seconds
+DATA_PROVIDER_CACHE_TIMEOUT = 60 * 60 * 2  # Two hours
 
 DEBUG_TOOLBAR_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
