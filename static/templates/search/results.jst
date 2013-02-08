@@ -1,6 +1,7 @@
 <ul class="unstyled" id="search-results">
-    <% for (i in cards) { %>
-        <% var card = cards[i] %>
+    <% var cardsArray = cards.toJSON() %>
+    <% for (i in cardsArray) { %>
+        <% var card = cardsArray[i] %>
         <li class="card"><img src="<%= card.scan %>" /></li>
     <% } %>
 </ul>
