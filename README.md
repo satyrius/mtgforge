@@ -44,6 +44,9 @@ To fill cards database do the following:
     ./manage.py fetch_gatherer
     # Partial load. Get only particular set (e.g. Zendikar)
     ./manage.py fetch_gatherer zen
+    # Then run some postprocessing
+    ./manage.py parse_face_type
+    ./manage.py parse_card_type
 
 To build full text search engine do:
     ./manage.py build_fts_index
