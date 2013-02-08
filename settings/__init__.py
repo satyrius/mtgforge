@@ -8,4 +8,4 @@ try:
 except ImportError:
     pass
 
-LOGGING = get_logging_configuration(debug=DEBUG)
+LOGGING = get_logging_configuration(debug=DEBUG, debug_db=DEBUG_DB)

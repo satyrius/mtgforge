@@ -6,6 +6,7 @@ import sys
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
+DEBUG_DB = DEBUG
 
 DIR_NAME = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
