@@ -74,6 +74,7 @@ class CardResource(ModelResource):
                 {set_filter}
                 {color_filter}
                 {type_filter}
+                {cmc_filter}
             ORDER BY {rank} DESC, r.card_id, cs.released_at DESC
         """
         count_query = "SELECT COUNT(1) FROM ({query}) AS t".format(query=query)
@@ -82,11 +83,10 @@ class CardResource(ModelResource):
         filters = dict(
             search_filter='',
             set_filter='',
-            set_joins='',
             color_filter='',
             type_filter='',
-            order='',
-            rank='ts_rank_cd(array[0.1,0.7,0.8,0.9], i.fts, to_tsquery(%s), 4)'
+            cmc_filter='',
+            rank='1',
         )
 
         # custom filters
@@ -101,6 +101,7 @@ class CardResource(ModelResource):
             search = [u'%s:*' % s for s in search]
             search = u' & '.join(search)
             filters['search_filter'] = 'AND i.fts @@ to_tsquery(%s)'
+            filters['rank'] = 'ts_rank_cd(array[0.1,0.7,0.8,0.9], i.fts, to_tsquery(%s), 4)'
             args.append(search)
             args.append(search)
 
@@ -133,8 +134,19 @@ class CardResource(ModelResource):
             filters['type_filter'] = 'AND i.fts @@ to_tsquery(%s)'
             args.append(type_query)
 
+        if 'cmc' in request.GET:
+            try:
+                cmc = int(request.GET.get('cmc'))
+            except ValueError:
+                pass
+            else:
+                extra_url_args['cmc'] = str(cmc)
+                filters['cmc_filter'] = 'AND i.cmc = %s'
+                args.append(cmc)
+
         # fetch total objects count and build metadata
-        args.append(search)
+        if filters['search_filter']:
+            args.append(search)
         cursor.execute(count_query.format(**filters), args)
         total_count = cursor.fetchone()[0]
         limit = int(request.GET.get('limit', 20))
