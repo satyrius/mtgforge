@@ -74,7 +74,7 @@ class CardResource(ModelResource):
                 {set_filter}
                 {color_filter}
                 {type_filter}
-            ORDER BY {rank}, r.card_id, cs.released_at DESC
+            ORDER BY {rank} DESC, r.card_id, cs.released_at DESC
         """
         count_query = "SELECT COUNT(1) FROM ({query}) AS t".format(query=query)
 
@@ -86,7 +86,7 @@ class CardResource(ModelResource):
             color_filter='',
             type_filter='',
             order='',
-            rank='ts_rank_cd(array[1.0,0.9,0.8,0.7], i.fts, to_tsquery(%s))'
+            rank='ts_rank_cd(array[0.1,0.7,0.8,0.9], i.fts, to_tsquery(%s), 4)'
         )
 
         # custom filters
