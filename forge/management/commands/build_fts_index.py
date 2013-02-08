@@ -3,6 +3,7 @@ from django.db import connection, transaction
 
 from oracle.models import Color
 
+
 class Command(BaseCommand):
 
     @transaction.commit_on_success
@@ -14,8 +15,8 @@ class Command(BaseCommand):
             """,
 
             """--Populate fts with empty index
-            INSERT INTO forge_cardftsindex (card_id, fts, color_identity, color_identity_idx)
-            SELECT id, ''::tsvector, 0, ARRAY[]::int[] FROM oracle_card
+            INSERT INTO forge_cardftsindex (card_id, card_face_id, fts, color_identity, color_identity_idx)
+            SELECT card_id, id, ''::tsvector, 0, ARRAY[]::int[] FROM oracle_cardface
             """,
 
             """--Populate tsvector from names, type_lines and rules
@@ -24,22 +25,21 @@ class Command(BaseCommand):
                 || setweight(to_tsvector(n.types), 'B')
                 || setweight(to_tsvector(n.rules), 'C')
             FROM (
-                SELECT c.id as id,
-                    array_to_string(array_agg(COALESCE(t.name, f.name)), ' ') as names,
-                    array_to_string(array_agg(COALESCE(t.type_line, f.name)), ' ') as types,
-                    array_to_string(array_agg(COALESCE(t.rules, f.name)), ' ') as rules
-                FROM oracle_card c
-                JOIN oracle_cardface f ON (c.id = f.card_id)
-                LEFT JOIN oracle_cardl10n t on (t.card_face_id = f.id)
-                GROUP BY c.id
+                SELECT f.id,
+                    array_to_string(array_agg(COALESCE(l.name, f.name)), ' ') AS names,
+                    array_to_string(array_agg(COALESCE(l.type_line, f.name)), ' ') AS types,
+                    array_to_string(array_agg(COALESCE(l.rules, f.rules)), ' ') AS rules
+                FROM oracle_cardface AS f
+                LEFT JOIN oracle_cardl10n AS l ON (l.card_face_id = f.id)
+                GROUP BY f.id
             ) AS n
-            WHERE n.id = card_id
+            WHERE n.id = card_face_id
             """,
 
             """--Poulate table with colors
             UPDATE forge_cardftsindex set color_identity = f.color_identity
             FROM oracle_cardface f
-            WHERE forge_cardftsindex.card_id = f.card_id and place = 'front'
+            WHERE forge_cardftsindex.card_face_id = f.id
             """,
 
             """--Populate tsvector from colors
@@ -94,8 +94,8 @@ class Command(BaseCommand):
 
             """--Populate table with converted mana cost (cmc)
             UPDATE forge_cardftsindex SET cmc = f.cmc
-            FROM oracle_cardface f
-            WHERE forge_cardftsindex.card_id = f.card_id and place = 'front'
+            FROM oracle_cardface AS f
+            WHERE forge_cardftsindex.card_face_id = f.id
             """,
 
             """--Populate tsvector from converted mana cost
@@ -117,16 +117,6 @@ class Command(BaseCommand):
                 WHERE r.card_id = forge_cardftsindex.card_id
             )
             """,
-
-            """--Remember card_face_id
-            UPDATE forge_cardftsindex SET card_face_id = (
-                SELECT id from oracle_cardface f
-                WHERE f.card_id = forge_cardftsindex.card_id
-                AND f.place = 'front'
-                ORDER BY f.cmc LIMIT 1
-            )
-            """
-
         ]
 
         sql_no = 1
@@ -142,8 +132,3 @@ class Command(BaseCommand):
             if connection.connection.notices[notices:]:
                 print "".join(connection.connection.notices[notices:]).strip(" \n\t")
                 notices += len(connection.connection.notices[notices:])
-
-
-
-
-

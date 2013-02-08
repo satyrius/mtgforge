@@ -31,6 +31,8 @@ class FetchCardsCommandTest(ProviderTest):
         release = card.cardrelease_set.get(card_set=cs)
         self.assertEqual(release.rarity, CardRelease.MYTHIC)
         self.assertEqual(release.card_number, 6)
+        art = 'http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=239961&type=card'
+        self.assertEqual(release.scan, art)
 
         # Source for released card was saved
         provider = page.get_provider()

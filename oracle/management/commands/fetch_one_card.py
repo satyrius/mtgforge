@@ -15,26 +15,31 @@ class Command(BaseCommand):
     help = ('Fetched card page from Gatherer and save it to the storage.')
 
     option_list = BaseCommand.option_list + (
-        make_option('-s', '--card-set',
+        make_option(
+            '-s', '--card-set',
             dest='set',
             help='Card set acronym'),
-        make_option('-n', '--name',
+        make_option(
+            '-n', '--name',
             dest='name',
             help='Card name'),
-        make_option('-u', '--url',
+        make_option(
+            '-u', '--url',
             dest='url',
             help='Card page url'),
-        make_option('-c', '--clear-cache',
+        make_option(
+            '-c', '--clear-cache',
             dest='clear',
             action='store_true',
             default=False,
             help='Invalidate page cache'),
-        make_option('--no-update',
+        make_option(
+            '--no-update',
             action='store_true',
             dest='no_update',
             default=False,
             help='Do not update existing card faces'),
-        )
+    )
 
     def handle(self, *args, **options):
         card_set = CardSet.objects.get(acronym=options['set'].lower())
@@ -135,6 +140,9 @@ def save_card_face(page, card_set, no_update=False):
                 release = new_card_release()
         else:
             release = new_card_release()
+    finally:
+        if not release.scan:
+            release.scan = card_details['art']
     release.save()
 
     # Remember card release source
