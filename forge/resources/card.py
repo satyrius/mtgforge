@@ -111,9 +111,9 @@ class CardResource(ModelResource):
             sets = "AND i.sets @@ '%s'::query_int" % sets
             filters['set_filter'] = sets
 
-        colors = request.GET.getlist('color', [])
+        colors = request.GET.getlist('c', [])
         if colors:
-            extra_url_args['color'] = colors
+            extra_url_args['c'] = colors
             if 'a' in colors:
                 colors.remove('a')
                 operator = ' & '
