@@ -22,12 +22,7 @@ class Forge.SearchView extends Backbone.View
         @$el.html(@template())
         @$el.find('#q-input').typeahead({
             source: (query, callback) ->
-                $.get('/api/v1/complete', {q: query}, (data) ->
-                    arr = []
-                    for obj in data.objects
-                        arr.push(obj.name)
-                    callback(arr)
-                )
+                $.get('/api/v1/complete', {q: query}, callback)
         })
 
     handleSubmit: (event) ->
