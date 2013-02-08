@@ -98,8 +98,8 @@ class CardResource(ModelResource):
             meta['query'] = search
             meta['original_query'] = original
             search = search.split(' ')
-            search = ["%s:*" % s for s in search]
-            search = " & ".join(search)
+            search = [u'%s:*' % s for s in search]
+            search = u' & '.join(search)
             filters['search_filter'] = 'AND i.fts @@ to_tsquery(%s)'
             args.append(search)
             args.append(search)
@@ -116,24 +116,21 @@ class CardResource(ModelResource):
             extra_url_args['c'] = colors
             if 'a' in colors:
                 colors.remove('a')
-                operator = ' & '
+                operator = u' & '
             else:
-                operator = ' | '
+                operator = u' | '
 
             identity_query = [str(Color.MAP[c]) for c in colors]
-            identity_query = "'%s'::query_int" % operator.join(identity_query)
-            # identity_query = '1 | 12 | 56'
-            filters['color_filter'] = 'AND color_identity_idx @@ {0}'.format(
+            identity_query = u"'%s'::query_int" % operator.join(identity_query)
+            filters['color_filter'] = u'AND color_identity_idx @@ {0}'.format(
                 identity_query)
 
         type_query = request.GET.getlist('type', [])
         if type_query:
             extra_url_args['type'] = type_query
-            type_query = ['%s:B*' % q.strip(' \n\t') for q in type_query]
-            type_query = ' | '.join(type_query)
-            # type_query = 'red:B* & creature:B* with:B* flying:B*'
+            type_query = [u'%s:B*' % q.strip(' \n\t') for q in type_query]
+            type_query = u' | '.join(type_query)
             filters['type_filter'] = 'AND i.fts @@ to_tsquery(%s)'
-            print filters['type_filter'], type_query
             args.append(type_query)
 
         # fetch total objects count and build metadata

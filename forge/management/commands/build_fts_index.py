@@ -27,7 +27,7 @@ class Command(BaseCommand):
             FROM (
                 SELECT f.id,
                     array_to_string(array_agg(COALESCE(l.name, f.name)), ' ') AS names,
-                    array_to_string(array_agg(COALESCE(l.type_line, f.name)), ' ') AS types,
+                    array_to_string(array_agg(COALESCE(l.type_line, f.type_line)), ' ') AS types,
                     array_to_string(array_agg(COALESCE(l.rules, f.rules)), ' ') AS rules
                 FROM oracle_cardface AS f
                 LEFT JOIN oracle_cardl10n AS l ON (l.card_face_id = f.id)
