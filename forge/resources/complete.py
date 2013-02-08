@@ -28,8 +28,8 @@ class CompleteResource(Resource):
             search = request.GET.get('q', '')
             search, original = similarity_check(cursor, search)
             search = search.strip(' \n\t').split(' ')
-            search = ['{0}:*'.format(s) for s in search]
-            search = ' & '.join(search)
+            search = [u'{0}:*'.format(s) for s in search]
+            search = u' & '.join(search)
             filters['search_filter'] = 'AND i.fts @@ to_tsquery(%s)'
             args.append(search)
 
