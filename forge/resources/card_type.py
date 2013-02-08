@@ -1,4 +1,4 @@
-from . import ModelResource
+from forge.resources import ModelResource
 from oracle.models import CardType
 
 

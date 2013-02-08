@@ -8,11 +8,14 @@ class Forge.SearchView extends Backbone.View
     subscriptions:
         'search:confirm': 'updateForm'
 
+    q: ""
+
     initialize: () ->
         @render()
+        $('#q-input').focus()
 
     updateForm: (query) ->
-        q = $.unserialize(query).q.replace('+', ' ')
+        q = $.unserialize(query).q.replace(/\+/g, ' ')
         @$el.find('#q-input').val(q)
 
     render: () ->

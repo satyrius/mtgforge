@@ -139,7 +139,7 @@ class CardFace(models.Model):
     # Mana cost code and CMC (Converted Mana Cost)
     mana_cost = NullCharField(max_length=255, null=True)
     cmc = models.PositiveIntegerField(null=True)
-    color_identity = models.PositiveSmallIntegerField(default=0, blank=True) # DEPRICATED
+    color_identity = models.PositiveSmallIntegerField(default=0, blank=True)  # DEPRICATED
     colors = IntegerArrayField(default=[], blank=True)
 
     # Oracle's card name, type line, rules text and flavor. Always in English.
@@ -224,6 +224,9 @@ class CardRelease(models.Model):
     card_number = models.PositiveIntegerField(null=True, blank=True)
     mvid = models.PositiveIntegerField(
         help_text='Multiverse ID of english card oracle page', unique=True)
+
+    # Default card scan to use when no one card localization is fetched
+    scan = models.URLField(null=True, blank=True)
 
     sources = generic.GenericRelation(DataSource)
 

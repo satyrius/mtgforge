@@ -41,9 +41,12 @@ Then load fixtures and get card sets list from Gatherer:
 To fill cards database do the following:
 
     # To download all (not recommended)
-    ./manage.py fetch_cards
+    ./manage.py fetch_gatherer
     # Partial load. Get only particular set (e.g. Zendikar)
-    ./manage.py fetch_cards zen
+    ./manage.py fetch_gatherer zen
+    # Then run some postprocessing
+    ./manage.py parse_face_type
+    ./manage.py parse_card_type
 
 To build full text search engine do:
     ./manage.py build_fts_index
@@ -61,27 +64,27 @@ We use Wizards' official product page to get all valueable product releases (aka
 
 ### Cards
 
-Another major command `fetch_cards` loads cards details you want. It's output
+Another major command `fetch_gatherer` loads cards details you want. It's output
 depends on verbose mode `-v` (`--verbosity`): 1 is mimimal output, 2 shows
 card details, 3 show card details with oracle rulings. Without argumetds it
 fetches cards for all sets that database has. To limit grabber for particular
 sets `-s` (`--set`) option may be used or argument to filter multiple sets.
 
-    ./manage.py fetch_cards --set=isd
-    ./manage.py fetch_cards isd dka avr
+    ./manage.py fetch_gatherer --set=isd
+    ./manage.py fetch_gatherer isd dka avr
 
 It is possible to update single cards, not whole set. You have to specify
 card set filter in this case.
 
-    ./manage.py fetch_cards -s avr 'Avacyn, Angel of Hope' 'Sigarda, Host of Herons'
+    ./manage.py fetch_gatherer -s avr 'Avacyn, Angel of Hope' 'Sigarda, Host of Herons'
 
 The `--no-update` option skips updating card faces already saved
 
-    ./manage.py fetch_cards -s chk --no-update
+    ./manage.py fetch_gatherer -s chk --no-update
 
 To skip card faces that cannot be found (parsed from) on card page you can pass `--skip-not-found`. This will catch *CardNotFound* exception.
 
-    ./manage.py fetch_cards -s chk --skip-not-found
+    ./manage.py fetch_gatherer -s chk --skip-not-found
 
 ### Cards post processing
 

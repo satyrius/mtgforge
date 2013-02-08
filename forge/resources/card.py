@@ -1,19 +1,24 @@
 import re
 import urllib
 
-from django.db import connection
 from django.conf.urls.defaults import url
 from django.core.urlresolvers import NoReverseMatch
-from oracle.models import CardL10n, Color
-from . import ModelResource
+from django.db import connection
+
+from forge.resources import ModelResource
+from oracle.models import CardFace, Color
 
 
 class CardResource(ModelResource):
     class Meta:
         resource_name = 'cards'
-        queryset = CardL10n.objects.all()
+        queryset = CardFace.objects.all()
         list_allowed_methods = []
         details_allowed_methods = ['get']
+
+    def dehydrate(self, bundle):
+        bundle.data['scan'] = bundle.obj.scan
+        return bundle
 
     def override_urls(self):
         return [
@@ -46,23 +51,32 @@ class CardResource(ModelResource):
 
         cursor = connection.cursor()
         meta = {}
-        extra_url_args = {} # for building next and prev links
+        extra_url_args = {}  # for building next and prev links
 
         # prepare base query
         query = """
-            select distinct on ({rank}, r.card_id) l.* from forge_cardftsindex i
-            join oracle_cardl10n l on (i.card_face_id = l.card_face_id and l.language='en')
-            join oracle_cardrelease r on r.id = l.card_release_id
-            join oracle_cardset cs on cs.id = r.card_set_id
-            where
-                True
+            SELECT DISTINCT ON ({rank}, r.card_id) f.*,
+                COALESCE(l.name, f.name) AS name,
+                COALESCE(l.type_line, f.type_line) AS type_line,
+                COALESCE(l.rules, f.rules) AS rules,
+                COALESCE(l.flavor, f.flavor) AS flavor,
+                COALESCE(l.scan, r.scan) AS scan
+            FROM forge_cardftsindex AS i
+            JOIN oracle_cardface AS f ON f.id = i.card_face_id
+            JOIN oracle_cardrelease AS r ON r.card_id = f.card_id
+            JOIN oracle_cardset cs ON cs.id = r.card_set_id
+            LEFT JOIN oracle_cardl10n AS l
+                ON f.id = l.card_face_id
+                AND l.language = 'en'
+            WHERE
+                TRUE
                 {search_filter}
                 {set_filter}
                 {color_filter}
                 {type_filter}
-            order by {rank}, r.card_id, cs.released_at desc
+            ORDER BY {rank}, r.card_id, cs.released_at DESC
         """
-        count_query = """select count(1) from ({query}) as t""".format(query=query)
+        count_query = "SELECT COUNT(1) FROM ({query}) AS t".format(query=query)
 
         args = []
         filters = dict(
@@ -109,7 +123,8 @@ class CardResource(ModelResource):
             identity_query = [str(Color.MAP[c]) for c in colors]
             identity_query = "'%s'::query_int" % operator.join(identity_query)
             # identity_query = '1 | 12 | 56'
-            filters['color_filter'] = 'AND color_identity_idx @@ %s' % identity_query
+            filters['color_filter'] = 'AND color_identity_idx @@ {0}'.format(
+                identity_query)
 
         type_query = request.GET.getlist('type', [])
         if type_query:
@@ -121,7 +136,6 @@ class CardResource(ModelResource):
             print filters['type_filter'], type_query
             args.append(type_query)
 
-
         # fetch total objects count and build metadata
         args.append(search)
         cursor.execute(count_query.format(**filters), args)
@@ -131,17 +145,18 @@ class CardResource(ModelResource):
         if total_count < limit + offset:
             next_url = None
         else:
-            next_url = self.get_resource_search_uri() + '?' + urllib.urlencode(dict(
-                format='json',
-                limit = limit,
-                offset = limit + offset,
-                **extra_url_args
-            ), doseq=True)
+            next_url = self.get_resource_search_uri() + '?' + urllib.urlencode(
+                dict(
+                    format='json',
+                    limit=limit,
+                    offset=limit + offset,
+                    **extra_url_args
+                ), doseq=True)
 
         meta.update(
-            next = next_url,
-            total_count = total_count,
-            limit = limit,
+            next=next_url,
+            total_count=total_count,
+            limit=limit,
             offset=offset
         )
 
@@ -152,7 +167,7 @@ class CardResource(ModelResource):
         """
         args += [limit, offset]
         query = query.format(**filters)
-        query = CardL10n.objects.raw(query, args)
+        query = CardFace.objects.raw(query, args)
 
         # serialize objects for tastypy response
         objects = []
@@ -162,11 +177,13 @@ class CardResource(ModelResource):
             objects.append(bundle)
 
         to_be_serialized = dict(
-            objects = objects,
-            meta = meta
+            objects=objects,
+            meta=meta
         )
-        to_be_serialized = self.alter_list_data_to_serialize(request, to_be_serialized)
+        to_be_serialized = self.alter_list_data_to_serialize(
+            request, to_be_serialized)
         return self.create_response(request, to_be_serialized)
+
 
 def similarity_check(cursor, query):
     original = query
