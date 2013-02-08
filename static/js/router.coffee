@@ -26,6 +26,6 @@ class Forge.Router extends Backbone.Router
         @cardsCollection.fetch({
             data: query
         }).done(() =>
-            Backbone.Mediator.publish('cards:fetched', @cardsCollection.toJSON())
+            Backbone.Mediator.publish('cards:fetched', @cardsCollection)
         )
         Backbone.Mediator.publish('search:confirm', query) 
