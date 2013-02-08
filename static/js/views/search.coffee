@@ -21,7 +21,13 @@ class Forge.SearchView extends Backbone.View
     render: () ->
         @$el.html(@template())
         @$el.find('#q-input').typeahead({
-            source: ['Jace', 'Chandra', 'Red', 'Green', 'Blue', 'Black', 'White']
+            source: (query, callback) ->
+                $.get('/api/v1/complete', {q: query}, (data) ->
+                    arr = []
+                    for obj in data.objects
+                        arr.push(obj.name)
+                    callback(arr)
+                )
         })
 
     handleSubmit: (event) ->
