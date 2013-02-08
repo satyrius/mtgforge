@@ -104,9 +104,9 @@ class CardResource(ModelResource):
             args.append(search)
             args.append(search)
 
-        sets = [str(int(s)) for s in request.GET.getlist('sets', [])]
+        sets = [str(int(s)) for s in request.GET.getlist('set', [])]
         if sets:
-            extra_url_args['sets'] = sets
+            extra_url_args['set'] = sets
             sets = '|'.join(sets)
             sets = "AND i.sets @@ '%s'::query_int" % sets
             filters['set_filter'] = sets
