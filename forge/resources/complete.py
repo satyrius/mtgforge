@@ -19,9 +19,10 @@ class CompleteResource(Resource):
             WHERE TRUE
                 {search_filter}
             ORDER BY f.name
+            LIMIT %(limit)s
         """
         filters = dict(search_filter='')
-        args = []
+        params = dict(limit=meta.limit)
 
         cursor = connection.cursor()
         if request.GET.get('q', ''):
@@ -29,17 +30,10 @@ class CompleteResource(Resource):
             search, original = similarity_check(cursor, search)
             search = search.strip(' \n\t').split(' ')
             search = [u'{0}:A*'.format(s) for s in search]
-            search = u' & '.join(search)
-            filters['search_filter'] = 'AND i.fts @@ to_tsquery(%s)'
-            args.append(search)
+            params['term'] = u' & '.join(search)
+            filters['search_filter'] = 'AND i.fts @@ to_tsquery(%(term)s)'
 
-        # Set limits
-        query += """
-            LIMIT %s
-        """
-        args.append(meta.limit)
-
-        cursor.execute(query.format(**filters), args)
+        cursor.execute(query.format(**filters), params)
         objects = [r[0] for r in cursor.fetchall()]
 
         to_be_serialized = objects
