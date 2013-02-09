@@ -1,11 +1,6 @@
-from .media import MEDIA_BUNDLES
-from .cdn import *
-from .common import *
-from .logging import get_logging_configuration
+import sys
 
-try:
-    from .local import *
-except ImportError:
-    pass
-
-LOGGING = get_logging_configuration(debug=DEBUG, debug_db=DEBUG_DB)
+if 'test' in sys.argv:
+    from test import *
+else:
+    from dev import *

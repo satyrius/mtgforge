@@ -2,11 +2,13 @@
 import os
 import sys
 
+# Media bundles config for mediagenerator
+from media import MEDIA_BUNDLES
+
 # Django settings for mtgforge project.
 
 DEBUG = False
-TEMPLATE_DEBUG = DEBUG
-DEBUG_DB = DEBUG
+TEMPLATE_DEBUG = False
 
 DIR_NAME = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
@@ -16,19 +18,23 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'mtgforge',
-        'USER': 'postgres',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
-        'OPTIONS': {
-            'autocommit': True,
+# Try to find local databases settings
+try:
+    from local import DATABASES
+except ImportError:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'mtgforge',
+            'USER': 'postgres',
+            'PASSWORD': '',
+            'HOST': '',
+            'PORT': '',
+            'OPTIONS': {
+                'autocommit': True,
+            }
         }
     }
-}
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -92,6 +98,13 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     #'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
+
+# CDN and image storage settings
+CDN_URL_HTTP_ONLY = 'http://cdn.dev2.ostrovok.ru/'
+CDN_URL_SECURABLE = '//dev2.ostrovok.ru/cdn/'
+IMAGE_STORAGE_API_HOST = 'storage.dev2.ostrovok.ru'
+IMAGE_STORAGE_HOST = 'storage.dev2.ostrovok.ru'
+IMAGE_STORAGE_API_TIMEOUT = 1000
 
 # experiment with mediagenerator (alternative asset manager and compression tool)
 MEDIA_DEV_MODE = 'runserver' in sys.argv  # do not compress media under ./manage.py runserver
@@ -200,4 +213,40 @@ DATA_PROVIDER_CACHE_TIMEOUT = 60 * 60 * 2  # Two hours
 
 DEBUG_TOOLBAR_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler'
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        'oracle.management': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    }
 }

@@ -1,11 +1,10 @@
 MTG Forge is a Magic Card Database and trading platform. It has been started under Ostrovok Lab Day initiative.
 
-## Dev installation
+## Installation
 
-Clone git repository with project, and configure your own `settings/local.py`:
+Clone git repository with project:
 
     git clone git@github.com:ostrovok-team/mtgforge.git
-    vim settings/local.py
 
 You should intall some system requirements (Mac OS X dependent):
 
@@ -28,8 +27,29 @@ Next step is to install python packages:
 
     pip install -r requirements.txt
 
-Standard way to setup database:
+## Configure
 
+MTGForge project has several config modules for any purpose. `settings.dev` for developments, `settings.test` to run unit tests and `settings.prod` for production server. They all use default project settings from `settings.common`, but override some optins to bring something to the environment. You can pass the comfic explicitly using `DJANGO_SETTINGS_MODULE` environment variable. For example to run server with production config use following:
+
+	DJANGO_SETTINGS_MODULE=settings.prod ./manage.py runserver
+
+But there is easy way for developers, `settings` module has a liitle magic to choose which config to use. If it founds `test` in `sys.argv` it uses `settings.test` otherwise `settings.dev`. 
+
+Be careful on production server, pass `settings.prod` config explicitly to prevent running your app in dev mode for your real customers.
+
+There is separate comfig for *mediagenerator* bundles, it is `settings.media`. This setting has beed moved to separate module to make it easier for frontand devepers to modify it and do not care about damaging `settings.common` module.
+
+Both development and production environments usually has database settings that differs the one from `settings.common`.  There is `settings.local` module to deal with it. You can define `DATABASES` setting in this module and it will be imported to `settings.common`, otherwise default projects `DATABASES` settings will be used. Note that `settings/local.py` is ignored by git.
+
+## Data
+
+Configure your own `DATABASES` settings:
+
+	vim settings/local.py
+
+Create the database:
+
+	createdb mtgforge
     ./manage.py syncdb
     ./manage.py migrate
 
@@ -59,9 +79,9 @@ We use nose with django-nose 1.1 to run unit tests, so you can reuse DB to save 
 
     REUSE_DB=1 ./manage.py test
 
-The project provides custom settings for test environment. It is strictly adviced to use `settings.test` module for tests when you run and test on the same machine.
+The project provides custom settings for test environment. It is strictly adviced to use `settings.test` module for tests, this module is used by default when you run `test` command. But if you want to run tests with another settings you can do it explicitly, using `DJANGO_SETTINGS_MODULE` environment variable.
 
-    DJANGO_SETTINGS_MODULE=settings.test ./manage.py test
+    DJANGO_SETTINGS_MODULE=settings.foo ./manage.py test
 
 ## Tools
 
