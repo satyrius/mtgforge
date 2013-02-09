@@ -4,8 +4,7 @@ import urllib
 from django.conf.urls.defaults import url
 from django.core.urlresolvers import NoReverseMatch
 from django.db import connection
-
-from forge.resources import ModelResource
+from forge.resources.base import ModelResource
 from oracle.models import CardFace, Color
 
 

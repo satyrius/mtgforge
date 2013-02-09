@@ -1,5 +1,8 @@
-from tastypie.resources import Resource
 from django.db import connection
+from tastypie.cache import SimpleCache
+from tastypie.resources import Resource
+
+from forge.resources.base import cached_response
 from forge.resources.card import similarity_check
 
 
@@ -8,8 +11,10 @@ class CompleteResource(Resource):
         resource_name = 'complete'
         allowed_methods = ['get']
         detail_allowed_methods = []
+        cache = SimpleCache()
         limit = 10
 
+    @cached_response
     def get_list(self, request, **kwargs):
         meta = self._meta
         query = """

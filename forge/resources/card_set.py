@@ -1,4 +1,4 @@
-from forge.resources import ModelResource
+from forge.resources.base import ModelResource
 from oracle.models import CardSet
 
 
