@@ -41,6 +41,10 @@ There is separate comfig for *mediagenerator* bundles, it is `settings.media`. T
 
 Both development and production environments usually has database settings that differs the one from `settings.common`.  There is `settings.local` module to deal with it. You can define `DATABASES` setting in this module and it will be imported to `settings.common`, otherwise default projects `DATABASES` settings will be used. Note that `settings/local.py` is ignored by git.
 
+One more settings trick. You can set `DEBUG_DB` to true when `settings.dev` is used to start log database queries to the console output.
+
+	DEBUG_DB=1 ./manage.py runserver
+
 ## Data
 
 Configure your own `DATABASES` settings:
