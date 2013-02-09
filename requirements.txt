@@ -7,7 +7,7 @@ South==0.7.6
 django-arrayfields==0.1.0
 django-debug-toolbar==0.9.4
 django-extensions==0.8
-django-modeltranslation==0.3.3
+django-modeltranslation==0.4.1
 django-nose==1.1
 django-tastypie==0.9.11
 gevent==0.13.8

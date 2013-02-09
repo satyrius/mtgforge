@@ -3,6 +3,7 @@ from oracle.models import CardSet
 from django.db.models.signals import pre_save
 from modeltranslation.utils import get_language, build_localized_fieldname
 
+
 class CardSetTranslationOptions(TranslationOptions):
     fields = ('name',)
 

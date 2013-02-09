@@ -205,7 +205,9 @@ LANGUAGES = (
     ('es', gettext('Español')),
 )
 MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
-MODELTRANSLATION_TRANSLATION_REGISTRY = 'translation'
+MODELTRANSLATION_TRANSLATION_FILES = (
+    'oracle.translation',
+)
 
 # Data provider settings
 DATA_PROVIDER_TIMEOUT = 10  # Ten seconds
