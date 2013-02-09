@@ -2,7 +2,7 @@
 from mock import patch
 
 from oracle.management.commands import save_card_face
-from oracle.models import CardFace, CardRelease, CardSet
+from oracle.models import CardFace, CardRelease, CardSet, Color
 from oracle.providers.gatherer import GathererCard
 from oracle.tests.helpers import get_html_fixture
 from oracle.tests.providers.base import ProviderTest
@@ -26,6 +26,9 @@ class FetchCardsCommandTest(ProviderTest):
         card = card_face.card
         self.assertEqual(card_face.name, card.name)
         self.assertEqual(card.faces_count, 1)
+        expected_color = Color(card_face.mana_cost)
+        card_face.color_identity = expected_color.identity
+        card_face.colors = expected_color.colors
 
         # Release record was created too
         release = card.cardrelease_set.get(card_set=cs)
