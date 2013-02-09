@@ -7,13 +7,13 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Adding field 'Card.name'
-        db.add_column('oracle_card', 'name', self.gf('contrib.fields.NullCharField')(default='', max_length=255, blank=True), keep_default=False)
+        db.add_column('oracle_card', 'name', self.gf('contrib.fields.NullCharField')(default=None, max_length=255, blank=True), keep_default=False)
 
 
     def backwards(self, orm):
-        
+
         # Deleting field 'Card.name'
         db.delete_column('oracle_card', 'name')
 

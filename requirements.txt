@@ -3,7 +3,7 @@
 -e git+git://github.com/ostrovok-team/django-mediagenerator.git@ddcbaf24bb1bb7cc83ad8fa4d9bd80a890d7d650#egg=mediagenerator
 -e git+git://github.com/ostrovok-team/xact.git@65e19094#egg=xact
 Django==1.4.2
-South==0.7.3
+South==0.7.6
 django-arrayfields==0.1.0
 django-debug-toolbar==0.9.4
 django-extensions==0.7.1
