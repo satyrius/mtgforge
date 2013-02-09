@@ -1,4 +1,3 @@
-from django.core.cache import get_cache
 from django.http import HttpResponse
 from django.test import TestCase
 from mock import patch
@@ -7,7 +6,6 @@ from forge.resources.complete import CompleteResource
 from forge.tests.base import get_uri
 
 
-@patch('tastypie.cache.cache', get_cache('locmem://'))
 class CompleteTest(TestCase):
     @patch.object(CompleteResource, 'create_response')
     def test_cache(self, create_response):

@@ -49,8 +49,19 @@ To fill cards database do the following:
     ./manage.py parse_card_type
 
 To build full text search engine do:
+
     ./manage.py build_fts_index
     ./manage.py build_sim_index
+
+## Test
+
+We use nose with django-nose 1.1 to run unit tests, so you can reuse DB to save several seconds at the beginning and end of your test suite.
+
+    REUSE_DB=1 ./manage.py test
+
+The project provides custom settings for test environment. It is strictly adviced to use `settings.test` module for tests when you run and test on the same machine.
+
+    DJANGO_SETTINGS_MODULE=settings.test ./manage.py test
 
 ## Tools
 
