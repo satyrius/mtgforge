@@ -12,7 +12,6 @@ django-nose==1.1
 django-tastypie==0.9.11
 gevent==0.13.8
 ipdb==0.6.1
-ipdbplugin==1.2
 lxml==2.3.5
 mock==1.0.1
 psycopg2==2.4.1
