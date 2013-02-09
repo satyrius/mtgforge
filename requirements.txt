@@ -10,10 +10,10 @@ django-extensions==0.7.1
 django-modeltranslation==0.3.3
 django-nose==1.1
 django-tastypie==0.9.11
-gevent==0.13.7
+gevent==0.13.8
 ipdb==0.6.1
 ipdbplugin==1.2
-lxml==2.3.4
+lxml==2.3.5
 mock==1.0.1
 psycopg2==2.4.1
-requests==0.14.1
+requests==1.1.0
