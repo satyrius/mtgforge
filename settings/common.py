@@ -172,8 +172,11 @@ INSTALLED_APPS = (
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/tmp/django_cache',
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': 'localhost:11211',
+        'OPTIONS': {
+            'MAX_ENTRIES': 100000
+        }
     },
     'provider_page': {
         'BACKEND': 'oracle.providers.cache.PageCache',
