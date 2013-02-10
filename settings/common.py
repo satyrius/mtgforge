@@ -147,6 +147,7 @@ INSTALLED_APPS = (
 
     # Third-party apps
     'debug_toolbar',
+    'django_any',
     'django_extensions',
     'mediagenerator',
     'modeltranslation',

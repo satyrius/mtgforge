@@ -12,6 +12,7 @@ django-modeltranslation==0.4.1
 django-nose==1.1
 django-storages==1.1.6
 django-tastypie==0.9.11
+django-whatever==0.2.3
 gevent==0.13.8
 ipdb==0.7
 lxml==2.3.5

@@ -227,6 +227,8 @@ class CardRelease(models.Model):
 
     # Default card scan to use when no one card localization is fetched
     scan = models.URLField(null=True, blank=True)
+    default_art = models.ImageField(upload_to='art',
+                                    null=True, blank=True)
 
     sources = generic.GenericRelation(DataSource)
 

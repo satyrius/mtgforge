@@ -5,7 +5,7 @@ from django.conf.urls.defaults import url
 from django.core.urlresolvers import NoReverseMatch
 from django.db import connection
 from forge.resources.base import ModelResource
-from oracle.models import CardFace, Color
+from oracle.models import CardFace, Color, CardRelease
 
 
 class CardResource(ModelResource):
@@ -59,7 +59,8 @@ class CardResource(ModelResource):
                 COALESCE(l.type_line, f.type_line) AS type_line,
                 COALESCE(l.rules, f.rules) AS rules,
                 COALESCE(l.flavor, f.flavor) AS flavor,
-                COALESCE(l.scan, r.scan) AS scan
+                COALESCE(l.scan, r.scan) AS scan,
+                r.default_art, r.id AS cr_id
             FROM forge_cardftsindex AS i
             JOIN oracle_cardface AS f ON f.id = i.card_face_id
             JOIN oracle_cardrelease AS r ON r.card_id = f.card_id
@@ -177,9 +178,15 @@ class CardResource(ModelResource):
         query = query.format(**filters)
         query = CardFace.objects.raw(query, args)
 
+        cr_ids = [o.cr_id for o in query if o.default_art]
+        releases = CardRelease.objects.filter(pk__in=cr_ids)
+        art = {cr.id: cr.default_art for cr in releases}
+
         # serialize objects for tastypy response
         objects = []
         for result in query:
+            if result.cr_id in art:
+                result.scan = art[result.cr_id].url
             bundle = self.build_bundle(obj=result, request=request)
             bundle = self.full_dehydrate(bundle)
             objects.append(bundle)
