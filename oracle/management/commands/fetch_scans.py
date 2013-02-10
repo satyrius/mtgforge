@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         n = int(options['threads'])
-        cards = CardRelease.objects.filter(default_art=None)
+        cards = CardRelease.objects.filter(default_art='')
         self.download(cards, n)
 
     def download(self, cards, threads, tries=[]):
