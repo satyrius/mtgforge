@@ -1,11 +1,25 @@
 <ul class="nav nav-list">
     <li class="nav-header">Colors</li>
     <li>
-        <i class="icon-color-r"></i>
-        <i class="icon-color-g"></i>
-        <i class="icon-color-b"></i>
-        <i class="icon-color-w"></i>
-        <i class="icon-color-u"></i>
+        <div class="btn-toolbar">
+            <div class="btn-group" data-toggle="buttons-checkbox">
+                <button class="btn btn-mini filter-toggle colorr" data-forge-filter-toggle='{"color": "r"}'>
+                    <i class="icon-color-r color-toggle-icon"></i>
+                </button>
+                <button class="btn btn-mini filter-toggle colorg" data-forge-filter-toggle='{"color": "g"}'>
+                    <i class="icon-color-g color-toggle-icon"></i>
+                </button>
+                <button class="btn btn-mini filter-toggle colorb" data-forge-filter-toggle='{"color": "b"}'>
+                    <i class="icon-color-b color-toggle-icon"></i>
+                </button>
+                <button class="btn btn-mini filter-toggle colorw" data-forge-filter-toggle='{"color": "w"}'>
+                    <i class="icon-color-w color-toggle-icon"></i>
+                </button>
+                <button class="btn btn-mini filter-toggle coloru" data-forge-filter-toggle='{"color": "u"}'>
+                    <i class="icon-color-u color-toggle-icon"></i>
+                </button>
+            </div>
+        </div>
     </li>
     
     <li class="divider"></li>
@@ -13,13 +27,13 @@
     <li>
         <div class="btn-toolbar">
             <div class="btn-group" data-toggle="buttons-checkbox">
-                <button class="btn btn-mini">1</button>
-                <button class="btn btn-mini">2</button>
-                <button class="btn btn-mini">3</button>
-                <button class="btn btn-mini">4</button>
-                <button class="btn btn-mini">5</button>
-                <button class="btn btn-mini">6</button>
-                <button class="btn btn-mini">7+</button>
+                <button class="btn btn-mini filter-toggle cmc1" data-forge-filter-toggle='{"cmc": "1"}'>1</button>
+                <button class="btn btn-mini filter-toggle cmc2" data-forge-filter-toggle='{"cmc": "2"}'>2</button>
+                <button class="btn btn-mini filter-toggle cmc3" data-forge-filter-toggle='{"cmc": "3"}'>3</button>
+                <button class="btn btn-mini filter-toggle cmc4" data-forge-filter-toggle='{"cmc": "4"}'>4</button>
+                <button class="btn btn-mini filter-toggle cmc5" data-forge-filter-toggle='{"cmc": "5"}'>5</button>
+                <button class="btn btn-mini filter-toggle cmc6" data-forge-filter-toggle='{"cmc": "6"}'>6</button>
+                <button class="btn btn-mini filter-toggle cmc7" data-forge-filter-toggle='{"cmc": "7"}'>7+</button>
             </div>
         </div>
     </li>
@@ -29,10 +43,10 @@
     <li>
         <div class="btn-toolbar">
             <div class="btn-group" data-toggle="buttons-checkbox">
-                <button class="btn btn-mini">Common</button>
-                <button class="btn btn-mini">Uncommon</button>
-                <button class="btn btn-mini">Rare</button>
-                <button class="btn btn-mini">Mythic</button>
+                <button class="btn btn-mini filter-toggle raritycommon" data-forge-filter-toggle='{"rarity": "common"}'>Common</button>
+                <button class="btn btn-mini filter-toggle rarityuncommon" data-forge-filter-toggle='{"rarity": "uncommon"}'>Uncommon</button>
+                <button class="btn btn-mini filter-toggle rarityrare" data-forge-filter-toggle='{"rarity": "rare"}'>Rare</button>
+                <button class="btn btn-mini filter-toggle raritymythic" data-forge-filter-toggle='{"rarity": "mythic"}'>Mythic</button>
             </div>
         </div>
     </li>
@@ -42,17 +56,17 @@
     <li>
         <div class="btn-toolbar">
             <div class="btn-group" data-toggle="buttons-checkbox">
-                <button class="btn btn-mini">Land</button>
-                <button class="btn btn-mini">Creature</button>
-                <button class="btn btn-mini">Sorcery</button>
-                <button class="btn btn-mini">Instant</button>
+                <button class="btn btn-mini filter-toggle typeland" data-forge-filter-toggle='{"type": "land"}'>Land</button>
+                <button class="btn btn-mini filter-toggle typecreature" data-forge-filter-toggle='{"type": "creature"}'>Creature</button>
+                <button class="btn btn-mini filter-toggle typesorcery" data-forge-filter-toggle='{"type": "sorcery"}'>Sorcery</button>
+                <button class="btn btn-mini filter-toggle typeinstant" data-forge-filter-toggle='{"type": "instant"}'>Instant</button>
             </div>
         </div>
         <div class="btn-toolbar">
             <div class="btn-group" data-toggle="buttons-checkbox">
-                <button class="btn btn-mini">Planeswalker</button>
-                <button class="btn btn-mini">Enchant</button>
-                <button class="btn btn-mini">Artifact</button>
+                <button class="btn btn-mini filter-toggle typeplaneswalker" data-forge-filter-toggle='{"type": "planeswalker"}'>Planeswalker</button>
+                <button class="btn btn-mini filter-toggle typeenchant" data-forge-filter-toggle='{"type": "enchant"}'>Enchant</button>
+                <button class="btn btn-mini filter-toggle typeartifact" data-forge-filter-toggle='{"type": "artifact"}'>Artifact</button>
             </div>
         </div>
     </li>

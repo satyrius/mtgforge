@@ -4,8 +4,12 @@ class Forge.Router extends Backbone.Router
         @searchView = new Forge.SearchView()
         @sidebarView = new Forge.SidebarView()
         Backbone.Mediator.subscribe('search:q', (query) =>
-            @navigate("search?#{query}", {trigger: true})
+            query = $.unserialize(query) if typeof query == 'string'
+            _.extend(@query, query);
+            @navigate("search?#{$.serialize(@query, true)}", {trigger: true})
         )
+
+    query: {}
 
     routes:
         '': 'index'
@@ -28,4 +32,4 @@ class Forge.Router extends Backbone.Router
         }).done(() =>
             Backbone.Mediator.publish('cards:fetched', @cardsCollection)
         )
-        Backbone.Mediator.publish('search:confirm', query) 
+        Backbone.Mediator.publish('search:confirm', query)

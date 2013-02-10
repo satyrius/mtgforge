@@ -15,8 +15,10 @@ class Forge.SearchView extends Backbone.View
         $('#q-input').focus()
 
     updateForm: (query) ->
-        q = $.unserialize(query).q.replace(/\+/g, ' ')
-        @$el.find('#q-input').val(q)
+        q = $.unserialize(query).q
+        if q
+            q = q.replace(/\+/g, ' ')
+            @$el.find('#q-input').val(q)
 
     render: () ->
         @$el.html(@template())
