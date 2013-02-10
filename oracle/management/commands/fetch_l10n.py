@@ -28,6 +28,8 @@ class Command(FetchCardsCommand):
         self.english_only = False
 
     def handle(self, *args, **options):
+        raise NotImplemented()
+
         self.handle_args(*args, **options)
         self.english_only = options['english_only']
 
