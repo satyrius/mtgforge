@@ -18,6 +18,7 @@ class CardResource(ModelResource):
 
     def dehydrate(self, bundle):
         bundle.data['scan'] = bundle.obj.scan
+        bundle.data['rank'] = bundle.obj.rank
         return bundle
 
     def override_urls(self):
@@ -61,7 +62,9 @@ class CardResource(ModelResource):
                 COALESCE(l.rules, f.rules) AS rules,
                 COALESCE(l.flavor, f.flavor) AS flavor,
                 COALESCE(l.scan, r.scan) AS scan,
-                r.default_art, r.id AS cr_id
+                r.default_art,
+                r.id AS cr_id,
+                {rank} AS rank
             FROM forge_cardftsindex AS i
             JOIN oracle_cardface AS f ON f.id = i.card_face_id
             JOIN oracle_cardrelease AS r ON r.card_id = f.card_id
@@ -81,7 +84,7 @@ class CardResource(ModelResource):
         """
         count_query = "SELECT COUNT(1) FROM ({query}) AS t".format(query=query)
 
-        args = []
+        params = {}
         filters = dict(
             search_filter='',
             set_filter='',
@@ -103,10 +106,9 @@ class CardResource(ModelResource):
             search = search.split(' ')
             search = [u'%s:*' % s for s in search]
             search = u' & '.join(search)
-            filters['search_filter'] = 'AND i.fts @@ to_tsquery(%s)'
-            filters['rank'] = 'ts_rank_cd(array[0.1,0.7,0.8,0.9], i.fts, to_tsquery(%s), 4)'
-            args.append(search)
-            args.append(search)
+            filters['search_filter'] = 'AND i.fts @@ to_tsquery(%(q)s)'
+            filters['rank'] = 'ts_rank_cd(array[0.1,0.5,1,0.8], i.fts, to_tsquery(%(q)s), 4)'
+            params['q'] = search
 
         # SET filter
         acronyms = get_commaseparated_param(request, 'set')
@@ -123,10 +125,9 @@ class CardResource(ModelResource):
         rarity = get_commaseparated_param(request, 'rarity')
         if rarity:
             extra_url_args['rarity'] = rarity
-            rarity_query = u' | '.join(
+            filters['rarity_filter'] = 'AND i.fts @@ to_tsquery(%(rarity)s)'
+            params['rarity'] = u' | '.join(
                 [u'%s:B*' % q.strip(' \n\t') for q in rarity])
-            filters['rarity_filter'] = 'AND i.fts @@ to_tsquery(%s)'
-            args.append(rarity_query)
 
         # COLOR filter
         color = get_commaseparated_param(request, 'color')
@@ -148,24 +149,21 @@ class CardResource(ModelResource):
         if type_query:
             extra_url_args['type'] = type_query
             type_query = [u'%s:B*' % q.strip(' \n\t') for q in type_query]
-            type_query = u' | '.join(type_query)
-            filters['type_filter'] = 'AND i.fts @@ to_tsquery(%s)'
-            args.append(type_query)
+            filters['type_filter'] = 'AND i.fts @@ to_tsquery(%(type)s)'
+            params['type'] = u' | '.join(type_query)
 
         # CMC filter
         cmc = get_commaseparated_param(request, 'cmc')
         if cmc:
             extra_url_args['cmc'] = cmc
             cmc = map(int, cmc)
-            cmc_filter = 'AND (i.cmc = ANY(%s){higher_cost})'
+            cmc_filter = 'AND (i.cmc = ANY(%(cmc)s){higher_cost})'
             higher_cost = 7 in cmc and ' OR i.cmc > 7' or ''
             filters['cmc_filter'] = cmc_filter.format(higher_cost=higher_cost)
-            args.append(cmc)
+            params['cmc'] = cmc
 
         # fetch total objects count and build metadata
-        if filters['search_filter']:
-            args.append(search)
-        cursor.execute(count_query.format(**filters), args)
+        cursor.execute(count_query.format(**filters), params)
         total_count = cursor.fetchone()[0]
         limit = int(request.GET.get('limit', 20))
         offset = int(request.GET.get('offset', 0))
@@ -189,12 +187,12 @@ class CardResource(ModelResource):
 
         # make an ordered and limited query
         query = query + """
-            limit %s
-            offset %s
+            limit %(limit)s
+            offset %(offset)s
         """
-        args += [limit, offset]
+        params.update(dict(limit=limit, offset=offset))
         query = query.format(**filters)
-        query = CardFace.objects.raw(query, args)
+        query = CardFace.objects.raw(query, params)
 
         cr_ids = [o.cr_id for o in query if o.default_art]
         releases = CardRelease.objects.filter(pk__in=cr_ids)
