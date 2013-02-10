@@ -8,7 +8,6 @@ from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
-from contrib.cdn import CDNFileField
 from contrib.fields import NullCharField, NullTextField
 
 
@@ -254,7 +253,7 @@ class CardL10n(models.Model):
 
     artist = models.ForeignKey(Artist)
     scan = models.URLField()
-    file = CDNFileField(storage_path=STORAGE_PATH, null=True, blank=True)
+    file = models.ImageField(upload_to='art', null=True, blank=True)
 
     class Meta:
         unique_together = (('card_face', 'card_release', 'language'),)

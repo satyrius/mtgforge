@@ -89,13 +89,6 @@ STATICFILES_FINDERS = (
 
 DEFAULT_FILE_STORAGE = 'storages.backends.hashpath.HashPathStorage'
 
-# CDN and image storage settings
-CDN_URL_HTTP_ONLY = 'http://cdn.dev2.ostrovok.ru/'
-CDN_URL_SECURABLE = '//dev2.ostrovok.ru/cdn/'
-IMAGE_STORAGE_API_HOST = 'storage.dev2.ostrovok.ru'
-IMAGE_STORAGE_HOST = 'storage.dev2.ostrovok.ru'
-IMAGE_STORAGE_API_TIMEOUT = 1000
-
 # experiment with mediagenerator (alternative asset manager and compression tool)
 MEDIA_DEV_MODE = 'runserver' in sys.argv  # do not compress media under ./manage.py runserver
 PRODUCTION_MEDIA_URL = '/static/gm/'
