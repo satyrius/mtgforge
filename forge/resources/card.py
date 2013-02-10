@@ -5,8 +5,12 @@ from django.conf.urls.defaults import url
 from django.core.urlresolvers import NoReverseMatch
 from django.db import connection
 from forge.resources.base import ModelResource
-from oracle.models import CardFace, Color, CardRelease, CardSet
+from oracle.models import CardFace, Color, CardSet, CardImage
 from tastypie.exceptions import BadRequest
+
+
+def get_art_url(name):
+    return CardImage().file.storage.url(name)
 
 
 class CardResource(ModelResource):
@@ -18,6 +22,8 @@ class CardResource(ModelResource):
 
     def dehydrate(self, bundle):
         bundle.data['scan'] = bundle.obj.scan
+        if bundle.obj.file:
+            bundle.data['scan'] = get_art_url(bundle.obj.file)
         bundle.data['rank'] = bundle.obj.rank
         return bundle
 
@@ -56,22 +62,15 @@ class CardResource(ModelResource):
 
         # prepare base query
         query = """
-            SELECT DISTINCT ON ({rank}, r.card_id) f.*,
-                COALESCE(l.name, f.name) AS name,
-                COALESCE(l.type_line, f.type_line) AS type_line,
-                COALESCE(l.rules, f.rules) AS rules,
-                COALESCE(l.flavor, f.flavor) AS flavor,
-                COALESCE(l.scan, r.scan) AS scan,
-                r.default_art,
-                r.id AS cr_id,
+            SELECT DISTINCT ON ({rank}, r.card_id)
+                f.*,
+                img.*,
                 {rank} AS rank
             FROM forge_cardftsindex AS i
             JOIN oracle_cardface AS f ON f.id = i.card_face_id
             JOIN oracle_cardrelease AS r ON r.card_id = f.card_id
-            JOIN oracle_cardset cs ON cs.id = r.card_set_id
-            LEFT JOIN oracle_cardl10n AS l
-                ON f.id = l.card_face_id
-                AND l.language = 'en'
+            JOIN oracle_cardset AS cs ON cs.id = r.card_set_id
+            JOIN oracle_cardimage AS img ON img.mvid = r.mvid
             WHERE
                 TRUE
                 {search_filter}
@@ -141,7 +140,7 @@ class CardResource(ModelResource):
 
             identity_query = [str(Color.MAP[c]) for c in color]
             identity_query = u"'%s'::query_int" % operator.join(identity_query)
-            filters['color_filter'] = u'AND color_identity_idx @@ {0}'.format(
+            filters['color_filter'] = u'AND i.color_identity_idx @@ {0}'.format(
                 identity_query)
 
         # TYPE filter
@@ -194,15 +193,9 @@ class CardResource(ModelResource):
         query = query.format(**filters)
         query = CardFace.objects.raw(query, params)
 
-        cr_ids = [o.cr_id for o in query if o.default_art]
-        releases = CardRelease.objects.filter(pk__in=cr_ids)
-        art = {cr.id: cr.default_art for cr in releases}
-
         # serialize objects for tastypy response
         objects = []
         for result in query:
-            if result.cr_id in art:
-                result.scan = art[result.cr_id].url
             bundle = self.build_bundle(obj=result, request=request)
             bundle = self.full_dehydrate(bundle)
             objects.append(bundle)

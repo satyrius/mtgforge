@@ -7,7 +7,8 @@ from django.core.exceptions import ValidationError
 
 from oracle.forms import CardFaceForm
 from oracle.management.base import BaseCommand
-from oracle.models import CardFace, Card, CardRelease, CardSet, DataSource
+from oracle.models import CardFace, Card, CardRelease, CardSet, DataSource, \
+    CardImage
 from oracle.providers.gatherer import GathererCard
 
 
@@ -140,9 +141,6 @@ def save_card_face(page, card_set, no_update=False):
                 release = new_card_release()
         else:
             release = new_card_release()
-    finally:
-        if not release.scan:
-            release.scan = card_details['art']
     release.save()
 
     # Remember card release source
@@ -158,6 +156,10 @@ def save_card_face(page, card_set, no_update=False):
         if not source.url or sub_number == 'a':
             source.url = card_details['url']
         source.save()
+
+    # Save card face scan
+    img, created = CardImage.objects.get_or_create(
+        mvid=mvid, defaults=dict(scan=card_details['art']))
 
     page.set_parsed()
     return face

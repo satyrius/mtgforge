@@ -9,7 +9,7 @@ from django.core.files.base import ContentFile
 from gevent import monkey
 
 from oracle.management.base import BaseCommand
-from oracle.models import CardRelease
+from oracle.models import CardImage
 
 
 monkey.patch_all(thread=False, select=False)
@@ -26,37 +26,35 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         n = int(options['threads'])
-        cards = CardRelease.objects.filter(default_art='')
-        self.download(cards, n)
+        card_images = CardImage.objects.filter(file='')
+        self.download(card_images, n)
 
-    def download(self, cards, threads, tries=[]):
+    def download(self, card_images, threads, tries=[]):
         tries.append(len(tries) + 1)
         if len(tries) > threads:
             self.error(u'This is a {0} try and there is {1} failed pages. '
-                       u'Give up!'.format(len(tries), len(cards)))
+                       u'Give up!'.format(len(tries), len(card_images)))
             sys.exit(1)
         failed = []
-        for chunk in itertools.izip_longest(*([iter(cards)] * threads)):
+        for chunk in itertools.izip_longest(*([iter(card_images)] * threads)):
             chunk = filter(None, chunk)
-            jobs = [gevent.spawn(fetch_art, cr, 'scan', 'default_art') for cr in chunk]
+            jobs = [gevent.spawn(fetch_art, img) for img in chunk]
             gevent.joinall(jobs, timeout=settings.DATA_PROVIDER_TIMEOUT)
-            for job, cr in zip(jobs, chunk):
+            for job, img in zip(jobs, chunk):
                 if job.successful():
-                    self.writeln(u'{0:30} {1}'.format(
-                        unicode(cr.card.name), cr.scan))
+                    self.writeln(u'{0:15} {1}'.format(
+                        img.mvid, img.scan))
                 else:
-                    failed.append(cr)
+                    failed.append(img)
                     self.error(
                         u'Cannot complete job for page {0}, '
-                        u'try again later'.format(cr.scan))
+                        u'try again later'.format(img.scan))
         if failed:
             self.download(failed, threads)
 
 
-def fetch_art(card, orig_url_attr='scan', image_attr='art'):
-    r = requests.get(getattr(card, orig_url_attr))
-    name = '{0}.image'.format(card.mvid)
-    content = ContentFile(r.content)
-    image_field = getattr(card, image_attr)
-    image_field.save(name, content)
-    return card
+def fetch_art(img):
+    r = requests.get(img.scan)
+    name = '{0}.image'.format(img.mvid)
+    img.file.save(name, ContentFile(r.content))
+    return img

@@ -2,7 +2,7 @@
 from mock import patch
 
 from oracle.management.commands import save_card_face
-from oracle.models import CardFace, CardRelease, CardSet, Color
+from oracle.models import CardFace, CardRelease, CardSet, Color, CardImage
 from oracle.providers.gatherer import GathererCard
 from oracle.tests.helpers import get_html_fixture
 from oracle.tests.providers.base import ProviderTest
@@ -16,8 +16,13 @@ class FetchCardsCommandTest(ProviderTest):
     def test_save_card_oracle_details(self, _dowload_content):
         cs = CardSet.objects.create(name='Avacyn Restored')
         _dowload_content.return_value = get_html_fixture('gatherer_angel_oracle')
+        mvid = 239961
         url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=239961'
         page = GathererCard(url)
+
+        # No image yet
+        with self.assertRaises(CardImage.DoesNotExist):
+            CardImage.objects.get(mvid=mvid)
 
         # Save card face and assert saved data
         card_face = save_card_face(page, cs)
@@ -34,8 +39,13 @@ class FetchCardsCommandTest(ProviderTest):
         release = card.cardrelease_set.get(card_set=cs)
         self.assertEqual(release.rarity, CardRelease.MYTHIC)
         self.assertEqual(release.card_number, 6)
+        self.assertEqual(release.mvid, mvid)
+
+        # And default card image was created for this release
         art = 'http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=239961&type=card'
-        self.assertEqual(release.scan, art)
+        img = CardImage.objects.get(mvid=mvid)
+        self.assertEqual(img.scan, art)
+        self.assertEqual(img.file.name, '')
 
         # Source for released card was saved
         provider = page.get_provider()

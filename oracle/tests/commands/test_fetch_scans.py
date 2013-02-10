@@ -4,7 +4,7 @@ from django_any import any_model
 from mock import patch, Mock
 
 from oracle.management.commands.fetch_scans import fetch_art
-from oracle.models import CardRelease
+from oracle.models import CardImage
 from oracle.tests.helpers import get_jpeg_scan_fixture
 
 
@@ -19,11 +19,11 @@ class FetchScansCommandTest(TestCase):
         # Prepare CardRelease fixture
         scan_url = 'http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=366469&type=card'
         mvid = 366469
-        cr = any_model(CardRelease, scan=scan_url, mvid=mvid)
+        img = any_model(CardImage, scan=scan_url, mvid=mvid)
 
-        cr = fetch_art(cr, 'scan', 'default_art')
-        name = cr.default_art.name
+        img = fetch_art(img)
+        name = img.file.name
 
         # Try to save the same content again
-        cr = fetch_art(cr, 'scan', 'default_art')
-        self.assertEqual(cr.default_art.name, name)
+        img = fetch_art(img)
+        self.assertEqual(img.file.name, name)

@@ -224,19 +224,10 @@ class CardRelease(models.Model):
     mvid = models.PositiveIntegerField(
         help_text='Multiverse ID of english card oracle page', unique=True)
 
-    # Default card scan to use when no one card localization is fetched
-    scan = models.URLField(null=True, blank=True)
-    default_art = models.ImageField(upload_to='art',
-                                    null=True, blank=True)
-
     sources = generic.GenericRelation(DataSource)
 
     def __unicode__(self):
         return u'{0} ({1})'.format(self.card.name, self.card_set.name)
-
-
-STORAGE_PATH = '/mtgforge/media/'
-IMAGE_FORMATS = ['orig', 'x220']
 
 
 class CardL10n(models.Model):
@@ -259,5 +250,11 @@ class CardL10n(models.Model):
         unique_together = (('card_face', 'card_release', 'language'),)
 
     sources = generic.GenericRelation(DataSource)
+
+
+class CardImage(models.Model):
+    mvid = models.PositiveIntegerField(primary_key=True)
+    scan = models.URLField(help_text='Url of the original art on the Gatherer')
+    file = models.ImageField(upload_to='art', null=True, blank=True)
 
 # }}}
