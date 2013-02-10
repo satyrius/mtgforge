@@ -5,7 +5,8 @@ from django.conf.urls.defaults import url
 from django.core.urlresolvers import NoReverseMatch
 from django.db import connection
 from forge.resources.base import ModelResource
-from oracle.models import CardFace, Color, CardRelease
+from oracle.models import CardFace, Color, CardRelease, CardSet
+from tastypie.exceptions import BadRequest
 
 
 class CardResource(ModelResource):
@@ -89,7 +90,7 @@ class CardResource(ModelResource):
             rank='1',
         )
 
-        # custom filters
+        # FULL TEXT SEARCH filter
         if request.GET.get('q', ''):
             search = request.GET.get('q', '')
             search, original = similarity_check(cursor, search)
@@ -105,28 +106,34 @@ class CardResource(ModelResource):
             args.append(search)
             args.append(search)
 
-        sets = [str(int(s)) for s in request.GET.getlist('set', [])]
-        if sets:
-            extra_url_args['set'] = sets
-            sets = '|'.join(sets)
-            sets = "AND i.sets @@ '%s'::query_int" % sets
-            filters['set_filter'] = sets
+        # SET filter
+        acronyms = get_commaseparated_param(request, 'set')
+        if acronyms:
+            extra_url_args['set'] = acronyms
+            set_ids = CardSet.objects.filter(
+                acronym__in=acronyms).values_list('id', flat=True)
+            if len(set_ids) != len(acronyms):
+                raise BadRequest('Make shure all set acronyms exist')
+            filters['set_filter'] = "AND i.sets @@ '{0}'::query_int".format(
+                '|'.join(map(str, set_ids)))
 
-        colors = request.GET.getlist('c', [])
-        if colors:
-            extra_url_args['c'] = colors
-            if 'a' in colors:
-                colors.remove('a')
+        # COLOR filter
+        color = get_commaseparated_param(request, 'color')
+        if color:
+            extra_url_args['color'] = color
+            if 'a' in color:
+                color.remove('a')
                 operator = u' & '
             else:
                 operator = u' | '
 
-            identity_query = [str(Color.MAP[c]) for c in colors]
+            identity_query = [str(Color.MAP[c]) for c in color]
             identity_query = u"'%s'::query_int" % operator.join(identity_query)
             filters['color_filter'] = u'AND color_identity_idx @@ {0}'.format(
                 identity_query)
 
-        type_query = request.GET.getlist('type', [])
+        # TYPE filter
+        type_query = get_commaseparated_param(request, 'type')
         if type_query:
             extra_url_args['type'] = type_query
             type_query = [u'%s:B*' % q.strip(' \n\t') for q in type_query]
@@ -134,15 +141,15 @@ class CardResource(ModelResource):
             filters['type_filter'] = 'AND i.fts @@ to_tsquery(%s)'
             args.append(type_query)
 
-        if 'cmc' in request.GET:
-            try:
-                cmc = int(request.GET.get('cmc'))
-            except ValueError:
-                pass
-            else:
-                extra_url_args['cmc'] = str(cmc)
-                filters['cmc_filter'] = 'AND i.cmc = %s'
-                args.append(cmc)
+        # CMC filter
+        cmc = get_commaseparated_param(request, 'cmc')
+        if cmc:
+            extra_url_args['cmc'] = cmc
+            cmc = map(int, cmc)
+            cmc_filter = 'AND (i.cmc = ANY(%s){higher_cost})'
+            higher_cost = 7 in cmc and ' OR i.cmc > 7' or ''
+            filters['cmc_filter'] = cmc_filter.format(higher_cost=higher_cost)
+            args.append(cmc)
 
         # fetch total objects count and build metadata
         if filters['search_filter']:
@@ -223,3 +230,11 @@ def similarity_check(cursor, query):
         modified = modified.replace(source, changed)
 
     return modified, original
+
+
+def get_commaseparated_param(request, name):
+    # Parameter may be passed as '&type=creature&type=artifact'
+    params_list = request.GET.getlist(name, [])
+    # Join list with comma for compatibility with commaseparates values
+    values = ','.join(params_list).split(',')
+    return filter(lambda v: v is not None and v != '', values)
