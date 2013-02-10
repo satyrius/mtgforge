@@ -54,7 +54,7 @@ class Command(BaseCommand):
                         (ARRAY[{colors}])[1 + ((color_identity & {Color.COLORLESS} ) >> 5)*6]
                     ], ' '
                 )), 'B')
-            """.format(colors="'', 'white', 'blue', 'black', 'red', 'green', 'colorness'", Color=Color),
+            """.format(colors="'', 'white', 'blue', 'black', 'red', 'green', 'colorless'", Color=Color),
 
             """--Create color index for white
             UPDATE forge_cardftsindex
