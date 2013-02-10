@@ -19,6 +19,8 @@ class Command(BaseCommand):
             SELECT card_id, id, ''::tsvector, 0, ARRAY[]::int[] FROM oracle_cardface
             """,
 
+            # {{{ NAME AND RULES
+
             """--Populate tsvector from names, type_lines and rules
             UPDATE forge_cardftsindex SET fts = fts
                 || setweight(to_tsvector(n.names), 'A')
@@ -35,6 +37,10 @@ class Command(BaseCommand):
             ) AS n
             WHERE n.id = card_face_id
             """,
+
+            # }}}
+
+            # {{{ COLOR
 
             """--Poulate table with colors
             UPDATE forge_cardftsindex set color_identity = f.color_identity
@@ -92,6 +98,10 @@ class Command(BaseCommand):
             WHERE color_identity & 32 > 0
             """,
 
+            # }}}
+
+            # {{{ MANA COST
+
             """--Populate table with converted mana cost (cmc)
             UPDATE forge_cardftsindex SET cmc = f.cmc
             FROM oracle_cardface AS f
@@ -110,6 +120,10 @@ class Command(BaseCommand):
             WHERE cmc IS NOT NULL
             """,
 
+            # }}}
+
+            # {{{ RELEASE AT CARD SET AND RARITY
+
             """--Populate table with releases
             UPDATE forge_cardftsindex set sets = (
                 SELECT array_agg(r.card_set_id)
@@ -117,6 +131,25 @@ class Command(BaseCommand):
                 WHERE r.card_id = forge_cardftsindex.card_id
             )
             """,
+
+            """--Create rarity index
+            UPDATE forge_cardftsindex SET fts = fts
+                || setweight(to_tsvector(array_to_string(n.rarity, '')), 'B')
+            FROM (
+                SELECT c.id, array_agg(DISTINCT CASE
+                    WHEN r.rarity = 'c' THEN 'common'
+                    WHEN r.rarity = 'u' THEN 'uncommon'
+                    WHEN r.rarity = 'r' THEN 'rare'
+                    WHEN r.rarity = 'm' THEN 'mythic'
+                END) AS rarity
+                FROM oracle_card AS c
+                JOIN oracle_cardrelease AS r ON r.card_id = c.id
+                GROUP BY c.id
+            ) AS n
+            WHERE n.id = card_id
+            """,
+
+            # }}}
         ]
 
         sql_no = 1

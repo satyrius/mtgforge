@@ -73,6 +73,7 @@ class CardResource(ModelResource):
                 TRUE
                 {search_filter}
                 {set_filter}
+                {rarity_filter}
                 {color_filter}
                 {type_filter}
                 {cmc_filter}
@@ -84,6 +85,7 @@ class CardResource(ModelResource):
         filters = dict(
             search_filter='',
             set_filter='',
+            rarity_filter='',
             color_filter='',
             type_filter='',
             cmc_filter='',
@@ -116,6 +118,15 @@ class CardResource(ModelResource):
                 raise BadRequest('Make shure all set acronyms exist')
             filters['set_filter'] = "AND i.sets @@ '{0}'::query_int".format(
                 '|'.join(map(str, set_ids)))
+
+        # RARITY filter
+        rarity = get_commaseparated_param(request, 'rarity')
+        if rarity:
+            extra_url_args['rarity'] = rarity
+            rarity_query = u' | '.join(
+                [u'%s:B*' % q.strip(' \n\t') for q in rarity])
+            filters['rarity_filter'] = 'AND i.fts @@ to_tsquery(%s)'
+            args.append(rarity_query)
 
         # COLOR filter
         color = get_commaseparated_param(request, 'color')
