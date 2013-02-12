@@ -4,6 +4,7 @@ class Forge.SearchResultsView extends Backbone.View
 
     subscriptions:
         'cards:fetched': 'render'
+        'cardsCollection:updated': 'render'
 
     events:
         'click .card img' : 'showCard'

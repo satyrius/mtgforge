@@ -6,31 +6,29 @@ Backbone.Collection.prototype.parse = function(resp, xhr) {
 	return (resp && 'objects' in resp) ? resp['objects'] : resp;
 };
 
-Backbone.Model.prototype.fetch =  function(options) {
+Backbone.Model.prototype.fetch = function(options) {
     options = options ? _.clone(options) : {};
-    var model = this;
+    if (options.parse === void 0) options.parse = true;
     var success = options.success;
-    options.success = function(resp, status, xhr) {
-        if (!model.set(model.parse(resp, xhr), options)) return false;
-        if (success) success(model, resp);
+    options.success = function(model, resp, options) {
+        if (!model.set(model.parse(resp, options), options)) return false;
+        if (success) success(model, resp, options);
         if (typeof resp.meta === "object") model.meta = _.clone(resp.meta);
     };
-    options.error = Backbone.wrapError(options.error, model, options);
-    return (this.sync || Backbone.sync).call(this, 'read', this, options);
+    return this.sync('read', this, options);
 }
 
 Backbone.Collection.prototype.fetch = function(options) {
     options = options ? _.clone(options) : {};
-    if (options.parse === undefined) options.parse = true;
-    var collection = this;
+    if (options.parse === void 0) options.parse = true;
     var success = options.success;
-    options.success = function(resp, status, xhr) {
+    options.success = function(collection, resp, options) {
+        var method = options.update ? 'update' : 'reset';
+        collection[method](resp, options);
         if (typeof resp.meta === "object") {
             collection.meta = _.clone(resp.meta);
         }
-        collection[options.add ? 'add' : 'reset'](collection.parse(resp, xhr), options);
-        if (success) success(collection, resp);
+        if (success) success(collection, resp, options);
     };
-    options.error = Backbone.wrapError(options.error, collection, options);
-    return (this.sync || Backbone.sync).call(this, 'read', this, options);
+    return this.sync('read', this, options);
 }

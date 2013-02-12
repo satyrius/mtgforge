@@ -5,3 +5,13 @@
         <li class="card"><img src="<%= card.scan %>" /></li>
     <% } %>
 </ul>
+<% if (cards.meta.next) { %>
+    <div class="pagination pagination-large pagination-centered">
+        <ul>
+            <li><a href="#">&laquo;</a></li>
+            
+            <li><a href="#">1</a></li>
+            <li><a href="#">&raquo;</a></li>
+        </ul>
+    </div>
+<% } %>
