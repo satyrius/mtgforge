@@ -6,13 +6,6 @@ class Forge.SearchResultsView extends Backbone.View
         'cards:fetched': 'render'
         'cardsCollection:updated': 'render'
 
-    events:
-        'click .card img' : 'showCard'
-
     render: (data) ->
         @$el.html(@template({cards: data}))
 
-    showCard: (event) ->
-        $(event.target).animate({
-            'padding-top': '200px'
-        }, 300)
