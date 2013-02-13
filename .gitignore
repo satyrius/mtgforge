@@ -5,3 +5,4 @@ _generated_media*
 .noseids
 *.pyc
 *.swp
+*.swo

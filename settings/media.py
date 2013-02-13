@@ -39,5 +39,6 @@ MEDIA_BUNDLES = (
         'templates/sidebar.jst',
         'templates/search/form.jst',
         'templates/search/results.jst',
+        'templates/search/new_card.jst',
     ),
 )
