@@ -3,6 +3,7 @@ class Forge.SidebarView extends Backbone.View
     template: window.MEDIA.templates['templates/sidebar.jst'].render
     events:
         "click .filter-toggle" : "handleFilterToggleClick"
+        "click .filter-reset" : "resetFilters"
     
     initialize: () ->
         @render()
@@ -54,3 +55,10 @@ class Forge.SidebarView extends Backbone.View
                     @_filterData[key].push(supervalue) if not _.has(@_filterData[key], supervalue)
                     $(".filter-toggle.#{key + '' + supervalue}", @$el).addClass('active')
 
+    resetFilters: () ->
+        @_filterData =
+            color: []
+            cmc: []
+            type: []
+            rarity: []
+        Backbone.Mediator.publish("search:q", @_filterData)
