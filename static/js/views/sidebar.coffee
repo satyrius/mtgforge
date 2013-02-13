@@ -13,6 +13,7 @@ class Forge.SidebarView extends Backbone.View
 
     render: () ->
         @$el.html(@template())
+        $(".filter-sets").chosen({no_results_text: "No results matched"})
 
     _filterData:
         color: []
