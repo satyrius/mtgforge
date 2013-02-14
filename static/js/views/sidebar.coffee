@@ -21,7 +21,7 @@ class Forge.SidebarView extends Backbone.View
         cmc: []
         type: []
         rarity: []
-        sets: []
+        set: []
 
     handleFilterToggleClick: (event) ->
         # INFO: Defer is done to let bootstrap.js toggles do it's work
@@ -30,7 +30,7 @@ class Forge.SidebarView extends Backbone.View
 
     handleFilterSetsChange: (event) ->
         data = $(event.target).val()
-        @_filterData.sets = data
+        @_filterData.set = data
         Backbone.Mediator.publish("search:q", @_filterData)
 
     _handleFilterToggleClick: (event) =>
