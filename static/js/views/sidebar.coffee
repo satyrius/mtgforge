@@ -51,9 +51,12 @@ class Forge.SidebarView extends Backbone.View
             cmc: []
             type: []
             rarity: []
-            sets: []
+            set: []
         query = $.unserialize(query)
         delete query.q
+        $(".filter-sets").val(query.set)
+        $(".filter-sets").trigger("liszt:updated")
+        delete query.sets
         $(".filter-toggle").removeClass("active")
         for key, value of query
             if typeof value == 'string'
