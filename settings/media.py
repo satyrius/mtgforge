@@ -18,29 +18,30 @@ MEDIA_BUNDLES = (
         'js/lib/backbone-mediator.js',
         'js/lib/chosen.jquery.min.js'
     ),
-    ( 'init.js',
-        'js/init.coffee',
-    ),
-    ( 'views.js',
-        'js/views/index.coffee',
-        'js/views/sidebar.coffee',
-        'js/views/search.coffee',
-        'js/views/search_results.coffee',
-    ),
-    ( 'models.js',
-        'js/models/card.coffee',
-    ),
-    ( 'collections.js',
-        'js/collections/cards.coffee',
-    ),
-    ( 'router.js',
-        'js/router.coffee',
-    ),
-    ( 'templates.js',
+    ( 'app.js',
+        #TEMPLATES
         'templates/index.jst',
         'templates/sidebar.jst',
         'templates/search/form.jst',
         'templates/search/results.jst',
         'templates/search/new_card.jst',
+ 
+        #INIT
+        'js/init.coffee',
+
+        #ROUTER
+        'js/router.coffee',
+
+        #MODELS
+        'js/models/card.coffee',
+
+        #COLLECTIONS
+        'js/collections/cards.coffee',
+
+        #VIEWS
+        'js/views/index.coffee',
+        'js/views/sidebar.coffee',
+        'js/views/search.coffee',
+        'js/views/search_results.coffee',
     ),
 )
