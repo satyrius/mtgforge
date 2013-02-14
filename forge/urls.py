@@ -14,7 +14,7 @@ v1_api.register(CardTypeResource())
 v1_api.register(CompleteResource())
 
 urlpatterns = patterns(
-    'django.views.generic.simple',
-    (r'^$', 'direct_to_template', {'template': 'index.html'}),
+    '',
+    (r'^$', 'forge.views.index'),
     (r'^api/', include(v1_api.urls)),
 )
