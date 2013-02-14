@@ -4,6 +4,7 @@ class Forge.SidebarView extends Backbone.View
     events:
         "click .filter-toggle" : "handleFilterToggleClick"
         "click .filter-reset" : "resetFilters"
+        "change .filter-sets" : "handleFilterSetsChange"
     
     initialize: () ->
         @render()
@@ -20,12 +21,18 @@ class Forge.SidebarView extends Backbone.View
         cmc: []
         type: []
         rarity: []
+        sets: []
 
     handleFilterToggleClick: (event) ->
         # INFO: Defer is done to let bootstrap.js toggles do it's work
         # with classes first
         _.defer(@_handleFilterToggleClick, event)
-    
+
+    handleFilterSetsChange: (event) ->
+        data = $(event.target).val()
+        @_filterData.sets = data
+        Backbone.Mediator.publish("search:q", @_filterData)
+
     _handleFilterToggleClick: (event) =>
         button  = $(event.target).closest('.filter-toggle')
         data =  button.data('forge-filter-toggle')
@@ -44,6 +51,7 @@ class Forge.SidebarView extends Backbone.View
             cmc: []
             type: []
             rarity: []
+            sets: []
         query = $.unserialize(query)
         delete query.q
         $(".filter-toggle").removeClass("active")
