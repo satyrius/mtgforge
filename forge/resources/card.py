@@ -27,6 +27,9 @@ class CardResource(ModelResource):
         bundle.data['rank'] = bundle.obj.rank
         return bundle
 
+    def dehydrate_colors(self, bundle):
+        return bundle.obj.color_names
+
     def override_urls(self):
         return [
             url(r"^(?P<resource_name>%s)/search/$" %

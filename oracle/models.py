@@ -9,6 +9,7 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
 from contrib.fields import NullCharField, NullTextField
+from oracle.utils import Color
 
 
 # Stub for gettext translation
@@ -87,42 +88,6 @@ class CardType(models.Model):
         return self.name
 
 
-# Color identity
-class Color(object):
-    WHITE = 0b1
-    BLUE = 0b10
-    BLACK = 0b100
-    RED = 0b1000
-    GREEN = 0b10000
-    COLORLESS = 0b100000
-
-    MAP = dict(
-        w=WHITE,
-        u=BLUE,
-        b=BLACK,
-        r=RED,
-        g=GREEN,
-        c=COLORLESS,
-    )
-
-    def __init__(self, mana_cost=None):
-        self.identity = 0
-        self.colors = []
-
-        if mana_cost:
-            costs = set(mana_cost.lower())
-            has_colorless_mana = len(filter(lambda s: s.isdigit() or s == 'x', costs)) > 0
-            allowed_symbols = self.MAP.keys()
-            for s in filter(lambda s: s.isalpha() and s in allowed_symbols, costs):
-                c = self.MAP[s]
-                self.identity |= c
-                self.colors.append(c)
-            if not self.identity and has_colorless_mana:
-                self.identity = self.COLORLESS
-                self.colors = [self.COLORLESS]
-            self.colors.sort()
-
-
 class CardFace(models.Model):
     FRONT, BACK, SPLIT, FLIP = 'front', 'back', 'split', 'flip'
     TYPE_CHOICES = (
@@ -161,6 +126,10 @@ class CardFace(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    @property
+    def color_names(self):
+        return Color(self.colors).names
 
 
 @receiver(pre_save, sender=CardFace)

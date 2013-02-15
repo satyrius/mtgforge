@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.test import TestCase
-from oracle.models import Color
+from oracle.utils import Color
 
 
 class ColorsTest(TestCase):
@@ -89,3 +89,23 @@ class ColorsTest(TestCase):
         c = Color('{w}{w}{z}')
         self.assertEqual(c.identity, self.w)
         self.assertEqual(c.colors, [self.w])
+
+    def test_create_with_explicit_colors(self):
+        c = Color([self.w])
+        self.assertEqual(c.identity, self.w)
+
+        c = Color([self.w, self.g])
+        self.assertEqual(c.identity, self.w | self.g)
+
+        c = Color(self.u)
+        self.assertEqual(c.identity, self.u)
+
+        c = Color(self.u, self.w)
+        self.assertEqual(c.identity, self.w | self.u)
+
+    def test_color_names(self):
+        c = Color(self.r, self.g, self.w)
+        self.assertEqual({'w', 'g', 'r'}, set(c.names))
+
+        c = Color(self.w, self.u, self.b)
+        self.assertEqual({'w', 'u', 'b'}, set(c.names))
