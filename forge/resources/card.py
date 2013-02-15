@@ -21,10 +21,12 @@ class CardResource(ModelResource):
         details_allowed_methods = ['get']
 
     def dehydrate(self, bundle):
-        bundle.data['scan'] = bundle.obj.scan
-        if bundle.obj.file:
+        if hasattr(bundle.obj, 'scan'):
+            bundle.data['scan'] = bundle.obj.scan
+        if hasattr(bundle.obj, 'file') and bundle.obj.file:
             bundle.data['scan'] = get_art_url(bundle.obj.file)
-        bundle.data['rank'] = bundle.obj.rank
+        if hasattr(bundle.obj, 'rank'):
+            bundle.data['rank'] = bundle.obj.rank
         return bundle
 
     def dehydrate_colors(self, bundle):
