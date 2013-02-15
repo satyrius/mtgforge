@@ -1,0 +1,57 @@
+@mixin one-color-shadow($color)
+    -moz-box-shadow: 0px 2px 7px 4px $color
+    -webkit-box-shadow: 0px 2px 7px 4px $color
+    box-shadow: 0px 2px 7px 4px $color
+
+@mixin two-color-shadow($color1, $color2)
+    box-shadow: 4px 0px 20px -3px $color2, -4px 0px 20px -3px $color1
+
+//COLOR IDENTITIES:
+//  WHITE = 1
+//  BLUE = 2
+//  BLACK = 4
+//  RED = 8
+//  GREEN = 16
+//  COLORLESS = 32
+$white: #ffffcc
+$blue: #0000cc
+$black: #333333
+$red: #cc0000
+$green: #00cc00
+$colorless: #cccccc
+
+$color_identity_list: ($white) ($blue) ($white, $blue) ($black) ($black, $white) ($black, $blue) ($black, $blue, $white) ($red) ($red, $white) ($red, $blue) ($red, $blue, $white) ($red, $black) ($red, $black, $white) ($red, $black, $blue) ($red, $black, $white, $blue) ($green) ($green, $white) ($green, $blue) ($green, $blue, $white) ($green, $black) ($green, $black, $white) ($green, $black, $blue) ($green, $black, $blue, $white) ($green, $red)
+
+@for $i from 1 to 24
+    ul#search-results li img.color_identity_#{$i}:hover
+        @if $i == 1
+            @include one-color-shadow(nth($color_identity_list, $i))
+        @if $i == 2
+            @include one-color-shadow(nth($color_identity_list, $i))
+        @if $i == 4
+            @include one-color-shadow(nth($color_identity_list, $i))
+        @if $i == 8
+            @include one-color-shadow(nth($color_identity_list, $i))
+        @if $i == 16
+            @include one-color-shadow(nth($color_identity_list, $i))
+        
+        @if $i == 3
+            @include two-color-shadow(nth(nth($color_identity_list, $i), 1), nth(nth($color_identity_list, $i), 2))
+        @if $i == 5
+            @include two-color-shadow(nth(nth($color_identity_list, $i), 1), nth(nth($color_identity_list, $i), 2))
+        @if $i == 6
+            @include two-color-shadow(nth(nth($color_identity_list, $i), 1), nth(nth($color_identity_list, $i), 2))
+        @if $i == 9
+            @include two-color-shadow(nth(nth($color_identity_list, $i), 1), nth(nth($color_identity_list, $i), 2))
+        @if $i == 10
+            @include two-color-shadow(nth(nth($color_identity_list, $i), 1), nth(nth($color_identity_list, $i), 2))
+        @if $i == 12
+            @include two-color-shadow(nth(nth($color_identity_list, $i), 1), nth(nth($color_identity_list, $i), 2))
+        @if $i == 17
+            @include two-color-shadow(nth(nth($color_identity_list, $i), 1), nth(nth($color_identity_list, $i), 2))
+        @if $i == 18
+            @include two-color-shadow(nth(nth($color_identity_list, $i), 1), nth(nth($color_identity_list, $i), 2))
+        @if $i == 20
+            @include two-color-shadow(nth(nth($color_identity_list, $i), 1), nth(nth($color_identity_list, $i), 2))
+        @if $i == 24
+            @include two-color-shadow(nth(nth($color_identity_list, $i), 1), nth(nth($color_identity_list, $i), 2))
