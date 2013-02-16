@@ -33,7 +33,7 @@ class CardAdmin(admin.ModelAdmin):
     inlines = [CardReleaseInline, CardFaceInline]
     list_filter = (PartsCountFilter, 'cardrelease__card_set__name',)
     ordering = ('name',)
-    readonly_fields = ('name', 'faces_count',)
+    readonly_fields = ('faces_count',)
     search_fields = ('name', 'cardface__cardl10n__name',)
 
 admin.site.register(models.Card, CardAdmin)

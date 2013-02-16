@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
+from django_any import any_model
 from django.test import TestCase
-
 from oracle.models import Card, CardFace, Color
 
 
@@ -42,3 +42,27 @@ class CardModelTest(TestCase):
         )
         self.assertEqual(face.color_identity, Color.BLUE)
         self.assertEqual(face.colors, [Color.BLUE])
+
+    def test_faces_count_update(self):
+        card = any_model(Card, faces_count=1)
+
+        # First face
+        any_model(CardFace, card=card, colors=[])
+        card = Card.objects.get(pk=card.id)
+        self.assertEqual(card.cardface_set.count(), 1)
+        self.assertEqual(card.faces_count, 1)
+
+        # Second face creation updates faces count
+        any_model(CardFace, card=card, colors=[])
+        card = Card.objects.get(pk=card.id)
+        self.assertEqual(card.cardface_set.count(), 2)
+        self.assertEqual(card.faces_count, 2)
+
+        # But do not update card.faces_count if it is set to the value higher
+        # than faces attached. This case is for fetch_gatherer.
+        card.faces_count = 5
+        card.save()
+        any_model(CardFace, card=card, colors=[])
+        card = Card.objects.get(pk=card.id)
+        self.assertEqual(card.cardface_set.count(), 3)
+        self.assertEqual(card.faces_count, 5)

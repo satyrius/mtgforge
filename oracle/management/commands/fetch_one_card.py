@@ -84,16 +84,14 @@ def save_card_face(page, card_set, no_update=False):
         pass
     finally:
         multifaced = 'other_faces' in card_details
-        if multifaced:
+
+        # Find existing multipart card to link with this face
+        if not card and multifaced:
             for f in CardFace.objects.filter(name__in=card_details['other_faces']):
-                if not card:
-                    card = f.card
-                    break
-                if card.id != f.card_id:
-                    # Delete duplicate and link with right card
-                    f.card.delete()
-                    f.card = card
-                    f.save()
+                card = f.card
+                break
+
+        # Create new card or update title if it is front face
         title = card_details['title']
         if not card:
             # Create card with name equal to card page title
@@ -102,6 +100,8 @@ def save_card_face(page, card_set, no_update=False):
             # Update title for multipart card, get it from first part
             card.name = title
             card.save()
+
+        # Create new card face instance if it is not exists
         if not face:
             face = CardFace(card=card)
 

@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
 from contrib.fields import NullCharField, NullTextField
@@ -152,6 +152,16 @@ def update_fixed_power_and_thoughtness(sender, **kwargs):
             else:
                 value = None
         setattr(card_face, field, value)
+
+
+@receiver(post_save, sender=CardFace)
+def update_faces_count(sender, **kwargs):
+    card_face = kwargs['instance']
+    card = card_face.card
+    count = max(1, card.faces_count, card.cardface_set.count())
+    if count != card.faces_count:
+        card.faces_count = count
+        card.save()
 
 # }}}
 
