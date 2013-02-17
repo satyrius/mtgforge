@@ -15,13 +15,10 @@ class CardSetAdmin(TranslationAdmin):
 
     class Media:
         js = (
-            '/static/modeltranslation/js/force_jquery.js',
-            '/static/modeltranslation/js/jquery-ui.min.js',
-            '/static/modeltranslation/js/tabbed_translation_fields.js',
+            '/static/grappelli_modeltranslation/js/tabbed_translation_fields.js',
         )
         css = {
-            'screen': ('/static/modeltranslation/css/tabbed_translation_fields.css',),
+            'screen': ('/static/grappelli_modeltranslation/css/tabbed_translation_fields.css',),
         }
 
 admin.site.register(models.CardSet, CardSetAdmin)
-

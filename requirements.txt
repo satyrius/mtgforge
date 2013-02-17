@@ -7,12 +7,14 @@ South==0.7.6
 django-arrayfields==0.1.0
 django-debug-toolbar==0.9.4
 django-extensions==0.8
+django-grappelli==2.4.3
 django-modeltranslation==0.4.1
 django-nose==1.1
 django-storages==1.1.6
 django-tastypie==0.9.11
 django-whatever==0.2.3
 gevent==0.13.8
+grappelli-modeltranslation==0.1.2
 ipdb==0.7
 lxml==2.3.5
 mock==1.0.1
