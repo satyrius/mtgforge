@@ -2,7 +2,7 @@
 from mock import patch
 
 from oracle.management.commands import save_card_face
-from oracle.models import CardFace, CardRelease, CardSet, Color, CardImage
+from oracle import models as m
 from oracle.providers.gatherer import GathererCard
 from oracle.tests.helpers import get_html_fixture
 from oracle.tests.providers.base import ProviderTest
@@ -14,36 +14,37 @@ class FetchCardsCommandTest(ProviderTest):
         pass
 
     def test_save_card_oracle_details(self, _dowload_content):
-        cs = CardSet.objects.create(name='Avacyn Restored')
+        cs = m.CardSet.objects.create(name='Avacyn Restored')
         _dowload_content.return_value = get_html_fixture('gatherer_angel_oracle')
         mvid = 239961
         url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=239961'
         page = GathererCard(url)
 
         # No image yet
-        with self.assertRaises(CardImage.DoesNotExist):
-            CardImage.objects.get(mvid=mvid)
+        with self.assertRaises(m.CardImage.DoesNotExist):
+            m.CardImage.objects.get(mvid=mvid)
 
         # Save card face and assert saved data
         card_face = save_card_face(page, cs)
-        self.assertIsInstance(card_face, CardFace)
+        self.assertIsInstance(card_face, m.CardFace)
         self.assertEqual(card_face.name, u'Avacyn, Angel of Hope')
         card = card_face.card
         self.assertEqual(card_face.name, card.name)
         self.assertEqual(card.faces_count, 1)
-        expected_color = Color(card_face.mana_cost)
+        expected_color = m.Color(card_face.mana_cost)
         card_face.color_identity = expected_color.identity
         card_face.colors = expected_color.colors
+        self.assertEqual(card_face.types.count(), 3)
 
         # Release record was created too
         release = card.cardrelease_set.get(card_set=cs)
-        self.assertEqual(release.rarity, CardRelease.MYTHIC)
+        self.assertEqual(release.rarity, m.CardRelease.MYTHIC)
         self.assertEqual(release.card_number, 6)
         self.assertEqual(release.mvid, mvid)
 
         # And default card image was created for this release
         art = 'http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=239961&type=card'
-        img = CardImage.objects.get(mvid=mvid)
+        img = m.CardImage.objects.get(mvid=mvid)
         self.assertEqual(img.scan, art)
         self.assertEqual(img.file.name, '')
 
@@ -60,7 +61,7 @@ class FetchCardsCommandTest(ProviderTest):
         self.assertEqual(restored_page.url, url)
 
     def test_save_card_with_no_text(self, _dowload_content):
-        cs = CardSet.objects.create(name='Return to Ravnica')
+        cs = m.CardSet.objects.create(name='Return to Ravnica')
         _dowload_content.return_value = get_html_fixture('gatherer_vanilla_creature')
         url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=265383'
         page = GathererCard(url)
@@ -70,7 +71,7 @@ class FetchCardsCommandTest(ProviderTest):
         self.assertIsNone(card_face.rules)
 
     def test_save_land_card(self, _dowload_content):
-        cs = CardSet.objects.create(name='Return to Ravnica')
+        cs = m.CardSet.objects.create(name='Return to Ravnica')
         _dowload_content.return_value = get_html_fixture('gatherer_forest')
         url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=289326'
         page = GathererCard(url)
@@ -85,7 +86,7 @@ class FetchCardsCommandTest(ProviderTest):
         self.assertIsNone(card_face.loyality)
 
     def test_save_card_with_no_number(self, _dowload_content):
-        cs = CardSet.objects.create(name='Portal Second Age')
+        cs = m.CardSet.objects.create(name='Portal Second Age')
         _dowload_content.return_value = get_html_fixture('gatherer_no_number')
         url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=6567'
         page = GathererCard(url)
@@ -93,17 +94,17 @@ class FetchCardsCommandTest(ProviderTest):
         card_face = save_card_face(page, cs)
         self.assertEqual(card_face.name, u'Abyssal Nightstalker')
         release = card_face.card.cardrelease_set.get(card_set=cs)
-        self.assertEqual(release.rarity, CardRelease.UNCOMMON)
+        self.assertEqual(release.rarity, m.CardRelease.UNCOMMON)
         self.assertIsNone(release.card_number)
 
     def test_save_splited_card(self, _dowload_content):
-        cs = CardSet.objects.create(name='Apocalypse')
+        cs = m.CardSet.objects.create(name='Apocalypse')
         _dowload_content.return_value = get_html_fixture('gatherer_fire_oracle')
         url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?part=Fire&multiverseid=27166'
         page = GathererCard(url)
 
         card_face = save_card_face(page, cs)
-        self.assertIsInstance(card_face, CardFace)
+        self.assertIsInstance(card_face, m.CardFace)
         self.assertEqual(card_face.name, u'Fire')
         card = card_face.card
         self.assertEqual(card.name, 'Fire // Ice')

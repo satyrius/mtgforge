@@ -5,6 +5,7 @@ from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
 
 from oracle import models
+from oracle.utils import parse_type_line
 
 
 class DataProviderForm(forms.ModelForm):
@@ -56,6 +57,7 @@ class CardFaceForm(CardPageForm):
     flavor = forms.CharField(required=False, widget=forms.Textarea)
     cmc = forms.IntegerField(required=False)
     mana_cost = forms.CharField(max_length=50, required=False)
+    type_line = forms.CharField(max_length=255, required=False)
 
     class Meta:
         model = models.CardFace
@@ -78,6 +80,25 @@ class CardFaceForm(CardPageForm):
                     data['loyality'] = int(pt[0])
 
         super(CardFaceForm, self).__init__(data=data, **kwargs)
+
+    def clean(self):
+        super(CardFaceForm, self).clean()
+        cleaned_data = self.cleaned_data
+        type_line = cleaned_data['type_line']
+        if type_line and not cleaned_data['types']:
+            cleaned_data['types'] = parse_type_line(type_line)
+        elif not type_line and cleaned_data['types']:
+            t0, t1, t2 = [], [], []
+            for t in cleaned_data['types']:
+                if t.category == models.CardType.TYPE:
+                    t1.append(t.name)
+                elif t.category == models.CardType.SUPERTYPE:
+                    t0.append(t.name)
+                elif t.category == models.CardType.SUBTYPE:
+                    t2.append(t.name)
+            cleaned_data['type_line'] = ' - '.join(
+                filter(None, [' '.join(t0 + t1), ' '.join(t2)]))
+        return cleaned_data
 
 
 class CardL10nForm(CardPageForm):

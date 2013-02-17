@@ -109,6 +109,7 @@ def save_card_face(page, card_set, no_update=False):
     if not form.is_valid():
         raise ValidationError(form.errors)
     face = form.save()
+
     if multifaced:
         card.faces_count = len(card_details['other_faces']) + 1
         card.save()

@@ -37,7 +37,7 @@ card_face_fieldsets = (
 class CardFaceInline(admin.StackedInline):
     model = models.CardFace
     form = CardFaceForm
-    readonly_fields = ('type_line', 'card', 'color_identity')
+    readonly_fields = ('card', 'color_identity',)
     extra = 0
     fieldsets = card_face_fieldsets
 
@@ -45,7 +45,7 @@ class CardFaceInline(admin.StackedInline):
 class CardFaceAdmin(admin.ModelAdmin):
     model = models.CardFace
     form = CardFaceForm
-    readonly_fields = ('type_line', 'card')
+    readonly_fields = ('card',)
     fieldsets = card_face_fieldsets
     inlines = [CardL10nInline]
 

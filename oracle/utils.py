@@ -1,3 +1,6 @@
+import re
+
+
 class Color(object):
     WHITE = 0b1
     BLUE = 0b10
@@ -53,3 +56,36 @@ class Color(object):
     @property
     def names(self):
         return [name for name, id in self.MAP.items() if id in self.colors]
+
+
+def parse_type_line(type_line):
+    """Parse card face type line and return list of CardType objects. It also
+    creates CardType if it does not exists"""
+    if not type_line.strip():
+        return []
+    splited_types = map(lambda t: t.strip(), type_line.split('-', 2))
+
+    split_types = lambda types: map(lambda t: t.capitalize(),
+                                    filter(None, re.split(r'\s+', types)))
+    main_types = split_types(splited_types[0])
+    types = main_types[-1:]
+    supertypes = main_types[:-1]
+    subtypes = len(splited_types) > 1 and split_types(splited_types[1]) or []
+
+    not_supertypes = {'Land', 'Artifact', 'Enchantment'}
+    types.extend(list(set(supertypes) & not_supertypes))
+    supertypes = list(set(supertypes) - not_supertypes)
+
+    from oracle.models import CardType
+    instances = []
+    for types, cat in (
+        (supertypes, CardType.SUPERTYPE),
+        (types, CardType.TYPE),
+        (subtypes, CardType.SUBTYPE),
+    ):
+        if not types:
+            continue
+        for name in types:
+            t = CardType.objects.get_or_create(name=name, category=cat)[0]
+            instances.append(t)
+    return instances

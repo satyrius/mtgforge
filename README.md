@@ -33,7 +33,7 @@ MTGForge project has several config modules for any purpose. `settings.dev` for 
 
 	DJANGO_SETTINGS_MODULE=settings.prod ./manage.py runserver
 
-But there is easy way for developers, `settings` module has a liitle magic to choose which config to use. If it founds `test` in `sys.argv` it uses `settings.test` otherwise `settings.dev`. 
+But there is easy way for developers, `settings` module has a liitle magic to choose which config to use. If it founds `test` in `sys.argv` it uses `settings.test` otherwise `settings.dev`.
 
 Be careful on production server, pass `settings.prod` config explicitly to prevent running your app in dev mode for your real customers.
 
@@ -70,7 +70,8 @@ To fill cards database do the following:
     ./manage.py fetch_gatherer zen
     # Then run some postprocessing
     ./manage.py parse_face_type
-    ./manage.py parse_card_type
+    # Download art
+    ./manage.py fetch_scans
 
 To build full text search engine do:
 
@@ -130,7 +131,3 @@ Loading cards' scans is a heavy pricess. It was introduces as separate managemen
 MTG has a number of unordinary cards: splited, fliped and double-faced. To set right face type use next command:
 
     ./manage.py parse_face_type
-
-To fill card types table and link it with cards use command:
-
-    ./manage.py parse_card_type
