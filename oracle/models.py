@@ -110,7 +110,6 @@ class CardFace(models.Model):
     name = NullCharField(max_length=255, unique=True)
     type_line = NullCharField(max_length=255)
     rules = NullTextField(null=True)
-    flavor = NullTextField(null=True)
 
     types = models.ManyToManyField(CardType)
 

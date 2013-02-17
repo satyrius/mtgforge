@@ -20,8 +20,7 @@ card_face_fieldsets = (
     }),
     (None, {
         'fields': (
-            'types', 'type_line',
-            'rules', 'flavor'
+            'types', 'type_line', 'rules',
         )
     }),
     (None, {

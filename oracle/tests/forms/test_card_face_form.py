@@ -27,7 +27,6 @@ class TestCardFaceForm(TestCase):
         self.assertEqual(saved_face.name, data['name'])
         self.assertEqual(card.name, data['name'])
         self.assertEqual(saved_face.rules, data['text'])
-        self.assertEqual(saved_face.flavor, data['flavor'])
         self.assertEqual(saved_face.type_line, data['type'])
         self.assertEqual(saved_face.cmc, int(data['cmc']))
         self.assertEqual(saved_face.mana_cost, data['mana'])

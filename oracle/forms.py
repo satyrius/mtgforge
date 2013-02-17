@@ -54,7 +54,6 @@ class CardFaceForm(CardPageForm):
         required=False,
     )
     rules = forms.CharField(required=False, widget=forms.Textarea)
-    flavor = forms.CharField(required=False, widget=forms.Textarea)
     cmc = forms.IntegerField(required=False)
     mana_cost = forms.CharField(max_length=50, required=False)
     type_line = forms.CharField(max_length=255, required=False)

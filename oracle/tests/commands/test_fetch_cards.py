@@ -78,7 +78,6 @@ class FetchCardsCommandTest(ProviderTest):
 
         card_face = save_card_face(page, cs)
         self.assertEqual(card_face.name, u'Forest')
-        self.assertIsNone(card_face.flavor)
         self.assertIsNone(card_face.power)
         self.assertIsNone(card_face.thoughtness)
         self.assertIsNone(card_face.fixed_power)
