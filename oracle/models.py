@@ -185,6 +185,17 @@ class Artist(models.Model):
         return self.name
 
 
+class CardImage(models.Model):
+    mvid = models.PositiveIntegerField(null=True, blank=True, unique=True)
+    scan = models.URLField(help_text='Url of the original art on the Gatherer',
+                           null=True, blank=True)
+    file = models.ImageField(upload_to='art', null=True, blank=True)
+    comment = models.TextField(null=True, blank=True)
+
+    def __unicode__(self):
+        return unicode(self.mvid)
+
+
 class CardRelease(models.Model):
     COMMON, UNCOMMON, RARE, MYTHIC = 'c', 'u', 'r', 'm'
     RARITY_CHOICES = (
@@ -199,8 +210,8 @@ class CardRelease(models.Model):
 
     rarity = NullCharField(max_length=1, choices=RARITY_CHOICES)
     card_number = models.PositiveIntegerField(null=True, blank=True)
-    mvid = models.PositiveIntegerField(
-        help_text='Multiverse ID of english card oracle page', unique=True)
+
+    art = models.ForeignKey(CardImage, null=True, blank=True)
 
     sources = generic.GenericRelation(DataSource)
 
@@ -228,11 +239,5 @@ class CardL10n(models.Model):
         unique_together = (('card_face', 'card_release', 'language'),)
 
     sources = generic.GenericRelation(DataSource)
-
-
-class CardImage(models.Model):
-    mvid = models.PositiveIntegerField(primary_key=True)
-    scan = models.URLField(help_text='Url of the original art on the Gatherer')
-    file = models.ImageField(upload_to='art', null=True, blank=True)
 
 # }}}

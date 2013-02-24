@@ -75,7 +75,7 @@ class CardResource(ModelResource):
             JOIN oracle_cardface AS f ON f.id = i.card_face_id
             JOIN oracle_cardrelease AS r ON r.card_id = f.card_id
             JOIN oracle_cardset AS cs ON cs.id = r.card_set_id
-            JOIN oracle_cardimage AS img ON img.mvid = r.mvid
+            JOIN oracle_cardimage AS img ON img.id = r.art_id
             WHERE
                 TRUE
                 {search_filter}

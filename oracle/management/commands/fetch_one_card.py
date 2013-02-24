@@ -5,7 +5,7 @@ import xact
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 
-from oracle.forms import CardFaceForm
+from oracle.forms import CardFaceForm, CardImageForm
 from oracle.management.base import BaseCommand
 from oracle.models import CardFace, Card, CardRelease, CardSet, DataSource, \
     CardImage
@@ -47,8 +47,7 @@ class Command(BaseCommand):
         page = GathererCard(options['url'], name=options['name'] or None)
         if options['clear']:
             page.delete_cache()
-        details = page.details()
-        card_face = save_card_face(details, card_set, options['no_update'])
+        card_face = save_card_face(page, card_set, options['no_update'])
         page.set_parsed()
         for field in card_face._meta.fields:
             self.writeln(u'{0}: {1}'.format(
@@ -118,18 +117,25 @@ def save_card_face(page, card_set, no_update=False):
     # Card release notes
     #
 
+    # Save card face scan
     mvid = int(card_details['mvid'])
+    try:
+        img = CardImage.objects.get(mvid=mvid)
+    except CardImage.DoesNotExist:
+        cif = CardImageForm(data=dict(mvid=mvid, scan=card_details['art']))
+        img = cif.save()
+
     rarity = card_details['rarity'].lower()[0]
     try:
         # Try to get existing card by its id
-        release = CardRelease.objects.get(mvid=mvid)
+        release = CardRelease.objects.get(art__mvid=mvid)
         if release.card_id != card.id:
             raise Exception(
                 u'Card release for MVID {0} card id is {1}, expected {1}'.format(
                     mvid, release.card_id, card.id))
     except CardRelease.DoesNotExist:
         new_card_release = lambda: CardRelease(
-            card_set=card_set, card=card, mvid=mvid,
+            card_set=card_set, card=card, art=img,
             card_number=number, rarity=rarity)
         if number:
             try:
@@ -137,7 +143,7 @@ def save_card_face(page, card_set, no_update=False):
                     card_set=card_set, card=card, card_number=number)
                 # Update multiverseid when process card front face
                 if sub_number == 'a':
-                    release.mvid = mvid
+                    release.art = img
             except CardRelease.DoesNotExist:
                 release = new_card_release()
         else:
@@ -157,10 +163,6 @@ def save_card_face(page, card_set, no_update=False):
         if not source.url or sub_number == 'a':
             source.url = card_details['url']
         source.save()
-
-    # Save card face scan
-    img, created = CardImage.objects.get_or_create(
-        mvid=mvid, defaults=dict(scan=card_details['art']))
 
     page.set_parsed()
     return face

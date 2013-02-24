@@ -86,6 +86,14 @@ def parse_type_line(type_line):
         if not types:
             continue
         for name in types:
-            t = CardType.objects.get_or_create(name=name, category=cat)[0]
+            t, _ = CardType.objects.get_or_create(
+                name=name, defaults=dict(category=cat))
+
+            # Hack to fix my local database
+            # TODO remove before first release
+            if t.category != cat:
+                t.category = cat
+                t.save()
+
             instances.append(t)
     return instances

@@ -40,12 +40,13 @@ class FetchCardsCommandTest(ProviderTest):
         release = card.cardrelease_set.get(card_set=cs)
         self.assertEqual(release.rarity, m.CardRelease.MYTHIC)
         self.assertEqual(release.card_number, 6)
-        self.assertEqual(release.mvid, mvid)
 
         # And default card image was created for this release
-        art = 'http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=239961&type=card'
-        img = m.CardImage.objects.get(mvid=mvid)
-        self.assertEqual(img.scan, art)
+        self.assertIsNotNone(release.art)
+        img = release.art
+        self.assertEqual(img.mvid, mvid)
+        art_url = 'http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=239961&type=card'
+        self.assertEqual(img.scan, art_url)
         self.assertEqual(img.file.name, '')
 
         # Source for released card was saved

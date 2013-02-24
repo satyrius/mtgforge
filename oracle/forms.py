@@ -3,6 +3,7 @@ import re
 
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
+from django.utils.translation import ugettext_lazy as _
 
 from oracle import models
 from oracle.utils import parse_type_line
@@ -111,3 +112,18 @@ class CardL10nForm(CardPageForm):
             self._fix_data(data, 'scan', 'art')
 
         super(CardL10nForm, self).__init__(data=data, **kwargs)
+
+
+class CardImageForm(forms.ModelForm):
+    class Meta:
+        model = models.CardImage
+
+    def clean(self):
+        d = self.cleaned_data
+        no_mvid = 'mvid' not in d or not d['mvid']
+        no_comment = 'comment' not in d or not d['comment']
+        if no_mvid and no_comment:
+            raise forms.ValidationError(_(
+                'You have to post a comment about the image if you don\'t '
+                'know about it\'s MVID'))
+        return d

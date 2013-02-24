@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         n = int(options['threads'])
-        card_images = CardImage.objects.filter(file='')
+        card_images = CardImage.objects.filter(file='').exclude(scan='')
         self.download(card_images, n)
 
     def download(self, card_images, threads, tries=[]):

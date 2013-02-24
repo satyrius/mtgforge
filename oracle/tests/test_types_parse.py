@@ -36,3 +36,14 @@ class TypesParseTest(TestCase):
         t = types[3]
         assert t.name == 'Knight'
         assert t.category == CardType.SUBTYPE
+
+    def test_two_of_the_same_type(self):
+        assert CardType.objects.count() == 0
+        parse_type_line('legendary creature - human knight')
+        assert CardType.objects.count() == 4
+        legendary = CardType.objects.get(name='Legendary')
+        assert legendary.category == CardType.SUPERTYPE
+        parse_type_line('legendary creature - praetor')
+        assert CardType.objects.count() == 5
+        legendary = CardType.objects.get(name='Legendary')
+        assert legendary.category == CardType.SUPERTYPE
