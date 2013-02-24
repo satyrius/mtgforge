@@ -191,6 +191,7 @@ class CardImage(models.Model):
                            null=True, blank=True)
     file = models.ImageField(upload_to='art', null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
+    artist = models.ForeignKey(Artist, null=True, blank=True)
 
     def __unicode__(self):
         return unicode(self.mvid)
@@ -231,7 +232,6 @@ class CardL10n(models.Model):
     rules = NullTextField(null=True, blank=True)
     flavor = NullTextField(null=True, blank=True)
 
-    artist = models.ForeignKey(Artist)
     art = models.ForeignKey(CardImage, null=True, blank=True)
 
     class Meta:

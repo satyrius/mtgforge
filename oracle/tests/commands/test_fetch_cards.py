@@ -18,11 +18,15 @@ class FetchCardsCommandTest(ProviderTest):
         _dowload_content.return_value = get_html_fixture('gatherer_angel_oracle')
         mvid = 239961
         url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=239961'
+        artist_name = 'Jason Chan'
         page = GathererCard(url)
 
         # No image yet
         with self.assertRaises(m.CardImage.DoesNotExist):
             m.CardImage.objects.get(mvid=mvid)
+        # And no artist
+        with self.assertRaises(m.Artist.DoesNotExist):
+            m.Artist.objects.get(name=artist_name)
 
         # Save card face and assert saved data
         card_face = save_card_face(page, cs)
@@ -48,6 +52,8 @@ class FetchCardsCommandTest(ProviderTest):
         art_url = 'http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=239961&type=card'
         self.assertEqual(img.scan, art_url)
         self.assertEqual(img.file.name, '')
+        self.assertIsNotNone(img.artist)
+        self.assertEqual(img.artist.name, artist_name)
 
         # Source for released card was saved
         provider = page.get_provider()

@@ -7,8 +7,12 @@ from oracle.forms import CardFaceForm
 class CardL10nInline(admin.TabularInline):
     model = models.CardL10n
     readonly_fields = ('card_release', 'language',)
-    fields = ('card_release', 'language', 'name', 'scan')
+    fields = ('card_release', 'language', 'name', 'art')
     extra = 0
+    raw_id_fields = ('art',)
+    related_lookup_fields = {
+        'fk': ['art'],
+    }
 
 
 card_face_fieldsets = (

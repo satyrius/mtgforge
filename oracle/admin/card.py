@@ -1,23 +1,8 @@
 from django.contrib import admin
 from oracle import models
-from oracle.forms import CardImageForm
 from oracle.admin.card_face import CardFaceInline
 from django.contrib.admin import SimpleListFilter
 from django.utils.translation import ugettext_lazy as _
-from django.utils.html import mark_safe, escape
-
-
-class CardImageAdmin(admin.ModelAdmin):
-    form = CardImageForm
-    list_display = ('mvid', 'art_thumbnail',)
-    ordering = ('mvid',)
-    search_fields = ('mvid',)
-
-    def art_thumbnail(self, obj):
-        return mark_safe(u'<img src="{0}"/>'.format(escape(obj.file.url)))
-    art_thumbnail.allow_tags = True
-
-admin.site.register(models.CardImage, CardImageAdmin)
 
 
 class CardReleaseInline(admin.TabularInline):

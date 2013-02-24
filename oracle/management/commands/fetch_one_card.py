@@ -7,8 +7,7 @@ from django.core.exceptions import ValidationError
 
 from oracle.forms import CardFaceForm, CardImageForm
 from oracle.management.base import BaseCommand
-from oracle.models import CardFace, Card, CardRelease, CardSet, DataSource, \
-    CardImage
+from oracle import models as m
 from oracle.providers.gatherer import GathererCard
 
 
@@ -43,7 +42,7 @@ class Command(BaseCommand):
     )
 
     def handle(self, *args, **options):
-        card_set = CardSet.objects.get(acronym=options['set'].lower())
+        card_set = m.CardSet.objects.get(acronym=options['set'].lower())
         page = GathererCard(options['url'], name=options['name'] or None)
         if options['clear']:
             page.delete_cache()
@@ -75,18 +74,18 @@ def save_card_face(page, card_set, no_update=False):
         sub_number = match.group(2)
 
     try:
-        face = CardFace.objects.get(name=card_details['name'])
+        face = m.CardFace.objects.get(name=card_details['name'])
         if no_update:
             return face
         card = face.card
-    except CardFace.DoesNotExist:
+    except m.CardFace.DoesNotExist:
         pass
     finally:
         multifaced = 'other_faces' in card_details
 
         # Find existing multipart card to link with this face
         if not card and multifaced:
-            for f in CardFace.objects.filter(name__in=card_details['other_faces']):
+            for f in m.CardFace.objects.filter(name__in=card_details['other_faces']):
                 card = f.card
                 break
 
@@ -94,7 +93,7 @@ def save_card_face(page, card_set, no_update=False):
         title = card_details['title']
         if not card:
             # Create card with name equal to card page title
-            card = Card.objects.create(name=title)
+            card = m.Card.objects.create(name=title)
         elif sub_number == 'a':
             # Update title for multipart card, get it from first part
             card.name = title
@@ -102,7 +101,7 @@ def save_card_face(page, card_set, no_update=False):
 
         # Create new card face instance if it is not exists
         if not face:
-            face = CardFace(card=card)
+            face = m.CardFace(card=card)
 
     form = CardFaceForm(card_details, instance=face)
     if not form.is_valid():
@@ -114,37 +113,44 @@ def save_card_face(page, card_set, no_update=False):
         card.save()
 
     #
-    # Card release notes
+    # Save card face scan and artist
     #
-
-    # Save card face scan
     mvid = int(card_details['mvid'])
     try:
-        img = CardImage.objects.get(mvid=mvid)
-    except CardImage.DoesNotExist:
+        img = m.CardImage.objects.get(mvid=mvid)
+    except m.CardImage.DoesNotExist:
         cif = CardImageForm(data=dict(mvid=mvid, scan=card_details['art']))
         img = cif.save()
+
+    artist = m.Artist.objects.get_or_create(name=card_details['artist'])[0]
+    if not img.artist or img.artist.id != artist.id:
+        img.artist = artist
+        img.save()
+
+    #
+    # Card release notes
+    #
 
     rarity = card_details['rarity'].lower()[0]
     try:
         # Try to get existing card by its id
-        release = CardRelease.objects.get(art__mvid=mvid)
+        release = m.CardRelease.objects.get(art__mvid=mvid)
         if release.card_id != card.id:
             raise Exception(
                 u'Card release for MVID {0} card id is {1}, expected {1}'.format(
                     mvid, release.card_id, card.id))
-    except CardRelease.DoesNotExist:
-        new_card_release = lambda: CardRelease(
+    except m.CardRelease.DoesNotExist:
+        new_card_release = lambda: m.CardRelease(
             card_set=card_set, card=card, art=img,
             card_number=number, rarity=rarity)
         if number:
             try:
-                release = CardRelease.objects.get(
+                release = m.CardRelease.objects.get(
                     card_set=card_set, card=card, card_number=number)
                 # Update multiverseid when process card front face
                 if sub_number == 'a':
                     release.art = img
-            except CardRelease.DoesNotExist:
+            except m.CardRelease.DoesNotExist:
                 release = new_card_release()
         else:
             release = new_card_release()
@@ -154,11 +160,11 @@ def save_card_face(page, card_set, no_update=False):
     provider = page.get_provider()
     release_type = ContentType.objects.get_for_model(release)
     try:
-        source = DataSource.objects.get(content_type__pk=release_type.pk,
-                                        object_id=release.id,
-                                        data_provider=provider)
-    except DataSource.DoesNotExist:
-        source = DataSource(content_object=release, data_provider=provider)
+        source = m.DataSource.objects.get(content_type__pk=release_type.pk,
+                                          object_id=release.id,
+                                          data_provider=provider)
+    except m.DataSource.DoesNotExist:
+        source = m.DataSource(content_object=release, data_provider=provider)
     finally:
         if not source.url or sub_number == 'a':
             source.url = card_details['url']
