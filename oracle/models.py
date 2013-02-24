@@ -232,8 +232,7 @@ class CardL10n(models.Model):
     flavor = NullTextField(null=True, blank=True)
 
     artist = models.ForeignKey(Artist)
-    scan = models.URLField()
-    file = models.ImageField(upload_to='art', null=True, blank=True)
+    art = models.ForeignKey(CardImage, null=True, blank=True)
 
     class Meta:
         unique_together = (('card_face', 'card_release', 'language'),)
