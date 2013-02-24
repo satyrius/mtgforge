@@ -17,7 +17,8 @@ class CardImageAdmin(admin.ModelAdmin):
             'artist')
 
     def art_thumbnail(self, obj):
-        return mark_safe(u'<img src="{0}"/>'.format(escape(obj.file.url)))
+        url = obj.file and obj.file.url or obj.scan
+        return mark_safe(u'<img src="{0}"/>'.format(escape(url)))
     art_thumbnail.allow_tags = True
 
 admin.site.register(models.CardImage, CardImageAdmin)

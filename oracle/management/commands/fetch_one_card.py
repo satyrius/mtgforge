@@ -148,7 +148,7 @@ def save_card_face(page, card_set, no_update=False):
                 release = m.CardRelease.objects.get(
                     card_set=card_set, card=card, card_number=number)
                 # Update multiverseid when process card front face
-                if sub_number == 'a':
+                if not release.art or sub_number == 'a':
                     release.art = img
             except m.CardRelease.DoesNotExist:
                 release = new_card_release()
