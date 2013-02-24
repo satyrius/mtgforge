@@ -37,3 +37,5 @@ LOGGING['loggers']['oracle.management']['level'] = 'DEBUG'
 MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + (
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
+
+DEBUG_PROPAGATE_EXCEPTIONS = True
