@@ -242,3 +242,5 @@ LOGGING = {
         },
     }
 }
+
+GRAPPELLI_ADMIN_TITLE = 'MTG Forge'
