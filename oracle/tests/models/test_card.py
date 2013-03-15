@@ -33,12 +33,13 @@ class CardModelTest(TestCase):
         self.assertEqual(card.cardface_set.count(), 1)
 
     def test_colors(self):
-        name = 'Draw X Cards'
+        name = 'Mind Spring'
+        rules = 'Draw X Cards'
         card = Card.objects.create(name=name)
         face = CardFace.objects.create(
             card=card, place=CardFace.FRONT,
-            name='Mind Spring', type_line='Sorcery',
-            rules=name, mana_cost='{X}{U}{U}',
+            name=name, type_line='Sorcery',
+            rules=rules, mana_cost='{X}{U}{U}',
         )
         self.assertEqual(face.color_identity, Color.BLUE)
         self.assertEqual(face.colors, [Color.BLUE])
