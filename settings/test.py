@@ -7,7 +7,7 @@ MEDIA_ROOT = '/tmp/mtgforge/media/'
 # Make it clean before running
 if os.path.exists(MEDIA_ROOT):
     shutil.rmtree(MEDIA_ROOT)
-for d in ['art']:
+for d in ['art', 'thumbs']:
     d = os.path.join(MEDIA_ROOT, d)
     os.makedirs(d)
 
