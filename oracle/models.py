@@ -197,6 +197,15 @@ class CardImage(models.Model):
         return unicode(self.mvid)
 
 
+class CardImageThumb(models.Model):
+    original = models.ForeignKey(CardImage)
+    format = models.CharField(max_length=10)
+    file = models.ImageField(upload_to='thumbs')
+
+    class Meta:
+        unique_together = ('original', 'format')
+
+
 class CardRelease(models.Model):
     COMMON, UNCOMMON, RARE, MYTHIC = 'c', 'u', 'r', 'm'
     RARITY_CHOICES = (

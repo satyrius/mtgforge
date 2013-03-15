@@ -1,16 +1,21 @@
 import re
 import urllib
 
+from django.conf import settings
 from django.conf.urls.defaults import url
 from django.core.urlresolvers import NoReverseMatch
 from django.db import connection
 from forge.resources.base import ModelResource
-from oracle.models import CardFace, Color, CardSet, CardImage
+from oracle.models import CardFace, Color, CardSet, CardImage, CardImageThumb
 from tastypie.exceptions import BadRequest
 
 
 def get_art_url(name):
     return CardImage().file.storage.url(name)
+
+
+def get_thumb_url(name):
+    return CardImageThumb().file.storage.url(name)
 
 
 class CardResource(ModelResource):
@@ -22,9 +27,12 @@ class CardResource(ModelResource):
 
     def dehydrate(self, bundle):
         if hasattr(bundle.obj, 'scan'):
-            bundle.data['scan'] = bundle.obj.scan
+            bundle.data['thumb'] = bundle.obj.scan
         if hasattr(bundle.obj, 'file') and bundle.obj.file:
-            bundle.data['scan'] = get_art_url(bundle.obj.file)
+            bundle.data['thumb'] = bundle.data['original'] = \
+                get_art_url(bundle.obj.file)
+        if hasattr(bundle.obj, 'thumb') and bundle.obj.thumb:
+            bundle.data['thumb'] = get_thumb_url(bundle.obj.thumb)
         if hasattr(bundle.obj, 'rank'):
             bundle.data['rank'] = bundle.obj.rank
         return bundle
@@ -70,12 +78,16 @@ class CardResource(ModelResource):
             SELECT DISTINCT ON ({rank}, r.card_id)
                 f.*,
                 img.*,
+                thumb.file AS thumb,
                 {rank} AS rank
             FROM forge_cardftsindex AS i
             JOIN oracle_cardface AS f ON f.id = i.card_face_id
             JOIN oracle_cardrelease AS r ON r.card_id = f.card_id
             JOIN oracle_cardset AS cs ON cs.id = r.card_set_id
             JOIN oracle_cardimage AS img ON img.id = r.art_id
+            LEFT JOIN oracle_cardimagethumb AS thumb
+                ON thumb.original_id = img.id
+                AND format = %(thumb_fmt)s
             WHERE
                 TRUE
                 {search_filter}
@@ -88,7 +100,7 @@ class CardResource(ModelResource):
         """
         count_query = "SELECT COUNT(1) FROM ({query}) AS t".format(query=query)
 
-        params = {}
+        params = dict(thumb_fmt=settings.CARD_IMAGE_SERP_THUMB)
         filters = dict(
             search_filter='',
             set_filter='',
