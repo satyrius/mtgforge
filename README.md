@@ -126,10 +126,20 @@ To skip card faces that cannot be found (parsed from) on card page you can pass 
 
 ### Cards post processing
 
+#### fetch_scans
+
 Loading cards' scans is a heavy pricess. It was introduces as separate management command.
 
     ./manage.py fetch_scans
 
+#### generate_thumbnails
+    
+It is enought to show fetched scans on SERP as is, but it would be better to use *progressive jpeg* compression to make them smaller. Use `generate_thumbnails` command to create all thumbnails we need. You can pass additional `--quality` option to set jpeg quality. This command do not update existing thumbs by default, but if you want to refresh thumbnails pass `--refresh` option.
+
+    ./manage.py generate_thumbnails
+
+#### parse_face_type
+    
 MTG has a number of unordinary cards: splited, fliped and double-faced. To set right face type use next command:
 
     ./manage.py parse_face_type
