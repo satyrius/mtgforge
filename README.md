@@ -68,10 +68,12 @@ To fill cards database do the following:
     ./manage.py fetch_gatherer
     # Partial load. Get only particular set (e.g. Zendikar)
     ./manage.py fetch_gatherer zen
-    # Then run some postprocessing
+    
+Then run some postprocessing. *It is optional but adviced if you want to all go faster.*
+
     ./manage.py parse_face_type
-    # Download art
     ./manage.py fetch_scans
+    ./manage.py generate_thumbnails
 
 To build full text search engine do:
 
