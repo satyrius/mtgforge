@@ -4,7 +4,7 @@ MTG Forge is a Magic Card Database and trading platform. It has been started und
 
 Clone git repository with project:
 
-    git clone git@github.com:ostrovok-team/mtgforge.git
+    git clone git@github.com:satyrius/mtgforge.git
 
 You should intall some system requirements (Mac OS X dependent):
 
