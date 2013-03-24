@@ -71,7 +71,6 @@ To fill cards database do the following:
     
 Then run some postprocessing. *It is optional but adviced if you want to all go faster.*
 
-    ./manage.py parse_face_type
     ./manage.py fetch_scans
     ./manage.py generate_thumbnails
 
@@ -137,9 +136,3 @@ Loading cards' scans is a heavy pricess. It was introduces as separate managemen
 It is enought to show fetched scans on SERP as is, but it would be better to use *progressive jpeg* compression to make them smaller. Use `generate_thumbnails` command to create all thumbnails we need. You can pass additional `--quality` option to set jpeg quality. This command do not update existing thumbs by default, but if you want to refresh thumbnails pass `--refresh` option.
 
     ./manage.py generate_thumbnails
-
-#### parse_face_type
-    
-MTG has a number of unordinary cards: splited, fliped and double-faced. To set right face type use next command:
-
-    ./manage.py parse_face_type

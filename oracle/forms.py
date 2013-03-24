@@ -3,6 +3,7 @@ import re
 
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
+from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
 from oracle import models
@@ -78,12 +79,16 @@ class CardFaceForm(CardPageForm):
                     data['power'], data['thoughtness'] = p, t = pt
                 else:
                     data['loyality'] = int(pt[0])
+            if 'number' in data and 'sub_number' not in data:
+                number, data['sub_number'] = validate_collectors_number(
+                    data['number'])
 
         super(CardFaceForm, self).__init__(data=data, **kwargs)
 
     def clean(self):
         super(CardFaceForm, self).clean()
         cleaned_data = self.cleaned_data
+
         type_line = cleaned_data['type_line']
         if type_line and not cleaned_data['types']:
             cleaned_data['types'] = parse_type_line(type_line)
@@ -98,7 +103,35 @@ class CardFaceForm(CardPageForm):
                     t2.append(t.name)
             cleaned_data['type_line'] = ' - '.join(
                 filter(None, [' '.join(t0 + t1), ' '.join(t2)]))
+
+        # Change face type (a.k.a. place) for multifaced card
+        if self.instance and self.instance.card_id:
+            if self.instance.card.faces_count > 1:
+                types = [t.name.lower() for t in cleaned_data['types']]
+                if 'instant' in types or 'sorcery' in types:
+                    value = models.CardFace.SPLIT
+                elif cleaned_data['mana_cost'] is None:
+                    value = models.CardFace.BACK
+                elif cleaned_data['sub_number'] == 'b':
+                    value = models.CardFace.FLIP
+                else:
+                    value = models.CardFace.FRONT
+                cleaned_data['place'] = value
+
         return cleaned_data
+
+
+def validate_collectors_number(number, required=False):
+    match = re.match('^(\d+)([a-z])?', number or '')
+    if not match:
+        if required:
+            raise ValidationError(u'Collector\'s number "{}" does not match '
+                                  u'format'.format(number))
+        else:
+            return None, None
+    number = int(match.group(1))
+    sub_number = match.group(2)
+    return number, sub_number
 
 
 class CardL10nForm(CardPageForm):

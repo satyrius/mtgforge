@@ -112,6 +112,25 @@ class FetchCardsCommandTest(ProviderTest):
         card_face = save_card_face(page, cs)
         self.assertIsInstance(card_face, m.CardFace)
         self.assertEqual(card_face.name, u'Fire')
+        self.assertEqual(card_face.place, m.CardFace.SPLIT)
         card = card_face.card
         self.assertEqual(card.name, 'Fire // Ice')
         self.assertEqual(card.faces_count, 2)
+
+    def test_save_fliped_card(self, _dowload_content):
+        cs = m.CardSet.objects.create(name='Champions of Kamigawa')
+        _dowload_content.return_value = get_html_fixture('gatherer_flip_oracle')
+        url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=78694&part=Tok-Tok%2c+Volcano+Born'
+        name = u'Akki Lavarunner (Tok-Tok, Volcano Born)'
+        page = GathererCard(url, name=name)
+
+        card_face = save_card_face(page, cs)
+        card = card_face.card
+
+        self.assertEqual(card.name, 'Akki Lavarunner')
+        self.assertEqual(card.faces_count, 2)
+
+        self.assertIsInstance(card_face, m.CardFace)
+        self.assertEqual(card_face.name, u'Tok-Tok, Volcano Born')
+        self.assertEqual(card_face.sub_number, 'b')
+        self.assertEqual(card_face.place, m.CardFace.FLIP)

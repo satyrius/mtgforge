@@ -1,6 +1,8 @@
 import requests
 from mock import patch, call
 
+from oracle.forms import CardFaceForm
+from oracle.models import Card, CardFace
 from oracle.providers import Page
 from oracle.providers.gatherer import GathererCard, GathererCardPrint, \
     GathererCardLanguages
@@ -17,7 +19,7 @@ class GathererDataParsingTest(ProviderTest):
             self.assertIn(k, standard)
 
     def assert_card_parse(self, name, url, expected_data, html_fixture=None,
-                          print_url=None, lang_url=None):
+                          print_url=None, lang_url=None, save=False):
         page = GathererCard(url, name=name)
         if html_fixture:
             with patch.object(Page, 'get_content') as get_content:
@@ -41,6 +43,21 @@ class GathererDataParsingTest(ProviderTest):
             lang_page = page.languages_page()
             self.assertIsInstance(lang_page, GathererCardLanguages)
             self.assertEqual(lang_page.url, lang_url)
+
+        if save:
+            card_name = 'title' in details or name
+            faces_count = 'other_faces' in details and \
+                len(details['other_faces']) + 1 or 1
+            card = Card.objects.create(name=card_name, faces_count=faces_count)
+            face = CardFace(card=card)
+            form = CardFaceForm(details, instance=face)
+            self.assertTrue(form.is_valid(), '\n' + form.errors.as_text())
+
+            saved_face = form.save()
+            self.assertIsInstance(saved_face, CardFace)
+            return saved_face
+        else:
+            return None
 
     def test_card_oracle_details(self):
         self.assert_card_parse(
@@ -93,7 +110,7 @@ class GathererDataParsingTest(ProviderTest):
             ))
 
     def test_double_faced_card_front(self):
-        self.assert_card_parse(
+        face = self.assert_card_parse(
             name=u'Hanweir Watchkeep',
             url='http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=2446835',
             print_url='http://gatherer.wizards.com/Pages/Card/Details.aspx?printed=true&multiverseid=244683',
@@ -116,10 +133,14 @@ class GathererDataParsingTest(ProviderTest):
                 other_faces=['Bane of Hanweir'],
                 flavor='He scans for wolves, knowing there\'s one he can never anticipate.',
                 type='Creature - Human Warrior Werewolf',
-            ))
+            ),
+            save=True)
+        # It should be 'front' face type
+        self.assertEqual(face.card.faces_count, 2)
+        self.assertEqual(face.place, CardFace.FRONT)
 
     def test_double_faced_card_back(self):
-        self.assert_card_parse(
+        face = self.assert_card_parse(
             name=u'Bane of Hanweir',
             url='http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=244687',
             html_fixture='gatherer_werewolf_oracle',
@@ -140,10 +161,14 @@ class GathererDataParsingTest(ProviderTest):
                 other_faces=['Hanweir Watchkeep'],
                 flavor='Technically he never left his post. He looks after the wolf wherever it goes.',
                 type='Creature - Werewolf',
-            ))
+            ),
+            save=True)
+        # It should be 'back' face type
+        self.assertEqual(face.card.faces_count, 2)
+        self.assertEqual(face.place, CardFace.BACK)
 
     def test_fliped_card_normal(self):
-        self.assert_card_parse(
+        face = self.assert_card_parse(
             name=u'Akki Lavarunner',
             url='http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=78694',
             print_url='http://gatherer.wizards.com/Pages/Card/Details.aspx?printed=true&multiverseid=78694',
@@ -165,10 +190,14 @@ class GathererDataParsingTest(ProviderTest):
                 playerRating='Rating: 2.716 / 5 (44 votes)',
                 other_faces=['Tok-Tok, Volcano Born'],
                 type='Creature - Goblin Warrior',
-            ))
+            ),
+            save=True)
+        # It should be 'front' face type
+        self.assertEqual(face.card.faces_count, 2)
+        self.assertEqual(face.place, CardFace.FRONT)
 
     def test_fliped_card_flip(self):
-        self.assert_card_parse(
+        face = self.assert_card_parse(
             name=u'Akki Lavarunner (Tok-Tok, Volcano Born)',
             url='http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=78694&part=Tok-Tok%2c+Volcano+Born',
             html_fixture='gatherer_flip_oracle',
@@ -189,7 +218,11 @@ class GathererDataParsingTest(ProviderTest):
                 playerRating='Rating: 2.716 / 5 (44 votes)',
                 other_faces=['Akki Lavarunner'],
                 type='Legendary Creature - Goblin Shaman',
-            ))
+            ),
+            save=True)
+        # It should be 'flip' face type
+        self.assertEqual(face.card.faces_count, 2)
+        self.assertEqual(face.place, CardFace.FLIP)
 
     @patch.object(Page, '_dowload_content')
     def test_splited_card(self, urlopen):
@@ -200,7 +233,8 @@ class GathererDataParsingTest(ProviderTest):
         fire_page = get_html_fixture('gatherer_fire_oracle')
         urlopen.side_effect = [card_page, fire_page]
 
-        self.assert_card_parse(
+        card_name = 'Fire // Ice'
+        face = self.assert_card_parse(
             name=u'Fire',
             url=page_url,
             print_url='http://gatherer.wizards.com/Pages/Card/Details.aspx?printed=true&multiverseid=27166',
@@ -208,7 +242,7 @@ class GathererDataParsingTest(ProviderTest):
                 set='Apocalypse',
                 art='http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=27166&type=card',
                 name='Fire',
-                title='Fire // Ice',
+                title=card_name,
                 artist='Franz Vohwinkel',
                 url='http://gatherer.wizards.com/Pages/Card/Details.aspx?part=Fire&multiverseid=27166',
                 text='Fire deals 2 damage divided as you choose among one or two target creatures and/or players.',
@@ -221,8 +255,15 @@ class GathererDataParsingTest(ProviderTest):
                 other_faces=['Ice'],
                 otherSets='',
                 type='Instant',
-            ))
+            ),
+            save=True)
+
+        # Check that both mocked pages was requested
         self.assertEqual(urlopen.call_args_list, [call(page_url), call(fire_url)])
+
+        # It should be 'split' face type
+        self.assertEqual(face.card.faces_count, 2)
+        self.assertEqual(face.place, CardFace.SPLIT)
 
     def test_land_card_details(self):
         self.assert_card_parse(

@@ -99,6 +99,8 @@ class CardFace(models.Model):
 
     card = models.ForeignKey(Card, blank=True)
     place = NullCharField(max_length=5, choices=TYPE_CHOICES, default=FRONT, blank=True)
+    sub_number = NullCharField(max_length=1, null=True, blank=True,
+                               choices=(('a', 'a'), ('b', 'b')))
 
     # Mana cost code and CMC (Converted Mana Cost)
     mana_cost = NullCharField(max_length=255, null=True)

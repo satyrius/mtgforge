@@ -18,7 +18,7 @@ class CardL10nInline(admin.TabularInline):
 card_face_fieldsets = (
     (None, {
         'fields': (
-            ('name', 'place'),
+            ('name', 'place', 'sub_number'),
             ('mana_cost', 'cmc', 'color_identity')
         )
     }),
@@ -43,6 +43,7 @@ class CardFaceInline(admin.StackedInline):
     readonly_fields = ('card', 'color_identity',)
     extra = 0
     fieldsets = card_face_fieldsets
+    ordering = ('sub_number',)
 
 
 class CardFaceAdmin(admin.ModelAdmin):
