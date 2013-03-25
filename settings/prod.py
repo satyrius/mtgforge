@@ -11,7 +11,7 @@ MEDIA_ROOT = '/var/www/media/'
 STATIC_ROOT = '/var/www/static/'
 
 ADMINS = (
-    ('Anton Egorov', 'anton.egoroff@gmailcom'),
+    ('Anton Egorov', 'anton.egoroff@gmail.com'),
 )
 
 MANAGERS = ADMINS
