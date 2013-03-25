@@ -10,7 +10,7 @@ You should intall some system requirements (Mac OS X dependent):
 
     # CoffeeScript (as Node.js module)
     brew install nodejs
-    curl http://npmjs.org/install.sh | sh
+    curl https://npmjs.org/install.sh | sh
     npm install -g coffee-script
 
     # SASS (as Ruby gem)
@@ -68,7 +68,7 @@ To fill cards database do the following:
     ./manage.py fetch_gatherer
     # Partial load. Get only particular set (e.g. Zendikar)
     ./manage.py fetch_gatherer zen
-    
+
 Then run some postprocessing. *It is optional but adviced if you want to all go faster.*
 
     ./manage.py fetch_scans
@@ -132,7 +132,7 @@ Loading cards' scans is a heavy pricess. It was introduces as separate managemen
     ./manage.py fetch_scans
 
 #### generate_thumbnails
-    
+
 It is enought to show fetched scans on SERP as is, but it would be better to use *progressive jpeg* compression to make them smaller. Use `generate_thumbnails` command to create all thumbnails we need. You can pass additional `--quality` option to set jpeg quality. This command do not update existing thumbs by default, but if you want to refresh thumbnails pass `--refresh` option.
 
     ./manage.py generate_thumbnails
