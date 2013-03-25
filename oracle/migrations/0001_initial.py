@@ -70,6 +70,7 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('card', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['oracle.Card'], blank=True)),
             ('place', self.gf('contrib.fields.NullCharField')(default='front', max_length=5, blank=True)),
+            ('sub_number', self.gf('contrib.fields.NullCharField')(max_length=1, null=True, blank=True)),
             ('mana_cost', self.gf('contrib.fields.NullCharField')(max_length=255, null=True)),
             ('cmc', self.gf('django.db.models.fields.PositiveIntegerField')(null=True)),
             ('color_identity', self.gf('django.db.models.fields.PositiveSmallIntegerField')(default=0, blank=True)),
@@ -77,7 +78,6 @@ class Migration(SchemaMigration):
             ('name', self.gf('contrib.fields.NullCharField')(unique=True, max_length=255)),
             ('type_line', self.gf('contrib.fields.NullCharField')(max_length=255)),
             ('rules', self.gf('contrib.fields.NullTextField')(null=True)),
-            ('flavor', self.gf('contrib.fields.NullTextField')(null=True)),
             ('power', self.gf('contrib.fields.NullCharField')(max_length=10, null=True, blank=True)),
             ('thoughtness', self.gf('contrib.fields.NullCharField')(max_length=10, null=True, blank=True)),
             ('fixed_power', self.gf('django.db.models.fields.PositiveSmallIntegerField')(null=True, blank=True)),
@@ -122,6 +122,29 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal('oracle', ['Artist'])
 
+        # Adding model 'CardImage'
+        db.create_table('oracle_cardimage', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('mvid', self.gf('django.db.models.fields.PositiveIntegerField')(unique=True, null=True, blank=True)),
+            ('scan', self.gf('django.db.models.fields.URLField')(max_length=200, null=True, blank=True)),
+            ('file', self.gf('django.db.models.fields.files.ImageField')(max_length=100, null=True, blank=True)),
+            ('comment', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('artist', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['oracle.Artist'], null=True, blank=True)),
+        ))
+        db.send_create_signal('oracle', ['CardImage'])
+
+        # Adding model 'CardImageThumb'
+        db.create_table('oracle_cardimagethumb', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('original', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['oracle.CardImage'])),
+            ('format', self.gf('django.db.models.fields.CharField')(max_length=10)),
+            ('file', self.gf('django.db.models.fields.files.ImageField')(max_length=100)),
+        ))
+        db.send_create_signal('oracle', ['CardImageThumb'])
+
+        # Adding unique constraint on 'CardImageThumb', fields ['original', 'format']
+        db.create_unique('oracle_cardimagethumb', ['original_id', 'format'])
+
         # Adding model 'CardRelease'
         db.create_table('oracle_cardrelease', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -129,9 +152,7 @@ class Migration(SchemaMigration):
             ('card_set', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['oracle.CardSet'])),
             ('rarity', self.gf('contrib.fields.NullCharField')(max_length=1)),
             ('card_number', self.gf('django.db.models.fields.PositiveIntegerField')(null=True, blank=True)),
-            ('mvid', self.gf('django.db.models.fields.PositiveIntegerField')(unique=True)),
-            ('scan', self.gf('django.db.models.fields.URLField')(max_length=200, null=True, blank=True)),
-            ('default_art', self.gf('django.db.models.fields.files.ImageField')(max_length=100, null=True, blank=True)),
+            ('art', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['oracle.CardImage'], null=True, blank=True)),
         ))
         db.send_create_signal('oracle', ['CardRelease'])
 
@@ -145,9 +166,7 @@ class Migration(SchemaMigration):
             ('type_line', self.gf('contrib.fields.NullCharField')(max_length=255)),
             ('rules', self.gf('contrib.fields.NullTextField')(null=True, blank=True)),
             ('flavor', self.gf('contrib.fields.NullTextField')(null=True, blank=True)),
-            ('artist', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['oracle.Artist'])),
-            ('scan', self.gf('django.db.models.fields.URLField')(max_length=200)),
-            ('file', self.gf('django.db.models.fields.files.ImageField')(max_length=100, null=True, blank=True)),
+            ('art', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['oracle.CardImage'], null=True, blank=True)),
         ))
         db.send_create_signal('oracle', ['CardL10n'])
 
@@ -158,6 +177,9 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
         # Removing unique constraint on 'CardL10n', fields ['card_face', 'card_release', 'language']
         db.delete_unique('oracle_cardl10n', ['card_face_id', 'card_release_id', 'language'])
+
+        # Removing unique constraint on 'CardImageThumb', fields ['original', 'format']
+        db.delete_unique('oracle_cardimagethumb', ['original_id', 'format'])
 
         # Removing unique constraint on 'DataProviderPage', fields ['url_hash', 'class_name']
         db.delete_unique('oracle_dataproviderpage', ['url_hash', 'class_name'])
@@ -195,6 +217,12 @@ class Migration(SchemaMigration):
         # Deleting model 'Artist'
         db.delete_table('oracle_artist')
 
+        # Deleting model 'CardImage'
+        db.delete_table('oracle_cardimage')
+
+        # Deleting model 'CardImageThumb'
+        db.delete_table('oracle_cardimagethumb')
+
         # Deleting model 'CardRelease'
         db.delete_table('oracle_cardrelease')
 
@@ -229,7 +257,6 @@ class Migration(SchemaMigration):
             'colors': ('arrayfields.fields.IntegerArrayField', [], {'default': '[]', 'blank': 'True'}),
             'fixed_power': ('django.db.models.fields.PositiveSmallIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'fixed_thoughtness': ('django.db.models.fields.PositiveSmallIntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'flavor': ('contrib.fields.NullTextField', [], {'null': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'loyality': ('django.db.models.fields.PositiveSmallIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'mana_cost': ('contrib.fields.NullCharField', [], {'max_length': '255', 'null': 'True'}),
@@ -237,34 +264,47 @@ class Migration(SchemaMigration):
             'place': ('contrib.fields.NullCharField', [], {'default': "'front'", 'max_length': '5', 'blank': 'True'}),
             'power': ('contrib.fields.NullCharField', [], {'max_length': '10', 'null': 'True', 'blank': 'True'}),
             'rules': ('contrib.fields.NullTextField', [], {'null': 'True'}),
+            'sub_number': ('contrib.fields.NullCharField', [], {'max_length': '1', 'null': 'True', 'blank': 'True'}),
             'thoughtness': ('contrib.fields.NullCharField', [], {'max_length': '10', 'null': 'True', 'blank': 'True'}),
             'type_line': ('contrib.fields.NullCharField', [], {'max_length': '255'}),
             'types': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['oracle.CardType']", 'symmetrical': 'False'})
         },
+        'oracle.cardimage': {
+            'Meta': {'object_name': 'CardImage'},
+            'artist': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['oracle.Artist']", 'null': 'True', 'blank': 'True'}),
+            'comment': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'file': ('django.db.models.fields.files.ImageField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'mvid': ('django.db.models.fields.PositiveIntegerField', [], {'unique': 'True', 'null': 'True', 'blank': 'True'}),
+            'scan': ('django.db.models.fields.URLField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'})
+        },
+        'oracle.cardimagethumb': {
+            'Meta': {'unique_together': "(('original', 'format'),)", 'object_name': 'CardImageThumb'},
+            'file': ('django.db.models.fields.files.ImageField', [], {'max_length': '100'}),
+            'format': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'original': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['oracle.CardImage']"})
+        },
         'oracle.cardl10n': {
             'Meta': {'unique_together': "(('card_face', 'card_release', 'language'),)", 'object_name': 'CardL10n'},
-            'artist': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['oracle.Artist']"}),
+            'art': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['oracle.CardImage']", 'null': 'True', 'blank': 'True'}),
             'card_face': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['oracle.CardFace']", 'blank': 'True'}),
             'card_release': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['oracle.CardRelease']", 'blank': 'True'}),
-            'file': ('django.db.models.fields.files.ImageField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'flavor': ('contrib.fields.NullTextField', [], {'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'language': ('contrib.fields.NullCharField', [], {'default': "'en'", 'max_length': '2', 'blank': 'True'}),
             'name': ('contrib.fields.NullCharField', [], {'max_length': '255'}),
             'rules': ('contrib.fields.NullTextField', [], {'null': 'True', 'blank': 'True'}),
-            'scan': ('django.db.models.fields.URLField', [], {'max_length': '200'}),
             'type_line': ('contrib.fields.NullCharField', [], {'max_length': '255'})
         },
         'oracle.cardrelease': {
             'Meta': {'object_name': 'CardRelease'},
+            'art': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['oracle.CardImage']", 'null': 'True', 'blank': 'True'}),
             'card': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['oracle.Card']"}),
             'card_number': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'card_set': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['oracle.CardSet']"}),
-            'default_art': ('django.db.models.fields.files.ImageField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'mvid': ('django.db.models.fields.PositiveIntegerField', [], {'unique': 'True'}),
-            'rarity': ('contrib.fields.NullCharField', [], {'max_length': '1'}),
-            'scan': ('django.db.models.fields.URLField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'})
+            'rarity': ('contrib.fields.NullCharField', [], {'max_length': '1'})
         },
         'oracle.cardset': {
             'Meta': {'object_name': 'CardSet'},

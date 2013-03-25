@@ -9,3 +9,9 @@ MEDIA_ROOT = '/var/www/media/'
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = '/var/www/static/'
+
+ADMINS = (
+    ('Anton Egorov', 'anton.egoroff@gmail.com'),
+)
+
+MANAGERS = ADMINS
