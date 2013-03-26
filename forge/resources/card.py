@@ -148,7 +148,7 @@ class CardResource(ModelResource):
         # COLOR filter
         color = get_commaseparated_param(request, 'color')
         if color:
-            extra_url_args['color'] = color
+            extra_url_args['color'] = color[:]
             if 'a' in color:
                 color.remove('a')
                 operator = u' & '
