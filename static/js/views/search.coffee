@@ -4,6 +4,7 @@ class Forge.SearchView extends Backbone.View
 
     events:
         'change #search-form': 'handleSubmit'
+        'submit #search-form': 'handleSubmit'
 
     subscriptions:
         'search:confirm': 'updateForm'
