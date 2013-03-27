@@ -78,6 +78,7 @@ To build full text search engine do:
 
     ./manage.py build_fts_index
     ./manage.py build_sim_index
+    ./manage.py build_suggest
 
 ## Test
 
