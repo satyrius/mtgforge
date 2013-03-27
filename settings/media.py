@@ -17,7 +17,8 @@ MEDIA_BUNDLES = (
         'js/lib/backbone.js',
         'js/lib/backbone.meta.js',
         'js/lib/backbone-mediator.js',
-        'js/lib/chosen.jquery.min.js'
+        'js/lib/chosen.jquery.min.js',
+        'js/lib/bootstrap-typeahead.custom.js',
     ),
     ( 'app.js',
         #TEMPLATES
