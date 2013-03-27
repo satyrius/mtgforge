@@ -12,7 +12,7 @@ class Forge.SearchResultsView extends Backbone.View
         @data = data
         @$el.html(@template())
         @addCards(data.toJSON())
-        $(document).on('scroll', @checkScroll)
+        $(document).on('scroll', _.throttle(@checkScroll, 100))
 
     addCards: (data) ->
         @loading = false
