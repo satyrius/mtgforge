@@ -27,6 +27,8 @@ MEDIA_BUNDLES = (
         'templates/search/form.jst',
         'templates/search/results.jst',
         'templates/search/new_card.jst',
+        'templates/search/new_row.jst',
+        'templates/search/card_info.jst',
  
         #INIT
         'js/init.coffee',
