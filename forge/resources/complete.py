@@ -21,5 +21,5 @@ class CompleteResource(Resource):
                           .order_by('-weight', 'term')\
                           .values_list('term', flat=True)[:meta.limit]
 
-        to_be_serialized = words
+        to_be_serialized = list(words)
         return self.create_response(request, to_be_serialized)
