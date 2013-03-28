@@ -109,3 +109,7 @@ class ColorsTest(TestCase):
 
         c = Color(self.w, self.u, self.b)
         self.assertEqual({'w', 'u', 'b'}, set(c.names))
+
+    def test_no_color_identity(self):
+        c = Color([])
+        self.assertEqual(c.names, [])
