@@ -5,8 +5,8 @@ class Forge.Router extends Backbone.Router
         @sidebarView = new Forge.SidebarView()
         Backbone.Mediator.subscribe('search:q', (query) =>
             query = $.unserialize(query) if typeof query == 'string'
-            _.extend(@query, query);
-            @navigate("search?#{$.serialize(@query, true)}", {trigger: true})
+            q = _.extend(@query, query);
+            @navigate("search?#{$.serialize(q, true)}", {trigger: true})
         )
 
     query: {}
@@ -21,6 +21,7 @@ class Forge.Router extends Backbone.Router
         @indexView.render()
 
     search: (query) ->
+        query = query
         unless @searchResultsView?
             @searchResultsView = new Forge.SearchResultsView()
 

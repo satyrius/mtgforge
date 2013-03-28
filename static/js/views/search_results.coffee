@@ -41,7 +41,9 @@ class Forge.SearchResultsView extends Backbone.View
 
     checkScroll: () =>
         return if @loading
-        lastCardTop = $(".card", @$el).last().find('img').offset().top
+        lastCard = $('.card', @$el).last()
+        return if lastCard.length == 0
+        lastCardTop = lastCard.find('img').offset().top
         windowBottomPosition = $("body").scrollTop() + window.outerHeight
         if windowBottomPosition >= lastCardTop and @data.meta.total_count > @data.meta.offset + @data.meta.limit
             @data.loadNext()

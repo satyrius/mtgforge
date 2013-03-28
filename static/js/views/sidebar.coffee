@@ -73,4 +73,5 @@ class Forge.SidebarView extends Backbone.View
             cmc: []
             type: []
             rarity: []
+            set: []
         Backbone.Mediator.publish("search:q", @_filterData)
