@@ -1,13 +1,12 @@
-import re
 import urllib
-
-from django.conf import settings
 from django.conf.urls.defaults import url
 from django.core.urlresolvers import NoReverseMatch
-from django.db import connection
-from forge.resources.base import ModelResource
-from oracle.models import CardFace, Color, CardSet, CardImage, CardImageThumb
 from tastypie.exceptions import BadRequest
+from tastypie.utils import trailing_slash
+
+from forge.fts import FtsQuery
+from forge.resources.base import ModelResource
+from oracle.models import CardFace, CardImage, CardImageThumb
 
 
 def get_art_url(name):
@@ -40,10 +39,10 @@ class CardResource(ModelResource):
     def dehydrate_colors(self, bundle):
         return bundle.obj.color_names
 
-    def override_urls(self):
+    def prepend_urls(self):
         return [
-            url(r"^(?P<resource_name>%s)/search/$" %
-                self._meta.resource_name,
+            url(r"^(?P<resource_name>%s)/search%s$" %
+                (self._meta.resource_name, trailing_slash()),
                 self.wrap_view('get_search'),
                 name="api_get_search"),
         ]
@@ -69,118 +68,45 @@ class CardResource(ModelResource):
         Performs fts search on Card using CardFtsIndex table
         """
 
-        cursor = connection.cursor()
-        meta = {}
         extra_url_args = {}  # for building next and prev links
 
-        # prepare base query
-        query = """
-            SELECT DISTINCT ON ({rank}, r.card_id)
-                f.*,
-                img.*,
-                thumb.file AS thumb,
-                {rank} AS rank
-            FROM forge_cardftsindex AS i
-            JOIN oracle_cardface AS f ON f.id = i.card_face_id
-            JOIN oracle_cardrelease AS r ON r.card_id = f.card_id
-            JOIN oracle_cardset AS cs ON cs.id = r.card_set_id
-            JOIN oracle_cardimage AS img ON img.id = r.art_id
-            LEFT JOIN oracle_cardimagethumb AS thumb
-                ON thumb.original_id = img.id
-                AND format = %(thumb_fmt)s
-            WHERE
-                TRUE
-                {search_filter}
-                {set_filter}
-                {rarity_filter}
-                {color_filter}
-                {type_filter}
-                {cmc_filter}
-            ORDER BY {rank} DESC, r.card_id, cs.released_at DESC
-        """
-        count_query = "SELECT COUNT(1) FROM ({query}) AS t".format(query=query)
-
-        params = dict(thumb_fmt=settings.CARD_IMAGE_SERP_THUMB)
-        filters = dict(
-            search_filter='',
-            set_filter='',
-            rarity_filter='',
-            color_filter='',
-            type_filter='',
-            cmc_filter='',
-            rank='1',
-        )
-
-        # FULL TEXT SEARCH filter
+        query = FtsQuery()
         if request.GET.get('q', ''):
-            search = request.GET.get('q', '')
-            search, original = similarity_check(cursor, search)
-            search = search.strip(' \n\t')
+            search = request.GET['q'].strip(' \n\t')
+            query.add_term(q=search)
             extra_url_args['q'] = search
-            meta['query'] = search
-            meta['original_query'] = original
-            search = search.split(' ')
-            search = [u'%s:*' % s for s in search]
-            search = u' & '.join(search)
-            filters['search_filter'] = 'AND i.fts @@ to_tsquery(%(q)s)'
-            filters['rank'] = 'ts_rank_cd(array[0.1,0.5,1,0.8], i.fts, to_tsquery(%(q)s), 4)'
-            params['q'] = search
 
-        # SET filter
         acronyms = get_commaseparated_param(request, 'set')
         if acronyms:
-            extra_url_args['set'] = acronyms
-            set_ids = CardSet.objects.filter(
-                acronym__in=acronyms).values_list('id', flat=True)
-            if len(set_ids) != len(acronyms):
+            query.add_term(sets=acronyms)
+            if query.meta['sets_filtered'] != len(acronyms):
                 raise BadRequest('Make shure all set acronyms exist')
-            filters['set_filter'] = "AND i.sets @@ '{0}'::query_int".format(
-                '|'.join(map(str, set_ids)))
+            extra_url_args['set'] = acronyms
 
-        # RARITY filter
         rarity = get_commaseparated_param(request, 'rarity')
         if rarity:
+            query.add_term(rarity=rarity)
             extra_url_args['rarity'] = rarity
-            filters['rarity_filter'] = 'AND i.fts @@ to_tsquery(%(rarity)s)'
-            params['rarity'] = u' | '.join(
-                [u'%s:B*' % q.strip(' \n\t') for q in rarity])
 
-        # COLOR filter
         color = get_commaseparated_param(request, 'color')
         if color:
-            extra_url_args['color'] = color[:]
-            if 'a' in color:
-                color.remove('a')
-                operator = u' & '
-            else:
-                operator = u' | '
+            query.add_term(colors=color)
+            extra_url_args['color'] = color
 
-            identity_query = [str(Color.MAP[c]) for c in color]
-            identity_query = u"'%s'::query_int" % operator.join(identity_query)
-            filters['color_filter'] = u'AND i.color_identity_idx @@ {0}'.format(
-                identity_query)
-
-        # TYPE filter
         type_query = get_commaseparated_param(request, 'type')
         if type_query:
+            query.add_term(types=type_query)
             extra_url_args['type'] = type_query
-            type_query = [u'%s:B*' % q.strip(' \n\t') for q in type_query]
-            filters['type_filter'] = 'AND i.fts @@ to_tsquery(%(type)s)'
-            params['type'] = u' | '.join(type_query)
 
-        # CMC filter
         cmc = get_commaseparated_param(request, 'cmc')
         if cmc:
+            query.add_term(cmc=cmc)
             extra_url_args['cmc'] = cmc
-            cmc = map(int, cmc)
-            cmc_filter = 'AND (i.cmc = ANY(%(cmc)s){higher_cost})'
-            higher_cost = 7 in cmc and ' OR i.cmc > 7' or ''
-            filters['cmc_filter'] = cmc_filter.format(higher_cost=higher_cost)
-            params['cmc'] = cmc
+
+        meta = query.meta.copy()
 
         # fetch total objects count and build metadata
-        cursor.execute(count_query.format(**filters), params)
-        total_count = cursor.fetchone()[0]
+        total_count = query.execute_count()
         limit = int(request.GET.get('limit', 20))
         offset = int(request.GET.get('offset', 0))
         if total_count < limit + offset:
@@ -201,54 +127,16 @@ class CardResource(ModelResource):
             offset=offset
         )
 
-        # make an ordered and limited query
-        query = query + """
-            limit %(limit)s
-            offset %(offset)s
-        """
-        params.update(dict(limit=limit, offset=offset))
-        query = query.format(**filters)
-        query = CardFace.objects.raw(query, params)
-
-        # serialize objects for tastypy response
+        # serialize objects for tastypie response
         objects = []
-        for result in query:
+        for result in query.execute(limit, offset):
             bundle = self.build_bundle(obj=result, request=request)
             bundle = self.full_dehydrate(bundle)
             objects.append(bundle)
 
-        to_be_serialized = dict(
-            objects=objects,
-            meta=meta
-        )
         to_be_serialized = self.alter_list_data_to_serialize(
-            request, to_be_serialized)
+            request, {'objects': objects, 'meta': meta})
         return self.create_response(request, to_be_serialized)
-
-
-def similarity_check(cursor, query):
-    original = query
-    query = re.split('[^\w]', query.lower(), flags=re.I)
-    cursor.execute("""
-        SELECT DISTINCT ON (sim.keyword) src.kw, sim.keyword
-        FROM (
-            SELECT UNNEST(ARRAY[%s]) kw
-        ) src, forge_cardsimilarity sim
-        WHERE
-            NOT EXISTS(
-                SELECT id
-                FROM forge_cardsimilarity
-                WHERE keyword = src.kw
-            )
-            AND sim.keyword %% src.kw
-        ORDER BY sim.keyword, similarity(sim.keyword, src.kw)
-    """, [query])
-    modifications = cursor.fetchall()
-    modified = original
-    for source, changed in modifications:
-        modified = modified.replace(source, changed)
-
-    return modified, original
 
 
 def get_commaseparated_param(request, name):

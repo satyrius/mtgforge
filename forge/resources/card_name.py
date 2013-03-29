@@ -3,7 +3,7 @@ from tastypie.cache import SimpleCache
 from tastypie.resources import Resource
 
 from forge.resources.base import cached_response
-from forge.resources.card import similarity_check
+from forge.fts import similarity_check
 
 
 class CardNameResource(Resource):
