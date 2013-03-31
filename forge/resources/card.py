@@ -1,10 +1,9 @@
 import urllib
 from django.conf.urls.defaults import url
 from django.core.urlresolvers import NoReverseMatch
-from tastypie.exceptions import BadRequest
 from tastypie.utils import trailing_slash
 
-from forge.fts import FtsQuery
+from forge import fts
 from forge.resources.base import ModelResource
 from oracle.models import CardFace, CardImage, CardImageThumb
 
@@ -65,61 +64,33 @@ class CardResource(ModelResource):
 
     def get_search(self, request, **kwargs):
         """
-        Performs fts search on Card using CardFtsIndex table
+        Performs fts search on CardFace using CardFtsIndex table
         """
+        filters = {}
+        search = request.GET.get('q', '').strip(' \n\t')
+        if search:
+            filters['q'] = search
+        for k in ['set', 'rarity', 'color', 'type', 'cmc']:
+            values = get_commaseparated_param(request, k)
+            if values:
+                filters[k] = values
 
-        extra_url_args = {}  # for building next and prev links
-
-        query = FtsQuery()
-        if request.GET.get('q', ''):
-            search = request.GET['q'].strip(' \n\t')
-            query.add_term(q=search)
-            extra_url_args['q'] = search
-
-        acronyms = get_commaseparated_param(request, 'set')
-        if acronyms:
-            query.add_term(sets=acronyms)
-            if query.meta['sets_filtered'] != len(acronyms):
-                raise BadRequest('Make shure all set acronyms exist')
-            extra_url_args['set'] = acronyms
-
-        rarity = get_commaseparated_param(request, 'rarity')
-        if rarity:
-            query.add_term(rarity=rarity)
-            extra_url_args['rarity'] = rarity
-
-        color = get_commaseparated_param(request, 'color')
-        if color:
-            query.add_term(colors=color)
-            extra_url_args['color'] = color
-
-        type_query = get_commaseparated_param(request, 'type')
-        if type_query:
-            query.add_term(types=type_query)
-            extra_url_args['type'] = type_query
-
-        cmc = get_commaseparated_param(request, 'cmc')
-        if cmc:
-            query.add_term(cmc=cmc)
-            extra_url_args['cmc'] = cmc
-
+        query = fts.FtsQuery().add_term(**filters)
         meta = query.meta.copy()
 
-        # fetch total objects count and build metadata
+        # Fetch total objects count and build metadata
         total_count = query.execute_count()
         limit = int(request.GET.get('limit', 20))
         offset = int(request.GET.get('offset', 0))
         if total_count < limit + offset:
             next_url = None
         else:
-            next_url = self.get_resource_search_uri() + '?' + urllib.urlencode(
-                dict(
-                    format='json',
-                    limit=limit,
-                    offset=limit + offset,
-                    **extra_url_args
-                ), doseq=True)
+            filters.update(format='json', limit=limit, offset=limit + offset)
+            next_url = u'{}?{}'.format(
+                self.get_resource_search_uri(),
+                urllib.urlencode(filters, doseq=True))
 
+        # Update response meta
         meta.update(
             next=next_url,
             total_count=total_count,
@@ -127,7 +98,7 @@ class CardResource(ModelResource):
             offset=offset
         )
 
-        # serialize objects for tastypie response
+        # Serialize objects for tastypie response
         objects = []
         for result in query.execute(limit, offset):
             bundle = self.build_bundle(obj=result, request=request)

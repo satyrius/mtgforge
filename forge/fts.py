@@ -98,7 +98,7 @@ class FtsQuery(object):
         self.filters['rank'] = 'ts_rank_cd(array[0.1,0.5,1,0.8], i.fts, to_tsquery(%(q)s), 4)'
 
     @valueble(assert_list=True)
-    def add_sets(self, value):
+    def add_set(self, value):
         set_ids = CardSet.objects.filter(
             acronym__in=value).values_list('id', flat=True)
         self.meta['sets_filtered'] = len(set_ids)
@@ -112,7 +112,7 @@ class FtsQuery(object):
             [u'%s:B*' % q.strip(' \n\t') for q in value])
 
     @valueble(assert_list=True)
-    def add_colors(self, value):
+    def add_color(self, value):
         color = value[:]
         if 'a' in color:
             color.remove('a')
@@ -126,7 +126,7 @@ class FtsQuery(object):
             identity_query)
 
     @valueble(assert_list=True)
-    def add_types(self, value):
+    def add_type(self, value):
         type_query = [u'%s:B*' % q.strip(' \n\t') for q in value]
         self.filters['type_filter'] = 'AND i.fts @@ to_tsquery(%(type)s)'
         self.params['type'] = u' | '.join(type_query)
