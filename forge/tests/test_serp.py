@@ -13,22 +13,20 @@ class SerpTest(ResourceTestCase):
     def build_fts(self):
         BuildIndex().handle(verbosity=0)
 
-    def search(self, colors=None):
-        self.build_fts()
-        data = {}
-        if colors:
-            data['color'] = colors
-        return self.deserialize(self.api_client.get(self.uri, data=data))
+    def search(self, build_fts=True, **kwargs):
+        if build_fts:
+            self.build_fts()
+        return self.deserialize(self.api_client.get(self.uri, data=kwargs))
 
-    def create_card(self, mana_cost=None):
+    def create_card(self, **kwargs):
         card = any_model(Card)
-        face = any_model(CardFace, card=card, mana_cost=mana_cost, colors=[])
+        face = any_model(CardFace, card=card, colors=[], **kwargs)
         any_model(CardRelease, card=card, card_set=any_model(CardSet),
                   art=any_model(CardImage))
         return face
 
-    def get_card_ids(self, serp):
-        return [cf['id'] for cf in serp['objects']]
+    def get_cards(self, serp, field='id'):
+        return [cf[field] for cf in serp['objects']]
 
     def test_filter_white(self):
         expected = []
@@ -36,6 +34,23 @@ class SerpTest(ResourceTestCase):
         expected.append(self.create_card(mana_cost='rw').id)
         self.create_card(mana_cost='r')
 
-        data = self.search(colors=['w'])
+        data = self.search(color=['w'])
         self.assertEqual(data['meta']['total_count'], 2)
-        self.assertEqual(set(self.get_card_ids(data)), set(expected))
+        self.assertEqual(set(self.get_cards(data)), set(expected))
+
+    def test_angel(self):
+        expected = []
+        expected.append(self.create_card(
+            name='Baneslayer Angel',
+            type_line='Creature - Angel'
+        ).name)
+        expected.append(self.create_card(
+            name='Guardian Seraph',
+            type_line='Creature - Angel'
+        ).name)
+        expected.append(self.create_card(
+            name='Angel\' Mercy',
+            type_line='Instant'
+        ).name)
+        data = self.search(q='angel')
+        self.assertEqual(self.get_cards(data, field='name'), expected)
