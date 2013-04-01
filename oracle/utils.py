@@ -24,7 +24,7 @@ class Color(object):
         if len(args):
             if isinstance(args[0], basestring):
                 i, c = self.id_by_mana_cost(args[0])
-            elif isinstance(args[0], (list, tuple)):
+            elif isinstance(args[0], (list, tuple)) and args[0]:
                 c = args[0]
                 i = reduce_to_identity(c)
             elif isinstance(args[0], int):

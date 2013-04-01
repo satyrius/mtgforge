@@ -12,7 +12,7 @@ django-grappelli==2.4.3
 django-modeltranslation==0.4.1
 django-nose==1.1
 django-storages==1.1.6
-django-tastypie==0.9.11
+django-tastypie==0.9.12
 django-whatever==0.2.3
 gevent==0.13.8
 grappelli-modeltranslation==0.1.2
