@@ -25,14 +25,25 @@ _.extend(Backbone.Collection.prototype, {
         options = options ? _.clone(options) : {};
         if (options.parse === void 0) options.parse = true;
         var success = options.success;
-        options.success = function(collection, resp, options) {
-            var method = options.update ? 'update' : 'reset';
+        var collection = this;
+        options.success = function(resp) {
+            var method = options.reset ? 'reset' : 'set';
             collection[method](resp, options);
             if (typeof resp.meta === "object") {
                 collection.meta = _.clone(resp.meta);
             }
             if (success) success(collection, resp, options);
+            collection.trigger('sync', collection, resp, options);
         };
+        wrapError(this, options);
         return this.sync('read', this, options);
     }
 });
+
+var wrapError = function (model, options) {
+    var error = options.error;
+    options.error = function(resp) {
+        if (error) error(model, resp, options);
+        model.trigger('error', model, resp, options);
+    };
+};
