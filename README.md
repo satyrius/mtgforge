@@ -10,7 +10,7 @@ You should intall some system requirements (Mac OS X dependent):
 
     # CoffeeScript (as Node.js module)
     brew install nodejs
-    curl http://npmjs.org/install.sh | sh
+    curl https://npmjs.org/install.sh | sh
     npm install -g coffee-script
 
     # SASS (as Ruby gem)
