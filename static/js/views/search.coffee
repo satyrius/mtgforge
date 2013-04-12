@@ -3,6 +3,7 @@ class Forge.SearchView extends Backbone.View
     template: window.MEDIA.templates['templates/search/form.jst'].render
 
     events:
+        'change #search-form': 'handleSubmit'
         'submit #search-form': 'handleSubmit'
 
     subscriptions:

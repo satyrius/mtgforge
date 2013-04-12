@@ -5,9 +5,9 @@ from oracle.models import Color
 
 
 class Command(BaseCommand):
-
     @transaction.commit_on_success
     def handle(self, *args, **options):
+        silent = options['verbosity'] == 0
 
         statements = [
             """--Cleanup fts index table
@@ -156,8 +156,9 @@ class Command(BaseCommand):
         notices = 0
         cursor = connection.cursor()
         for sql in statements:
-            debug_msg = sql.split("\n")[0].strip(" -")
-            print "Executing %d/%d: %s" % (sql_no, len(statements), debug_msg)
+            if not silent:
+                debug_msg = sql.split("\n")[0].strip(" -")
+                print "Executing %d/%d: %s" % (sql_no, len(statements), debug_msg)
             sql_no += 1
 
             cursor.execute(sql)

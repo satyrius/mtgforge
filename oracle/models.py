@@ -99,6 +99,8 @@ class CardFace(models.Model):
 
     card = models.ForeignKey(Card, blank=True)
     place = NullCharField(max_length=5, choices=TYPE_CHOICES, default=FRONT, blank=True)
+    sub_number = NullCharField(max_length=1, null=True, blank=True,
+                               choices=(('a', 'a'), ('b', 'b')))
 
     # Mana cost code and CMC (Converted Mana Cost)
     mana_cost = NullCharField(max_length=255, null=True)
@@ -195,6 +197,15 @@ class CardImage(models.Model):
 
     def __unicode__(self):
         return unicode(self.mvid)
+
+
+class CardImageThumb(models.Model):
+    original = models.ForeignKey(CardImage)
+    format = models.CharField(max_length=10)
+    file = models.ImageField(upload_to='thumbs')
+
+    class Meta:
+        unique_together = ('original', 'format')
 
 
 class CardRelease(models.Model):

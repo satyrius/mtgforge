@@ -1,4 +1,6 @@
 <% for (i in cards) { %>
     <% var card = cards[i] %>
-    <li class="card"><img src="<%= card.scan %>" class="color_identity_<%= card.color_identity %>"/></li>
+    <span class="card">
+        <img src="<%= card.thumb %>" class="color_identity_<%= card.color_identity %>"/>
+    </span>
 <% } %>

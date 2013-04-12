@@ -17,7 +17,8 @@ MEDIA_BUNDLES = (
         'js/lib/backbone.js',
         'js/lib/backbone.meta.js',
         'js/lib/backbone-mediator.js',
-        'js/lib/chosen.jquery.min.js'
+        'js/lib/chosen.jquery.min.js',
+        'js/lib/bootstrap-typeahead.custom.js',
     ),
     ( 'app.js',
         #TEMPLATES
@@ -26,6 +27,8 @@ MEDIA_BUNDLES = (
         'templates/search/form.jst',
         'templates/search/results.jst',
         'templates/search/new_card.jst',
+        'templates/search/new_row.jst',
+        'templates/search/card_info.jst',
  
         #INIT
         'js/init.coffee',

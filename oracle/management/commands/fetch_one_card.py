@@ -1,11 +1,11 @@
-import re
 from optparse import make_option
 
 import xact
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 
-from oracle.forms import CardFaceForm, CardImageForm
+from oracle.forms import CardFaceForm, CardImageForm, \
+    validate_collectors_number
 from oracle.management.base import BaseCommand
 from oracle import models as m
 from oracle.providers.gatherer import GathererCard
@@ -62,16 +62,7 @@ def save_card_face(page, card_set, no_update=False):
     card = None
     face = None
 
-    number = None
-    sub_number = None
-    cn = card_details['number']
-    if cn:
-        match = re.match('^(\d+)([a-z])?', cn)
-        if not match:
-            raise ValidationError(
-                'Collector\'s number "{}" does not match format'.format(cn))
-        number = int(match.group(1))
-        sub_number = match.group(2)
+    number, sub_number = validate_collectors_number(card_details['number'])
 
     try:
         face = m.CardFace.objects.get(name=card_details['name'])
@@ -103,14 +94,14 @@ def save_card_face(page, card_set, no_update=False):
         if not face:
             face = m.CardFace(card=card)
 
+    if multifaced:
+        card.faces_count = len(card_details['other_faces']) + 1
+        card.save()
+
     form = CardFaceForm(card_details, instance=face)
     if not form.is_valid():
         raise ValidationError(form.errors)
     face = form.save()
-
-    if multifaced:
-        card.faces_count = len(card_details['other_faces']) + 1
-        card.save()
 
     #
     # Save card face scan and artist

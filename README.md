@@ -4,7 +4,7 @@ MTG Forge is a Magic Card Database and trading platform. It has been started und
 
 Clone git repository with project:
 
-    git clone git@github.com:ostrovok-team/mtgforge.git
+    git clone git@github.com:satyrius/mtgforge.git
 
 You should intall some system requirements (Mac OS X dependent):
 
@@ -68,15 +68,17 @@ To fill cards database do the following:
     ./manage.py fetch_gatherer
     # Partial load. Get only particular set (e.g. Zendikar)
     ./manage.py fetch_gatherer zen
-    # Then run some postprocessing
-    ./manage.py parse_face_type
-    # Download art
+
+Then run some postprocessing. *It is optional but adviced if you want to all go faster.*
+
     ./manage.py fetch_scans
+    ./manage.py generate_thumbnails
 
 To build full text search engine do:
 
     ./manage.py build_fts_index
     ./manage.py build_sim_index
+    ./manage.py build_suggest
 
 ## Test
 
@@ -124,10 +126,14 @@ To skip card faces that cannot be found (parsed from) on card page you can pass 
 
 ### Cards post processing
 
+#### fetch_scans
+
 Loading cards' scans is a heavy pricess. It was introduces as separate management command.
 
     ./manage.py fetch_scans
 
-MTG has a number of unordinary cards: splited, fliped and double-faced. To set right face type use next command:
+#### generate_thumbnails
 
-    ./manage.py parse_face_type
+It is enought to show fetched scans on SERP as is, but it would be better to use *progressive jpeg* compression to make them smaller. Use `generate_thumbnails` command to create all thumbnails we need. You can pass additional `--quality` option to set jpeg quality. This command do not update existing thumbs by default, but if you want to refresh thumbnails pass `--refresh` option.
+
+    ./manage.py generate_thumbnails
