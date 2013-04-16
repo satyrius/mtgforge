@@ -5,6 +5,13 @@ DEBUG = True
 TEMPLATE_DEBUG = True
 MEDIA_DEV_MODE = True
 
+# Django's normal exception handling of view functions will be suppressed,
+# and exceptions will propagate upwards.
+DEBUG_PROPAGATE_EXCEPTIONS = True
+
+# Controls what the behavior is when an unhandled exception occurs.
+TASTYPIE_FULL_DEBUG = True
+
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
 MEDIA_ROOT = os.path.join(DIR_NAME, 'media')
@@ -37,5 +44,3 @@ LOGGING['loggers']['oracle.management']['level'] = 'DEBUG'
 MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + (
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
-
-DEBUG_PROPAGATE_EXCEPTIONS = True
