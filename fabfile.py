@@ -12,7 +12,8 @@ def project_task(func):
     def wrapper(*args, **kwargs):
         with cd('/var/www/mtgforge'):
             with prefix(virtualenv):
-                return func(*args, **kwargs)
+                with prefix('export DJANGO_SETTINGS_MODULE=settings.prod'):
+                    return func(*args, **kwargs)
     return wrapper
 
 
