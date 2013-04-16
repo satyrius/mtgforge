@@ -29,7 +29,7 @@ def valueble(func=None, callback=None, assert_list=False):
 
 class FtsQuery(object):
     FTS_TEMPLATE = """
-        SELECT DISTINCT ON (rank, r.card_id)
+        SELECT DISTINCT ON (i.fts, r.card_id)
             f.*,
             img.*,
             thumb.file AS thumb,
