@@ -40,6 +40,7 @@ def build_fts():
 
 @project_task
 def deploy():
+    sudo('git reset --hard')
     sudo('git pull')
     sudo('find . -name "*.pyc" -delete')
     sudo('./manage.py migrate --merge --delete-ghost-migrations')
