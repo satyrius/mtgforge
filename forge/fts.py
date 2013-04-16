@@ -97,9 +97,8 @@ class FtsQuery(object):
         self.params['q_types'] = u' | '.join(search)
         self.filters['search_filter'] = 'AND i.fts @@ to_tsquery(%(q)s)'
         self.filters['rank'] = '''
-            -- Match card type first, and give it 1 on success, this will
-            -- popup direct matching with types
-            ceil(ts_rank(array[0,0,1,0], i.fts, to_tsquery(%(q_types)s))) +
+            -- Match card type first, this pops up direct matching with types
+            ts_rank(array[0,0,1,0], i.fts, to_tsquery(%(q_types)s)) +
             -- And go with common ranking after
             ts_rank_cd(array[0.1,0.5,0,0.8], i.fts, to_tsquery(%(q)s), 4|32)
         '''
