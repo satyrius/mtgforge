@@ -29,6 +29,12 @@ class SerpTest(ResourceTestCase):
         return [cf[field] for cf in serp['objects']]
 
     def test_filter_white(self):
+        '''We can filter by one color.
+
+        Both monocolored and multicolored should be in SERP. If we are looking
+        for `white` cards, for example, both `white` and `red-white` will be
+        found but not `red`.
+        '''
         expected = []
         expected.append(self.create_card(mana_cost='w').id)
         expected.append(self.create_card(mana_cost='rw').id)
@@ -39,6 +45,11 @@ class SerpTest(ResourceTestCase):
         self.assertEqual(set(self.get_cards(data)), set(expected))
 
     def test_plural(self):
+        '''There is no difference between single and plural form of term word.
+
+        So `creature` and `creatures` will be normalized and will be the same
+        for search engine
+        '''
         expected = []
         expected.append(self.create_card(
             type_line='Artifact Creature - Angel',
@@ -52,6 +63,12 @@ class SerpTest(ResourceTestCase):
         self.assertEqual(self.get_cards(data), expected)
 
     def test_angel(self):
+        '''Matching creature type is much important than with name or text.
+
+        For example, if we are looking for `angel`, we expect than creatures
+        with subtype `Angel` will be at the top of SERP. Then cards with
+        `Angel` in their names, and in the rules text at last.
+        '''
         expected = []
         expected.append(self.create_card(
             name='Baneslayer Angel',
