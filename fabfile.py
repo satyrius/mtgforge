@@ -43,6 +43,7 @@ def deploy():
     sudo('git reset --hard')
     sudo('git pull')
     sudo('find . -name "*.pyc" -delete')
+    sudo('pip install -r requirements.txt')
     sudo('./manage.py migrate --merge --delete-ghost-migrations')
     build_fts()
     recollect_static()
