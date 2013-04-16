@@ -84,3 +84,31 @@ class SerpTest(ResourceTestCase):
         ).name)
         data = self.search(q='angel')
         self.assertEqual(self.get_cards(data, field='name'), expected)
+
+    def test_card_type_ranking(self):
+        '''The more terms are matched with type line, the better result is.
+
+        If we are looking for `artifact angel`, first results should countain
+        both types, next with one matching, and the rest at the end of SERP.
+        '''
+        expected = []
+        expected.append(self.create_card(
+            name='Filigree Angel',
+            type_line='Artifact Creature - Angel'
+        ).name)
+        expected.append(self.create_card(
+            name='Angel\'s Tomb',
+            type_line='Artifact',
+            rules='Whenever a creature enters the battlefield under your '
+                  'control, you may have Angel\'s Tomb become a 3/3 white '
+                  'Angel artifact creature with flying until end of turn.'
+        ).name)
+        expected.append(self.create_card(
+            name='Indomitable Archangel',
+            type_line='Creature - Angel',
+            rules='Flying\n'
+                  'Metalcraft - Artifacts you control have shroud as long as '
+                  'you control three or more artifacts.'
+        ).name)
+        data = self.search(q='artifact angel')
+        self.assertEqual(self.get_cards(data, field='name'), expected)
