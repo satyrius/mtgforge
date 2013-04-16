@@ -29,7 +29,7 @@ def valueble(func=None, callback=None, assert_list=False):
 
 class FtsQuery(object):
     FTS_TEMPLATE = """
-        SELECT DISTINCT ON ({rank}, r.card_id)
+        SELECT DISTINCT ON (rank, r.card_id)
             f.*,
             img.*,
             thumb.file AS thumb,
@@ -50,7 +50,7 @@ class FtsQuery(object):
             {color_filter}
             {type_filter}
             {cmc_filter}
-        ORDER BY {rank} DESC, r.card_id, cs.released_at DESC
+        ORDER BY rank DESC, r.card_id, cs.released_at DESC
     """
 
     COUNT_TEMPLATE = "SELECT COUNT(1) FROM ({query}) AS t".format(
@@ -94,8 +94,15 @@ class FtsQuery(object):
         # Split query by space and build ts_vector filter
         search = [u'%s:*' % s for s in search.split(' ')]
         self.params['q'] = u' & '.join(search)
+        self.params['q_types'] = u' | '.join(search)
         self.filters['search_filter'] = 'AND i.fts @@ to_tsquery(%(q)s)'
-        self.filters['rank'] = 'ts_rank_cd(array[0.1,0.5,1,0.8], i.fts, to_tsquery(%(q)s), 4)'
+        self.filters['rank'] = '''
+            -- Match card type first, and give it 1 on success, this will
+            -- popup direct matching with types
+            ceil(ts_rank(array[0,0,1,0], i.fts, to_tsquery(%(q_types)s))) +
+            -- And go with common ranking after
+            ts_rank_cd(array[0.1,0.5,0,0.8], i.fts, to_tsquery(%(q)s), 4|32)
+        '''
 
     @valueble(assert_list=True)
     def add_set(self, value):
