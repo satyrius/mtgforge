@@ -38,6 +38,19 @@ class SerpTest(ResourceTestCase):
         self.assertEqual(data['meta']['total_count'], 2)
         self.assertEqual(set(self.get_cards(data)), set(expected))
 
+    def test_plural(self):
+        expected = []
+        expected.append(self.create_card(
+            type_line='Artifact Creature - Angel',
+            rules='Flying'
+        ).id)
+
+        data = self.search(q='artifact flying creature')
+        self.assertEqual(self.get_cards(data), expected)
+
+        data = self.search(q='artifact flying creatures')
+        self.assertEqual(self.get_cards(data), expected)
+
     def test_angel(self):
         expected = []
         expected.append(self.create_card(
