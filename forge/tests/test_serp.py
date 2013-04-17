@@ -25,7 +25,7 @@ class SerpTest(ResourceTestCase):
                   art=any_model(CardImage))
         return face
 
-    def get_cards(self, serp, field='id'):
+    def get_cards(self, serp, field='name'):
         return [cf[field] for cf in serp['objects']]
 
     def test_filter_white(self):
@@ -42,7 +42,7 @@ class SerpTest(ResourceTestCase):
 
         data = self.search(color=['w'])
         self.assertEqual(data['meta']['total_count'], 2)
-        self.assertEqual(set(self.get_cards(data)), set(expected))
+        self.assertEqual(set(self.get_cards(data, field='id')), set(expected))
 
     def test_plural(self):
         '''There is no difference between single and plural form of term word.
@@ -57,10 +57,10 @@ class SerpTest(ResourceTestCase):
         ).id)
 
         data = self.search(q='artifact flying creature')
-        self.assertEqual(self.get_cards(data), expected)
+        self.assertEqual(self.get_cards(data, field='id'), expected)
 
         data = self.search(q='artifact flying creatures')
-        self.assertEqual(self.get_cards(data), expected)
+        self.assertEqual(self.get_cards(data, field='id'), expected)
 
     def test_angel(self):
         '''Matching creature type is much important than with name or text.
@@ -83,7 +83,7 @@ class SerpTest(ResourceTestCase):
             type_line='Instant'
         ).name)
         data = self.search(q='angel')
-        self.assertEqual(self.get_cards(data, field='name'), expected)
+        self.assertEqual(self.get_cards(data), expected)
 
     def test_card_type_ranking(self):
         '''The more terms are matched with type line, the better result is.
@@ -111,4 +111,28 @@ class SerpTest(ResourceTestCase):
                   'you control three or more artifacts.'
         ).name)
         data = self.search(q='artifact angel')
-        self.assertEqual(self.get_cards(data, field='name'), expected)
+        self.assertEqual(self.get_cards(data), expected)
+
+    def test_merge_multifaced(self):
+        '''All faces of multipart card should be merged.
+
+        If one of the werewolf double-faced cards will be found, only front
+        face of this card should appear in SERP.
+        '''
+        expected = []
+        back = self.create_card(
+            name='Garruk, the Veil-Cursed',
+            type_line='Planeswalker - Garruk'
+        )
+        any_model(
+            CardFace, card=back.card, colors=[],
+            name='Garruk Relentless',
+            type_line='Planeswalker - Garruk'
+        )
+        expected.append(back.name)
+        # If both faces matched, only front face shold be shown
+        data = self.search(q='garruk')
+        self.assertEqual(self.get_cards(data), expected)
+        # The same for back face match
+        data = self.search(q='veil cursed')
+        self.assertEqual(self.get_cards(data), expected)
