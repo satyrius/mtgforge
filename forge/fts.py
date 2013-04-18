@@ -31,7 +31,10 @@ class FtsQuery(object):
     FTS_TEMPLATE = """
         WITH cards AS (
             SELECT DISTINCT ON (i.card_id)
-                i.card_face_id, i.fts, color_identity_idx, img.id AS img_id
+                i.card_face_id, i.fts, color_identity_idx, (
+                    SELECT COUNT(1) FROM unnest(color_identity_idx)
+                ) AS colors_count,
+                img.id AS img_id
             FROM forge_cardftsindex AS i
             JOIN oracle_cardrelease AS r ON r.card_id = i.card_id
             JOIN oracle_cardset AS cs ON cs.id = r.card_set_id
@@ -115,24 +118,12 @@ class FtsQuery(object):
 
         # Match card type first, this pops up direct matching with types
         self.rank.append(
-            'ts_rank(array[0,0,1,0], i.fts, to_tsquery(%(q_types)s))')
+            'ts_rank(array[0,0,0,1], i.fts, to_tsquery(%(q_types)s))')
+        self.rank.append(
+            'ts_rank(array[0,0,0.8,0], i.fts, to_tsquery(%(q_types)s)) / COALESCE(NULLIF(i.colors_count, 0), 10)')
         # And go with common ranking after
         self.rank.append(
-            'ts_rank_cd(array[0.1,0.5,0,0.8], i.fts, to_tsquery(%(q)s), 4|32)')
-
-    @valueble(assert_list=True)
-    def add_set(self, value):
-        set_ids = CardSet.objects.filter(
-            acronym__in=value).values_list('id', flat=True)
-        self.meta['sets_filtered'] = len(set_ids)
-        self.filters['set_filter'] = "AND i.sets @@ '{0}'::query_int".format(
-            '|'.join(map(str, set_ids)))
-
-    @valueble(assert_list=True)
-    def add_rarity(self, value):
-        self.filters['rarity_filter'] = 'AND i.fts @@ to_tsquery(%(rarity)s)'
-        self.params['rarity'] = u' | '.join(
-            [u'%s:B*' % q.strip(' \n\t') for q in value])
+            'ts_rank_cd(array[0.1,0.5,0,0], i.fts, to_tsquery(%(q)s), 4|32)')
 
     @valueble(assert_list=True)
     def add_color(self, value):
@@ -149,8 +140,22 @@ class FtsQuery(object):
                 identity_query)
 
         self.rank.append(
-            "ts_rank(to_tsvector(i.color_identity_idx::text), "
-            "to_tsquery('{0}'), 32|2)".format(identity_query))
+            "ts_rank(array[1,0,0,0], to_tsvector(i.color_identity_idx::text), "
+            "to_tsquery('{0}'), 2)".format(identity_query))
+
+    @valueble(assert_list=True)
+    def add_set(self, value):
+        set_ids = CardSet.objects.filter(
+            acronym__in=value).values_list('id', flat=True)
+        self.meta['sets_filtered'] = len(set_ids)
+        self.filters['set_filter'] = "AND i.sets @@ '{0}'::query_int".format(
+            '|'.join(map(str, set_ids)))
+
+    @valueble(assert_list=True)
+    def add_rarity(self, value):
+        self.filters['rarity_filter'] = 'AND i.fts @@ to_tsquery(%(rarity)s)'
+        self.params['rarity'] = u' | '.join(
+            [u'%s:B*' % q.strip(' \n\t') for q in value])
 
     @valueble(assert_list=True)
     def add_type(self, value):

@@ -9,6 +9,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         silent = options['verbosity'] == 0
 
+        # A - very important card parts (e.g. types), higher SERP
+        #     position if matched
+        # B - important info, usually used for filtering (e.g. color, rarity)
+        # C - common info (e.g. card name, rules)
+        # D - some noise
+
         statements = [
             """--Cleanup fts index table
             DELETE FROM forge_cardftsindex
@@ -30,8 +36,8 @@ class Command(BaseCommand):
 
             """--Populate tsvector from names, type_lines and rules
             UPDATE forge_cardftsindex SET fts = fts
-                || setweight(to_tsvector(n.names), 'A')
-                || setweight(to_tsvector(n.types), 'B')
+                || setweight(to_tsvector(n.types), 'A')
+                || setweight(to_tsvector(n.names), 'C')
                 || setweight(to_tsvector(n.rules), 'C')
             FROM (
                 SELECT f.id,
@@ -66,7 +72,7 @@ class Command(BaseCommand):
                         (ARRAY[{colors}])[1 + ((color_identity & {Color.GREEN}     ) >> 4)*5],
                         (ARRAY[{colors}])[1 + ((color_identity & {Color.COLORLESS} ) >> 5)*6]
                     ], ' '
-                )), 'C')
+                )), 'B')
             """.format(colors="'', 'white', 'blue', 'black', 'red', 'green', 'colorless'", Color=Color),
 
             """--Create color index for white
