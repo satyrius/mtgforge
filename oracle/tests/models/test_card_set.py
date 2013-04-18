@@ -25,7 +25,8 @@ class CardSetModelTest(TestCase):
 
     def test_card_set_unique_name(self):
         form = CardSetForm(dict(name=self.name, acronym=self.acronym))
-        self.assertTrue(form.is_valid())
+        is_valid = form.is_valid()
+        self.assertTrue(is_valid, form.errors)
         form.save()
 
         # Post the same name thing twice
@@ -38,7 +39,8 @@ class CardSetModelTest(TestCase):
 
     def test_card_set_unique_acronym(self):
         form = CardSetForm(dict(name=self.name, acronym=self.acronym))
-        self.assertTrue(form.is_valid())
+        is_valid = form.is_valid()
+        self.assertTrue(is_valid, form.errors)
         form.save()
 
         # Post the same acronym thing twice
