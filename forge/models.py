@@ -8,6 +8,7 @@ class CardFtsIndex(models.Model):
     card_face = models.ForeignKey(CardFace)
     cmc = models.IntegerField(null=True)
     color_identity = models.IntegerField(default=0)
+    face_order = models.PositiveIntegerField(default=0)
 
 
 class CardSimilarity(models.Model):

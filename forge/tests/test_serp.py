@@ -119,17 +119,24 @@ class SerpTest(ResourceTestCase):
         If one of the werewolf double-faced cards will be found, only front
         face of this card should appear in SERP.
         '''
-        expected = []
-        back = self.create_card(
+        front_face = self.create_card(
             name='Garruk, the Veil-Cursed',
             type_line='Planeswalker - Garruk'
         )
-        any_model(
-            CardFace, card=back.card, colors=[],
+        back_face = any_model(
+            CardFace, card=front_face.card, colors=[],
             name='Garruk Relentless',
-            type_line='Planeswalker - Garruk'
+            type_line='Planeswalker - Garruk',
+            place=CardFace.FRONT
         )
-        expected.append(back.name)
+        # Assert order of just created card faces. We need it to ensure that
+        # default order is not what we want when merge faces for SERP.
+        self.assertEqual(
+            list(CardFace.objects.values_list('id', flat=True)),
+            [front_face.id, back_face.id])
+
+        # Let's go test search
+        expected = [front_face.name]
         # If both faces matched, only front face shold be shown
         data = self.search(q='garruk')
         self.assertEqual(self.get_cards(data), expected)

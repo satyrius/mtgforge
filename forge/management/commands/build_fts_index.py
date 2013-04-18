@@ -15,8 +15,15 @@ class Command(BaseCommand):
             """,
 
             """--Populate fts with empty index
-            INSERT INTO forge_cardftsindex (card_id, card_face_id, fts, color_identity, color_identity_idx)
-            SELECT card_id, id, ''::tsvector, 0, ARRAY[]::int[] FROM oracle_cardface
+            INSERT INTO forge_cardftsindex (
+                card_id, card_face_id, fts, color_identity,
+                color_identity_idx, face_order)
+            SELECT card_id, id, ''::tsvector, 0, ARRAY[]::int[], CASE
+                WHEN place = '{CardFace.FRONT}' THEN 0
+                WHEN place = '{CardFace.SPLIT}' THEN 1
+                ELSE 2
+            END
+            FROM oracle_cardface
             """,
 
             # {{{ NAME AND RULES

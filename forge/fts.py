@@ -29,12 +29,25 @@ def valueble(func=None, callback=None, assert_list=False):
 
 class FtsQuery(object):
     FTS_TEMPLATE = """
-        SELECT DISTINCT ON (rank, r.card_id)
+        WITH cards AS (
+            SELECT DISTINCT ON (i.card_id) i.card_face_id, i.fts
+            FROM forge_cardftsindex AS i
+            WHERE
+                TRUE
+                {search_filter}
+                {set_filter}
+                {rarity_filter}
+                {color_filter}
+                {type_filter}
+                {cmc_filter}
+            ORDER BY i.card_id, i.face_order
+        )
+        SELECT
             f.*,
             img.*,
             thumb.file AS thumb,
             {rank} AS rank
-        FROM forge_cardftsindex AS i
+        FROM cards AS i
         JOIN oracle_cardface AS f ON f.id = i.card_face_id
         JOIN oracle_cardrelease AS r ON r.card_id = f.card_id
         JOIN oracle_cardset AS cs ON cs.id = r.card_set_id
@@ -42,14 +55,6 @@ class FtsQuery(object):
         LEFT JOIN oracle_cardimagethumb AS thumb
             ON thumb.original_id = img.id
             AND format = %(thumb_fmt)s
-        WHERE
-            TRUE
-            {search_filter}
-            {set_filter}
-            {rarity_filter}
-            {color_filter}
-            {type_filter}
-            {cmc_filter}
         ORDER BY rank DESC, r.card_id, cs.released_at DESC
     """
 
