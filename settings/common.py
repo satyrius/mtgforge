@@ -250,3 +250,6 @@ CARD_IMAGE_THUMBS = [CARD_IMAGE_SERP_THUMB]
 
 # Only JSON, baby!
 TASTYPIE_DEFAULT_FORMATS = ['json']
+
+# This will add additional information to the SERP resource
+DEBUG_SERP = False

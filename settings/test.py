@@ -2,6 +2,8 @@ import os
 import shutil
 from common import *
 
+DEBUG_SERP = True
+
 # Save upload media to the temporary directory
 MEDIA_ROOT = '/tmp/mtgforge/media/'
 # Make it clean before running

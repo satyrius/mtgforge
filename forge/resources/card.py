@@ -1,4 +1,5 @@
 import urllib
+from django.conf import settings
 from django.conf.urls.defaults import url
 from django.core.urlresolvers import NoReverseMatch
 from tastypie.utils import trailing_slash
@@ -31,8 +32,11 @@ class CardResource(ModelResource):
                 get_art_url(bundle.obj.file)
         if hasattr(bundle.obj, 'thumb') and bundle.obj.thumb:
             bundle.data['thumb'] = get_thumb_url(bundle.obj.thumb)
-        if hasattr(bundle.obj, 'rank'):
-            bundle.data['rank'] = bundle.obj.rank
+        if settings.DEBUG_SERP:
+            if hasattr(bundle.obj, 'rank'):
+                bundle.data['rank'] = bundle.obj.rank
+            if hasattr(bundle.obj, 'ranks'):
+                bundle.data['ranks'] = bundle.obj.ranks
         return bundle
 
     def dehydrate_colors(self, bundle):

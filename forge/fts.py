@@ -50,6 +50,7 @@ class FtsQuery(object):
             f.*,
             img.*,
             thumb.file AS thumb,
+            array[{ranks}]::float[] AS ranks,
             {rank} AS rank
         FROM cards AS i
         JOIN oracle_cardface AS f ON f.id = i.card_face_id
@@ -90,6 +91,7 @@ class FtsQuery(object):
     def sql_filters(self):
         filters = self.filters.copy()
         filters['rank'] = ' + '.join(self.rank)
+        filters['ranks'] = ' , '.join(self.rank)
         return filters
 
     def add_term(self, **terms):

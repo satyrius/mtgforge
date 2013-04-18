@@ -4,6 +4,7 @@ from common import *
 DEBUG = True
 TEMPLATE_DEBUG = True
 MEDIA_DEV_MODE = True
+DEBUG_SERP = True
 
 # Django's normal exception handling of view functions will be suppressed,
 # and exceptions will propagate upwards.
