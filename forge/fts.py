@@ -31,7 +31,7 @@ class FtsQuery(object):
     FTS_TEMPLATE = """
         WITH cards AS (
             SELECT DISTINCT ON (i.card_id)
-                i.card_face_id, i.fts, img.id AS img_id
+                i.card_face_id, i.fts, color_identity_idx, img.id AS img_id
             FROM forge_cardftsindex AS i
             JOIN oracle_cardrelease AS r ON r.card_id = i.card_id
             JOIN oracle_cardset AS cs ON cs.id = r.card_set_id
@@ -83,7 +83,14 @@ class FtsQuery(object):
             'cmc_filter': '',
             'rank': '1',
         }
+        self.rank = ['0']
         self.meta = {}
+
+    @property
+    def sql_filters(self):
+        filters = self.filters.copy()
+        filters['rank'] = ' + '.join(self.rank)
+        return filters
 
     def add_term(self, **terms):
         for term, value in terms.items():
@@ -103,12 +110,13 @@ class FtsQuery(object):
         self.params['q'] = u' & '.join(search)
         self.params['q_types'] = u' | '.join(search)
         self.filters['search_filter'] = 'AND i.fts @@ to_tsquery(%(q)s)'
-        self.filters['rank'] = '''
-            -- Match card type first, this pops up direct matching with types
-            ts_rank(array[0,0,1,0], i.fts, to_tsquery(%(q_types)s)) +
-            -- And go with common ranking after
-            ts_rank_cd(array[0.1,0.5,0,0.8], i.fts, to_tsquery(%(q)s), 4|32)
-        '''
+
+        # Match card type first, this pops up direct matching with types
+        self.rank.append(
+            'ts_rank(array[0,0,1,0], i.fts, to_tsquery(%(q_types)s))')
+        # And go with common ranking after
+        self.rank.append(
+            'ts_rank_cd(array[0.1,0.5,0,0.8], i.fts, to_tsquery(%(q)s), 4|32)')
 
     @valueble(assert_list=True)
     def add_set(self, value):
@@ -133,10 +141,14 @@ class FtsQuery(object):
         else:
             operator = u' | '
 
-        identity_query = [str(Color.MAP[c]) for c in color]
-        identity_query = u"'%s'::query_int" % operator.join(identity_query)
-        self.filters['color_filter'] = u'AND i.color_identity_idx @@ {0}'.format(
-            identity_query)
+        identity_query = operator.join(map(str, Color(''.join(color)).colors))
+        self.filters['color_filter'] = \
+            u"AND i.color_identity_idx @@ '{0}'::query_int".format(
+                identity_query)
+
+        self.rank.append(
+            "ts_rank(to_tsvector(i.color_identity_idx::text), "
+            "to_tsquery('{0}'), 32|2)".format(identity_query))
 
     @valueble(assert_list=True)
     def add_type(self, value):
@@ -154,7 +166,7 @@ class FtsQuery(object):
 
     def execute_count(self):
         cursor = self.get_cursor()
-        query = self.COUNT_TEMPLATE.format(**self.filters)
+        query = self.COUNT_TEMPLATE.format(**self.sql_filters)
         cursor.execute(query, self.params)
         return cursor.fetchone()[0]
 
@@ -165,7 +177,7 @@ class FtsQuery(object):
         """
         params = self.params.copy()
         params.update(limit=limit, offset=offset)
-        return CardFace.objects.raw(query.format(**self.filters), params)
+        return CardFace.objects.raw(query.format(**self.sql_filters), params)
 
 
 def similarity_check(cursor, query):

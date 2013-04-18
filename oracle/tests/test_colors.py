@@ -105,10 +105,12 @@ class ColorsTest(TestCase):
 
     def test_color_names(self):
         c = Color(self.r, self.g, self.w)
-        self.assertEqual({'w', 'g', 'r'}, set(c.names))
+        self.assertEqual({'w', 'g', 'r'}, set(c.short_names))
+        self.assertEqual({'white', 'green', 'red'}, set(c.names))
 
         c = Color(self.w, self.u, self.b)
-        self.assertEqual({'w', 'u', 'b'}, set(c.names))
+        self.assertEqual({'w', 'u', 'b'}, set(c.short_names))
+        self.assertEqual({'white', 'blue', 'black'}, set(c.names))
 
     def test_no_color_identity(self):
         c = Color([])

@@ -1,33 +1,10 @@
-from tastypie.test import ResourceTestCase
-from forge.resources.card import CardResource
 from django_any import any_model
-from oracle.models import Card, CardFace, CardSet, CardImage, CardRelease
-from forge.management.commands.build_fts_index import Command as BuildIndex
+
+from forge.tests.base import SerpTest
+from oracle.models import CardFace, CardSet, CardImage, CardRelease
 
 
-class SerpTest(ResourceTestCase):
-    def setUp(self):
-        super(SerpTest, self).setUp()
-        self.uri = CardResource('v1').get_resource_search_uri()
-
-    def build_fts(self):
-        BuildIndex().handle(verbosity=0)
-
-    def search(self, build_fts=True, **kwargs):
-        if build_fts:
-            self.build_fts()
-        return self.deserialize(self.api_client.get(self.uri, data=kwargs))
-
-    def create_card(self, **kwargs):
-        card = any_model(Card)
-        face = any_model(CardFace, card=card, colors=[], **kwargs)
-        any_model(CardRelease, card=card, card_set=any_model(CardSet),
-                  art=any_model(CardImage))
-        return face
-
-    def get_cards(self, serp, field='name'):
-        return [cf[field] for cf in serp['objects']]
-
+class SearchTest(SerpTest):
     def test_filter_white(self):
         '''We can filter by one color.
 
@@ -61,57 +38,6 @@ class SerpTest(ResourceTestCase):
 
         data = self.search(q='artifact flying creatures')
         self.assertEqual(self.get_cards(data, field='id'), expected)
-
-    def test_angel(self):
-        '''Matching creature type is much important than with name or text.
-
-        For example, if we are looking for `angel`, we expect than creatures
-        with subtype `Angel` will be at the top of SERP. Then cards with
-        `Angel` in their names, and in the rules text at last.
-        '''
-        expected = []
-        expected.append(self.create_card(
-            name='Baneslayer Angel',
-            type_line='Creature - Angel'
-        ).name)
-        expected.append(self.create_card(
-            name='Guardian Seraph',
-            type_line='Creature - Angel'
-        ).name)
-        expected.append(self.create_card(
-            name='Angel\' Mercy',
-            type_line='Instant'
-        ).name)
-        data = self.search(q='angel')
-        self.assertEqual(self.get_cards(data), expected)
-
-    def test_card_type_ranking(self):
-        '''The more terms are matched with type line, the better result is.
-
-        If we are looking for `artifact angel`, first results should countain
-        both types, next with one matching, and the rest at the end of SERP.
-        '''
-        expected = []
-        expected.append(self.create_card(
-            name='Filigree Angel',
-            type_line='Artifact Creature - Angel'
-        ).name)
-        expected.append(self.create_card(
-            name='Angel\'s Tomb',
-            type_line='Artifact',
-            rules='Whenever a creature enters the battlefield under your '
-                  'control, you may have Angel\'s Tomb become a 3/3 white '
-                  'Angel artifact creature with flying until end of turn.'
-        ).name)
-        expected.append(self.create_card(
-            name='Indomitable Archangel',
-            type_line='Creature - Angel',
-            rules='Flying\n'
-                  'Metalcraft - Artifacts you control have shroud as long as '
-                  'you control three or more artifacts.'
-        ).name)
-        data = self.search(q='artifact angel')
-        self.assertEqual(self.get_cards(data), expected)
 
     def test_merge_multifaced(self):
         '''All faces of multipart card should be merged.

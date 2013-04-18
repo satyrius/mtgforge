@@ -66,7 +66,7 @@ class Command(BaseCommand):
                         (ARRAY[{colors}])[1 + ((color_identity & {Color.GREEN}     ) >> 4)*5],
                         (ARRAY[{colors}])[1 + ((color_identity & {Color.COLORLESS} ) >> 5)*6]
                     ], ' '
-                )), 'B')
+                )), 'C')
             """.format(colors="'', 'white', 'blue', 'black', 'red', 'green', 'colorless'", Color=Color),
 
             """--Create color index for white

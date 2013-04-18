@@ -36,7 +36,7 @@ class CardResource(ModelResource):
         return bundle
 
     def dehydrate_colors(self, bundle):
-        return bundle.obj.color_names
+        return bundle.obj.color_short_names
 
     def prepend_urls(self):
         return [

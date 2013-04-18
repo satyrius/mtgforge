@@ -129,6 +129,10 @@ class CardFace(models.Model):
         return self.name
 
     @property
+    def color_short_names(self):
+        return Color(self.colors).short_names
+
+    @property
     def color_names(self):
         return Color(self.colors).names
 

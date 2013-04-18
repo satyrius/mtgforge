@@ -9,14 +9,23 @@ class Color(object):
     GREEN = 0b10000
     COLORLESS = 0b100000
 
-    MAP = dict(
-        w=WHITE,
-        u=BLUE,
-        b=BLACK,
-        r=RED,
-        g=GREEN,
-        c=COLORLESS,
-    )
+    MAP = {
+        'w': WHITE,
+        'u': BLUE,
+        'b': BLACK,
+        'r': RED,
+        'g': GREEN,
+        'c': COLORLESS,
+    }
+
+    NAMES = {
+        'w': 'white',
+        'u': 'blue',
+        'b': 'black',
+        'r': 'red',
+        'g': 'green',
+        'c': 'colorless',
+    }
 
     def __init__(self, *args):
         i, c = 0, []
@@ -54,8 +63,13 @@ class Color(object):
         return identity, colors
 
     @property
-    def names(self):
+    def short_names(self):
         return [name for name, id in self.MAP.items() if id in self.colors]
+
+    @property
+    def names(self):
+        return [self.NAMES[name] for name, id in self.MAP.items()
+                if id in self.colors]
 
 
 def parse_type_line(type_line):
