@@ -2,7 +2,7 @@ from fabric.api import env, cd, sudo, prefix, task
 from functools import wraps
 
 
-env.hosts = ['evindor.com']
+env.hosts = ['topdeck.pro']
 virtualenv = 'source /var/virtualenv/mtgforge/bin/activate'
 
 
