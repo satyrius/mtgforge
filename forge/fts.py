@@ -30,8 +30,12 @@ def valueble(func=None, callback=None, assert_list=False):
 class FtsQuery(object):
     FTS_TEMPLATE = """
         WITH cards AS (
-            SELECT DISTINCT ON (i.card_id) i.card_face_id, i.fts
+            SELECT DISTINCT ON (i.card_id)
+                i.card_face_id, i.fts, img.id AS img_id
             FROM forge_cardftsindex AS i
+            JOIN oracle_cardrelease AS r ON r.card_id = i.card_id
+            JOIN oracle_cardset AS cs ON cs.id = r.card_set_id
+            JOIN oracle_cardimage AS img ON img.id = r.art_id
             WHERE
                 TRUE
                 {search_filter}
@@ -40,7 +44,7 @@ class FtsQuery(object):
                 {color_filter}
                 {type_filter}
                 {cmc_filter}
-            ORDER BY i.card_id, i.face_order
+            ORDER BY i.card_id, i.face_order, cs.released_at DESC
         )
         SELECT
             f.*,
@@ -49,13 +53,11 @@ class FtsQuery(object):
             {rank} AS rank
         FROM cards AS i
         JOIN oracle_cardface AS f ON f.id = i.card_face_id
-        JOIN oracle_cardrelease AS r ON r.card_id = f.card_id
-        JOIN oracle_cardset AS cs ON cs.id = r.card_set_id
-        JOIN oracle_cardimage AS img ON img.id = r.art_id
+        JOIN oracle_cardimage AS img ON img.id = i.img_id
         LEFT JOIN oracle_cardimagethumb AS thumb
             ON thumb.original_id = img.id
             AND format = %(thumb_fmt)s
-        ORDER BY rank DESC, r.card_id, cs.released_at DESC
+        ORDER BY rank DESC, f.card_id
     """
 
     COUNT_TEMPLATE = "SELECT COUNT(1) FROM ({query}) AS t".format(

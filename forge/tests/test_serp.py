@@ -143,3 +143,21 @@ class SerpTest(ResourceTestCase):
         # The same for back face match
         data = self.search(q='veil cursed')
         self.assertEqual(self.get_cards(data), expected)
+
+    def test_merge_releases(self):
+        '''Only one card release should be shown.
+
+        If a card was released several times, we still should show only one
+        it's release.
+        '''
+        expected = []
+        gideon = self.create_card(
+            name='Gideon Jura',
+            type_line='Planeswalker - Gideon'
+        )
+        expected.append(gideon.name)
+        any_model(CardRelease, card=gideon.card,
+                  card_set=any_model(CardSet, name='Zendikar'),
+                  art=any_model(CardImage))
+        data = self.search(types='planeswalker')
+        self.assertEqual(self.get_cards(data), expected)
