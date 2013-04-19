@@ -1,5 +1,5 @@
 class Forge.SearchResultsView extends Backbone.View
-    el: '#main'
+    el: '#td-main'
     template: window.MEDIA.templates['templates/search/results.jst'].render
     newRowTemplate: window.MEDIA.templates['templates/search/new_row.jst'].render
     newCardsTemplate: window.MEDIA.templates['templates/search/new_card.jst'].render
@@ -13,7 +13,7 @@ class Forge.SearchResultsView extends Backbone.View
         'cardsCollection:updated': 'addCards'
 
     events:
-        'click .card': 'showCardInfo'
+        'click .td-card': 'showCardInfo'
 
     loading: false
     render: (data) ->
@@ -37,11 +37,11 @@ class Forge.SearchResultsView extends Backbone.View
         for rowCards in d
             html += @newRowTemplate({cards: rowCards})
         
-        $("#search-results", @$el).append(html)
+        $("#td-search-results", @$el).append(html)
 
     checkScroll: () =>
         return if @loading
-        lastCard = $('.card', @$el).last()
+        lastCard = $('.td-card', @$el).last()
         return if lastCard.length == 0
         lastCardTop = lastCard.find('img').offset().top
         windowBottomPosition = $("body").scrollTop() + window.outerHeight
@@ -51,21 +51,21 @@ class Forge.SearchResultsView extends Backbone.View
     
     checkRows: () =>
         return if @initialCardsInRow == @cardsInRow()
-        $("#search-results", @$el).height($("#search-results", @$el).height())
-        $("#search-results", @$el).empty()
+        $("#td-search-results", @$el).height($("#td-search-results", @$el).height())
+        $("#td-search-results", @$el).empty()
         @addCards(@data.toJSON())
-        $("#search-results", @$el).height('auto')
+        $("#td-search-results", @$el).height('auto')
         @initialCardsInRow = @cardsInRow()
 
 
     cardsInRow: () ->
-        Math.floor($('#search-results', @$el).width()/(@CARD_WIDTH + @CARD_MARGIN))
+        Math.floor($('#td-search-results', @$el).width()/(@CARD_WIDTH + @CARD_MARGIN))
     
     showCardInfo: (event) =>
-        $('#card-info', @$el).remove()
-        row = $(event.target).closest('.serp-row')
+        $('#td-card-info', @$el).remove()
+        row = $(event.target).closest('.td-serp-row')
         card = @data.get($(event.target).data('id'))
         row.after(@cardInfoTemplate({card: card.toJSON()}))
-        $('#card-info', @$el).width((@CARD_WIDTH + @CARD_MARGIN) * @cardsInRow() - @CARD_MARGIN - 80)
-        $('#card-info', @$el).slideDown(300)
+        $('#td-card-info', @$el).width((@CARD_WIDTH + @CARD_MARGIN) * @cardsInRow() - @CARD_MARGIN - 80)
+        $('#td-card-info', @$el).slideDown(300)
 

@@ -1,5 +1,5 @@
 class Forge.IndexView extends Backbone.View
-    el: "#main"
+    el: "#td-main"
     template: window.MEDIA.templates['templates/index.jst'].render
 
     render: () ->
