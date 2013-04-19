@@ -1,5 +1,5 @@
 import os
-from common import *
+from settings.common import *
 
 DEBUG = True
 TEMPLATE_DEBUG = True
@@ -45,3 +45,5 @@ LOGGING['loggers']['oracle.management']['level'] = 'DEBUG'
 MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + (
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
+
+from settings.local import *

@@ -1,6 +1,6 @@
 import os
 import shutil
-from common import *
+from settings.common import *
 
 DEBUG_SERP = True
 
@@ -17,3 +17,5 @@ for d in ['art', 'thumbs']:
 CACHES['default'] = {
     'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
 }
+
+from settings.local import *

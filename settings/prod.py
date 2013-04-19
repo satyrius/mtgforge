@@ -1,4 +1,4 @@
-from common import *
+from settigns.common import *
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
@@ -15,3 +15,5 @@ ADMINS = (
 )
 
 MANAGERS = ADMINS
+
+from settings.local import *

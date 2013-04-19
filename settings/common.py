@@ -3,7 +3,7 @@ import os
 import sys
 
 # Media bundles config for mediagenerator
-from media import MEDIA_BUNDLES
+from settings.media import MEDIA_BUNDLES
 
 DEBUG = False
 TEMPLATE_DEBUG = False
@@ -16,23 +16,15 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-# Try to find local databases settings
-try:
-    from local import DATABASES
-except ImportError:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'mtgforge',
-            'USER': 'postgres',
-            'PASSWORD': '',
-            'HOST': '',
-            'PORT': '',
-            'OPTIONS': {
-                'autocommit': True,
-            }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'mtgforge',
+        'OPTIONS': {
+            'autocommit': True,
         }
     }
+}
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
