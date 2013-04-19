@@ -25,6 +25,9 @@ class CardResource(ModelResource):
         details_allowed_methods = ['get']
 
     def dehydrate(self, bundle):
+        bundle.data['rules'] = bundle.data['rules'].split('\n')
+
+        # Card image
         if hasattr(bundle.obj, 'scan'):
             bundle.data['thumb'] = bundle.obj.scan
         if hasattr(bundle.obj, 'file') and bundle.obj.file:
@@ -32,11 +35,14 @@ class CardResource(ModelResource):
                 get_art_url(bundle.obj.file)
         if hasattr(bundle.obj, 'thumb') and bundle.obj.thumb:
             bundle.data['thumb'] = get_thumb_url(bundle.obj.thumb)
+
+        # Debug ranking
         if settings.DEBUG_SERP:
             if hasattr(bundle.obj, 'rank'):
                 bundle.data['rank'] = bundle.obj.rank
             if hasattr(bundle.obj, 'ranks'):
                 bundle.data['ranks'] = bundle.obj.ranks
+
         return bundle
 
     def dehydrate_colors(self, bundle):
