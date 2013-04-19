@@ -4,7 +4,6 @@ MEDIA_BUNDLES = (
         'bootstrap/css/bootstrap-responsive.css',
     ),
     ( 'common.css',
-        'css/normalize.css',
         'css/main.sass',
         'css/ambilight.sass',
         'css/sprites.css',
