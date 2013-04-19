@@ -1,10 +1,10 @@
 class Forge.SearchView extends Backbone.View
-    el: "#search"
+    el: "#td-search"
     template: window.MEDIA.templates['templates/search/form.jst'].render
 
     events:
-        'change #search-form': 'handleSubmit'
-        'submit #search-form': 'handleSubmit'
+        'change #td-search-form': 'handleSubmit'
+        'submit #td-search-form': 'handleSubmit'
 
     subscriptions:
         'search:confirm': 'updateForm'
@@ -19,14 +19,14 @@ class Forge.SearchView extends Backbone.View
         q = $.unserialize(query).q
         if q
             q = q.replace(/\+/g, ' ')
-            @$el.find('#q-input').val(q)
+            @$el.find('#td-q-input').val(q)
 
     render: () ->
         @$el.html(@template())
-        @$el.find('#q-input').typeahead({
-            source: (query, callback) ->
-                $.get('/api/v1/complete', {q: query}, callback)
-        })
+        #@$el.find('#q-input').typeahead({
+            #source: (query, callback) ->
+                #$.get('/api/v1/complete', {q: query}, callback)
+        #})
 
     handleSubmit: (event) ->
         q = $(event.target).serialize()
