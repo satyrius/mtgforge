@@ -43,11 +43,13 @@ class SearchTest(SerpTest):
         '''All faces of multipart card should be merged.
 
         If one of the werewolf double-faced cards will be found, only front
-        face of this card should appear in SERP.
+        face of this card should appear in SERP. But exact match with back
+        face will return fliped card.
         '''
         back = self.create_card(
             name='Garruk, the Veil-Cursed',
-            type_line='Planeswalker - Garruk'
+            type_line='Planeswalker - Garruk',
+            place=CardFace.BACK
         )
         front = any_model(
             CardFace, card=back.card, colors=[],
@@ -55,6 +57,7 @@ class SearchTest(SerpTest):
             type_line='Planeswalker - Garruk',
             place=CardFace.FRONT
         )
+        self.assertEqual(front.card_id, back.card_id)
         # Assert order of just created card faces. We need it to ensure that
         # default order is not what we want when merge faces for SERP.
         self.assertEqual(
@@ -62,10 +65,10 @@ class SearchTest(SerpTest):
             [back.id, front.id])
 
         # Let's go test search
-        # If both faces matched, only front face shold be shown
+        # If both faces matched, only front face should be shown
         data = self.search(q='garruk')
         self.assertEqual(self.get_cards(data), [front.name])
-        # The same for back face match
+        # If exact face is matched it will be shown
         data = self.search(q='veil cursed')
         self.assertEqual(self.get_cards(data), [back.name])
 

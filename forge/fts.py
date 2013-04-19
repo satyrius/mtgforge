@@ -31,14 +31,10 @@ class FtsQuery(object):
     FTS_TEMPLATE = """
         WITH cards AS (
             SELECT DISTINCT ON (i.card_id)
-                i.card_face_id, i.fts, color_identity_idx, (
-                    SELECT COUNT(1) FROM unnest(color_identity_idx)
-                ) AS colors_count,
-                img.id AS img_id
+                i.card_face_id, i.fts, r.art_id AS img_id
             FROM forge_cardftsindex AS i
             JOIN oracle_cardrelease AS r ON r.card_id = i.card_id
             JOIN oracle_cardset AS cs ON cs.id = r.card_set_id
-            JOIN oracle_cardimage AS img ON img.id = r.art_id
             WHERE
                 TRUE
                 {search_filter}
@@ -120,7 +116,8 @@ class FtsQuery(object):
         self.rank.append(
             'ts_rank(array[0,0,0,1], i.fts, to_tsquery(%(q_types)s))')
         self.rank.append(
-            'ts_rank(array[0,0,0.8,0], i.fts, to_tsquery(%(q_types)s)) / COALESCE(NULLIF(i.colors_count, 0), 10)')
+            'ts_rank(array[0,0,0.8,0], i.fts, to_tsquery(%(q_types)s)) / '
+            'COALESCE(NULLIF(array_length(f.colors, 1), 0), 10)')
         # And go with common ranking after
         self.rank.append(
             'ts_rank_cd(array[0.1,0.4,0,0], i.fts, to_tsquery(%(q)s), 4|32)')
@@ -140,7 +137,7 @@ class FtsQuery(object):
                 identity_query)
 
         self.rank.append(
-            "ts_rank(array[0.8,0,0,0], to_tsvector(i.color_identity_idx::text), "
+            "ts_rank(array[0.8,0,0,0], to_tsvector(f.colors::text), "
             "to_tsquery('{0}'), 2)".format(identity_query))
 
     @valueble(assert_list=True)
