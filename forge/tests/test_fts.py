@@ -87,3 +87,26 @@ class SearchTest(SerpTest):
                   art=any_model(CardImage))
         data = self.search(types='planeswalker')
         self.assertEqual(self.get_cards(data), expected)
+
+    def test_no_comments(self):
+        '''Do not add abilities comments to FTS index.
+
+        For example, cut `intimmidate` comment, otherwise we get these
+        creatures when we search for `artifact`, because rules contains
+        "can't be blocked except by artifact creatures..." comment.
+        '''
+        expected = []
+        expected.append(self.create_card(
+            name='Platinum Angel',
+            type_line='Artifact Creature - Angel',
+        ).name)
+        self.create_card(
+            name='Halo Hunter',
+            rules='Intimidate (This creature can\'t be blocked except by '
+                  'artifact creatures and/or creatures that share a color '
+                  'with it.)\n'
+                  'When Halo Hunter enters the battlefield, destroy target '
+                  'Angel.'
+        )
+        data = self.search(q='artifact')
+        self.assertEqual(self.get_cards(data), expected)

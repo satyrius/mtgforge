@@ -34,7 +34,7 @@ class Command(BaseCommand):
 
             # {{{ NAME AND RULES
 
-            """--Populate tsvector from names, type_lines and rules
+            r"""--Populate tsvector from names, type_lines and rules
             UPDATE forge_cardftsindex SET fts = fts
                 || setweight(to_tsvector(n.types), 'A')
                 || setweight(to_tsvector(n.names), 'C')
@@ -43,7 +43,7 @@ class Command(BaseCommand):
                 SELECT f.id,
                     array_to_string(array_agg(COALESCE(l.name, f.name)), ' ') AS names,
                     array_to_string(array_agg(COALESCE(l.type_line, f.type_line)), ' ') AS types,
-                    array_to_string(array_agg(COALESCE(l.rules, f.rules)), ' ') AS rules
+                    array_to_string(array_agg(regexp_replace(COALESCE(l.rules, f.rules), '\([^)]+\)', '')), ' ') AS rules
                 FROM oracle_cardface AS f
                 LEFT JOIN oracle_cardl10n AS l ON (l.card_face_id = f.id)
                 GROUP BY f.id
