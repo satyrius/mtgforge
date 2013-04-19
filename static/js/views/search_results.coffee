@@ -62,9 +62,18 @@ class Forge.SearchResultsView extends Backbone.View
         Math.floor($('#td-search-results', @$el).width()/(@CARD_WIDTH + @CARD_MARGIN))
     
     showCardInfo: (event) =>
-        $('#td-card-info', @$el).remove()
         row = $(event.target).closest('.td-serp-row')
         card = @data.get($(event.target).data('id'))
-        row.after(@cardInfoTemplate({card: card.toJSON()}))
-        $('#td-card-info', @$el).slideDown(300)
-
+        arrowPosition = $(event.target).offset().left + (@CARD_WIDTH/2) + @CARD_MARGIN
+        cardInfoElement = $('#td-card-info', @$el)
+        unless cardInfoElement.length
+            cardInfoElement = @cardInfoTemplate({card: card.toJSON(), arrowPosition: arrowPosition })
+            row.after(cardInfoElement)
+            $('#td-card-info', @$el).slideDown(300)
+        else
+            cardInfoElement.html(
+                $(@cardInfoTemplate(
+                    card: card.toJSON()
+                    arrowPosition: arrowPosition
+                )).html()
+            )
