@@ -77,3 +77,11 @@ class Forge.SearchResultsView extends Backbone.View
                     arrowPosition: arrowPosition
                 )).html()
             )
+            rowIndex = $('.td-serp-row').index(row)
+            oldRowIndex = $('.td-serp-row').index(cardInfoElement.prev())
+            console.log 'indicies', rowIndex, oldRowIndex
+            if rowIndex != oldRowIndex
+                cardInfoElement.hide()
+                cardInfoElement.insertAfter(row)
+                cardInfoElement.slideDown(300)
+                $('body').scrollTop($(event.target).offset().top - 55)
