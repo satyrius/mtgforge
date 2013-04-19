@@ -66,6 +66,5 @@ class Forge.SearchResultsView extends Backbone.View
         row = $(event.target).closest('.td-serp-row')
         card = @data.get($(event.target).data('id'))
         row.after(@cardInfoTemplate({card: card.toJSON()}))
-        $('#td-card-info', @$el).width((@CARD_WIDTH + @CARD_MARGIN) * @cardsInRow() - @CARD_MARGIN - 80)
         $('#td-card-info', @$el).slideDown(300)
 
