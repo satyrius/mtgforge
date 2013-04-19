@@ -123,7 +123,7 @@ class FtsQuery(object):
             'ts_rank(array[0,0,0.8,0], i.fts, to_tsquery(%(q_types)s)) / COALESCE(NULLIF(i.colors_count, 0), 10)')
         # And go with common ranking after
         self.rank.append(
-            'ts_rank_cd(array[0.1,0.5,0,0], i.fts, to_tsquery(%(q)s), 4|32)')
+            'ts_rank_cd(array[0.1,0.4,0,0], i.fts, to_tsquery(%(q)s), 4|32)')
 
     @valueble(assert_list=True)
     def add_color(self, value):
@@ -140,7 +140,7 @@ class FtsQuery(object):
                 identity_query)
 
         self.rank.append(
-            "ts_rank(array[1,0,0,0], to_tsvector(i.color_identity_idx::text), "
+            "ts_rank(array[0.8,0,0,0], to_tsvector(i.color_identity_idx::text), "
             "to_tsquery('{0}'), 2)".format(identity_query))
 
     @valueble(assert_list=True)
