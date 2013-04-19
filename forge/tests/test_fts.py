@@ -109,3 +109,16 @@ class SearchTest(SerpTest):
         )
         data = self.search(q='artifact')
         self.assertEqual(self.get_cards(data), expected)
+
+    def test_filter_by_type(self):
+        expected = []
+        expected.append(self.create_card(
+            name='Abrupt Decay',
+            type_line='Instant',
+        ).name)
+        self.create_card(
+            name='Dreadbore',
+            type_line='Sorcery',
+        )
+        data = self.search(type='instant')
+        self.assertEqual(self.get_cards(data), expected)

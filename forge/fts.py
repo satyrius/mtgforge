@@ -159,7 +159,7 @@ class FtsQuery(object):
 
     @valueble(assert_list=True)
     def add_type(self, value):
-        type_query = [u'%s:B*' % q.strip(' \n\t') for q in value]
+        type_query = [u'%s:A*' % q.strip(' \n\t') for q in value]
         self.filters['type_filter'] = 'AND i.fts @@ to_tsquery(%(type)s)'
         self.params['type'] = u' | '.join(type_query)
 
