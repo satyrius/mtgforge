@@ -37,3 +37,10 @@ class SerpTest(ResourceTestCase):
 
     def get_cards(self, serp, field='name'):
         return [cf[field] for cf in serp['objects']]
+
+    def dump_rank(self, data):
+        if isinstance(data, dict):
+            data = data['objects']
+        for d in data:
+            print d['name'], d['ranks']
+
