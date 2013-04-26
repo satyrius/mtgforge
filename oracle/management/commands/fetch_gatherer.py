@@ -159,7 +159,7 @@ class Command(BaseCommand):
             result.extend(self.process_pages(failed))
         return result
 
-    def log_request(self, response):
+    def log_request(self, response, **kwargs):
         self.writeln(u'>>> {0}'.format(response.url))
 
     def fetch_page(self, page):
