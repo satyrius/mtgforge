@@ -1,4 +1,4 @@
-from settigns.common import *
+from settings.common import *
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
