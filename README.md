@@ -33,13 +33,13 @@ MTGForge project has several config modules for any purpose. `settings.dev` for 
 
 	DJANGO_SETTINGS_MODULE=settings.prod ./manage.py runserver
 
-But there is easy way for developers, `settings` module has a liitle magic to choose which config to use. If it founds `test` in `sys.argv` it uses `settings.test` otherwise `settings.dev`.
+But there is easy way for developers, `settings` module has a liitle magic to choose which config to use. If it founds `test` in `sys.argv` it uses `settings.test`, then it checks `sys.platform` to match *darwin* (because our developers use MacOS) and use `settings.dev` if it is, otherwise the `settings.prod` will be imorted.
 
 Be careful on production server, pass `settings.prod` config explicitly to prevent running your app in dev mode for your real customers.
 
-There is separate comfig for *mediagenerator* bundles, it is `settings.media`. This setting has beed moved to separate module to make it easier for frontand devepers to modify it and do not care about damaging `settings.common` module.
+There is separate config for *mediagenerator* bundles, it is `settings.media`. This setting has beed moved to separate module to make it easier for frontand devepers to modify it and do not care about damaging `settings.common` module.
 
-Both development and production environments usually has database settings that differs the one from `settings.common`.  There is `settings.local` module to deal with it. You can define `DATABASES` setting in this module and it will be imported to `settings.common`, otherwise default projects `DATABASES` settings will be used. Note that `settings/local.py` is ignored by git.
+Both development and production environments usually has database settings that differs the one from `settings.common`.  There is `settings.local` module to deal with it. You can define `DATABASES` setting in this module and it will be imported to `settings.common`, otherwise default projects `DATABASES` settings will be used. For only development local settings there is `settings.dev_local` module, you can use it to switch on some specific things like *Django Debug Toolbar*. Note that `settings/*local.py` is ignored by git.
 
 One more settings trick. You can set `DEBUG_DB` to true when `settings.dev` is used to start log database queries to the console output.
 
