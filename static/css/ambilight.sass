@@ -26,7 +26,7 @@ $colorless: #cccccc
 $color_identity_list: ($white) ($blue) ($white, $blue) ($black) ($white, $black) ($blue, $black) ($black, $blue, $white) ($red) ($red, $white) ($blue, $red) ($red, $blue, $white) ($black, $red) ($red, $black, $white) ($red, $black, $blue) ($red, $black, $white, $blue) ($green) ($green, $white) ($green, $blue) ($green, $blue, $white) ($black, $green) ($green, $black, $white) ($green, $black, $blue) ($green, $black, $blue, $white) ($red, $green)
 
 @for $i from 1 to 25
-    ul#search-results li img.color_identity_#{$i}:hover
+    #td-search-results .td-card img.color_identity_#{$i}:hover
         @if $i == 1
             @include one-color-shadow(nth($color_identity_list, $i))
         @if $i == 2
@@ -37,7 +37,7 @@ $color_identity_list: ($white) ($blue) ($white, $blue) ($black) ($white, $black)
             @include one-color-shadow(nth($color_identity_list, $i))
         @if $i == 16
             @include one-color-shadow(nth($color_identity_list, $i))
-        
+
         @if $i == 3
             @include two-color-shadow(nth(nth($color_identity_list, $i), 1), nth(nth($color_identity_list, $i), 2))
         @if $i == 5
