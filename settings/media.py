@@ -5,7 +5,7 @@ MEDIA_BUNDLES = (
     ),
     ( 'common.css',
         'css/main.sass',
-        'css/ambilight.sass',
+        #'css/ambilight.sass',
         'css/sprites.css',
         'css/chosen.css',
     ),
@@ -29,7 +29,7 @@ MEDIA_BUNDLES = (
         'templates/search/new_card.jst',
         'templates/search/new_row.jst',
         'templates/search/card_info.jst',
- 
+
         #INIT
         'js/init.coffee',
 
