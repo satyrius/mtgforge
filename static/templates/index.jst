@@ -1,4 +1,12 @@
 <div class="">
     <h1>Magic: The Gathering cards intelligent search tool</h1>
     <p class="lead">Just start typing your search query in the box and see magic.</p>
+    <h2>Choose a product to explore</h2>
+    <div id="products-list">
+    <% for (set in window.serverData.card_sets) { %>
+        <a href="#<%= window.serverData.card_sets[set].acronym %>">
+            <%= window.serverData.card_sets[set].name%>
+        </a>
+    <% } %>
+    </div>
 </div>
