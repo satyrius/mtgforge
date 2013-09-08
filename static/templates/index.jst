@@ -3,10 +3,12 @@
     <p class="lead">Just start typing your search query in the box and see magic.</p>
     <h2>Choose a product to explore</h2>
     <div id="products-list">
-    <% for (set in window.serverData.card_sets) { %>
-        <a href="#<%= window.serverData.card_sets[set].acronym %>">
-            <%= window.serverData.card_sets[set].name%>
+    <% _.each(card_sets, function(cs) { %>
+        <a class="card-set"
+            data-acronym="<%= cs.acronym %>"
+            href="#">
+            <%= cs.name %>
         </a>
-    <% } %>
+    <% }) %>
     </div>
 </div>

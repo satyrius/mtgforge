@@ -5,4 +5,19 @@ class Forge.IndexView extends Backbone.View
         "click .card-set" : "handleCardSetClick"
 
     render: () ->
-        @$el.html(@template())
+        unless @csCollection?
+            @csCollection = new Forge.CardSetsCollection()
+            @csCollection.fetch().done () =>
+                @_renderSets()
+        else
+            @_renderSets()
+
+    _renderSets: () ->
+        @$el.html(@template({card_sets: @csCollection.toJSON()}))
+
+    handleCardSetClick: (event) ->
+        _.defer(@_handleCardSetClick, event)
+
+    _handleCardSetClick: (event) ->
+        cs_acronym  = $(event.target).data("acronym")
+        Backbone.Mediator.publish("search:q", {set: cs_acronym})

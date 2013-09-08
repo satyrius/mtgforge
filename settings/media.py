@@ -38,9 +38,11 @@ MEDIA_BUNDLES = (
 
         #MODELS
         'js/models/card.coffee',
+        'js/models/set.coffee',
 
         #COLLECTIONS
         'js/collections/cards.coffee',
+        'js/collections/sets.coffee',
 
         #VIEWS
         'js/views/index.coffee',
