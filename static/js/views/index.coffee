@@ -11,4 +11,4 @@ class Forge.IndexView extends Backbone.View
             @_renderSets()
 
     _renderSets: () ->
-        @$el.html(@template({card_sets: @csCollection}))
+        @$el.html(@template({card_sets: @csCollection.groupBy "year"}))

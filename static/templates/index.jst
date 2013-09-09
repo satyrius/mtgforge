@@ -3,13 +3,20 @@
     <p class="lead">Just start typing your search query in the box and see magic.</p>
     <h2>Choose a product to explore</h2>
     <div id="products-list">
-    <% card_sets.each(function(cs) { %>
-        <a class="card-set"
-            data-acronym="<%= cs.get("acronym") %>"
-            href="#<%= cs.getSearchUrl() %>"
-        >
-            <%= cs.get("name") %>
-        </a>
+    <% _.each(card_sets, function(cs_list, year) { %>
+        <div class="row-fluid">
+            <h3 class="span1"><%= year %></h3>
+            <div class="span11">
+            <% _.each(cs_list, function(cs) { %>
+                <a class="card-set"
+                    data-acronym="<%= cs.get("acronym") %>"
+                    href="#<%= cs.getSearchUrl() %>"
+                >
+                    <%= cs.get("name") %>
+                </a>
+            <% }) %>
+            </div>
+        </div>
     <% }) %>
     </div>
 </div>
