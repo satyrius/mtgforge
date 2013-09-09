@@ -1,6 +1,7 @@
 class Forge.IndexView extends Backbone.View
     el: "#td-main"
     template: window.MEDIA.templates['templates/index.jst'].render
+    csListTemplate: window.MEDIA.templates['templates/cs_links.jst'].render
 
     render: () ->
         unless @csCollection?
@@ -11,4 +12,12 @@ class Forge.IndexView extends Backbone.View
             @_renderSets()
 
     _renderSets: () ->
-        @$el.html(@template({card_sets: @csCollection.groupBy "year"}))
+        grouped = @csCollection.groupBy (cs) -> cs.year
+        _.each grouped, (sets, year) ->
+            grouped[year] = _.groupBy sets, (cs) ->
+                cs.type
+
+        @$el.html(@template({
+            cardSets: grouped,
+            listTemplate: @csListTemplate
+        }))

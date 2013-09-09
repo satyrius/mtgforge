@@ -23,6 +23,7 @@ MEDIA_BUNDLES = (
     ( 'app.js',
         #TEMPLATES
         'templates/index.jst',
+        'templates/cs_links.jst',
         'templates/sidebar.jst',
         'templates/search/form.jst',
         'templates/search/results.jst',

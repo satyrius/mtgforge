@@ -3,18 +3,20 @@
     <p class="lead">Use fulltext search engine by typing what do you want to find, or try some links below to look at card sets in whole</p>
     <h2>Choose a product to explore</h2>
     <div id="products-list">
-    <% _.each(card_sets, function(cs_list, year) { %>
+        <% _.each(_.pairs(cardSets).reverse(), function(yearSets) { %>
         <div class="row-fluid">
-            <h3 class="span1"><%= year %></h3>
-            <div class="span11">
-            <% _.each(cs_list, function(cs) { %>
-                <a class="card-set"
-                    data-acronym="<%= cs.get("acronym") %>"
-                    href="#<%= cs.getSearchUrl() %>"
-                >
-                    <%= cs.get("name") %>
-                </a>
-            <% }) %>
+            <h3 class="span1"><%= yearSets[0] %></h3>
+            <div class="span2">
+                <%= listTemplate({cs_list: yearSets[1]["core"]}) %>
+            </div>
+            <div class="span3">
+                <%= listTemplate({cs_list: yearSets[1]["block"]}) %>
+            </div>
+            <div class="span2">
+                <%= listTemplate({cs_list: yearSets[1]["duel"]}) %>
+            </div>
+            <div class="span4">
+                <%= listTemplate({cs_list: yearSets[1]["other"]}) %>
             </div>
         </div>
     <% }) %>

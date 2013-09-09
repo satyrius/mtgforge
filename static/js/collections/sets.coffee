@@ -3,4 +3,4 @@ class Forge.CardSetsCollection extends Backbone.Collection
     model: Forge.CardSet
 
     comparator: (cs) ->
-        return cs.get "released_at"
+        return new Date(cs.get "released_at")
