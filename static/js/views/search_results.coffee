@@ -7,6 +7,7 @@ class Forge.SearchResultsView extends Backbone.View
     CARD_WIDTH: 223
     CARD_HEIGHT: 310
     CARD_MARGIN: 15
+    VIEW_MARGIN: 60
 
     subscriptions:
         'cards:fetched': 'render'
@@ -36,7 +37,7 @@ class Forge.SearchResultsView extends Backbone.View
         html = ""
         for rowCards in d
             html += @newRowTemplate({cards: rowCards})
-        
+
         $("#td-search-results", @$el).append(html)
 
     checkScroll: () =>
@@ -48,7 +49,7 @@ class Forge.SearchResultsView extends Backbone.View
         if windowBottomPosition >= lastCardTop and @data.meta.total_count > @data.meta.offset + @data.meta.limit
             @data.loadNext()
             @loading = true
-    
+
     checkRows: () =>
         return if @initialCardsInRow == @cardsInRow()
         $("#td-search-results", @$el).height($("#td-search-results", @$el).height())
@@ -60,11 +61,11 @@ class Forge.SearchResultsView extends Backbone.View
 
     cardsInRow: () ->
         Math.floor($('#td-search-results', @$el).width()/(@CARD_WIDTH + @CARD_MARGIN))
-    
+
     showCardInfo: (event) =>
         row = $(event.target).closest('.td-serp-row')
         card = @data.get($(event.target).data('id'))
-        arrowPosition = $(event.target).offset().left + (@CARD_WIDTH/2) + @CARD_MARGIN
+        arrowPosition = $(event.target).offset().left + (@CARD_WIDTH/2) + @CARD_MARGIN - @VIEW_MARGIN
         cardInfoElement = $('#td-card-info', @$el)
         unless cardInfoElement.length
             cardInfoElement = @cardInfoTemplate({card: card.toJSON(), arrowPosition: arrowPosition })
