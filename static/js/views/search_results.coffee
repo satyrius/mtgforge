@@ -14,7 +14,7 @@ class Forge.SearchResultsView extends Backbone.View
         'cardsCollection:updated': 'addCards'
 
     events:
-        'click .td-card': 'showCardInfo'
+        'click .td-card': 'toggleCardInfo'
 
     loading: false
     render: (data) ->
@@ -34,55 +34,81 @@ class Forge.SearchResultsView extends Backbone.View
             else
                 return d.push([card])
         , this)
-        html = ""
+        html = ''
         for rowCards in d
             html += @newRowTemplate({cards: rowCards})
 
-        $("#td-search-results", @$el).append(html)
+        $('#td-search-results', @$el).append(html)
 
     checkScroll: () =>
         return if @loading
         lastCard = $('.td-card', @$el).last()
         return if lastCard.length == 0
         lastCardTop = lastCard.find('img').offset().top
-        windowBottomPosition = $("body").scrollTop() + window.outerHeight
+        windowBottomPosition = $('body').scrollTop() + window.outerHeight
         if windowBottomPosition >= lastCardTop and @data.meta.total_count > @data.meta.offset + @data.meta.limit
             @data.loadNext()
             @loading = true
 
     checkRows: () =>
         return if @initialCardsInRow == @cardsInRow()
-        $("#td-search-results", @$el).height($("#td-search-results", @$el).height())
-        $("#td-search-results", @$el).empty()
+        $('#td-search-results', @$el).height($('#td-search-results', @$el).height())
+        $('#td-search-results', @$el).empty()
         @addCards(@data.toJSON())
-        $("#td-search-results", @$el).height('auto')
+        $('#td-search-results', @$el).height('auto')
         @initialCardsInRow = @cardsInRow()
 
 
     cardsInRow: () ->
         Math.floor($('#td-search-results', @$el).width()/(@CARD_WIDTH + @CARD_MARGIN))
 
-    showCardInfo: (event) =>
-        row = $(event.target).closest('.td-serp-row')
-        card = @data.get($(event.target).data('id'))
-        arrowPosition = $(event.target).offset().left + (@CARD_WIDTH/2) + @CARD_MARGIN - @VIEW_MARGIN
-        cardInfoElement = $('#td-card-info', @$el)
-        unless cardInfoElement.length
-            cardInfoElement = @cardInfoTemplate({card: card.toJSON(), arrowPosition: arrowPosition })
-            row.after(cardInfoElement)
-            $('#td-card-info', @$el).slideDown(300)
+    getCardInfoElement: () ->
+        $('#td-card-info', @$el)
+
+    showCardInfoElement: () ->
+        el = @getCardInfoElement()
+        el.slideDown(300)
+
+    renderCardInfo: (target) =>
+        card = @data.get($(target).data('id'))
+        arrowPosition = $(target).offset().left + (@CARD_WIDTH/2) + @CARD_MARGIN - @VIEW_MARGIN
+        @cardInfoTemplate({
+            card: card.toJSON(),
+            arrowPosition: arrowPosition})
+
+    toggleCardInfo: (event) =>
+        target = $(event.target)
+        row = target.closest('.td-serp-row')
+        info = @getCardInfoElement()
+
+        unless info.length
+            # If card info element is not created yet, render it's content
+            # and insert after card's row
+            row.after(@renderCardInfo(event.target))
+            @showCardInfoElement()
         else
-            cardInfoElement.html(
-                $(@cardInfoTemplate(
-                    card: card.toJSON()
-                    arrowPosition: arrowPosition
-                )).html()
-            )
-            rowIndex = $('.td-serp-row').index(row)
-            oldRowIndex = $('.td-serp-row').index(cardInfoElement.prev())
-            console.log 'indicies', rowIndex, oldRowIndex
-            if rowIndex != oldRowIndex
-                cardInfoElement.hide()
-                cardInfoElement.insertAfter(row)
-                cardInfoElement.slideDown(300)
-                $('body').scrollTop($(event.target).offset().top - 55)
+            id = $(target).data('id')
+            sameId = info.data('id') is id
+
+            # Hide info if shown (a.k.a toggle) and immediately return
+            if sameId and $(':visible', info).length
+                info.hide()
+                return
+
+            # Update content and id data if new card info requested
+            if not sameId
+                info.html(
+                    $(@renderCardInfo(event.target)).html()
+                ).data('id', id)
+
+                # Then check for row index to move card info element after it
+                rows = $('.td-serp-row', @$el)
+                rowIndex = rows.index(row)
+                oldRowIndex = rows.index(info.prev())
+                if rowIndex != oldRowIndex
+                    info.hide()
+                    info.insertAfter(row)
+
+            # Show card info element and fix scroll
+            @showCardInfoElement()
+            $('body').scrollTop($(event.target).offset().top - 55)
