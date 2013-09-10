@@ -3,14 +3,15 @@ class Forge.SidebarView extends Backbone.View
     template: window.MEDIA.templates['templates/sidebar.jst'].render
     events:
         "click .filter-toggle" : "handleFilterToggleClick"
-        "click .filter-reset" : "resetFilters"
+        "click .filter-reset" : "resetFiltersAndSearch"
         "change .filter-sets" : "handleFilterSetsChange"
-    
+
     initialize: () ->
         @render()
 
     subscriptions:
         'search:confirm': 'updateToggles'
+        'search:reset': 'resetFilters'
 
     render: () ->
         @$el.html(@template())
@@ -46,7 +47,7 @@ class Forge.SidebarView extends Backbone.View
 
     updateToggles: (query) ->
         # this is prototype, what you want??
-        @_filterData = 
+        @_filterData =
             color: []
             cmc: []
             type: []
@@ -74,4 +75,7 @@ class Forge.SidebarView extends Backbone.View
             type: []
             rarity: []
             set: []
+
+    resetFiltersAndSearch: () ->
+        @resetFilters()
         Backbone.Mediator.publish("search:q", @_filterData)

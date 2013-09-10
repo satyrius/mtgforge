@@ -4,6 +4,7 @@ class Forge.IndexView extends Backbone.View
     csListTemplate: window.MEDIA.templates['templates/cs_links.jst'].render
 
     render: () ->
+        # Fetch card set collection or use cached
         unless @csCollection?
             @csCollection = new Forge.CardSetsCollection()
             @csCollection.fetch().done () =>
@@ -11,7 +12,12 @@ class Forge.IndexView extends Backbone.View
         else
             @_renderSets()
 
+        # Reset search input and filters
+        Backbone.Mediator.publish('search:reset')
+
     _renderSets: () ->
+        # Group card sets collection by year it was released, then group
+        # each subset by card set type (e.g. core set, duel deck, etc.)
         grouped = @csCollection.groupBy (cs) -> cs.year
         _.each grouped, (sets, year) ->
             grouped[year] = _.groupBy sets, (cs) ->

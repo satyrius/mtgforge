@@ -8,6 +8,7 @@ class Forge.SearchView extends Backbone.View
 
     subscriptions:
         'search:confirm': 'updateForm'
+        'search:reset': 'resetForm'
 
     q: ""
 
@@ -15,11 +16,17 @@ class Forge.SearchView extends Backbone.View
         @render()
         $('#q-input').focus()
 
+    _setInput: (q) ->
+        @$el.find('#td-q-input').val(q)
+
+    resetForm: () ->
+        @q = ""
+        @_setInput @q
+
     updateForm: (query) ->
         q = $.unserialize(query).q
         if q
-            q = q.replace(/\+/g, ' ')
-            @$el.find('#td-q-input').val(q)
+            @_setInput q.replace(/\+/g, ' ')
 
     render: () ->
         @$el.html(@template())
@@ -30,5 +37,5 @@ class Forge.SearchView extends Backbone.View
 
     handleSubmit: (event) ->
         q = $(event.target).serialize()
-        Backbone.Mediator.publish('search:q', q) 
+        Backbone.Mediator.publish('search:q', q)
         false
