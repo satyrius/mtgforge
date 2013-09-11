@@ -3,6 +3,8 @@ class Forge.CardInfoView extends Backbone.View
 
     events:
         'click button.close': 'hide'
+        'click button.left': 'showPrevious'
+        'click button.right': 'showNext'
 
     subscriptions:
         'card:details': 'toggle'
@@ -53,13 +55,12 @@ class Forge.CardInfoView extends Backbone.View
         @$el.hide()
 
     show: () ->
-        if @card and @cardElement
+        if @card
             @$el.slideDown 200, () =>
                 windowBottom = $('body').scrollTop() + window.outerHeight
                 infoBottom =
                     @$el.offsetParent().offset().top + @$el.offset().top +
                     @$el.outerHeight() + @parent.CARD_MARGIN
-                console.log windowBottom, infoBottom
                 offset = windowBottom - infoBottom
                 if offset < 0
                     $('body').scrollTop($('body').scrollTop() - offset)
@@ -73,3 +74,14 @@ class Forge.CardInfoView extends Backbone.View
             @cardElement = $(cardElement)
             @render()
             @show()
+
+    showPrevious: () ->
+        [card, el] = @parent.getPreviousCard(@card)
+        if card
+            @toggle(card, el)
+
+    showNext: () ->
+        [card, el] = @parent.getNextCard(@card)
+        if card
+            @toggle(card, el)
+

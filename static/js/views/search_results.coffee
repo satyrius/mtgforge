@@ -67,7 +67,27 @@ class Forge.SearchResultsView extends Backbone.View
     toggleCardInfo: (event) =>
         target = $(event.target)
         card = @data.get(target.data('id'))
-
         unless @cardInfoView?
             @cardInfoView = new Forge.CardInfoView({parent: @})
         Backbone.Mediator.publish('card:details', card, target)
+
+    getCardElement: (card) ->
+        $(".td-card img[data-id=\"#{card.id}\"]", @$el).parent()
+
+    getPreviousCard: (card) ->
+        index = @data.indexOf(card)
+        if index > 0
+            card = @data.at(index - 1)
+            el = @getCardElement(card)
+            if el.length
+                return [card, el]
+        return [null, null]
+
+    getNextCard: (card) ->
+        index = @data.indexOf(card)
+        if -1 < index < @data.length - 1
+            card = @data.at(index + 1)
+            el = @getCardElement(card)
+            if el.length
+                return [card, el]
+        return [null, null]

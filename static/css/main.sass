@@ -82,9 +82,57 @@
   .close
     background: url(data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNui8sowAAAAWdEVYdENyZWF0aW9uIFRpbWUAMTEvMTMvMTKswDp5AAAAd0lEQVQ4jb2VQRLAIAgDE///Z3qqY1FAhalHMCsCIkVEAIAkkVgvp2lDBgYAnAyHkWotLccNrEd4A7X2TqIdqLfnWBAdaF5rJdyJfjtPH5GT37CaGhoVq3nOm/XflUuLUto2pY1d+vRKh0Pp+MrAVtDe2JkvYNQ+jVSEEFmOkggAAAAASUVORK5CYII=) no-repeat center center
     position: absolute
-    cursor: pointer
+    cursor: pointer !important
     height: 20px
     width: 20px
     top: 15px
     right: 15px
     z-index: 1
+
+  .arrow-btn
+    position: absolute
+    cursor: pointer !important
+    padding: 0
+    height: 77px
+    width: 32px
+    top: 178px
+    background-color: #454545
+    background-image: -webkit-gradient(linear,50% 0%,50% 100%,color-stop(0,#303030),color-stop(1,#262626))
+    background-image: -webkit-linear-gradient(top,#303030,#262626)
+    background-image: linear-gradient(top,#303030,#262626)
+    -webkit-box-shadow: 0 1px 0 rgba(255,255,255,.06),1px 1px 0 rgba(255,255,255,.03),-1px -1px 0 rgba(0,0,0,.02),inset 1px 1px 0 rgba(255,255,255,0.05)
+    box-shadow: 0 1px 0 rgba(255,255,255,.06),1px 1px 0 rgba(255,255,255,.03),-1px -1px 0rgba(0,0,0,.02),inset 1px 1px 0 rgba(255,255,255,0.05)
+    color: #9f9f9f !important
+    border: 1px solid #141414
+    -webkit-border-radius: 2px
+    border-radius: 2px
+
+    div
+      background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAXBAMAAADJv2OxAAAAMFBMVEX///+ZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZnHHh8xAAAAD3RSTlMAESIzRFVmd4iZqrvM3e5GKvWZAAAAdElEQVQI12NgAAH2v2CKsf83mJb8vxBEMe3/KQCitf83gLn3n4Flff8FgCjW90/A3Pw/BiBK4v0lMHf+bwUw/R/CZVj/SwBq5kaIQD1UAfv7yxCBuH8OYJrl/VWIgM3/AjDNdP45REDq/0SI+9b/gghw/AUAn68l+4HFkZUAAAAASUVORK5CYII=) center no-repeat
+      display: block
+      position: absolute
+      top: 0
+      bottom: 0
+      left: 0
+      right: 0
+      margin: auto
+      height: 23px
+      width: 14px
+
+  .arrow-btn:hover
+    background-image: -webkit-gradient(linear,50% 0%,50% 100%,color-stop(0,#2F2F2F),color-stop(1,#2d2d2d))
+    background-image: -webkit-linear-gradient(top,#343434,#2d2d2d)
+    background-image: linear-gradient(top,#2f2f2f,#343434)
+    color: #afafaf !important
+    background-color: #3d3d3d
+    border: 1px solid #191919
+    -webkit-box-shadow: 0 1px 0 rgba(255,255,255,.09),1px 1px 0 rgba(255,255,255,.05), -1px -1px 0 rgba(0,0,0,.02),inset 1px 1px 0 rgba(255,255,255,.05)
+    box-shadow: 0 1px 0 rgba(255,255,255,.09), 1px 1px 0 rgba(255,255,255,.05),-1px -1px 0 rgba(0,0,0,.02), inset 1px 1px 0 rgba(255,255,255,.05)
+
+  .arrow-btn.left
+    left: 0
+
+  .arrow-btn.right
+    right: 0
+    -webkit-transform: scaleX(-1)
+    transform: scaleX(-1)
