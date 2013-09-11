@@ -46,6 +46,7 @@ MEDIA_BUNDLES = (
         'js/collections/sets.coffee',
 
         #VIEWS
+        'js/views/card_info.coffee',
         'js/views/index.coffee',
         'js/views/sidebar.coffee',
         'js/views/search.coffee',

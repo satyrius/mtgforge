@@ -3,7 +3,6 @@ class Forge.SearchResultsView extends Backbone.View
     template: window.MEDIA.templates['templates/search/results.jst'].render
     newRowTemplate: window.MEDIA.templates['templates/search/new_row.jst'].render
     newCardsTemplate: window.MEDIA.templates['templates/search/new_card.jst'].render
-    cardInfoTemplate: window.MEDIA.templates['templates/search/card_info.jst'].render
     CARD_WIDTH: 223
     CARD_HEIGHT: 310
     CARD_MARGIN: 15
@@ -62,53 +61,13 @@ class Forge.SearchResultsView extends Backbone.View
     cardsInRow: () ->
         Math.floor($('#td-search-results', @$el).width()/(@CARD_WIDTH + @CARD_MARGIN))
 
-    getCardInfoElement: () ->
-        $('#td-card-info', @$el)
-
-    showCardInfoElement: () ->
-        el = @getCardInfoElement()
-        el.slideDown(300)
-
-    renderCardInfo: (target) =>
-        card = @data.get($(target).data('id'))
-        arrowPosition = $(target).offset().left + (@CARD_WIDTH/2) + @CARD_MARGIN - @VIEW_MARGIN
-        @cardInfoTemplate({
-            card: card.toJSON(),
-            arrowPosition: arrowPosition})
+    getCardInfoOffset: () ->
+        (@CARD_WIDTH/2) + @CARD_MARGIN - @VIEW_MARGIN
 
     toggleCardInfo: (event) =>
         target = $(event.target)
-        row = target.closest('.td-serp-row')
-        info = @getCardInfoElement()
+        card = @data.get(target.data('id'))
 
-        unless info.length
-            # If card info element is not created yet, render it's content
-            # and insert after card's row
-            row.after(@renderCardInfo(event.target))
-            @showCardInfoElement()
-        else
-            id = $(target).data('id')
-            sameId = info.data('id') is id
-
-            # Hide info if shown (a.k.a toggle) and immediately return
-            if sameId and $(':visible', info).length
-                info.hide()
-                return
-
-            # Update content and id data if new card info requested
-            if not sameId
-                info.html(
-                    $(@renderCardInfo(event.target)).html()
-                ).data('id', id)
-
-                # Then check for row index to move card info element after it
-                rows = $('.td-serp-row', @$el)
-                rowIndex = rows.index(row)
-                oldRowIndex = rows.index(info.prev())
-                if rowIndex != oldRowIndex
-                    info.hide()
-                    info.insertAfter(row)
-
-            # Show card info element and fix scroll
-            @showCardInfoElement()
-            $('body').scrollTop($(event.target).offset().top - 55)
+        unless @cardInfoView?
+            @cardInfoView = new Forge.CardInfoView({parent: @})
+        Backbone.Mediator.publish('card:details', card, target)
