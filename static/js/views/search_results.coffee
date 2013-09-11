@@ -69,7 +69,8 @@ class Forge.SearchResultsView extends Backbone.View
         card = @data.get(target.data('id'))
         unless @cardInfoView?
             @cardInfoView = new Forge.CardInfoView({parent: @})
-        Backbone.Mediator.publish('card:details', card, target)
+        el = target.closest('.td-card')
+        Backbone.Mediator.publish('card:details', card, el)
 
     getCardElement: (card) ->
         $(".td-card img[data-id=\"#{card.id}\"]", @$el).parent()

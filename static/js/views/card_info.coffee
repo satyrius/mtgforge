@@ -57,26 +57,30 @@ class Forge.CardInfoView extends Backbone.View
     show: () ->
         if @card and @cardElement
             @$el.slideDown 200, () =>
-                windowHeight = window.outerHeight
+                parentOffset = @$el.offsetParent().offset().top
+                scroll = $('body').scrollTop()
+
+                # First scroll to show card element top border
+                cardTop = $('img', @cardElement).offset().top - parentOffset
+                if cardTop < 0
+                    cardTop = 0
+                if cardTop < scroll
+                    scroll -= scroll - cardTop
+
+                # Then check that card info lower border is visible
+                elTop = @$el.offset().top
+                elBottom = elTop + @$el.outerHeight() +
+                    @parent.CARD_MARGIN + parentOffset
+                windowBottom = scroll + window.outerHeight
+                if elBottom > windowBottom
+                    scroll += elBottom - windowBottom
+
+                # And at the end check card info top border is visible
                 barHeight = Forge.app.searchView.$el.outerHeight()
-                cardMargin = @parent.CARD_MARGIN
+                if elTop - barHeight < scroll
+                    scroll -= scroll - elTop + barHeight
 
-                upper = $('body').scrollTop()
-                lower = upper + windowHeight
-
-                elBottom = @$el.offsetParent().offset().top +
-                    @$el.offset().top + @$el.outerHeight() + cardMargin
-                elTop = $('.td-arrow-wrap', @$el).offset().top - barHeight
-                cardTop = @cardElement.offsetParent().offset().top +
-                    @cardElement.offset().top
-
-                if lower < elBottom
-                    upper -= lower - elBottom
-                    lower = upper + windowHeight
-                if elTop < upper
-                    upper += elTop - upper
-
-                $('body').scrollTop(upper)
+                $('body').scrollTop(scroll)
 
     toggle: (card, cardElement) ->
         if @_rendered and @card.id is card.id and @$el.is(':visible')
@@ -96,4 +100,3 @@ class Forge.CardInfoView extends Backbone.View
         [card, el] = @parent.getNextCard(@card)
         if card
             @toggle(card, el)
-
