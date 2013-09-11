@@ -21,7 +21,8 @@ class Forge.CardInfoView extends Backbone.View
     render: () =>
         if @card and @cardElement
             # Calculate arrow position and render template
-            arrowPosition = @cardElement.offset().left + @parent.getCardInfoOffset()
+            arrowPosition = @cardElement.offset().left +
+                @parent.getCardInfoOffset()
             html = @template({
                 card: @card.toJSON(),
                 arrowPosition: arrowPosition
@@ -53,8 +54,15 @@ class Forge.CardInfoView extends Backbone.View
 
     show: () ->
         if @card and @cardElement
-            @$el.slideDown(200)
-            $('body').scrollTop(@cardElement.offset().top - 55)
+            @$el.slideDown 200, () =>
+                windowBottom = $('body').scrollTop() + window.outerHeight
+                infoBottom =
+                    @$el.offsetParent().offset().top + @$el.offset().top +
+                    @$el.outerHeight() + @parent.CARD_MARGIN
+                console.log windowBottom, infoBottom
+                offset = windowBottom - infoBottom
+                if offset < 0
+                    $('body').scrollTop($('body').scrollTop() - offset)
 
 
     toggle: (card, cardElement) ->
