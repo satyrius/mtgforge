@@ -1,6 +1,9 @@
 class Forge.CardInfoView extends Backbone.View
     template: window.MEDIA.templates['templates/search/card_info.jst'].render
 
+    events:
+        'click button.close': 'hide'
+
     subscriptions:
         'card:details': 'toggle'
         'cards:fetched': 'reset'
@@ -29,6 +32,7 @@ class Forge.CardInfoView extends Backbone.View
                 # replace @el content compelete with rendered html and
                 # update @$el reference to the right selector
                 @$el = $(@el).replaceWith $(html)
+                @delegateEvents()
             else
                 # Otherwise we can update inner html and data-id
                 @$el.html($(html).html()).data('id', @card.id)
@@ -44,14 +48,20 @@ class Forge.CardInfoView extends Backbone.View
             # @el which was attached to DOM tree.
             @_rendered = true
 
-            # And show it with animation and fix scroll
+    hide: () ->
+        @$el.hide()
+
+    show: () ->
+        if @card and @cardElement
             @$el.slideDown(200)
             $('body').scrollTop(@cardElement.offset().top - 55)
 
+
     toggle: (card, cardElement) ->
         if @_rendered and @card.id is card.id and @$el.is(':visible')
-            @$el.hide()
+            @hide()
         else
             @card = card
             @cardElement = $(cardElement)
             @render()
+            @show()
