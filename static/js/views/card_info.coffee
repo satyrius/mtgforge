@@ -55,16 +55,28 @@ class Forge.CardInfoView extends Backbone.View
         @$el.hide()
 
     show: () ->
-        if @card
+        if @card and @cardElement
             @$el.slideDown 200, () =>
-                windowBottom = $('body').scrollTop() + window.outerHeight
-                infoBottom =
-                    @$el.offsetParent().offset().top + @$el.offset().top +
-                    @$el.outerHeight() + @parent.CARD_MARGIN
-                offset = windowBottom - infoBottom
-                if offset < 0
-                    $('body').scrollTop($('body').scrollTop() - offset)
+                windowHeight = window.outerHeight
+                barHeight = Forge.app.searchView.$el.outerHeight()
+                cardMargin = @parent.CARD_MARGIN
 
+                upper = $('body').scrollTop()
+                lower = upper + windowHeight
+
+                elBottom = @$el.offsetParent().offset().top +
+                    @$el.offset().top + @$el.outerHeight() + cardMargin
+                elTop = $('.td-arrow-wrap', @$el).offset().top - barHeight
+                cardTop = @cardElement.offsetParent().offset().top +
+                    @cardElement.offset().top
+
+                if lower < elBottom
+                    upper -= lower - elBottom
+                    lower = upper + windowHeight
+                if elTop < upper
+                    upper += elTop - upper
+
+                $('body').scrollTop(upper)
 
     toggle: (card, cardElement) ->
         if @_rendered and @card.id is card.id and @$el.is(':visible')
