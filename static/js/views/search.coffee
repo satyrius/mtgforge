@@ -5,6 +5,7 @@ class Forge.SearchView extends Backbone.View
     events:
         'change #td-search-form': 'handleSubmit'
         'submit #td-search-form': 'handleSubmit'
+        'click #feedback-btn': 'showUserVoice'
 
     subscriptions:
         'search:confirm': 'updateForm'
@@ -39,3 +40,14 @@ class Forge.SearchView extends Backbone.View
         q = $(event.target).serialize()
         Backbone.Mediator.publish('search:q', q)
         false
+
+    showUserVoice: ()->
+        unless @UserVoice?
+            @UserVoice = window.UserVoice || []
+        @UserVoice.push ['showLightbox', 'classic_widget',
+            mode: 'full'
+            primary_color: '#cc6d00'
+            link_color: '#007dbf'
+            default_mode: 'feedback'
+            forum_id: 222347
+        ]
