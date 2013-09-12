@@ -72,23 +72,18 @@ class Forge.SearchResultsView extends Backbone.View
         el = target.closest('.td-card')
         Backbone.Mediator.publish('card:details', card, el)
 
-    getCardElement: (card) ->
-        $(".td-card img[data-id=\"#{card.id}\"]", @$el).parent()
+    getCard: (card, offset) ->
+        currentIndex = @data.indexOf(card)
+        index = currentIndex + offset
+        if 0 <= index <= @data.length
+            card = @data.at(index)
+            el = $(".td-card img[data-id=\"#{card.id}\"]", @$el).parent()
+            if el.length
+                return [card, el]
+        return [null, null]
 
     getPreviousCard: (card) ->
-        index = @data.indexOf(card)
-        if index > 0
-            card = @data.at(index - 1)
-            el = @getCardElement(card)
-            if el.length
-                return [card, el]
-        return [null, null]
+        @getCard(card, -1)
 
     getNextCard: (card) ->
-        index = @data.indexOf(card)
-        if -1 < index < @data.length - 1
-            card = @data.at(index + 1)
-            el = @getCardElement(card)
-            if el.length
-                return [card, el]
-        return [null, null]
+        @getCard(card, +1)
