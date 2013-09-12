@@ -31,8 +31,11 @@ class SerpTest(ResourceTestCase):
     def create_card(self, **kwargs):
         card = any_model(Card)
         face = any_model(CardFace, card=card, colors=[], **kwargs)
-        any_model(CardRelease, card=card, card_set=any_model(CardSet),
-                  art=any_model(CardImage))
+
+        if 'card_set' not in kwargs:
+            kwargs['card_set'] = any_model(CardSet)
+        any_model(CardRelease, card=card, art=any_model(CardImage), **kwargs)
+
         return face
 
     def get_cards(self, serp, field='name'):
@@ -43,4 +46,3 @@ class SerpTest(ResourceTestCase):
             data = data['objects']
         for d in data:
             print d['name'], d['ranks']
-

@@ -31,7 +31,8 @@ class FtsQuery(object):
     FTS_TEMPLATE = """
         WITH cards AS (
             SELECT DISTINCT ON (i.card_id)
-                i.card_face_id, i.fts, r.art_id AS img_id
+                i.card_face_id, i.fts, r.art_id AS img_id,
+                COALESCE(r.card_number, 0) card_number
             FROM forge_cardftsindex AS i
             JOIN oracle_cardrelease AS r ON r.card_id = i.card_id
             JOIN oracle_cardset AS cs ON cs.id = r.card_set_id
@@ -57,7 +58,7 @@ class FtsQuery(object):
         LEFT JOIN oracle_cardimagethumb AS thumb
             ON thumb.original_id = img.id
             AND format = %(thumb_fmt)s
-        ORDER BY rank DESC, f.card_id
+        ORDER BY rank DESC, i.card_number, f.card_id
     """
 
     COUNT_TEMPLATE = "SELECT COUNT(1) FROM ({query}) AS t".format(

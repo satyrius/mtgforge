@@ -1,4 +1,7 @@
+from django_any import any_model
+
 from forge.tests.base import SerpTest
+from oracle.models import CardSet
 
 
 class SerpSortTest(SerpTest):
@@ -208,3 +211,21 @@ class SerpSortTest(SerpTest):
 
         data = self.search(q='black angel')
         self.assertEqual(self.get_cards(data), expected)
+
+    def test_order_by_card_number(self):
+        '''Order by collector's number if rank is equal.
+
+        For example, we look at the card set spoiler (cards filtered by card
+        set acronym), all cards will have the same rank and should be sorted
+        by collector's number.
+        '''
+        m14 = any_model(CardSet, name='Magic 2014', acronym='m14')
+
+        act_of_treason = self.create_card(
+            name='Act of Treason', card_set=m14, card_number=125)
+        cancel = self.create_card(
+            name='Cancel', card_set=m14, card_number=45)
+
+        data = self.search(set='m14')
+        self.assertEqual(self.get_cards(data),
+                         [cancel.name, act_of_treason.name])
