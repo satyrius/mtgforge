@@ -31,12 +31,14 @@ class SerpTest(ResourceTestCase):
     def create_card(self, **kwargs):
         card = any_model(Card)
         face = any_model(CardFace, card=card, colors=[], **kwargs)
+        self.create_card_release(card, **kwargs)
+        return face
 
+    def create_card_release(self, card, **kwargs):
         if 'card_set' not in kwargs:
             kwargs['card_set'] = any_model(CardSet)
-        any_model(CardRelease, card=card, art=any_model(CardImage), **kwargs)
-
-        return face
+        return any_model(
+            CardRelease, card=card, art=any_model(CardImage), **kwargs)
 
     def get_cards(self, serp, field='name'):
         return [cf[field] for cf in serp['objects']]

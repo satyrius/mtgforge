@@ -148,8 +148,8 @@ class FtsQuery(object):
         set_ids = CardSet.objects.filter(
             acronym__in=value).values_list('id', flat=True)
         self.meta['sets_filtered'] = len(set_ids)
-        self.filters['set_filter'] = "AND i.sets @@ '{0}'::query_int".format(
-            '|'.join(map(str, set_ids)))
+        self.filters['set_filter'] = "AND cs.id = ANY(ARRAY[{}])".format(
+            ','.join(map(str, set_ids)))
 
     @valueble(assert_list=True)
     def add_rarity(self, value):

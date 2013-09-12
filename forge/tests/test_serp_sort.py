@@ -217,12 +217,16 @@ class SerpSortTest(SerpTest):
 
         For example, we look at the card set spoiler (cards filtered by card
         set acronym), all cards will have the same rank and should be sorted
-        by collector's number.
+        by collector's number. And it does not matter thar it had released in
+        a few sets with different collector's number.
         '''
         m14 = any_model(CardSet, name='Magic 2014', acronym='m14')
+        reissue = any_model(CardSet, acronym='rei')
 
         act_of_treason = self.create_card(
             name='Act of Treason', card_set=m14, card_number=125)
+        self.create_card_release(
+            act_of_treason.card, card_set=reissue, card_number=1)
         cancel = self.create_card(
             name='Cancel', card_set=m14, card_number=45)
 
