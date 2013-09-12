@@ -21,6 +21,7 @@ class Forge.SearchResultsView extends Backbone.View
         @$el.html(@template())
         @addCards(data.toJSON())
         @initialCardsInRow = @cardsInRow()
+        $('body').scrollTop(0)
         $(document).on('scroll', _.throttle(@checkScroll, 100))
         $(window).on('resize', _.throttle(@checkRows, 100))
 
