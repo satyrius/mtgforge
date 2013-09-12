@@ -40,8 +40,8 @@ if os.getenv('DEBUG_DB'):
 LOGGING['loggers']['oracle.management']['level'] = 'DEBUG'
 
 # Enable django debug toolbar
-MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + (
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-)
+#MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + (
+#    'debug_toolbar.middleware.DebugToolbarMiddleware',
+#)
 
 from settings.local import *
