@@ -52,6 +52,7 @@ class FtsQuery(object):
             thumb.file AS thumb,
             i.card_number,
             i.card_set_id,
+            img.mvid,
             array[{ranks}]::float[] AS ranks,
             {rank} AS rank
         FROM cards AS i
@@ -60,7 +61,7 @@ class FtsQuery(object):
         LEFT JOIN oracle_cardimagethumb AS thumb
             ON thumb.original_id = img.id
             AND format = %(thumb_fmt)s
-        ORDER BY rank DESC, i.card_number, f.card_id
+        ORDER BY rank DESC, i.card_number, img.mvid
     """
 
     COUNT_TEMPLATE = "SELECT COUNT(1) FROM ({query}) AS t".format(
