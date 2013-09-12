@@ -31,7 +31,7 @@ class FtsQuery(object):
     FTS_TEMPLATE = """
         WITH cards AS (
             SELECT DISTINCT ON (i.card_id)
-                i.card_face_id, i.fts, r.art_id AS img_id,
+                i.card_face_id, i.fts, r.art_id AS img_id, r.card_set_id,
                 COALESCE(r.card_number, 0) card_number
             FROM forge_cardftsindex AS i
             JOIN oracle_cardrelease AS r ON r.card_id = i.card_id
@@ -50,6 +50,8 @@ class FtsQuery(object):
             f.*,
             img.*,
             thumb.file AS thumb,
+            i.card_number,
+            i.card_set_id,
             array[{ranks}]::float[] AS ranks,
             {rank} AS rank
         FROM cards AS i

@@ -38,10 +38,11 @@ class CardResource(ModelResource):
 
         # Debug ranking
         if settings.DEBUG_SERP:
-            if hasattr(bundle.obj, 'rank'):
-                bundle.data['rank'] = bundle.obj.rank
-            if hasattr(bundle.obj, 'ranks'):
-                bundle.data['ranks'] = bundle.obj.ranks
+            debug = {}
+            for k in ['rank', 'ranks', 'card_number', 'card_set_id']:
+                if hasattr(bundle.obj, k):
+                    debug[k] = getattr(bundle.obj, k)
+            bundle.data['debug'] = debug
 
         return bundle
 
