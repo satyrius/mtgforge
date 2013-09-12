@@ -68,8 +68,8 @@ class Forge.CardInfoView extends Backbone.View
                 cardTop = $('img', @cardElement).offset().top - parentOffset
                 if cardTop < 0
                     cardTop = 0
-                if cardTop < scroll
-                    scroll -= scroll - cardTop
+                if cardTop != scroll
+                    scroll = scroll - (scroll - cardTop)
 
                 # Then check that card info lower border is visible
                 elTop = @$el.offset().top
