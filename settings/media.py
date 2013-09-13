@@ -18,6 +18,7 @@ MEDIA_BUNDLES = (
         'js/lib/backbone.meta.js',
         'js/lib/backbone-mediator.js',
         'js/lib/chosen.jquery.min.js',
+        'js/lib/spin.min.js',
         #'js/lib/bootstrap-typeahead.custom.js',
         'js/lib/user-voice.js',
     ),
@@ -31,6 +32,7 @@ MEDIA_BUNDLES = (
         'templates/search/new_card.jst',
         'templates/search/new_row.jst',
         'templates/search/card_info.jst',
+        'templates/search/notfound.jst',
 
         #INIT
         'js/init.coffee',
@@ -52,5 +54,6 @@ MEDIA_BUNDLES = (
         'js/views/sidebar.coffee',
         'js/views/search.coffee',
         'js/views/search_results.coffee',
+        'js/views/spinner.coffee',
     ),
 )

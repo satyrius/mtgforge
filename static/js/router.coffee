@@ -25,9 +25,13 @@ class Forge.Router extends Backbone.Router
         unless @searchResultsView?
             @searchResultsView = new Forge.SearchResultsView()
 
+        unless @spinnerView?
+            @spinnerView = new Forge.SpinnerView()
+
         unless @cardsCollection?
             @cardsCollection = new Forge.CardsCollection()
-        
+
+        Backbone.Mediator.publish('cards:loading')
         @cardsCollection.fetch({
             data: query
         }).done(() =>

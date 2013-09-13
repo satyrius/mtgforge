@@ -1,6 +1,7 @@
 class Forge.SearchResultsView extends Backbone.View
     el: '#td-main'
     template: window.MEDIA.templates['templates/search/results.jst'].render
+    notFoundTemplate: window.MEDIA.templates['templates/search/notfound.jst'].render
     newRowTemplate: window.MEDIA.templates['templates/search/new_row.jst'].render
     newCardsTemplate: window.MEDIA.templates['templates/search/new_card.jst'].render
     CARD_WIDTH: 223
@@ -9,6 +10,7 @@ class Forge.SearchResultsView extends Backbone.View
     VIEW_MARGIN: 60
 
     subscriptions:
+        'cards:loading': 'clear'
         'cards:fetched': 'render'
         'cardsCollection:updated': 'addCards'
 
@@ -16,8 +18,16 @@ class Forge.SearchResultsView extends Backbone.View
         'click .td-card': 'toggleCardInfo'
 
     loading: false
+
+    clear: () ->
+        @$el.html ''
+
     render: (data) ->
         @data = data
+        unless @data.length
+            @$el.html(@notFoundTemplate())
+            return
+
         @$el.html(@template())
         @addCards(data.toJSON())
         @initialCardsInRow = @cardsInRow()
