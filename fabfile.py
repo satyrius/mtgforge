@@ -26,16 +26,16 @@ def restart():
 @project_task
 def recollect_static():
     sudo('rm -rf _generated_media*')
-    sudo('./manage.py generatemedia')
-    sudo('./manage.py compressmedia')
-    sudo('./manage.py collectstatic --clear --noinput')
+    sudo('./dj.sh generatemedia')
+    sudo('./dj.sh compressmedia')
+    sudo('./dj.sh collectstatic --clear --noinput')
 
 
 @project_task
 def build_fts():
-    sudo('./manage.py build_fts_index')
-    sudo('./manage.py build_sim_index')
-    sudo('./manage.py build_suggest')
+    sudo('./dj.sh build_fts_index')
+    sudo('./dj.sh build_sim_index')
+    sudo('./dj.sh build_suggest')
 
 
 @project_task
@@ -44,7 +44,7 @@ def deploy():
     sudo('git pull')
     sudo('find . -name "*.pyc" -delete')
     sudo('pip install -r requirements.txt')
-    sudo('./manage.py migrate --merge --delete-ghost-migrations')
+    sudo('./dj.sh migrate --merge --delete-ghost-migrations')
     build_fts()
     recollect_static()
     restart()

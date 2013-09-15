@@ -31,7 +31,7 @@ Next step is to install python packages:
 
 MTGForge project has several config modules for any purpose. `settings.dev` for developments, `settings.test` to run unit tests and `settings.prod` for production server. They all use default project settings from `settings.common`, but override some optins to bring something to the environment. You can pass the comfic explicitly using `DJANGO_SETTINGS_MODULE` environment variable. For example to run server with production config use following:
 
-	DJANGO_SETTINGS_MODULE=settings.prod ./manage.py runserver
+	DJANGO_SETTINGS_MODULE=settings.prod ./dj.sh runserver
 
 But there is easy way for developers, `settings` module has a liitle magic to choose which config to use. If it founds `test` in `sys.argv` it uses `settings.test`, then it checks `sys.platform` to match *darwin* (because our developers use MacOS) and use `settings.dev` if it is, otherwise the `settings.prod` will be imorted.
 
@@ -43,7 +43,7 @@ Both development and production environments usually has database settings that 
 
 One more settings trick. You can set `DEBUG_DB` to true when `settings.dev` is used to start log database queries to the console output.
 
-	DEBUG_DB=1 ./manage.py runserver
+	DEBUG_DB=1 ./dj.sh runserver
 
 ## Data
 
@@ -54,41 +54,41 @@ Configure your own `DATABASES` settings:
 Create the database:
 
 	createdb mtgforge
-    ./manage.py syncdb
-    ./manage.py migrate
+    ./dj.sh syncdb
+    ./dj.sh migrate
 
 Then load fixtures and get card sets list from Gatherer:
 
-    ./manage.py loaddata data_provider
-    ./manage.py fetch_sets -a
+    ./dj.sh loaddata data_provider
+    ./dj.sh fetch_sets -a
 
 To fill cards database do the following:
 
     # To download all (not recommended)
-    ./manage.py fetch_gatherer
+    ./dj.sh fetch_gatherer
     # Partial load. Get only particular set (e.g. Zendikar)
-    ./manage.py fetch_gatherer zen
+    ./dj.sh fetch_gatherer zen
 
 Then run some postprocessing. *It is optional but adviced if you want to all go faster.*
 
-    ./manage.py fetch_scans
-    ./manage.py generate_thumbnails
+    ./dj.sh fetch_scans
+    ./dj.sh generate_thumbnails
 
 To build full text search engine do:
 
-    ./manage.py build_fts_index
-    ./manage.py build_sim_index
-    ./manage.py build_suggest
+    ./dj.sh build_fts_index
+    ./dj.sh build_sim_index
+    ./dj.sh build_suggest
 
 ## Test
 
 We use nose with django-nose 1.1 to run unit tests, so you can reuse DB to save several seconds at the beginning and end of your test suite.
 
-    REUSE_DB=1 ./manage.py test
+    REUSE_DB=1 ./dj.sh test
 
 The project provides custom settings for test environment. It is strictly adviced to use `settings.test` module for tests, this module is used by default when you run `test` command. But if you want to run tests with another settings you can do it explicitly, using `DJANGO_SETTINGS_MODULE` environment variable.
 
-    DJANGO_SETTINGS_MODULE=settings.foo ./manage.py test
+    DJANGO_SETTINGS_MODULE=settings.foo ./dj.sh test
 
 ## Tools
 
@@ -98,7 +98,7 @@ Projects ships with useful tolls. They are to fetch MTG set names, catds info an
 
 We use Wizards' official product page to get all valueable product releases (aka card sets). Additionally `-a` (`--fetch-acronyms`) option can be used to parse *magiccards.info* for pretty acronyms.
 
-    ./manage.py fetch_sets -a
+    ./dj.sh fetch_sets -a
 
 ### Cards
 
@@ -108,21 +108,21 @@ card details, 3 show card details with oracle rulings. Without argumetds it
 fetches cards for all sets that database has. To limit grabber for particular
 sets `-s` (`--set`) option may be used or argument to filter multiple sets.
 
-    ./manage.py fetch_gatherer --set=isd
-    ./manage.py fetch_gatherer isd dka avr
+    ./dj.sh fetch_gatherer --set=isd
+    ./dj.sh fetch_gatherer isd dka avr
 
 It is possible to update single cards, not whole set. You have to specify
 card set filter in this case.
 
-    ./manage.py fetch_gatherer -s avr 'Avacyn, Angel of Hope' 'Sigarda, Host of Herons'
+    ./dj.sh fetch_gatherer -s avr 'Avacyn, Angel of Hope' 'Sigarda, Host of Herons'
 
 The `--no-update` option skips updating card faces already saved
 
-    ./manage.py fetch_gatherer -s chk --no-update
+    ./dj.sh fetch_gatherer -s chk --no-update
 
 To skip card faces that cannot be found (parsed from) on card page you can pass `--skip-not-found`. This will catch *CardNotFound* exception.
 
-    ./manage.py fetch_gatherer -s chk --skip-not-found
+    ./dj.sh fetch_gatherer -s chk --skip-not-found
 
 ### Cards post processing
 
@@ -130,10 +130,10 @@ To skip card faces that cannot be found (parsed from) on card page you can pass 
 
 Loading cards' scans is a heavy pricess. It was introduces as separate management command.
 
-    ./manage.py fetch_scans
+    ./dj.sh fetch_scans
 
 #### generate_thumbnails
 
 It is enought to show fetched scans on SERP as is, but it would be better to use *progressive jpeg* compression to make them smaller. Use `generate_thumbnails` command to create all thumbnails we need. You can pass additional `--quality` option to set jpeg quality. This command do not update existing thumbs by default, but if you want to refresh thumbnails pass `--refresh` option.
 
-    ./manage.py generate_thumbnails
+    ./dj.sh generate_thumbnails

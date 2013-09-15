@@ -1,4 +1,4 @@
-settings/local.py
+*/settings/local.py
 media/*
 _generated_media*
 .DS_Store

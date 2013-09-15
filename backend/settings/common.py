@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
+from os.path import join, dirname, abspath
 
 # Media bundles config for mediagenerator
 from settings.media import MEDIA_BUNDLES
@@ -8,7 +9,8 @@ from settings.media import MEDIA_BUNDLES
 DEBUG = False
 TEMPLATE_DEBUG = False
 
-DIR_NAME = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+APP_ROOT = abspath(join(dirname(__file__), '..'))
+DIR_NAME = dirname(APP_ROOT)
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -118,7 +120,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(DIR_NAME, 'templates'),
+    os.path.join(APP_ROOT, 'templates'),
 )
 
 INSTALLED_APPS = (
