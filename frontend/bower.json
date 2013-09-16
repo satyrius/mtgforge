@@ -1,7 +1,40 @@
 {
-  "name": "your-app",
+  "name": "mtgforge",
   "version": "0.0.1",
+  "homepage": "https://github.com/satyrius/mtgforge",
+  "license": "MIT",
+  "private": true,
+  "authors": [
+    "Anton Egorov <anton.egoroff@gmail.com>"
+  ],
   "main": "public/app.js",
-  "dependencies": {},
-  "overrides": {}
+  "dependencies": {
+    "backbone": "~1.0.0",
+    "backbone-paginator": "*",
+    "bootstrap": "~2.3.2",
+    "spin.js": "~1.3.2",
+    "underscore": "~1.5.2"
+  },
+  "overrides": {
+    "backbone": {
+      "main": "backbone.js",
+      "dependencies": {
+        "jquery": "*",
+        "underscore": "*"
+      }
+    },
+    "backbone-paginator": {
+      "main": "backbone-mediator.js"
+    },
+    "underscore": {
+      "main": "underscore.js"
+    }
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
 }

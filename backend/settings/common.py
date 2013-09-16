@@ -5,8 +5,7 @@ from os.path import join, dirname, abspath
 DEBUG = False
 TEMPLATE_DEBUG = False
 
-APP_ROOT = abspath(join(dirname(__file__), '..'))
-DIR_NAME = dirname(APP_ROOT)
+PROJECT_ROOT = abspath(join(dirname(__file__), '../..'))
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -66,7 +65,7 @@ STATICFILES_DIRS = [
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(DIR_NAME, 'static'),
+    os.path.join(PROJECT_ROOT, 'frontend', 'public'),
 ]
 
 # List of finder classes that know how to find static files in
@@ -104,7 +103,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(APP_ROOT, 'templates'),
+    os.path.join(PROJECT_ROOT, 'backend', 'templates'),
 )
 
 INSTALLED_APPS = (

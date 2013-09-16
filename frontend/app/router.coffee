@@ -1,3 +1,5 @@
+require 'views'
+
 class Forge.Router extends Backbone.Router
     constructor: (options) ->
         super(options)

@@ -1,5 +1,7 @@
 window.Forge = {}
 
+require 'router'
+
 $ ->
-    Forge.app = new Forge.Router()
-    Backbone.history.start()
+  Forge.app = new Forge.Router()
+  Backbone.history.start()

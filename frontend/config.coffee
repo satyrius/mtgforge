@@ -7,3 +7,5 @@ exports.config =
       joinTo: 'app.css'
     templates:
       joinTo: 'app.js'
+
+  framework: 'backbone'
