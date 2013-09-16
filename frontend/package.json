@@ -1,7 +1,7 @@
 {
-  "name": "your-app",
-  "description": "Description",
-  "author": "Your Name",
+  "name": "mtgforge",
+  "description": "MTG Forge frontend application",
+  "author": "Anton Egorov",
   "version": "0.0.1",
   "repository": "",
   "scripts": {
