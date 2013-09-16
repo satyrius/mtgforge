@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-import sys
 from os.path import join, dirname, abspath
-
-# Media bundles config for mediagenerator
-from settings.media import MEDIA_BUNDLES
 
 DEBUG = False
 TEMPLATE_DEBUG = False
@@ -83,17 +79,6 @@ STATICFILES_FINDERS = (
 
 DEFAULT_FILE_STORAGE = 'storages.backends.hashpath.HashPathStorage'
 
-# experiment with mediagenerator (alternative asset manager and compression tool)
-MEDIA_DEV_MODE = 'runserver' in sys.argv  # do not compress media under ./manage.py runserver
-PRODUCTION_MEDIA_URL = '/static/gm/'
-GENERATED_MEDIA_DIR = os.path.join(DIR_NAME, '_generated_media/gm')
-GLOBAL_MEDIA_DIRS = STATICFILES_DIRS[:]  # force mediagenerator to do not walk over _generated_media dir
-DEV_MEDIA_URL = '/static-dev/'
-ROOT_MEDIA_FILTERS = {}
-MEDIA_BLOCKS = False
-
-STATICFILES_DIRS.append(os.path.join(DIR_NAME, '_generated_media'))
-
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '32fcsn31khb%-3m$iu1hs@i_l$)woq88m*_*$-k31z-9z3m!c^'
@@ -105,7 +90,6 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
-    'mediagenerator.middleware.MediaMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -138,7 +122,6 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'django_any',
     'django_extensions',
-    'mediagenerator',
     'modeltranslation',
     'oracle',
     'storages',
