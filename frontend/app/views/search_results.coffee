@@ -1,3 +1,5 @@
+Handlebars.registerPartial 'card', require '../templates/search/card'
+
 class Forge.SearchResultsView extends Backbone.View
   el: '#td-main'
   template: require '../templates/search/results'
@@ -23,7 +25,6 @@ class Forge.SearchResultsView extends Backbone.View
     @$el.html ''
 
   render: (data) ->
-    console.log data
     @data = data
     unless @data.length
       @$el.html @notFoundTemplate()

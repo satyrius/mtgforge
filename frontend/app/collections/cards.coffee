@@ -1,3 +1,5 @@
+require 'models/card'
+
 class Forge.CardsCollection extends Backbone.Collection
     url: "api/v1/cards/search"
     model: Forge.Card

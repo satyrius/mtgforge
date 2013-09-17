@@ -23,7 +23,10 @@
       }
     },
     "backbone-paginator": {
-      "main": "backbone-mediator.js"
+      "main": "backbone-mediator.js",
+      "dependencies": {
+        "backbone": "*"
+      }
     },
     "underscore": {
       "main": "underscore.js"
