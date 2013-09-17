@@ -5,33 +5,30 @@ MTG Forge is a Magic Card Database and trading platform. It has been started und
 Clone git repository with project:
 
     git clone git@github.com:satyrius/mtgforge.git
-
-You should intall some system requirements (Mac OS X dependent):
+    
+Following installation is for Mac OS X users.
+    
+Backend monastery:
+	
+    # Gevent requires libevent library
+    brew install libevent
+    export CFLAGS=-I/brew/include
+    # Python requirements
+    pip install -r requirements.txt
+	
+Frontend monastery:
 
     # CoffeeScript (as Node.js module)
     brew install nodejs
     curl https://npmjs.org/install.sh | sh
-    npm install -g coffee-script
-
-    # SASS (as Ruby gem)
-    gem install compass
-
-    # ImageMagick for sprites
-    brew install imagemagick
-
-    # Gevent requires libevent library
-    brew install libevent
-    export CFLAGS=-I/brew/include
-
-Next step is to install python packages:
-
-    pip install -r requirements.txt
+    npm install
+    bower install
 
 ## Configure
 
 MTGForge project has several config modules for any purpose. `settings.dev` for developments, `settings.test` to run unit tests and `settings.prod` for production server. They all use default project settings from `settings.common`, but override some optins to bring something to the environment. You can pass the comfic explicitly using `DJANGO_SETTINGS_MODULE` environment variable. For example to run server with production config use following:
 
-	DJANGO_SETTINGS_MODULE=settings.prod ./dj.sh runserver
+	DJANGO_SETTINGS_MODULE=settings.prod ./runserver.sh
 
 But there is easy way for developers, `settings` module has a liitle magic to choose which config to use. If it founds `test` in `sys.argv` it uses `settings.test`, then it checks `sys.platform` to match *darwin* (because our developers use MacOS) and use `settings.dev` if it is, otherwise the `settings.prod` will be imorted.
 
@@ -43,7 +40,7 @@ Both development and production environments usually has database settings that 
 
 One more settings trick. You can set `DEBUG_DB` to true when `settings.dev` is used to start log database queries to the console output.
 
-	DEBUG_DB=1 ./dj.sh runserver
+	DEBUG_DB=1 ./runserver.sh
 
 ## Data
 
