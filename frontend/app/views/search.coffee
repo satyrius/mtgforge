@@ -1,49 +1,50 @@
 class Forge.SearchView extends Backbone.View
-    el: "#td-search"
-    template: require '../templates/search/form'
+  el: '#td-search'
+  template: require '../templates/search/form'
 
-    events:
-        'change #td-search-form': 'handleSubmit'
-        'submit #td-search-form': 'handleSubmit'
-        'click #feedback-btn': 'showUserVoice'
+  events:
+    'change #td-search-form': 'handleSubmit'
+    'submit #td-search-form': 'handleSubmit'
+    'click #feedback-btn': 'showUserVoice'
 
-    subscriptions:
-        'search:confirm': 'updateForm'
-        'search:reset': 'resetForm'
+  subscriptions:
+    'search:confirm': 'updateForm'
+    'search:reset': 'resetForm'
 
-    q: ""
+  q: ''
 
-    initialize: () ->
-        @render()
-        $('#q-input').focus()
+  initialize: () ->
+    @render()
+    $('#q-input').focus()
 
-    _setInput: (q) ->
-        @$el.find('#td-q-input').val(q)
+  _setInput: (q) ->
+    @$el.find('#td-q-input').val(q)
 
-    resetForm: () ->
-        @q = ""
-        @_setInput @q
+  resetForm: () ->
+    @q = ''
+    @_setInput @q
 
-    updateForm: (query) ->
-        q = $.unserialize(query).q
-        if q
-            @_setInput q.replace(/\+/g, ' ')
+  updateForm: (query) ->
+    q = $.unserialize(query).q
+    if q
+      @_setInput q.replace(/\+/g, ' ')
 
-    render: () ->
-        @$el.html(@template())
+  render: () ->
+    @$el.html(@template())
 
-    handleSubmit: (event) ->
-        q = $(event.target).serialize()
-        Backbone.Mediator.publish('search:q', q)
-        false
+  handleSubmit: (event) ->
+    q = $(event.target).serialize()
+    Backbone.Mediator.publish('search:q', q)
+    false
 
-    showUserVoice: ()->
-        unless @UserVoice?
-            @UserVoice = window.UserVoice || []
-        @UserVoice.push ['showLightbox', 'classic_widget',
-            mode: 'full'
-            primary_color: '#cc6d00'
-            link_color: '#007dbf'
-            default_mode: 'feedback'
-            forum_id: 222347
-        ]
+  showUserVoice: ()->
+    unless @UserVoice?
+      @UserVoice = window.UserVoice || []
+
+    @UserVoice.push ['showLightbox', 'classic_widget',
+      mode: 'full'
+      primary_color: '#cc6d00'
+      link_color: '#007dbf'
+      default_mode: 'feedback'
+      forum_id: 222347
+    ]
