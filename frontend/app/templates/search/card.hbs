@@ -1,0 +1,8 @@
+<span class="td-card">
+    <div class="td-stats">
+        {{#each cards.debug}}
+        <span class="label label-important">{{@key}}: {{this}}</span>
+        {{/each}}
+    </div>
+    <img src="{{thumb}}" class="color_identity_{{color_identity}}" data-id="{{id}}"/>
+</span>

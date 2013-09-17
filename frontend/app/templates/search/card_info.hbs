@@ -1,17 +1,17 @@
-<div id="td-card-info" class="container-fluid" data-id="<%= card.id %>">
+<div id="td-card-info" class="container-fluid" data-id="{{card.id}}">
     <button class="close"/>
     <div class="row-fluid">
-        <div class="td-arrow-wrap" style="left: <%= arrowPosition %>px">
+        <div class="td-arrow-wrap" style="left: {{arrowPosition}}px">
             <div class="td-arrow"></div>
         </div>
-        <img src="<%= card.thumb %>" class="span3"/>
+        <img src="{{card.thumb}}" class="span3"/>
         <div class="span6 td-card-rules">
-            <h2><%= card.name %></h2>
-            <em><%= card.type_line %></em>
+            <h2>{{card.name}}</h2>
+            <em>{{card.type_line}}</em>
             <div class="td-card-rules-list">
-            <% _.each(card.rules, function(rule) { %>
-                <p class="lead"><%= rule %></p>
-            <% }) %>
+            {{#each card.rules}}
+                <p class="lead">{{this}}</p>
+            {{/each}}
             </div>
         </div>
     </div>
