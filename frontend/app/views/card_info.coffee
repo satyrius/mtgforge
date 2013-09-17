@@ -1,106 +1,111 @@
 class Forge.CardInfoView extends Backbone.View
-    template: window.MEDIA.templates['templates/search/card_info.jst'].render
+  template: require '../templates/search/card_info'
 
-    events:
-        'click button.close': 'hide'
-        'click button.left': 'showPrevious'
-        'click button.right': 'showNext'
+  events:
+    'click button.close': 'hide'
+    'click button.left': 'showPrevious'
+    'click button.right': 'showNext'
 
-    subscriptions:
-        'card:details': 'toggle'
-        'cards:fetched': 'reset'
+  subscriptions:
+    'card:details': 'toggle'
+    'cards:fetched': 'reset'
 
-    initialize: (options) ->
-        super()
-        @parent = options.parent
-        @reset()
-        $(document).on 'keydown', (event) =>
-            switch event.keyCode
-                when 37 then @showPrevious()
-                when 39 then @showNext()
+  initialize: (options) ->
+    super()
+    @parent = options.parent
+    @reset()
+    $(document).on 'keydown', (event) =>
+      switch event.keyCode
+        when 37 then @showPrevious()
+        when 39 then @showNext()
 
-    reset: () ->
-        @_rendered = false
-        @_lastPosition = null
-        @$el.hide()
+  reset: ->
+    @_rendered = false
+    @_lastPosition = null
+    @$el.hide()
 
-    render: () =>
-        if @card and @cardElement
-            # Calculate arrow position and render template
-            arrowPosition = @cardElement.offset().left +
-                @parent.getCardInfoOffset()
-            html = @template({
-                card: @card.toJSON(),
-                arrowPosition: arrowPosition
-            })
+  render: =>
+    unless @card and @cardElement
+      return
 
-            unless @_rendered
-                # It is the first time this view rendered, so wa have to
-                # replace @el content compelete with rendered html and
-                # update @$el reference to the right selector
-                @$el = $(@el).replaceWith $(html)
-                @delegateEvents()
-            else
-                # Otherwise we can update inner html and data-id
-                @$el.html($(html).html()).data('id', @card.id)
+    # Calculate arrow position and render template
+    arrowPosition = @cardElement.offset().left +
+      @parent.getCardInfoOffset()
+    html = @template
+      card: @card.toJSON(),
+      arrowPosition: arrowPosition
 
-            # Move card info block after card's row if card is from another row
-            row = @cardElement.closest('.td-serp-row')
-            index = row.siblings('.td-serp-row').andSelf().index(row)
-            unless @_rendered and @_lastPosition is index
-                row.after(@$el)
-                @_lastPosition = index
+    # Card info block positiob after card's row if card is from another row
+    row = @cardElement.closest '.td-serp-row'
+    index = row.siblings('.td-serp-row').andSelf().index row
 
-            # Mark this view as rendered. This means that it has once rendered
-            # @el which was attached to DOM tree.
-            @_rendered = true
+    unless @_rendered
+      # It is the first time this view rendered, so wa have to
+      # replace @el content compelete with rendered html and
+      # update @$el reference to the right selector
+      @$el = $(html).insertAfter(row)
+      @el = @$el[0]
+      @delegateEvents()
+    else
+      # Otherwise we can update inner html and data-id
+      @$el.html($(html).html()).data('id', @card.id)
+      unless @_lastPosition is index
+        row.after @$el
 
-    hide: () ->
-        @$el.hide()
+    @_lastPosition = index
 
-    show: () ->
-        if @card and @cardElement
-            @$el.slideDown 200, () =>
-                parentOffset = @$el.offsetParent().offset().top
-                scroll = $('body').scrollTop()
+    # Mark this view as rendered. This means that it has once rendered
+    # @el which was attached to DOM tree.
+    @_rendered = true
 
-                # First scroll to show card element top border
-                cardTop = $('img', @cardElement).offset().top - parentOffset
-                if cardTop < 0
-                    cardTop = 0
-                if cardTop != scroll
-                    scroll = scroll - (scroll - cardTop)
+  hide: ->
+    @$el.hide()
 
-                # Then check that card info lower border is visible
-                elTop = @$el.offset().top
-                elBottom = elTop + @$el.outerHeight() +
-                    @parent.CARD_MARGIN + parentOffset
-                windowBottom = scroll + window.outerHeight
-                if elBottom > windowBottom
-                    scroll += elBottom - windowBottom
+  show: ->
+    unless @card and @cardElement
+      return
 
-                # And at the end check card info top border is visible
-                barHeight = Forge.app.searchView.$el.outerHeight()
-                if elTop - barHeight < scroll
-                    scroll -= scroll - elTop + barHeight
+    @$el.slideDown 200, =>
+      parentOffset = @$el.offsetParent().offset().top
+      scroll = $('body').scrollTop()
 
-                $('body').scrollTop(scroll)
+      # First scroll to show card element top border
+      cardTop = $('img', @cardElement).offset().top - parentOffset
+      if cardTop < 0
+        cardTop = 0
+      if cardTop != scroll
+        scroll = scroll - (scroll - cardTop)
 
-    toggle: (card, cardElement) ->
-        if @_rendered and @card.id is card.id and @$el.is(':visible')
-            @hide()
-        else
-            @card = card
-            @cardElement = $(cardElement)
-            @render()
-            @show()
+      # Then check that card info lower border is visible
+      elTop = @$el.offset().top
+      elBottom = elTop + @$el.outerHeight() +
+        @parent.CARD_MARGIN + parentOffset
+      windowBottom = scroll + window.outerHeight
+      if elBottom > windowBottom
+        scroll += elBottom - windowBottom
 
-    showPrevious: () ->
-        [card, el] = @parent.getPreviousCard(@card)
-        if card
-            @toggle(card, el)
+      # And at the end check card info top border is visible
+      barHeight = Forge.app.searchView.$el.outerHeight()
+      if elTop - barHeight < scroll
+        scroll -= scroll - elTop + barHeight
 
-    showNext: () ->
-        [card, el] = @parent.getNextCard(@card)
-        if card
-            @toggle(card, el)
+      $('body').scrollTop scroll
+
+  toggle: (card, cardElement) ->
+    if @_rendered and @card.id is card.id and @$el.is(':visible')
+      @hide()
+    else
+      @card = card
+      @cardElement = $(cardElement)
+      @render()
+      @show()
+
+  showPrevious: ->
+    [card, el] = @parent.getPreviousCard @card
+    if card
+      @toggle card, el
+
+  showNext: ->
+    [card, el] = @parent.getNextCard @card
+    if card
+      @toggle card, el

@@ -1,3 +1,5 @@
+require 'views/card_info'
+
 Handlebars.registerPartial 'card', require '../templates/search/card'
 
 class Forge.SearchResultsView extends Backbone.View
