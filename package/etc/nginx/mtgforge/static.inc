@@ -1,0 +1,6 @@
+expires +2w;
+
+gzip_static on;
+gzip_http_version 1.1;
+gzip_proxied expired no-cache no-store private auth;
+gzip_disable "MSIE [1-6]\.";
