@@ -33,8 +33,3 @@ class Forge.CardSet extends Backbone.Model
 
     isDuelDecks: () ->
         @type is "duel"
-
-    getSearchUrl: () ->
-        unless @_searchUrl?
-            @_searchUrl = "search?#{$.serialize(@queryFilter, true)}"
-        return @_searchUrl

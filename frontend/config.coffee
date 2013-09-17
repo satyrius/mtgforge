@@ -2,10 +2,15 @@ exports.config =
   # See http://brunch.io/#documentation for docs.
   files:
     javascripts:
-      joinTo: 'app.js'
+      joinTo: 'js/app.js'
+      order: [
+        'bower_components/backbone/backbone.js',
+        'vendor/scripts/backbone.meta.js'
+      ]
     stylesheets:
-      joinTo: 'app.css'
+      joinTo: 'css/app.css'
     templates:
-      joinTo: 'app.js'
+      defaultExtension: 'hbs'
+      joinTo: 'js/app.js'
 
   framework: 'backbone'

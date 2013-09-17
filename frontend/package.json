@@ -15,6 +15,9 @@
 
     "css-brunch": ">= 1.0 < 1.8",
     "sass-brunch": ">= 1.0 < 1.8",
-    "clean-css-brunch": ">= 1.0 < 1.8"
+    "less-brunch": ">= 1.0 < 1.8",
+    "clean-css-brunch": ">= 1.0 < 1.8",
+
+    "handlebars-brunch": ">= 1.0 < 1.8"
   }
 }

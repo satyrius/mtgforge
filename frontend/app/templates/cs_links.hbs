@@ -1,0 +1,11 @@
+{{#each this}}
+<h4>
+    <a class="card-set"
+        data-acronym="{{{get this "acronym"}}}"
+        href="{{{search_href this}}}"
+    >
+        {{{get this "name"}}}
+        <sup class="badge">{{{get this "cards"}}}</sup>
+    </a>
+</h4>
+{{/each}}

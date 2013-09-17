@@ -76,15 +76,13 @@
             </div>
         </div>
     </li>
-    
+
     <li class="divider"></li>
     <li class="nav-header">Sets</li>
     <select class="filter-sets" multiple>
-        <% for (set in window.serverData.card_sets) { %>
-            <option value="<%= window.serverData.card_sets[set].acronym %>">
-                <%= window.serverData.card_sets[set].name%>
-            </option>
-        <% } %>
+        {{#each window.serverData.card_sets}}
+        <option value="{{acronym}}">{{name}}</option>
+        {{each}}
     </select>
     <li class="divider"></li>
 

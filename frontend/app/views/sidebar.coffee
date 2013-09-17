@@ -1,6 +1,6 @@
 class Forge.SidebarView extends Backbone.View
     el: "#td-sidebar"
-    template: window.MEDIA.templates['templates/sidebar.jst'].render
+    template: require '../templates/sidebar'
     events:
         "click .filter-toggle" : "handleFilterToggleClick"
         "click .filter-reset" : "resetFiltersAndSearch"
