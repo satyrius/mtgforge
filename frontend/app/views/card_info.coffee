@@ -37,7 +37,7 @@ class Forge.CardInfoView extends Backbone.View
 
     # Card info block positiob after card's row if card is from another row
     row = @cardElement.closest '.td-serp-row'
-    index = row.siblings('.td-serp-row').andSelf().index row
+    index = row.siblings('.td-serp-row').addBack().index row
 
     unless @_rendered
       # It is the first time this view rendered, so wa have to
