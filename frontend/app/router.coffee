@@ -1,5 +1,8 @@
 require 'views/index'
 require 'views/search'
+require 'views/search_results'
+require 'views/spinner'
+require 'collections/cards'
 require 'collections/sets'
 
 class Forge.Router extends Backbone.Router
@@ -35,7 +38,7 @@ class Forge.Router extends Backbone.Router
 
     Backbone.Mediator.publish 'cards:loading'
     @cardsCollection.fetch({
-        data: query
+      data: query
     }).done =>
-        Backbone.Mediator.publish 'cards:fetched', @cardsCollection
+      Backbone.Mediator.publish 'cards:fetched', @cardsCollection
     Backbone.Mediator.publish 'search:confirm', query
