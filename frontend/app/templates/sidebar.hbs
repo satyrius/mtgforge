@@ -81,11 +81,10 @@
     <li class="nav-header">Sets</li>
     <select class="filter-sets" multiple>
         {{#each window.serverData.card_sets}}
-        <option value="{{acronym}}">{{name}}</option>
-        {{each}}
+            <option value="{{acronym}}">{{name}}</option>
+        {{/each}}
     </select>
     <li class="divider"></li>
 
     <button class="btn btn-mini btn-link filter-reset">Reset</button>
-
 </ul>
