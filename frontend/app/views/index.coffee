@@ -1,5 +1,7 @@
 require 'helpers'
 
+Handlebars.registerPartial 'card_sets', require '../templates/cs_links'
+
 class Forge.IndexView extends Backbone.View
   el: '#td-main'
   template: require '../templates/index'
@@ -24,5 +26,4 @@ class Forge.IndexView extends Backbone.View
       grouped[year] = _.groupBy sets, (cs) -> cs.type
       grouped[year]['year'] = year
 
-    Handlebars.registerPartial 'card_sets', require '../templates/cs_links'
     @$el.html @template(cardSets: _.sortBy(grouped, (gr) -> -gr.year))
