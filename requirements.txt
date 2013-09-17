@@ -1,6 +1,6 @@
 -e git+git://github.com/ostrovok-team/xact.git@65e19094#egg=xact
 Django==1.4.2
-Fabric==1.6.0
+Fabric==1.7.0
 Pillow==1.7.8
 South==0.7.6
 cssselect==0.8
