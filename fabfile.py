@@ -1,7 +1,8 @@
 from fabric.api import local, lcd, task
+import deploy
 
 
-@task
+@task(alias='runs')
 def runserver():
     with lcd('frontend'):
         local('brunch watch &')

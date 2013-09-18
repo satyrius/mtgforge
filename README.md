@@ -1,12 +1,12 @@
 MTG Forge is a Magic Card Database and trading platform. It has been started under Ostrovok Lab Day initiative.
 
-## Installation
+## Installation (dev)
 
 Clone git repository with project:
 
     git clone git@github.com:satyrius/mtgforge.git
     
-Following installation is for Mac OS X users.
+Following installation is for `Mac OS X` users.
     
 Backend monastery:
 	
@@ -18,11 +18,80 @@ Backend monastery:
 	
 Frontend monastery:
 
-    # CoffeeScript (as Node.js module)
     brew install nodejs
     curl https://npmjs.org/install.sh | sh
+	npm install -g bower
+	npm install -g brunch
+	cd ~/Projects/mtgforge/frontend
     npm install
     bower install
+    
+## Deploy (prod)
+
+We use `Ubuntu` on production. Unless deb-packaging is ready we are deploy using `fabric`.
+
+### Before first release
+
+SSH to the production server and clone latest master:
+
+	cd /var/www/
+    sudo git clone git@github.com:satyrius/mtgforge.git
+    
+Create directories for static and media:
+	
+	cd /var/www/
+	sudo mkdir mtgforge-static
+	sudo mkdir mtgforge-media
+	sudo chown www-data:www-data mtgforge-static mtgforge-media
+	
+Create `virtualenv` and install python packages' dependencies:
+
+	sudo mkdir /var/virtualenv
+	sudo virtualenv /var/virtualenv/mtgforge
+	
+	# Required for psycopg2
+	sudo apt-get install postgresql-server-dev-9.3
+	
+	# Required for gevent
+	sudo apt-get install libevent-dev
+	
+Install `Brunch` using npm:
+
+	sudo add-apt-repository ppa:chris-lea/node.js
+	sudo apt-get update
+	sudo apt-get install nodejs
+	sudo npm install -g bower
+	sudo npm install -g brunch
+	
+### Database
+	
+Install postgresql on server you want, use [official instructions](https://wiki.postgresql.org/wiki/Apt) or following code:
+
+	curl 'http://anonscm.debian.org/loggerhead/pkg-postgresql/postgresql-common/trunk/download/head:/apt.postgresql.org.s-20130224224205-px3qyst90b3xp8zj-1/apt.postgresql.org.sh' | /bin/sh
+	sudo apt-get update
+	sudo apt-get install postgres-9.3
+	sudo apt-get install postgres-contrib-9.3
+	sudo -u postgres createdb mtgforge
+	
+Modify postgresql access config:
+
+	sudo vim /etc/postgresql/9.3/main/pg_hba.conf
+
+	local   all             postgres                                trust
+	host    all             postgres        127.0.0.1/32            trust
+	
+	sudo service postgresql restart
+
+Do not forget to configure database connection for `Django`:
+
+	sudo vim /var/www/mtgforge/backend/settings/local.py
+	
+### Fabric
+
+You can deploy latest `master` using fabric. Change directory to your local working copy, activate virtualenv and run:
+
+	fab deploy
+
 
 ## Configure
 
