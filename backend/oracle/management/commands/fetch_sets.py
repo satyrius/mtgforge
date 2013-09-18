@@ -23,23 +23,26 @@ ignore_products = [
     'Legacy',
     'Deck Builder\'s Toolkit',
     'Vanguard',
-    'Promo set for Gatherer', # This name is from Gatherer's list
+    'Promo set for Gatherer',  # This name is from Gatherer's list
 ]
 ignore_products_re = re.compile('|'.join(ignore_products))
 
+
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
-        make_option('-a', '--fetch-acronyms',
+        make_option(
+            '-a', '--fetch-acronyms',
             action='store_true',
             dest='fetch_acronyms',
             default=False,
             help='Fetch acronyms from magiccards.info'),
-        make_option('-c', '--clear-cache',
+        make_option(
+            '-c', '--clear-cache',
             dest='clear',
             action='store_true',
             default=False,
             help='Invalidate pages cache'),
-        )
+    )
 
     _acronyms = {}
 
@@ -101,7 +104,7 @@ class Command(BaseCommand):
             acronym += add
             letters_remain -= len(add)
         if letters_remain:
-            acronym += w[1:letters_remain+1]
+            acronym += w[1:letters_remain + 1]
         if acronym in self._acronyms:
             acronym = acronym[:-1] + w[-1]
 
@@ -201,12 +204,11 @@ class Command(BaseCommand):
                         (magiccards, mc_product and mc_product[1] or None)):
                     if not ds_url:
                         continue
+                    p = page.get_provider()
                     try:
-                        source_data = dict(
-                            data_provider=page.get_provider(), url=ds_url)
-                        cs.sources.get(**source_data)
+                        cs.sources.get(data_provider=p)
                     except DataSource.DoesNotExist:
-                        cs.sources.create(content_object=cs, **source_data)
+                        cs.sources.create(content_object=cs, data_provider=p, url=ds_url)
 
             info = dict(name=name, url=url, acronym=acronym or '-',
                         cards=extra['cards'] or '?', release=extra['release'])
