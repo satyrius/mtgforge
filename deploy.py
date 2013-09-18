@@ -1,11 +1,12 @@
-import os
+from os.path import join
 from fabric.api import task, sudo, cd, prefix
 
 
 APP_DIR = '/var/www/mtgforge'
+ETC_DIR = join(APP_DIR, 'package', 'etc')
 VIRTUALENV_BIN = '/var/virtualenv/mtgforge/bin'
-ACTIVATE = os.path.join(VIRTUALENV_BIN, 'activate')
-PY = os.path.join(VIRTUALENV_BIN, 'python')
+ACTIVATE = join(VIRTUALENV_BIN, 'activate')
+PY = join(VIRTUALENV_BIN, 'python')
 VERSION_FILE = '/etc/mtgforge/version'
 
 
@@ -46,7 +47,7 @@ def backend():
 
 @task
 def frontend():
-    with cd(os.path.join(APP_DIR, 'frontend')):
+    with cd(join(APP_DIR, 'frontend')):
         sudo('rm -rf node_modules bower_components public')
         sudo('npm install')
         sudo('bower install --allow-root')
@@ -68,6 +69,13 @@ def build_fts():
 
 @task
 def restart():
-    # TODO update configs
+    with cd('/etc/uwsgi/apps-enabled'):
+        sudo('rm -rf mtgforge.ini')
+        sudo('ln -s %s/uwsgi/apps-available/mtgforge.ini .' % ETC_DIR)
+    with cd('/etc/nginx'):
+        sudo('rm -rf mtgforge sites-enabled/mtgforge.conf')
+        sudo('ln -s %s/nginx/mtgforge' % ETC_DIR)
+        with cd('sites-enabled'):
+            sudo('ln -s %s/nginx/mtgforge/_.conf mtgforge.conf' % ETC_DIR)
     sudo('service uwsgi restart')
     sudo('service nginx reload')
