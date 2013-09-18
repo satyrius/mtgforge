@@ -6,6 +6,7 @@ APP_DIR = '/var/www/mtgforge'
 VIRTUALENV_BIN = '/var/virtualenv/mtgforge/bin'
 ACTIVATE = os.path.join(VIRTUALENV_BIN, 'activate')
 PY = os.path.join(VIRTUALENV_BIN, 'python')
+VERSION_FILE = '/etc/mtgforge/version'
 
 
 def manage(command):
@@ -16,6 +17,7 @@ def manage(command):
 
 @task(default=True)
 def full_deploy():
+    update()
     backend()
     restart()
     frontend()
@@ -23,10 +25,16 @@ def full_deploy():
 
 
 @task
-def backend():
+def update():
     with cd(APP_DIR):
         sudo('git reset --hard')
         sudo('git pull')
+        sudo('git log -1 --format="%H" > %s' % VERSION_FILE)
+
+
+@task
+def backend():
+    with cd(APP_DIR):
         sudo('find . -name "*.pyc" -delete')
         sudo('rm -f ./py')
         sudo('ln -s %s ./py' % PY)
@@ -43,6 +51,11 @@ def frontend():
         sudo('npm install')
         sudo('bower install --allow-root')
         sudo('brunch build --production')
+    with cd('/var/www/mtgforge-static'):
+        sudo('rm -rf *')
+        sudo('mkdir $(cat %s)' % VERSION_FILE)
+        sudo('chown www-data:www-data $(cat %s)' % VERSION_FILE)
+
     manage('collectstatic --clear --noinput')
 
 
@@ -55,6 +68,6 @@ def build_fts():
 
 @task
 def restart():
-    # update configs
+    # TODO update configs
     sudo('service uwsgi restart')
-    sudo('service nginx restart')
+    sudo('service nginx reload')
