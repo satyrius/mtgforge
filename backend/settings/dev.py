@@ -44,4 +44,7 @@ LOGGING['loggers']['oracle.management']['level'] = 'DEBUG'
 #    'debug_toolbar.middleware.DebugToolbarMiddleware',
 #)
 
-from settings.local import *
+try:
+    from settings.local import *
+except ImportError:
+    pass

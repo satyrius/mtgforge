@@ -14,4 +14,7 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-from settings.local import *
+try:
+    from settings.local import *
+except ImportError:
+    pass
