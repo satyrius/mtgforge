@@ -30,7 +30,7 @@ def update():
     with cd(APP_DIR):
         sudo('git reset --hard')
         sudo('git pull')
-        sudo('git log -1 --format="%H" > %s' % VERSION_FILE)
+        sudo('git log -1 --format="%H" > /etc/mtgforge/version')
 
 
 @task
