@@ -16,6 +16,7 @@ def manage(command):
 
 @task(default=True)
 def full_deploy():
+    update()
     backend()
     restart()
     frontend()
@@ -23,10 +24,16 @@ def full_deploy():
 
 
 @task
-def backend():
+def update():
     with cd(APP_DIR):
         sudo('git reset --hard')
         sudo('git pull')
+        sudo('git log -1 --format="%H" > /etc/mtgforge/version')
+
+
+@task
+def backend():
+    with cd(APP_DIR):
         sudo('find . -name "*.pyc" -delete')
         sudo('rm -f ./py')
         sudo('ln -s %s ./py' % PY)
@@ -55,6 +62,6 @@ def build_fts():
 
 @task
 def restart():
-    # update configs
+    # TODO update configs
     sudo('service uwsgi restart')
-    sudo('service nginx restart')
+    sudo('service nginx reload')

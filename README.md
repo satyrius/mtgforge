@@ -37,8 +37,9 @@ SSH to the production server and clone latest master:
 	cd /var/www/
     sudo git clone git@github.com:satyrius/mtgforge.git
     
-Create directories for static and media:
+Create directories for static, media and etc:
 	
+	sudo mkdir /etc/mtgforge
 	cd /var/www/
 	sudo mkdir mtgforge-static
 	sudo mkdir mtgforge-media
