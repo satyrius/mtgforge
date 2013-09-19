@@ -19,17 +19,6 @@
     <div id="td-main">
     </div>
 </body>
-<script>
-    window.serverData = {};
-    window.serverData.card_sets = [
-        {% for cs in sets %}
-        {
-            "name": "{{ cs.name|escapejs }}",
-            "acronym": "{{ cs.acronym|escapejs }}"
-        }{% if forloop.revcounter0 %},{% endif %}
-        {% endfor %}
-    ];
-</script>
 <script src="{% static "js/app.js" %}"></script>
 <script>require('init')</script>
 </html>

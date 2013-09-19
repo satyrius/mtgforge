@@ -14,6 +14,7 @@ class Forge.SidebarView extends Backbone.View
     'search:reset': 'resetFilters'
 
   render: () ->
+    # TODO pass card collection to template context
     @$el.html(@template())
     $(".filter-sets").chosen({no_results_text: "No results matched"})
 

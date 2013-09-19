@@ -17,6 +17,5 @@ v1_api.register(CompleteResource())
 
 urlpatterns = patterns(
     '',
-    (r'^$', 'forge.views.index'),
     (r'^api/', include(v1_api.urls)),
 )

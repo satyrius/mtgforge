@@ -1,18 +1,21 @@
 from django.conf import settings
-from django.conf.urls.defaults import patterns, include, url
+from django.conf.urls.defaults import patterns, include
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.views.generic import TemplateView
 
 from forge import urls as forge_urls
 
 
 admin.autodiscover()
 
-urlpatterns = patterns('',
-    url(r'^', include(forge_urls)),
-    url(r'^grappelli/', include('grappelli.urls')),
-    url(r'^admin/', include(admin.site.urls)),
+urlpatterns = patterns(
+    '',
+    (r'^$', TemplateView.as_view(template_name="index.html")),
+    (r'^', include(forge_urls)),
+    (r'^grappelli/', include('grappelli.urls')),
+    (r'^admin/', include(admin.site.urls)),
 )
 
 # Static files
