@@ -60,8 +60,23 @@ class Forge.CardInfoView extends Backbone.View
     # @el which was attached to DOM tree.
     @_rendered = true
 
+  getScrollToCardElement: ->
+      scroll = $('body').scrollTop()
+
+      if @cardElement
+        cardTop = $('img', @cardElement).offset().top -
+          @cardElement.offsetParent().offset().top
+        cardTop = 0 if cardTop < 0
+        if cardTop != scroll
+          scroll = scroll - (scroll - cardTop)
+
+      return scroll
+
   hide: ->
     @$el.hide()
+
+    if @cardElement
+      $('body').scrollTop @getScrollToCardElement()
 
   show: ->
     unless @card and @cardElement
@@ -69,14 +84,9 @@ class Forge.CardInfoView extends Backbone.View
 
     @$el.slideDown 200, =>
       parentOffset = @$el.offsetParent().offset().top
-      scroll = $('body').scrollTop()
 
       # First scroll to show card element top border
-      cardTop = $('img', @cardElement).offset().top - parentOffset
-      if cardTop < 0
-        cardTop = 0
-      if cardTop != scroll
-        scroll = scroll - (scroll - cardTop)
+      scroll = @getScrollToCardElement()
 
       # Then check that card info lower border is visible
       elTop = @$el.offset().top
