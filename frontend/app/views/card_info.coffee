@@ -91,8 +91,11 @@ class Forge.CardInfoView extends Backbone.View
 
       $('body').scrollTop scroll
 
+  isOpened: ->
+    @$el.is(':visible')
+
   toggle: (card, cardElement) ->
-    if @_rendered and @card.id is card.id and @$el.is(':visible')
+    if @_rendered and @card.id is card.id and @isOpened()
       @hide()
     else
       @card = card
@@ -101,11 +104,13 @@ class Forge.CardInfoView extends Backbone.View
       @show()
 
   showPrevious: ->
-    [card, el] = @parent.getPreviousCard @card
-    if card
-      @toggle card, el
+    if @isOpened()
+      [card, el] = @parent.getPreviousCard @card
+      if card
+        @toggle card, el
 
   showNext: ->
-    [card, el] = @parent.getNextCard @card
-    if card
-      @toggle card, el
+    if @isOpened()
+      [card, el] = @parent.getNextCard @card
+      if card
+        @toggle card, el
