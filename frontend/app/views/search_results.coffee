@@ -98,9 +98,3 @@ class Forge.SearchResultsView extends Backbone.View
         return [card, el]
 
     return [null, null]
-
-  getPreviousCard: (card) ->
-    @getCard card, -1
-
-  getNextCard: (card) ->
-    @getCard card, +1

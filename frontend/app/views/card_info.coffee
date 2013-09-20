@@ -16,10 +16,14 @@ class Forge.CardInfoView extends Backbone.View
     @parent = options.parent
     @reset()
     $(document).on 'keydown', (event) =>
-      switch event.keyCode
-        when 27 then @hide()
-        when 37 then @showPrevious()
-        when 39 then @showNext()
+      if @isOpened()
+        switch event.keyCode
+          when 27 then @hide() # esc
+          when 37 then @showPrevious() # arrow left
+          when 38 then @showPreviousRow() # arrow up
+          when 39 then @showNext() # arrow right
+          when 40 then @showNextRow() # arror down
+        false
 
   reset: ->
     @_rendered = false
@@ -115,14 +119,19 @@ class Forge.CardInfoView extends Backbone.View
       @render()
       @show()
 
+  move: (offset) ->
+    [card, el] = @parent.getCard @card, offset
+    if card
+      @toggle card, el
+
   showPrevious: ->
-    if @isOpened()
-      [card, el] = @parent.getPreviousCard @card
-      if card
-        @toggle card, el
+    @move -1
 
   showNext: ->
-    if @isOpened()
-      [card, el] = @parent.getNextCard @card
-      if card
-        @toggle card, el
+    @move 1
+
+  showPreviousRow: ->
+    @move -@parent.cardsInRow()
+
+  showNextRow: ->
+    @move @parent.cardsInRow()
