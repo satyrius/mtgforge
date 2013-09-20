@@ -6,6 +6,9 @@ class Forge.SearchView extends Backbone.View
     'change #td-search-form': 'handleSubmit'
     'submit #td-search-form': 'handleSubmit'
     'click #feedback-btn': 'showUserVoice'
+    'submit #focus': ->
+    'focus #td-search-form': ->
+      Backbone.Mediator.publish 'search:focus'
 
   subscriptions:
     'search:confirm': 'updateForm'
@@ -34,7 +37,7 @@ class Forge.SearchView extends Backbone.View
 
   handleSubmit: (event) ->
     q = $(event.target).serialize()
-    Backbone.Mediator.publish('search:q', q)
+    Backbone.Mediator.publish 'search:q', q
     false
 
   showUserVoice: ()->

@@ -9,6 +9,7 @@ class Forge.CardInfoView extends Backbone.View
   subscriptions:
     'card:details': 'toggle'
     'cards:fetched': 'reset'
+    'search:focus': 'hide'
 
   initialize: (options) ->
     super()
