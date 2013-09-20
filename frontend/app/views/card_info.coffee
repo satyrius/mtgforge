@@ -17,6 +17,7 @@ class Forge.CardInfoView extends Backbone.View
     @reset()
     $(document).on 'keydown', (event) =>
       switch event.keyCode
+        when 27 then @hide()
         when 37 then @showPrevious()
         when 39 then @showNext()
 
