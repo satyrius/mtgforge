@@ -18,12 +18,11 @@ class Forge.CardInfoView extends Backbone.View
     $(document).on 'keydown', (event) =>
       if @isOpened()
         switch event.keyCode
-          when 27 then @hide() # esc
-          when 37 then @showPrevious() # arrow left
-          when 38 then @showPreviousRow() # arrow up
-          when 39 then @showNext() # arrow right
-          when 40 then @showNextRow() # arror down
-        false
+          when 27 then @hide(); false # esc
+          when 37 then @showPrevious(); false # arrow left
+          when 38 then @showPreviousRow(); false # arrow up
+          when 39 then @showNext(); false # arrow right
+          when 40 then @showNextRow(); false # arror down
 
   reset: ->
     @_rendered = false
