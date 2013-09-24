@@ -1,6 +1,6 @@
 import urllib
 from django.conf import settings
-from django.conf.urls.defaults import url
+from django.conf.urls import url
 from django.core.urlresolvers import NoReverseMatch
 from tastypie.utils import trailing_slash
 

@@ -1,5 +1,6 @@
 from optparse import make_option
 from django.core.management import base
+from django.utils.encoding import smart_text
 
 
 class BaseCommand(base.BaseCommand):
@@ -28,4 +29,4 @@ class BaseCommand(base.BaseCommand):
     def error(self, message):
         colorized_message = self.style.NOTICE(
             u'{0}\n'.format(self.unicode(message)))
-        self.stderr.write(base.smart_str(colorized_message))
+        self.stderr.write(smart_text(colorized_message))
