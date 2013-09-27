@@ -1,13 +1,13 @@
 import requests
 from mock import patch, call
 
+from crawler.providers import Page
+from crawler.providers.gatherer import GathererCard, GathererCardPrint, \
+    GathererCardLanguages
+from crawler.tests.helpers import get_html_fixture
+from crawler.tests.providers.base import ProviderTest
 from oracle.forms import CardFaceForm
 from oracle.models import Card, CardFace
-from oracle.providers import Page
-from oracle.providers.gatherer import GathererCard, GathererCardPrint, \
-    GathererCardLanguages
-from oracle.tests.helpers import get_html_fixture
-from oracle.tests.providers.base import ProviderTest
 
 
 class GathererDataParsingTest(ProviderTest):

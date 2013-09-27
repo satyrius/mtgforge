@@ -4,7 +4,7 @@ from django.test import TestCase
 from oracle.management.commands.generate_thumbnails import \
     thumb_spec, create_thumbnail
 from oracle.models import CardImage
-from oracle.tests.helpers import get_jpeg_scan_fixture
+from crawler.tests.helpers import get_jpeg_scan_fixture
 
 
 class GenerateThumbnailsCommandTest(TestCase):

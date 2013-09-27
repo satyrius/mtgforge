@@ -1,8 +1,8 @@
 from mock import patch
 
-from oracle.providers.wizards import WizardsHomePage
-from oracle.tests.helpers import get_html_fixture
-from oracle.tests.providers.base import ProviderTest
+from crawler.providers.wizards import WizardsHomePage
+from crawler.tests.helpers import get_html_fixture
+from crawler.tests.providers.base import ProviderTest
 
 
 class WizardsComParsingTest(ProviderTest):

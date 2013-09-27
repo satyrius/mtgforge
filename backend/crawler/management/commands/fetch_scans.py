@@ -8,8 +8,8 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from gevent import monkey
 
-from oracle.management.base import BaseCommand
 from oracle.models import CardImage
+from crawler.management.base import BaseCommand
 
 
 monkey.patch_all(thread=False, select=False)

@@ -2,14 +2,14 @@
 import urllib
 from mock import patch
 
-from oracle.models import DataSource, CardSet, DataProviderPage
-from oracle.providers import Page
-from oracle.providers.gatherer import (
+from crawler.providers import Page
+from crawler.providers.gatherer import (
     GathererPage, GathererHomePage, GathererCardList, GathererCard,
     GathererCardLanguages, normalized_text
 )
-from oracle.tests.helpers import get_html_fixture
-from oracle.tests.providers.base import ProviderTest
+from crawler.tests.helpers import get_html_fixture
+from crawler.tests.providers.base import ProviderTest
+from oracle.models import DataSource, CardSet, DataProviderPage
 
 
 class GathererWizardsComParsingTest(ProviderTest):

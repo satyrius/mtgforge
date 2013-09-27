@@ -4,7 +4,7 @@ from django.core.files.base import ContentFile
 from optparse import make_option
 from tempfile import NamedTemporaryFile
 
-from oracle.management.base import BaseCommand
+from contrib.commands import BaseCommand
 from oracle.models import CardImage, CardImageThumb
 
 

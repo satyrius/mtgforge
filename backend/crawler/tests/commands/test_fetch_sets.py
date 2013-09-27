@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+
 from django.test import TestCase
-from oracle.management.commands.fetch_sets import Command
+from crawler.management.commands.fetch_sets import Command
 
 
 class FetchCardSetsCommandTest(TestCase):

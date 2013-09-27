@@ -4,9 +4,9 @@ import urllib
 from django.db import IntegrityError
 from django.test import TestCase
 
+from crawler.providers.gatherer import GathererPage
 from oracle.forms import DataProviderForm
 from oracle.models import DataProvider, CardSet, DataSource
-from oracle.providers.gatherer import GathererPage
 
 
 class DataProviderModelTest(TestCase):
@@ -15,7 +15,7 @@ class DataProviderModelTest(TestCase):
     def setUp(self):
         self.data_provider = DataProvider.objects.all()[0]
         self.new_data = dict(name='new', title='New Gatherer',
-                           home='http://example.com')
+                             home='http://example.com')
 
     def test_create(self):
         form = DataProviderForm(self.new_data)

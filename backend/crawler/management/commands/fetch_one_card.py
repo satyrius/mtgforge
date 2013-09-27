@@ -4,11 +4,11 @@ import xact
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 
+from crawler.management.base import BaseCommand
+from crawler.providers.gatherer import GathererCard
 from oracle.forms import CardFaceForm, CardImageForm, \
     validate_collectors_number
-from oracle.management.base import BaseCommand
 from oracle import models as m
-from oracle.providers.gatherer import GathererCard
 
 
 class Command(BaseCommand):

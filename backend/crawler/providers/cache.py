@@ -1,6 +1,7 @@
 from django.core.cache.backends.base import BaseCache
+
+from crawler.providers import ProviderPage
 from oracle.models import DataProviderPage
-from oracle.providers import ProviderPage
 
 
 class PageCache(BaseCache):

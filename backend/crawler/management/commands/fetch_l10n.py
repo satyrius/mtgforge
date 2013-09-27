@@ -4,10 +4,10 @@ from optparse import make_option
 from django.core.exceptions import ValidationError
 from django.utils.functional import curry
 
-from .fetch_gatherer import Command as FetchCardsCommand
+from crawler.management.commands.fetch_gatherer import Command as FetchCardsCommand
+from crawler.providers.gatherer import GathererCard, GathererCardPrint
 from oracle.forms import CardL10nForm
 from oracle.models import CardL10n, Artist
-from oracle.providers.gatherer import GathererCard, GathererCardPrint
 
 
 class Command(FetchCardsCommand):
@@ -16,12 +16,13 @@ class Command(FetchCardsCommand):
             'the storage.')
 
     option_list = FetchCardsCommand.option_list + (
-        make_option('--english-only',
+        make_option(
+            '--english-only',
             action='store_true',
             dest='english_only',
             default=False,
             help='Get only English cards localization'),
-        )
+    )
 
     def __init__(self):
         super(FetchCardsCommand, self).__init__()
@@ -55,7 +56,6 @@ class Command(FetchCardsCommand):
             self.error('The following card pages parsing failed:')
             for page in failed_pages:
                 self.error(u'{0} from {1}'.format(page.name, page.url))
-
 
     def pages_generator(self):
         for cs in self.sets:

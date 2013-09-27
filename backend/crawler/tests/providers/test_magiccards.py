@@ -1,8 +1,8 @@
 from mock import patch
 
-from oracle.providers.magiccards import MagiccardsHomePage
-from oracle.tests.helpers import get_html_fixture
-from oracle.tests.providers.base import ProviderTest
+from crawler.providers.magiccards import MagiccardsHomePage
+from crawler.tests.helpers import get_html_fixture
+from crawler.tests.providers.base import ProviderTest
 
 
 class MagiccardsInfoParsingTest(ProviderTest):

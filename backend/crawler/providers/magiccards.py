@@ -1,4 +1,4 @@
-from oracle.providers import HomePage, ProviderPage
+from crawler.providers import HomePage, ProviderPage
 
 
 class MagiccardsPage(ProviderPage):

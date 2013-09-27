@@ -5,12 +5,12 @@ from optparse import make_option
 from django.core.management.base import CommandError
 
 from contrib.utils import translation_aware
+from crawler.management.base import BaseCommand
+from crawler.providers.gatherer import GathererHomePage
+from crawler.providers.magiccards import MagiccardsHomePage
+from crawler.providers.wizards import WizardsHomePage
 from oracle.forms import CardSetForm
-from oracle.management.base import BaseCommand
 from oracle.models import CardSet, DataSource
-from oracle.providers.gatherer import GathererHomePage
-from oracle.providers.magiccards import MagiccardsHomePage
-from oracle.providers.wizards import WizardsHomePage
 
 
 acronym_re = re.compile('[a-z0-9]+$')

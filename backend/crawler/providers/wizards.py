@@ -1,6 +1,6 @@
 import re
 
-from oracle.providers import HomePage, ProviderPage
+from crawler.providers import HomePage, ProviderPage
 
 
 class WizardsPage(ProviderPage):
@@ -18,8 +18,8 @@ class WizardsHomePage(HomePage, WizardsPage):
                 continue
             match = product_link_re.search(href)
             if match:
-                name = ' '.join(filter(None,
-                    [re.sub(r'\s+', ' ', t).strip() for t in link.itertext()]))
+                name = ' '.join(filter(None, [
+                    re.sub(r'\s+', ' ', t).strip() for t in link.itertext()]))
 
                 for e in link.iterancestors():
                     if e.tag == 'td':

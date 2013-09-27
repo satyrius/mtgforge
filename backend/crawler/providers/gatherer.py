@@ -1,13 +1,14 @@
 import re
+
 import urllib
 from lxml import etree
 from urlparse import urlparse, urlunparse
 
-from oracle.models import PageState
-from oracle.providers import (
+from crawler.providers import (
     HomePage, ProviderPage, ProviderCardListPage, ProviderCardPage,
     map_result_as_pages, cache_parsed
 )
+from oracle.models import PageState
 
 
 def gettext(elem):
@@ -210,7 +211,7 @@ class GathererCardPrint(GathererCard):
 
 
 def map_card_set_to_pagination(parent_page, child_page):
-    child_page.card_set=parent_page.card_set
+    child_page.card_set = parent_page.card_set
 
 
 class GathererCardList(ProviderCardListPage, GathererPage):

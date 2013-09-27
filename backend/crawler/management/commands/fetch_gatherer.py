@@ -9,11 +9,11 @@ from django.utils.functional import curry
 from gevent import monkey
 
 from contrib.utils import measureit
-from oracle.management.base import BaseCommand
-from oracle.management.commands import save_card_face
+from crawler.management.base import BaseCommand
+from crawler.management.commands import save_card_face
+from crawler.providers import Page
+from crawler.providers.gatherer import GathererCardList
 from oracle.models import CardSet
-from oracle.providers import Page
-from oracle.providers.gatherer import GathererCardList
 
 
 logger = logging.getLogger(__name__)

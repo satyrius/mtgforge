@@ -3,9 +3,9 @@ from django.test import TestCase
 from django_any import any_model
 from mock import patch, Mock
 
-from oracle.management.commands.fetch_scans import fetch_art
+from crawler.management.commands.fetch_scans import fetch_art
+from crawler.tests.helpers import get_jpeg_scan_fixture
 from oracle.models import CardImage
-from oracle.tests.helpers import get_jpeg_scan_fixture
 
 
 class FetchScansCommandTest(TestCase):

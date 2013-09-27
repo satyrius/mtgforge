@@ -1,14 +1,14 @@
-import hashlib
 import os
 import re
-from urlparse import urlparse, urlunparse
 
+import hashlib
 import requests
-from lxml.html import document_fromstring
 from django.conf import settings
 from django.core.cache import get_cache
-from django.utils.functional import wraps, curry
 from django.utils.encoding import smart_str
+from django.utils.functional import wraps, curry
+from lxml.html import document_fromstring
+from urlparse import urlparse, urlunparse
 
 from oracle.models import DataProvider, CardSet, PageState, CardRelease
 
@@ -226,6 +226,7 @@ def map_result_as_pages(page_class=None, map_data=None):
         def result_wrapper(self, page_class=None, *args, **kwargs):
             result = func(self, *args, **kwargs)
             page_class = page_class or self.__class__
+
             def cls(r):
                 if isinstance(r, dict):
                     page = page_class(

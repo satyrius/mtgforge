@@ -125,14 +125,15 @@ INSTALLED_APPS = (
     'django_any',
     'django_extensions',
     'modeltranslation',
-    'oracle',
     'storages',
     'tastypie',
 
     # Our apps
+    'oracle',
+    'crawler',
     'forge',
-    'south',
 
+    'south',
     'django_nose',  # it should be after south (http://pypi.python.org/pypi/django-nose, Caveats)
 )
 
@@ -147,7 +148,7 @@ CACHES = {
         }
     },
     'provider_page': {
-        'BACKEND': 'oracle.providers.cache.PageCache',
+        'BACKEND': 'crawler.providers.cache.PageCache',
     },
 }
 

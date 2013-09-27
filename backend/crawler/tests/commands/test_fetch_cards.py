@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from mock import patch
 
-from oracle.management.commands import save_card_face
+from crawler.management.commands import save_card_face
+from crawler.providers.gatherer import GathererCard
+from crawler.tests.helpers import get_html_fixture
+from crawler.tests.providers.base import ProviderTest
 from oracle import models as m
-from oracle.providers.gatherer import GathererCard
-from oracle.tests.helpers import get_html_fixture
-from oracle.tests.providers.base import ProviderTest
 
 
 @patch.object(GathererCard, '_dowload_content')
