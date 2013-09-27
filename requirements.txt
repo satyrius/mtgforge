@@ -10,7 +10,7 @@ django-grappelli==2.4.6
 django-modeltranslation==0.4.1
 django-nose==1.2
 django-storages==1.1.8
-django-tastypie==0.9.16
+django-tastypie==0.10.0
 -e git://github.com/coagulant/django-whatever.git@62d5c8de195de88a2e4b6ce38a3698aaa24a3a62#egg=django_whatever-dev
 gevent==0.13.8
 grappelli-modeltranslation==0.1.2
