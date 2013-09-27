@@ -4,7 +4,6 @@ from django_any import any_model
 from mock import patch, Mock
 
 from crawler.management.commands.fetch_scans import fetch_art
-from crawler.tests.helpers import get_jpeg_scan_fixture
 from oracle.models import CardImage
 
 
@@ -12,9 +11,10 @@ class FetchScansCommandTest(TestCase):
     @patch.object(requests, 'get')
     def test_fetch_art(self, get):
         # Get request will return moked response
-        r_mock = Mock()
-        r_mock.content = get_jpeg_scan_fixture()
-        get.return_value = r_mock
+        with open('/dev/random', 'rb') as img_file:
+            r_mock = Mock()
+            r_mock.content = img_file.read(1024)
+            get.return_value = r_mock
 
         # Prepare CardRelease fixture
         scan_url = 'http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=366469&type=card'
