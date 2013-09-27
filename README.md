@@ -149,13 +149,17 @@ To build full text search engine do:
 
 ## Test
 
-We use nose with django-nose 1.1 to run unit tests, so you can reuse DB to save several seconds at the beginning and end of your test suite.
+We use nose with django-nose to run unit tests, so you can reuse DB to save several seconds at the beginning and end of your test suite.
 
     REUSE_DB=1 ./dj.sh test
 
 The project provides custom settings for test environment. It is strictly adviced to use `settings.test` module for tests, this module is used by default when you run `test` command. But if you want to run tests with another settings you can do it explicitly, using `DJANGO_SETTINGS_MODULE` environment variable.
 
     DJANGO_SETTINGS_MODULE=settings.foo ./dj.sh test
+    
+Shorthand to run tests with database reuse is
+
+	./test_app.sh
 
 ## Tools
 
