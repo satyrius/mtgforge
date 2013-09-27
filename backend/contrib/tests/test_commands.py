@@ -2,7 +2,7 @@
 
 from mock import patch
 from django.test import TestCase
-from oracle.management.base import BaseCommand
+from contrib.commands import BaseCommand
 
 
 class BaseCommandTest(TestCase):

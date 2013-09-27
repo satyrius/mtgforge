@@ -1,6 +1,6 @@
 from optparse import make_option
 
-from oracle.management.base import BaseCommand
+from contrib.commands import BaseCommand
 from oracle.models import CardSet
 
 
