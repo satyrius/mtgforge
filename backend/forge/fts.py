@@ -47,8 +47,8 @@ class FtsQuery(object):
             ORDER BY i.card_id, i.face_order, cs.released_at DESC
         )
         SELECT
-            f.*,
             img.*,
+            f.*,
             thumb.file AS thumb,
             i.card_number,
             i.card_set_id,
