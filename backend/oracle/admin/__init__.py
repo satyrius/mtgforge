@@ -1,5 +1,4 @@
 import oracle.admin.artist
-import oracle.admin.data_provider
 import oracle.admin.card
 import oracle.admin.card_image
 import oracle.admin.card_face

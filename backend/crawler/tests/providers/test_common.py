@@ -1,13 +1,13 @@
 from lxml.html import HtmlElement
 from mock import patch
 
+from crawler.models import DataProvider, DataProviderPage, PageState
 from crawler.providers import BadPageSource, Page, NoContent
 from crawler.providers.gatherer import GathererHomePage
 from crawler.providers.magiccards import MagiccardsHomePage
 from crawler.providers.wizards import WizardsHomePage
 from crawler.tests.helpers import get_html_fixture
 from crawler.tests.providers.base import ProviderTest
-from oracle.models import DataProvider, DataProviderPage, PageState
 
 
 class DataProvidersTest(ProviderTest):

@@ -4,11 +4,11 @@ import urllib
 from lxml import etree
 from urlparse import urlparse, urlunparse
 
+from crawler.models import PageState
 from crawler.providers import (
     HomePage, ProviderPage, ProviderCardListPage, ProviderCardPage,
     map_result_as_pages, cache_parsed
 )
-from oracle.models import PageState
 
 
 def gettext(elem):

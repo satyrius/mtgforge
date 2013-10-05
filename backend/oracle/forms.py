@@ -10,11 +10,6 @@ from oracle import models
 from oracle.utils import parse_type_line
 
 
-class DataProviderForm(forms.ModelForm):
-    class Meta:
-        model = models.DataProvider
-
-
 class CardSetForm(forms.ModelForm):
     class Meta:
         model = models.CardSet

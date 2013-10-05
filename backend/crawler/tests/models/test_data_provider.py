@@ -4,9 +4,10 @@ import urllib
 from django.db import IntegrityError
 from django.test import TestCase
 
+from crawler.forms import DataProviderForm
 from crawler.providers.gatherer import GathererPage
-from oracle.forms import DataProviderForm
-from oracle.models import DataProvider, CardSet, DataSource
+from crawler.models import DataProvider, DataSource
+from oracle.models import CardSet
 
 
 class DataProviderModelTest(TestCase):

@@ -10,7 +10,8 @@ from django.utils.functional import wraps, curry
 from lxml.html import document_fromstring
 from urlparse import urlparse, urlunparse
 
-from oracle.models import DataProvider, CardSet, PageState, CardRelease
+from crawler.models import DataProvider, PageState
+from oracle.models import CardSet, CardRelease
 
 
 class BadPageSource(Exception):

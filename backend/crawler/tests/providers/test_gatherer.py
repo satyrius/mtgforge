@@ -2,6 +2,7 @@
 import urllib
 from mock import patch
 
+from crawler.models import DataSource, DataProviderPage
 from crawler.providers import Page
 from crawler.providers.gatherer import (
     GathererPage, GathererHomePage, GathererCardList, GathererCard,
@@ -9,7 +10,7 @@ from crawler.providers.gatherer import (
 )
 from crawler.tests.helpers import get_html_fixture
 from crawler.tests.providers.base import ProviderTest
-from oracle.models import DataSource, CardSet, DataProviderPage
+from oracle.models import CardSet
 
 
 class GathererWizardsComParsingTest(ProviderTest):

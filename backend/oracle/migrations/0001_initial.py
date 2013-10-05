@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
@@ -8,47 +7,6 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'DataProvider'
-        db.create_table('oracle_dataprovider', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=20)),
-            ('title', self.gf('django.db.models.fields.CharField')(unique=True, max_length=255)),
-            ('home', self.gf('django.db.models.fields.URLField')(max_length=200)),
-        ))
-        db.send_create_signal('oracle', ['DataProvider'])
-
-        # Adding model 'DataSource'
-        db.create_table('oracle_datasource', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('url', self.gf('django.db.models.fields.URLField')(max_length=200)),
-            ('data_provider', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['oracle.DataProvider'])),
-            ('content_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType'])),
-            ('object_id', self.gf('django.db.models.fields.PositiveIntegerField')()),
-        ))
-        db.send_create_signal('oracle', ['DataSource'])
-
-        # Adding unique constraint on 'DataSource', fields ['content_type', 'object_id', 'url']
-        db.create_unique('oracle_datasource', ['content_type_id', 'object_id', 'url'])
-
-        # Adding unique constraint on 'DataSource', fields ['content_type', 'object_id', 'data_provider']
-        db.create_unique('oracle_datasource', ['content_type_id', 'object_id', 'data_provider_id'])
-
-        # Adding model 'DataProviderPage'
-        db.create_table('oracle_dataproviderpage', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('url', self.gf('django.db.models.fields.URLField')(max_length=200)),
-            ('url_hash', self.gf('django.db.models.fields.CharField')(max_length=40)),
-            ('data_provider', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['oracle.DataProvider'], null=True, blank=True)),
-            ('content', self.gf('contrib.fields.NullTextField')()),
-            ('class_name', self.gf('contrib.fields.NullCharField')(max_length=255)),
-            ('name', self.gf('contrib.fields.NullCharField')(max_length=255, null=True, blank=True)),
-            ('state', self.gf('django.db.models.fields.PositiveSmallIntegerField')(default=0, blank=True)),
-        ))
-        db.send_create_signal('oracle', ['DataProviderPage'])
-
-        # Adding unique constraint on 'DataProviderPage', fields ['url_hash', 'class_name']
-        db.create_unique('oracle_dataproviderpage', ['url_hash', 'class_name'])
-
         # Adding model 'Card'
         db.create_table('oracle_card', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -173,7 +131,6 @@ class Migration(SchemaMigration):
         # Adding unique constraint on 'CardL10n', fields ['card_face', 'card_release', 'language']
         db.create_unique('oracle_cardl10n', ['card_face_id', 'card_release_id', 'language'])
 
-
     def backwards(self, orm):
         # Removing unique constraint on 'CardL10n', fields ['card_face', 'card_release', 'language']
         db.delete_unique('oracle_cardl10n', ['card_face_id', 'card_release_id', 'language'])
@@ -228,7 +185,6 @@ class Migration(SchemaMigration):
 
         # Deleting model 'CardL10n'
         db.delete_table('oracle_cardl10n')
-
 
     models = {
         'contenttypes.contenttype': {
@@ -331,32 +287,6 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('contrib.fields.NullCharField', [], {'unique': 'True', 'max_length': '255'})
         },
-        'oracle.dataprovider': {
-            'Meta': {'object_name': 'DataProvider'},
-            'home': ('django.db.models.fields.URLField', [], {'max_length': '200'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '20'}),
-            'title': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'})
-        },
-        'oracle.dataproviderpage': {
-            'Meta': {'unique_together': "(('url_hash', 'class_name'),)", 'object_name': 'DataProviderPage'},
-            'class_name': ('contrib.fields.NullCharField', [], {'max_length': '255'}),
-            'content': ('contrib.fields.NullTextField', [], {}),
-            'data_provider': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['oracle.DataProvider']", 'null': 'True', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('contrib.fields.NullCharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
-            'state': ('django.db.models.fields.PositiveSmallIntegerField', [], {'default': '0', 'blank': 'True'}),
-            'url': ('django.db.models.fields.URLField', [], {'max_length': '200'}),
-            'url_hash': ('django.db.models.fields.CharField', [], {'max_length': '40'})
-        },
-        'oracle.datasource': {
-            'Meta': {'unique_together': "(('content_type', 'object_id', 'url'), ('content_type', 'object_id', 'data_provider'))", 'object_name': 'DataSource'},
-            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
-            'data_provider': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['oracle.DataProvider']"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'object_id': ('django.db.models.fields.PositiveIntegerField', [], {}),
-            'url': ('django.db.models.fields.URLField', [], {'max_length': '200'})
-        }
     }
 
     complete_apps = ['oracle']
