@@ -9,6 +9,7 @@ from crawler.providers import (
     HomePage, ProviderPage, ProviderCardListPage, ProviderCardPage,
     map_result_as_pages, cache_parsed
 )
+from crawler.providers.base import Gatherer
 
 
 def gettext(elem):
@@ -42,7 +43,7 @@ def normalized_element_text(elem):
 
 
 class GathererPage(ProviderPage):
-    provider_name = 'gatherer'
+    provider_class = Gatherer
 
     def set_parsed(self):
         self.change_state(PageState.PARSED)

@@ -1,10 +1,11 @@
 import re
 
 from crawler.providers import HomePage, ProviderPage
+from crawler.providers.base import Wizards
 
 
 class WizardsPage(ProviderPage):
-    provider_name = 'wizards'
+    provider_class = Wizards
 
 
 class WizardsHomePage(HomePage, WizardsPage):

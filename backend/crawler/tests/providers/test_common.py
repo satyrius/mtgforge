@@ -3,6 +3,7 @@ from mock import patch
 
 from crawler.models import DataProvider, DataProviderPage, PageState
 from crawler.providers import BadPageSource, Page, NoContent
+from crawler.providers.base import Gatherer, Wizards
 from crawler.providers.gatherer import GathererHomePage
 from crawler.providers.wizards import WizardsHomePage
 from crawler.tests.helpers import get_html_fixture
@@ -11,6 +12,14 @@ from crawler.tests.providers.base import ProviderTest
 
 class DataProvidersTest(ProviderTest):
     fixtures = ProviderTest.fixtures + ['card_set']
+
+    def test_provider_name(self):
+        self.assertEqual(Gatherer().name, 'gatherer')
+        self.assertEqual(Wizards().name, 'wizards')
+
+    def test_provider_home(self):
+        self.assertEqual(Gatherer().home, Gatherer._url)
+        self.assertEqual(Wizards().home, Wizards._url)
 
     def test_page_init(self):
         url = 'http://example.com/magic/tcg/home.html'

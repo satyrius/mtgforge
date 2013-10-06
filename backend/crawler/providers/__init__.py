@@ -188,13 +188,14 @@ class ProviderPage(Page):
     _data_provider = None
 
     def __init__(self, source=None, *args, **kwargs):
+        self._provider = self.provider_class()
         if source is None:
-            source = self.get_provider().home
+            source = self._provider.home
         super(ProviderPage, self).__init__(source, *args, **kwargs)
 
     def get_provider(self):
         if not self._data_provider:
-            self._data_provider = DataProvider.objects.get(name=self.provider_name)
+            self._data_provider = DataProvider.objects.get(name=self._provider.name)
         return self._data_provider
 
 
