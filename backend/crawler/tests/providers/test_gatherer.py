@@ -4,7 +4,7 @@ from mock import patch
 
 from crawler.models import DataSource, DataProviderPage
 from crawler.providers.base import Gatherer
-from crawler.providers import Page
+from crawler.providers.common import Page
 from crawler.providers.gatherer import (
     GathererPage, GathererHomePage, GathererCardList, GathererCard,
     GathererCardLanguages, normalized_text

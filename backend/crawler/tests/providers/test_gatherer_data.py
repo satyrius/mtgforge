@@ -1,7 +1,7 @@
 import requests
 from mock import patch, call
 
-from crawler.providers import Page
+from crawler.providers.common import Page
 from crawler.providers.gatherer import GathererCard, GathererCardPrint, \
     GathererCardLanguages
 from crawler.tests.helpers import get_html_fixture

@@ -2,8 +2,8 @@ from lxml.html import HtmlElement
 from mock import patch
 
 from crawler.models import DataProviderPage, PageState
-from crawler.providers import Page, NoContent
 from crawler.providers.base import Gatherer, Wizards
+from crawler.providers.common import Page, NoContent
 from crawler.providers.gatherer import GathererPage, GathererHomePage
 from crawler.providers.wizards import WizardsHomePage
 from crawler.tests.helpers import get_html_fixture

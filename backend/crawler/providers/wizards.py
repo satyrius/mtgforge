@@ -1,6 +1,6 @@
 import re
 
-from crawler.providers import HomePage
+from crawler.providers.common import HomePage
 from crawler.providers.base import Wizards
 
 

@@ -5,9 +5,9 @@ from lxml import etree
 from urlparse import urlparse, urlunparse
 
 from crawler.models import PageState
-from crawler.providers import Page, HomePage, CardListPage, CardPage, \
-    map_result_as_pages, cache_parsed
 from crawler.providers.base import Gatherer
+from crawler.providers.common import Page, HomePage, CardListPage, CardPage, \
+    map_result_as_pages, cache_parsed
 
 
 def gettext(elem):

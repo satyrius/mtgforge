@@ -11,7 +11,7 @@ from gevent import monkey
 from contrib.utils import measureit
 from crawler.management.base import BaseCommand
 from crawler.management.commands import save_card_face
-from crawler.providers import Page
+from crawler.providers.common import Page
 from crawler.providers.gatherer import GathererCardList
 from oracle.models import CardSet
 
