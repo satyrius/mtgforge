@@ -11,6 +11,7 @@ from lxml.html import document_fromstring
 from urlparse import urlparse, urlunparse
 
 from crawler.models import PageState
+from crawler.providers.base import Provider
 from oracle.models import CardSet, CardRelease
 
 
@@ -50,8 +51,22 @@ def canonocal_language(language):
 
 
 class Page(object):
-    def __init__(self, source, name=None, read_cache=True, language=None):
+    provider_class = None
+
+    def __init__(self, source=None, name=None, read_cache=True, language=None,
+                 provider_class=None):
+        if not provider_class:
+            provider_class = self.provider_class
+        if provider_class is None or not issubclass(provider_class, Provider):
+            raise RuntimeError(
+                'Provider class should be a subclass of `Provider`, "%s" was '
+                'given' % provider_class)
+        self._provider = provider_class()
+
+        if source is None:
+            source = self._provider.home
         self.url = self._source_url(source)
+
         self._content = None
         self._state = None
         self._name = None
@@ -60,6 +75,9 @@ class Page(object):
         self._cache = get_cache('provider_page')
         self.name = name
         self.language = canonocal_language(language)
+
+    def get_provider(self):
+        return self._provider.name
 
     def _source_url(self, source):
         if isinstance(source, basestring):
@@ -170,33 +188,6 @@ class HomePage(Page):
 
 
 class CardListPage(Page):
-    def cards_list(self):
-        """Each card in the list is a tuple. First element is a card's name,
-        second is GardPage instance.
-        """
-        raise NotImplementedError
-
-
-class CardPage(Page):
-    def details(self):
-        """Parse page and return card details dict"""
-        raise NotImplementedError
-
-
-class ProviderPage(Page):
-    provider_class = None
-
-    def __init__(self, source=None, *args, **kwargs):
-        self._provider = self.provider_class()
-        if source is None:
-            source = self._provider.home
-        super(ProviderPage, self).__init__(source, *args, **kwargs)
-
-    def get_provider(self):
-        return self._provider.name
-
-
-class ProviderCardListPage(CardListPage, ProviderPage):
     def _source_url(self, source):
         self.card_set = None
         if isinstance(source, CardSet):
@@ -205,8 +196,14 @@ class ProviderCardListPage(CardListPage, ProviderPage):
             return cs.sources.get(provider=self.get_provider()).url
         return super(CardListPage, self)._source_url(source)
 
+    def cards_list(self):
+        """Each card in the list is a tuple. First element is a card's name,
+        second is GardPage instance.
+        """
+        raise NotImplementedError
 
-class ProviderCardPage(CardPage, ProviderPage):
+
+class CardPage(Page):
     def _source_url(self, source):
         self.card_release = None
         if isinstance(source, CardRelease):
@@ -214,6 +211,10 @@ class ProviderCardPage(CardPage, ProviderPage):
             return self.card_release.sources.get(
                 provider=self.get_provider()).url
         return super(CardPage, self)._source_url(source)
+
+    def details(self):
+        """Parse page and return card details dict"""
+        raise NotImplementedError
 
 
 def map_result_as_pages(page_class=None, map_data=None):

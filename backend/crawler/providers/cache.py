@@ -1,6 +1,4 @@
 from django.core.cache.backends.base import BaseCache
-
-from crawler.providers import ProviderPage
 from crawler.models import DataProviderPage
 
 
@@ -12,7 +10,7 @@ class PageCache(BaseCache):
         """Create complex key to get or set cache value
 
         Argumets:
-            key -- ProviderPage instance
+            key -- Page instance
             version -- For capability with cache interface. Does not maters.
         """
         page = key
@@ -32,10 +30,9 @@ class PageCache(BaseCache):
         self.delete(key, version)
         page = key
         key = self.make_key(key)
-        dp = isinstance(page, ProviderPage) and page.get_provider() or None
         DataProviderPage.objects.create(
             url=page.url, name=page.name, state=page.state,
-            provider=dp, content=value, **key)
+            provider=page.get_provider(), content=value, **key)
 
     def delete(self, key, version=None):
         key = self.make_key(key)

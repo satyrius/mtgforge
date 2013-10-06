@@ -1,14 +1,12 @@
 import re
 
-from crawler.providers import HomePage, ProviderPage
+from crawler.providers import HomePage
 from crawler.providers.base import Wizards
 
 
-class WizardsPage(ProviderPage):
+class WizardsHomePage(HomePage):
     provider_class = Wizards
 
-
-class WizardsHomePage(HomePage, WizardsPage):
     def products_list_generator(self):
         product_link_re = re.compile(r'x=mtg[/_]tcg[/_](?:products[/_]([^/_#]+)|([^/_]+)[/_]productinfo)$')
         cards_count_re = re.compile(r'(\d+)\s+cards', re.IGNORECASE)

@@ -5,10 +5,8 @@ from lxml import etree
 from urlparse import urlparse, urlunparse
 
 from crawler.models import PageState
-from crawler.providers import (
-    HomePage, ProviderPage, ProviderCardListPage, ProviderCardPage,
+from crawler.providers import Page, HomePage, CardListPage, CardPage, \
     map_result_as_pages, cache_parsed
-)
 from crawler.providers.base import Gatherer
 
 
@@ -42,9 +40,11 @@ def normalized_element_text(elem):
     return normalized_text(text)
 
 
-class GathererPage(ProviderPage):
+class GathererPage(Page):
     provider_class = Gatherer
 
+
+class PageStateMixin(object):
     def set_parsed(self):
         self.change_state(PageState.PARSED)
 
@@ -52,7 +52,7 @@ class GathererPage(ProviderPage):
         return self.state == PageState.PARSED
 
 
-class GathererHomePage(HomePage, GathererPage):
+class GathererHomePage(HomePage, GathererPage, PageStateMixin):
     def products_list_generator(self):
         select_id = 'ctl00_ctl00_MainContent_Content_SearchControls_setAddText'
         for o in self.doc.cssselect('select#{0} option'.format(select_id)):
@@ -71,7 +71,7 @@ class ParseError(Exception):
     pass
 
 
-class GathererCard(ProviderCardPage, GathererPage):
+class GathererCard(CardPage, GathererPage, PageStateMixin):
     def _encode_mana(self, html_el):
         mana_re = re.compile(r'name=(.+?)&')
         for img in html_el.cssselect('img'):
@@ -207,7 +207,7 @@ class GathererCard(ProviderCardPage, GathererPage):
         return page
 
 
-class GathererCardPrint(GathererCard):
+class GathererCardPrint(GathererPage, PageStateMixin):
     pass
 
 
@@ -215,7 +215,7 @@ def map_card_set_to_pagination(parent_page, child_page):
     child_page.card_set = parent_page.card_set
 
 
-class GathererCardList(ProviderCardListPage, GathererPage):
+class GathererCardList(CardListPage, GathererPage, PageStateMixin):
     def __init__(self, card_set, *args, **kwargs):
         super(GathererCardList, self).__init__(card_set, *args, **kwargs)
 
@@ -278,7 +278,7 @@ class GathererCardList(ProviderCardListPage, GathererPage):
         return urls
 
 
-class GathererCardLanguages(GathererPage):
+class GathererCardLanguages(GathererPage, PageStateMixin):
     @map_result_as_pages(GathererCard)
     @cache_parsed()
     def languages(self):

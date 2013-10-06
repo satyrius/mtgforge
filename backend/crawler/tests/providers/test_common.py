@@ -2,9 +2,9 @@ from lxml.html import HtmlElement
 from mock import patch
 
 from crawler.models import DataProviderPage, PageState
-from crawler.providers import BadPageSource, Page, NoContent
+from crawler.providers import Page, NoContent
 from crawler.providers.base import Gatherer, Wizards
-from crawler.providers.gatherer import GathererHomePage
+from crawler.providers.gatherer import GathererPage, GathererHomePage
 from crawler.providers.wizards import WizardsHomePage
 from crawler.tests.helpers import get_html_fixture
 from crawler.tests.providers.base import ProviderTest
@@ -23,23 +23,20 @@ class DataProvidersTest(ProviderTest):
 
     def test_page_init(self):
         url = 'http://example.com/magic/tcg/home.html'
-        p = Page(url)
+        p = GathererPage(url)
         self.assertEqual(p.url, url)
         self.assertIsNone(p.name)
 
         name = 'Savannah'
-        p = Page(url, name=name)
+        p = GathererPage(url, name=name)
         self.assertEqual(p.name, name)
 
         name = u'Akki Lavarunner (Tok-Tok, Volcano Born)'
-        p = Page(url, name=name)
+        p = GathererPage(url, name=name)
         self.assertEqual(p.name, 'Tok-Tok, Volcano Born')
 
-        with self.assertRaises(BadPageSource):
-            p = Page(None)
-
     def test_normalize_href(self):
-        p = Page('http://example.com/magic/tcg/home.html')
+        p = GathererPage('http://example.com/magic/tcg/home.html')
         self.assertEqual(p.absolute_url('/foo/bar.html'),
                          'http://example.com/foo/bar.html')
         self.assertEqual(p.absolute_url('/foo.html?x=1'),
@@ -54,7 +51,7 @@ class DataProvidersTest(ProviderTest):
         page_content = '<html><h1>Example</h1></html>'
         patched_content.return_value = page_content
 
-        p = Page('http://example.com/')
+        p = GathererHomePage('http://example.com/')
         # Call doc property
         doc = p.doc
         self.assertIsInstance(doc, HtmlElement)
@@ -72,16 +69,17 @@ class DataProvidersTest(ProviderTest):
         self.assertNotEqual(wizards_page.url, gatherer_page.url)
 
     @patch.object(Page, '_dowload_content')
-    def test_common_page_cache(self, _dowload_content):
+    def test_cache_page_content(self, _dowload_content):
         page_content = get_html_fixture('gatherer_list')
         _dowload_content.return_value = page_content
         dummy_url = 'http://example.com/foo/bar.html'
 
-        # Common page has empty provider FK
-        page = Page(dummy_url)
+        page = GathererPage(dummy_url)
         self.assertEqual(page.get_content(), page_content)
         cache_entry = DataProviderPage.objects.get(url=dummy_url)
-        self.assertIsNone(cache_entry.provider)
+
+        self.assertEqual(cache_entry.provider, page.get_provider())
+        self.assertEqual(cache_entry.content, page_content.decode('utf8', errors='ignore'))
         self.assertIsNone(cache_entry.name)
         self.assertEqual(cache_entry.class_name, page.__class__.__name__)
 
@@ -92,9 +90,9 @@ class DataProvidersTest(ProviderTest):
         dummy_url = 'http://example.com/foo/bar.html'
 
         # Assert page name saved to cache
-        title = 'The Epic Page'
+        title = 'The Epic Card'
         _dowload_content.return_value = page_content
-        page = Page(dummy_url, name=title)
+        page = GathererPage(dummy_url, name=title)
         content = page.get_content()
         self.assertIsNotNone(content)
         self.assertEqual(content, page_content)
@@ -102,7 +100,7 @@ class DataProvidersTest(ProviderTest):
         self.assertEqual(cache_entry.name, title)
 
         # Test restoring page name from cache
-        page2 = Page(dummy_url)
+        page2 = GathererPage(dummy_url)
         self.assertEqual(page2.name, title)
 
     @patch.object(Page, '_dowload_content')
@@ -113,7 +111,7 @@ class DataProvidersTest(ProviderTest):
 
         # Assert page name saved to cache
         _dowload_content.return_value = page_content
-        page = Page(dummy_url)
+        page = GathererPage(dummy_url)
         self.assertEqual(page.state, PageState.INITIAL)
         content = page.get_content()
         self.assertIsNotNone(content)
@@ -126,12 +124,12 @@ class DataProvidersTest(ProviderTest):
         self.assertEqual(cache_entry.state, state)
 
         # Test restoring page state from cache
-        page2 = Page(dummy_url)
+        page2 = GathererPage(dummy_url)
         self.assertEqual(page2.state, state)
 
         # Test change state for page without content
         dummy_url_2 = 'http://example.com/foo/baz.html'
-        page3 = Page(dummy_url_2)
+        page3 = GathererPage(dummy_url_2)
         with self.assertRaises(NoContent):
             page3.change_state(state)
 
