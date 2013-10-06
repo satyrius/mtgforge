@@ -2,9 +2,9 @@
 from mock import patch
 
 from crawler.management.commands import save_card_face
-from crawler.providers.gatherer import GathererCard
+from crawler.pages.gatherer import GathererCard
 from crawler.tests.helpers import get_html_fixture
-from crawler.tests.providers.base import ProviderTest
+from crawler.tests.pages.base import ProviderTest
 from oracle import models as m
 
 

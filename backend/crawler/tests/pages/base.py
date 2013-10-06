@@ -5,7 +5,7 @@ from django.test.utils import override_settings
 
 @override_settings(CACHES={
     'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'},
-    'provider_page': {'BACKEND': 'crawler.providers.cache.PageCache'},
+    'provider_page': {'BACKEND': 'crawler.pages.cache.PageCache'},
 })
 class ProviderTest(TestCase):
     def setUp(self):

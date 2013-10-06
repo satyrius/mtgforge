@@ -1,7 +1,7 @@
 from mock import patch
 from django.test import TestCase
 
-from crawler.providers.gatherer import GathererCard
+from crawler.pages.gatherer import GathererCard
 from crawler.tests.helpers import get_html_fixture
 from oracle.forms import CardFaceForm
 from oracle.models import Card, CardFace

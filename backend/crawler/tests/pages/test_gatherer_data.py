@@ -1,11 +1,11 @@
 import requests
 from mock import patch, call
 
-from crawler.providers.common import Page
-from crawler.providers.gatherer import GathererCard, GathererCardPrint, \
+from crawler.pages.common import Page
+from crawler.pages.gatherer import GathererCard, GathererCardPrint, \
     GathererCardLanguages
 from crawler.tests.helpers import get_html_fixture
-from crawler.tests.providers.base import ProviderTest
+from crawler.tests.pages.base import ProviderTest
 from oracle.forms import CardFaceForm
 from oracle.models import Card, CardFace
 

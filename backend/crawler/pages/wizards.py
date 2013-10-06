@@ -1,7 +1,7 @@
 import re
 
-from crawler.providers.common import HomePage
-from crawler.providers.base import Wizards
+from crawler.pages.common import HomePage
+from crawler.pages.providers import Wizards
 
 
 class WizardsHomePage(HomePage):

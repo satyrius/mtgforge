@@ -6,8 +6,8 @@ from django.core.management.base import CommandError
 
 from contrib.utils import translation_aware
 from crawler.management.base import BaseCommand
-from crawler.providers.gatherer import GathererHomePage
-from crawler.providers.wizards import WizardsHomePage
+from crawler.pages.gatherer import GathererHomePage
+from crawler.pages.wizards import WizardsHomePage
 from oracle.forms import CardSetForm
 from oracle.models import CardSet, DataSource
 

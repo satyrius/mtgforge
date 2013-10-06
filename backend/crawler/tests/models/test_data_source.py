@@ -3,8 +3,8 @@ from django.db import IntegrityError
 from django.test import TestCase
 from django_any import any_model
 
-from crawler.providers.base import Gatherer
-from crawler.providers.gatherer import GathererPage
+from crawler.pages.gatherer import GathererPage
+from crawler.pages.providers import Gatherer
 from crawler.models import DataSource
 from oracle.models import CardSet
 

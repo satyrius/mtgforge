@@ -1,8 +1,8 @@
 from mock import patch
 
-from crawler.providers.wizards import WizardsHomePage
+from crawler.pages.wizards import WizardsHomePage
 from crawler.tests.helpers import get_html_fixture
-from crawler.tests.providers.base import ProviderTest
+from crawler.tests.pages.base import ProviderTest
 
 
 class WizardsComParsingTest(ProviderTest):

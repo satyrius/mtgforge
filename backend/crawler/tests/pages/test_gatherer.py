@@ -3,14 +3,14 @@ import urllib
 from mock import patch
 
 from crawler.models import DataSource, DataProviderPage
-from crawler.providers.base import Gatherer
-from crawler.providers.common import Page
-from crawler.providers.gatherer import (
+from crawler.pages.common import Page
+from crawler.pages.gatherer import (
     GathererPage, GathererHomePage, GathererCardList, GathererCard,
     GathererCardLanguages, normalized_text
 )
+from crawler.pages.providers import Gatherer
 from crawler.tests.helpers import get_html_fixture
-from crawler.tests.providers.base import ProviderTest
+from crawler.tests.pages.base import ProviderTest
 from oracle.models import CardSet
 
 

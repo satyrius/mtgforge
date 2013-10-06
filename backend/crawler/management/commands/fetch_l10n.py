@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.utils.functional import curry
 
 from crawler.management.commands.fetch_gatherer import Command as FetchCardsCommand
-from crawler.providers.gatherer import GathererCard, GathererCardPrint
+from crawler.pages.gatherer import GathererCard, GathererCardPrint
 from oracle.forms import CardL10nForm
 from oracle.models import CardL10n, Artist
 

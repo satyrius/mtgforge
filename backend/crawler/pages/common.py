@@ -11,7 +11,7 @@ from lxml.html import document_fromstring
 from urlparse import urlparse, urlunparse
 
 from crawler.models import PageState
-from crawler.providers.base import Provider
+from crawler.pages.providers import Provider
 from oracle.models import CardSet, CardRelease
 
 

@@ -5,7 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 
 from crawler.management.base import BaseCommand
-from crawler.providers.gatherer import GathererCard
+from crawler.pages.gatherer import GathererCard
 from oracle.forms import CardFaceForm, CardImageForm, \
     validate_collectors_number
 from oracle import models as m

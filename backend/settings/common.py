@@ -148,7 +148,7 @@ CACHES = {
         }
     },
     'provider_page': {
-        'BACKEND': 'crawler.providers.cache.PageCache',
+        'BACKEND': 'crawler.pages.cache.PageCache',
     },
 }
 
