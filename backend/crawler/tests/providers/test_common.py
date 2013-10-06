@@ -4,7 +4,6 @@ from mock import patch
 from crawler.models import DataProvider, DataProviderPage, PageState
 from crawler.providers import BadPageSource, Page, NoContent
 from crawler.providers.gatherer import GathererHomePage
-from crawler.providers.magiccards import MagiccardsHomePage
 from crawler.providers.wizards import WizardsHomePage
 from crawler.tests.helpers import get_html_fixture
 from crawler.tests.providers.base import ProviderTest
@@ -62,12 +61,6 @@ class DataProvidersTest(ProviderTest):
         wizards = DataProvider.objects.get(name='wizards')
         self.assertEqual(wizards_page.url, wizards.home)
         self.assertNotEqual(wizards_page.url, gatherer_page.url)
-
-        magiccards_page = MagiccardsHomePage()
-        magiccards = DataProvider.objects.get(name='magiccards')
-        self.assertEqual(magiccards_page.url, magiccards.home)
-        self.assertNotEqual(magiccards_page.url, gatherer_page.url)
-        self.assertNotEqual(magiccards_page.url, wizards_page.url)
 
     @patch.object(Page, '_dowload_content')
     def test_common_page_cache(self, _dowload_content):

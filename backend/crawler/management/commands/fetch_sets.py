@@ -7,7 +7,6 @@ from django.core.management.base import CommandError
 from contrib.utils import translation_aware
 from crawler.management.base import BaseCommand
 from crawler.providers.gatherer import GathererHomePage
-from crawler.providers.magiccards import MagiccardsHomePage
 from crawler.providers.wizards import WizardsHomePage
 from oracle.forms import CardSetForm
 from oracle.models import CardSet, DataSource
@@ -30,12 +29,6 @@ ignore_products_re = re.compile('|'.join(ignore_products))
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
-        make_option(
-            '-a', '--fetch-acronyms',
-            action='store_true',
-            dest='fetch_acronyms',
-            default=False,
-            help='Fetch acronyms from magiccards.info'),
         make_option(
             '-c', '--clear-cache',
             dest='clear',
@@ -131,19 +124,16 @@ class Command(BaseCommand):
     @translation_aware
     def handle(self, *args, **options):
         dry_run = options['dry_run']
-        fetch_acronyms = options['fetch_acronyms']
 
         self._acronyms = {}
         ignored_filter = lambda p: p and not ignore_products_re.match(isinstance(p, basestring) and p or p[0])
 
         wizards = WizardsHomePage()
         gatherer = GathererHomePage()
-        magiccards = MagiccardsHomePage()
         if options['clear']:
-            for page in (wizards, gatherer, magiccards):
+            for page in (wizards, gatherer):
                 page.delete_cache()
         gatherer_products = filter(ignored_filter, gatherer.products_list())
-        magiccards_products = filter(ignored_filter, magiccards.products_list())
 
         # Wizards
         for name, url, extra in wizards.products_list_generator():
@@ -157,16 +147,7 @@ class Command(BaseCommand):
             gatherer_products.remove(g_product)
 
             # Magiccards product and acronym
-            mc_product = None
-            acronym = None
-            if not fetch_acronyms:
-                acronym = self.generate_acronym(name)
-            else:
-                mc_product = self.find_in_list(name, magiccards_products)
-                if not mc_product:
-                    self.error(u'Cannot find acronym for "{0}"'.format(name))
-                else:
-                    acronym = mc_product[2]['acronym']
+            acronym = self.generate_acronym(name)
             acronym = self.check_acronym(acronym, name, skip_on_fail=dry_run)
 
             # Get or create CardSet
@@ -200,8 +181,7 @@ class Command(BaseCommand):
                 cs = form.save()
                 for page, ds_url in (
                         (wizards, url),
-                        (gatherer, g_product[1]),
-                        (magiccards, mc_product and mc_product[1] or None)):
+                        (gatherer, g_product[1])):
                     if not ds_url:
                         continue
                     p = page.get_provider()

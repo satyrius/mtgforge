@@ -127,7 +127,7 @@ Create the database:
 Then load fixtures and get card sets list from Gatherer:
 
     ./dj.sh loaddata data_provider
-    ./dj.sh fetch_sets -a
+    ./dj.sh fetch_sets
 
 To fill cards database do the following:
 
@@ -167,9 +167,9 @@ Projects ships with useful tolls. They are to fetch MTG set names, catds info an
 
 ### Card Sets
 
-We use Wizards' official product page to get all valueable product releases (aka card sets). Additionally `-a` (`--fetch-acronyms`) option can be used to parse *magiccards.info* for pretty acronyms.
+We use Wizards' official product page to get all valueable product releases (aka card sets).
 
-    ./dj.sh fetch_sets -a
+    ./dj.sh fetch_sets
 
 ### Cards
 
