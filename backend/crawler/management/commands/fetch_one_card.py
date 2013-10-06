@@ -153,9 +153,9 @@ def save_card_face(page, card_set, no_update=False):
     try:
         source = m.DataSource.objects.get(content_type__pk=release_type.pk,
                                           object_id=release.id,
-                                          data_provider=provider)
+                                          provider=provider)
     except m.DataSource.DoesNotExist:
-        source = m.DataSource(content_object=release, data_provider=provider)
+        source = m.DataSource(content_object=release, provider=provider)
     finally:
         if not source.url or sub_number == 'a':
             source.url = card_details['url']

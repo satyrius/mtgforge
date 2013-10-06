@@ -3,6 +3,7 @@ import urllib
 from mock import patch
 
 from crawler.models import DataSource, DataProviderPage
+from crawler.providers.base import Gatherer
 from crawler.providers import Page
 from crawler.providers.gatherer import (
     GathererPage, GathererHomePage, GathererCardList, GathererCard,
@@ -14,7 +15,7 @@ from oracle.models import CardSet
 
 
 class GathererWizardsComParsingTest(ProviderTest):
-    fixtures = ProviderTest.fixtures + ['card_set']
+    fixtures = ['card_set']
     zen_url = 'http://gatherer.wizards.com/Pages/Search/Default.aspx?set=%5B%22Zendikar%22%5D'
 
     @patch.object(GathererHomePage, 'get_content')
@@ -141,7 +142,7 @@ class GathererWizardsComParsingTest(ProviderTest):
         gatherer = page.get_provider()
         url = page.absolute_url(urllib.quote_plus(cs.name))
         compact_url = url + '?output=compact'
-        DataSource.objects.create(content_object=cs, url=url, data_provider=gatherer)
+        DataSource.objects.create(content_object=cs, url=url, provider=gatherer)
 
         # Create Gatherer cards list page with simple init interface
         list_page = GathererCardList(cs)
@@ -165,7 +166,7 @@ class GathererWizardsComParsingTest(ProviderTest):
         DataSource.objects.create(
             content_object=cs,
             url=url,
-            data_provider=GathererPage().get_provider())
+            provider=Gatherer().name)
         return cs, GathererCardList(cs)
 
     @patch.object(Page, 'get_content')
@@ -200,7 +201,7 @@ class GathererWizardsComParsingTest(ProviderTest):
         self.assertEqual(page1.get_content(), page_content)
         self.assertEqual(_dowload_content.call_count, 1)
         cache_entry = DataProviderPage.objects.get(url=page1.url)
-        self.assertEqual(cache_entry.data_provider, page1.get_provider())
+        self.assertEqual(cache_entry.provider, page1.get_provider())
 
         # Create the page again with the same url and test cache hit. Second
         # instance is to exclude in-memory cache hit.

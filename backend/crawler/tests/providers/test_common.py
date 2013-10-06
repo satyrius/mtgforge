@@ -1,7 +1,7 @@
 from lxml.html import HtmlElement
 from mock import patch
 
-from crawler.models import DataProvider, DataProviderPage, PageState
+from crawler.models import DataProviderPage, PageState
 from crawler.providers import BadPageSource, Page, NoContent
 from crawler.providers.base import Gatherer, Wizards
 from crawler.providers.gatherer import GathererHomePage
@@ -11,7 +11,7 @@ from crawler.tests.providers.base import ProviderTest
 
 
 class DataProvidersTest(ProviderTest):
-    fixtures = ProviderTest.fixtures + ['card_set']
+    fixtures = ['card_set']
 
     def test_provider_name(self):
         self.assertEqual(Gatherer().name, 'gatherer')
@@ -63,11 +63,11 @@ class DataProvidersTest(ProviderTest):
 
     def test_home_page(self):
         gatherer_page = GathererHomePage()
-        gatherer = DataProvider.objects.get(name='gatherer')
+        gatherer = Gatherer()
         self.assertEqual(gatherer_page.url, gatherer.home)
 
         wizards_page = WizardsHomePage()
-        wizards = DataProvider.objects.get(name='wizards')
+        wizards = Wizards()
         self.assertEqual(wizards_page.url, wizards.home)
         self.assertNotEqual(wizards_page.url, gatherer_page.url)
 
@@ -81,7 +81,7 @@ class DataProvidersTest(ProviderTest):
         page = Page(dummy_url)
         self.assertEqual(page.get_content(), page_content)
         cache_entry = DataProviderPage.objects.get(url=dummy_url)
-        self.assertIsNone(cache_entry.data_provider)
+        self.assertIsNone(cache_entry.provider)
         self.assertIsNone(cache_entry.name)
         self.assertEqual(cache_entry.class_name, page.__class__.__name__)
 

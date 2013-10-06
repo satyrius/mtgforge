@@ -10,7 +10,7 @@ from django.utils.functional import wraps, curry
 from lxml.html import document_fromstring
 from urlparse import urlparse, urlunparse
 
-from crawler.models import DataProvider, PageState
+from crawler.models import PageState
 from oracle.models import CardSet, CardRelease
 
 
@@ -184,8 +184,7 @@ class CardPage(Page):
 
 
 class ProviderPage(Page):
-    provider_name = None
-    _data_provider = None
+    provider_class = None
 
     def __init__(self, source=None, *args, **kwargs):
         self._provider = self.provider_class()
@@ -194,9 +193,7 @@ class ProviderPage(Page):
         super(ProviderPage, self).__init__(source, *args, **kwargs)
 
     def get_provider(self):
-        if not self._data_provider:
-            self._data_provider = DataProvider.objects.get(name=self._provider.name)
-        return self._data_provider
+        return self._provider.name
 
 
 class ProviderCardListPage(CardListPage, ProviderPage):
@@ -205,7 +202,7 @@ class ProviderCardListPage(CardListPage, ProviderPage):
         if isinstance(source, CardSet):
             cs = source
             self.card_set = cs
-            return cs.sources.get(data_provider=self.get_provider()).url
+            return cs.sources.get(provider=self.get_provider()).url
         return super(CardListPage, self)._source_url(source)
 
 
@@ -215,7 +212,7 @@ class ProviderCardPage(CardPage, ProviderPage):
         if isinstance(source, CardRelease):
             self.card_release = source
             return self.card_release.sources.get(
-                data_provider=self.get_provider()).url
+                provider=self.get_provider()).url
         return super(CardPage, self)._source_url(source)
 
 

@@ -126,7 +126,6 @@ Create the database:
 
 Then load fixtures and get card sets list from Gatherer:
 
-    ./dj.sh loaddata data_provider
     ./dj.sh fetch_sets
 
 To fill cards database do the following:

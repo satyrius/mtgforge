@@ -58,8 +58,8 @@ class FetchCardsCommandTest(ProviderTest):
         # Source for released card was saved
         provider = page.get_provider()
         self.assertEqual(
-            release.sources.filter(data_provider=provider).count(), 1)
-        source = release.sources.get(data_provider=provider)
+            release.sources.filter(provider=provider).count(), 1)
+        source = release.sources.get(provider=provider)
         self.assertEqual(source.url, url)
 
         # And we can get source page for card face released

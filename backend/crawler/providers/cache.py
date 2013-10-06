@@ -35,7 +35,7 @@ class PageCache(BaseCache):
         dp = isinstance(page, ProviderPage) and page.get_provider() or None
         DataProviderPage.objects.create(
             url=page.url, name=page.name, state=page.state,
-            data_provider=dp, content=value, **key)
+            provider=dp, content=value, **key)
 
     def delete(self, key, version=None):
         key = self.make_key(key)

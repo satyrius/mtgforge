@@ -8,8 +8,6 @@ from django.test.utils import override_settings
     'provider_page': {'BACKEND': 'crawler.providers.cache.PageCache'},
 })
 class ProviderTest(TestCase):
-    fixtures = ['data_provider']
-
     def setUp(self):
         # Invalidate pages cache
         get_cache('provider_page').clear()

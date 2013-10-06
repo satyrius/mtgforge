@@ -186,9 +186,9 @@ class Command(BaseCommand):
                         continue
                     p = page.get_provider()
                     try:
-                        cs.sources.get(data_provider=p)
+                        cs.sources.get(provider=p)
                     except DataSource.DoesNotExist:
-                        cs.sources.create(content_object=cs, data_provider=p, url=ds_url)
+                        cs.sources.create(content_object=cs, provider=p, url=ds_url)
 
             info = dict(name=name, url=url, acronym=acronym or '-',
                         cards=extra['cards'] or '?', release=extra['release'])
