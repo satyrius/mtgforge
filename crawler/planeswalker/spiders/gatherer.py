@@ -39,6 +39,13 @@ class GathererSpider(CrawlSpider):
                     meta={'card_set': card_set})
 
     def parse_list(self, response):
+        '''Parse compact card list and follow card details for each printing.
+
+        @url http://gatherer.wizards.com/Pages/Search/Default.aspx?output=compact&set=%5BTheros%5D
+        @returns items 1 1
+        @scrapes slug
+        @returns requests 100 106
+        '''
         card_set = response.request.meta.get('card_set', CardSetItem())
         hxs = HtmlXPathSelector(response)
         for card_row in hxs.select('//tr[contains(@class, "cardItem")]'):
