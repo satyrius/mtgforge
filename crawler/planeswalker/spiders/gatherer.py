@@ -42,7 +42,7 @@ class GathererSpider(CrawlSpider):
         '''Parse compact card list and follow card details for each printing.
 
         @url http://gatherer.wizards.com/Pages/Search/Default.aspx?output=compact&set=%5BTheros%5D
-        @returns items 1 1
+        @returns items 0 0
         @scrapes slug
         @returns requests 100 106
         '''
@@ -66,7 +66,6 @@ class GathererSpider(CrawlSpider):
             # Fill card set slug and return an item if not returned yet
             if 'slug' not in card_set:
                 card_set['slug'] = slug
-                yield card_set
 
             for url, cs in printings.items():
                 if cs == slug:
