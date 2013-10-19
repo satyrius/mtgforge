@@ -1,8 +1,9 @@
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
+from planeswalker.items import CardItem
 
-class PlaneswalkerPipeline(object):
+
+class CardsPipeline(object):
     def process_item(self, item, spider):
+        if isinstance(item, CardItem):
+            # Save the card
+            pass
         return item
