@@ -101,6 +101,13 @@ class GathererSpider(CrawlSpider):
         return value
 
     def parse_card(self, response):
+        '''Parse compact card list and follow card details for each printing.
+
+        @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=239961
+        @returns items 1 1
+        @scrapes name mana cmc pt
+        @returns requests 0 0
+        '''
         # Restore card item from request meta (it may content basic card
         # details like name or card set) or create new one.
         r = response.request
