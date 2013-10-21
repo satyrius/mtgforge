@@ -1,6 +1,7 @@
-from scrapy.selector import HtmlXPathSelector
-#from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
-#from scrapy.contrib.spiders import CrawlSpider, Rule
+import re
+from lxml import etree
+from lxml.html import document_fromstring
+from scrapy.selector import HtmlXPathSelector, XPathSelector
 from scrapy.contrib.spiders import CrawlSpider
 from scrapy.http import FormRequest, Request
 from urlparse import urljoin
@@ -79,7 +80,111 @@ class GathererSpider(CrawlSpider):
                         meta={'card': card, 'card_set': card_set},
                         callback=self.parse_card)
 
+    def extract_mana(self, el_selector):
+        # We dont need to use `encode_mana` here, because mana value node
+        # contains only mana symbols. It's easy to extract them from
+        # img sources params.
+        mana = el_selector.select('.//img/@src').re(r'name=(.+?)&')
+        return ''.join(['{%s}' % s for s in mana])
+
+    def extract_text(self, el_selector):
+        blocks = []
+        for block in el_selector.select('.//div[contains(@class, "cardtextbox")]'):
+            blocks.append(extract_text(encode_mana(block)))
+        return '\n'.join(blocks)
+
+    def extract_rarity(self, el_selector):
+        value = extract_text(el_selector)
+        # Workaround with Wizards' dummies
+        if value == u'Basic Land':
+            value = u'Common'
+        return value
+
     def parse_card(self, response):
+        # Restore card item from request meta (it may content basic card
+        # details like name or card set) or create new one.
         r = response.request
         card = r.meta.get('card', CardItem())
-        yield card
+
+        subcontent_re = re.compile('MainContent_SubContent_SubContent')
+        ignore_fields = ['playerRating', 'otherSets']
+
+        hxs = HtmlXPathSelector(response)
+        for details in hxs.select('//table[contains(@class, "cardDetails")]'):
+            for field_row in details.select('.//td[contains(@class, "rightCol")]//div[contains(@class, "row")]'):
+                id = field_row.select('@id').extract()[0]
+                if subcontent_re.search(id):
+                    k = id.split('_')[-1][:-3]
+                    if k in ignore_fields:
+                        continue
+                    value = field_row.select('.//div[contains(@class, "value")]')
+                    extract = 'extract_' + k
+                    if hasattr(self, extract):
+                        value = getattr(self, extract)(value)
+                    else:
+                        value = extract_text(value)
+                    card[k] = value
+            yield card
+
+            # Temporary parse only one cardDetail
+            break
+
+
+def extract_text(element):
+    '''Extract text from element and its descendants. It also normalizes
+    spaces and other valuable symbols.
+    '''
+    is_selector = lambda e: isinstance(e, XPathSelector)
+    if is_selector(element) or (isinstance(element, list) and all(is_selector(e) for e in element)):
+        text = ' '.join(element.select('.//text()').extract())
+    elif isinstance(element, basestring):
+        text = element
+    else:
+        raise Exception('Dont know how to normalize text for %s' % element)
+
+    # Backup newlines
+    nl = '__new_line__'
+    text = re.sub(u'\n', nl, text)
+    # Normalize spaces
+    #text = re.sub(u'\xa0', ' ', text)
+    text = re.sub(r'\s+', ' ', text)
+
+    #text = re.sub(u'\xe2\x80\x99|\u2019', '\'', text)
+    #text = re.sub(u'\s*(\xe2\x80\x94|\u2014)\s*', ' - ', text)
+
+    # Remove spaces around bracets
+    text = re.sub(r'\(\s+', '(', text)
+    text = re.sub(r'\s+\)', ')', text)
+    text = re.sub(r'(?<!\(|\{|\s|\d)\{', ' {', text)
+    text = re.sub(r'\}(?!=\)|\}|\s|\:)', '} ', text)
+    text = re.sub(r'}\s+{', '}{', text)
+
+    # Restore line endings and strip final string
+    text = re.sub(u'{0}\s*'.format(nl), '\n', text)
+    return text.strip()
+
+
+def encode_mana(el_selector):
+    # Unfortunately, Scrapy operates with XPathSelector and dont give
+    # access to selected element instances. We have to create html
+    # document and use lxml api to access img elements and replace them
+    # with mana-encoded text.
+    html_el = document_fromstring(el_selector.extract())
+
+    mana_re = re.compile(r'name=(.+?)&')
+    for img in html_el.cssselect('img'):
+        mana = unicode(mana_re.search(img.get('src')).groups()[0])
+        # Add text representation to each mane img
+        img.tail = u'{' + mana + u'}' + unicode(img.tail or '')
+    # Remove images, only mana-encoded text will remain
+    etree.strip_elements(html_el, 'img', with_tail=False)
+
+    # Walk all elements recursively to concatenate all text nodes
+    def gettext(elem):
+        parts = [elem.text or '']
+        for e in elem:
+            parts.append(gettext(e))
+            if e.tail:
+                parts.append(e.tail)
+        return ' '.join(parts).strip()
+    return gettext(html_el)

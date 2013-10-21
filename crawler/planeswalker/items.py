@@ -7,5 +7,18 @@ class CardSetItem(Item):
 
 
 class CardItem(Item):
-    name = Field()
-    card_set_slug = Field()
+    name = Field()  # card name
+    card_set_slug = Field()  # card set slut from list page
+    set = Field()  # card set full name
+
+    mana = Field()  # encoded mana cost, e.g. {B}{G}
+    cmc = Field()  # converted mana const
+    type = Field()  # type line
+    text = Field()  # rules text
+    flavor = Field()  # flavor text
+    pt = Field()  # power and thoughtness
+    rarity = Field()  # card rarity
+    number = Field()  # collector's numner
+    artist = Field()  # artist name
+
+    mark = Field()  # watermark, TODO alter db schema to store it
