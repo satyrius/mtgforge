@@ -12,8 +12,12 @@ class GathererSpider(CrawlSpider):
     allowed_domains = ['gatherer.wizards.com']
     search_url = 'http://gatherer.wizards.com/Pages/Search/Default.aspx'
 
+    def __init__(self, card_set=None, *args, **kwargs):
+        self.card_sets = [card_set or 'Theros']
+
     def card_set_names(self):
-        yield 'Theros'
+        for name in self.card_sets:
+            yield name
 
     def start_requests(self):
         for name in self.card_set_names():
