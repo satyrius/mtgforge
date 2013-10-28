@@ -134,3 +134,11 @@ def pg_restore():
         local('psql %s < %s' % (DATABASE, join(DOWNLOADS, DUMP_SCHEMA)))
         local('pg_restore -d mtgforge --format=c %s' % join(
             DOWNLOADS, DUMP_DATA))
+
+
+@task
+def reset_images():
+    if are_you_sure('This will remove all image and thumbnails data.'):
+        local('psql %s -c "truncate oracle_cardimagethumb"' % DATABASE)
+        local('psql %s -c "update oracle_cardimage set file = null"' % DATABASE)
+        local('rm -rf media/*')
