@@ -1,5 +1,5 @@
 Django==1.5.4
-Fabric==1.7.0
+Fabric==1.8.0
 Pillow==1.7.8
 South==0.8.2
 cssselect==0.8
