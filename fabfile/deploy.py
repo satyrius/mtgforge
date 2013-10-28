@@ -1,6 +1,5 @@
-import re
 from os.path import join
-from fabric.api import task, sudo, cd, prefix, get, local, prompt
+from fabric.api import task, sudo, cd, prefix
 
 
 APP_DIR = '/var/www/mtgforge'
@@ -9,10 +8,6 @@ VIRTUALENV_BIN = '/var/virtualenv/mtgforge/bin'
 ACTIVATE = join(VIRTUALENV_BIN, 'activate')
 PY = join(VIRTUALENV_BIN, 'python')
 VERSION_FILE = '/etc/mtgforge/version'
-DOWNLOADS = '~/Downloads'
-DATABASE = 'mtgforge'
-DUMP_SCHEMA = 'mtgforge.dump.schema.sql'
-DUMP_DATA = 'mtgforge.dump.data'
 
 
 def manage(command):
@@ -21,7 +16,7 @@ def manage(command):
             sudo('./py ./backend/manage.py %s' % command, user='www-data')
 
 
-@task(alias='deploy', default=True)
+@task(default=True)
 def full_deploy():
     update()
     backend()
@@ -85,60 +80,3 @@ def restart(update_config=False):
                 sudo('ln -s %s/nginx/mtgforge/_.conf mtgforge.conf' % ETC_DIR)
     sudo('service uwsgi restart')
     sudo('service nginx reload')
-
-
-@task
-def pg_dump():
-    schema_dump = join('/tmp', DUMP_SCHEMA)
-    data_dump = join('/tmp', DUMP_DATA)
-
-    sudo(' '.join([
-        'sudo -u mtgforge pg_dump -h localhost ',
-        '--schema-only',
-        '--no-owner',
-        '--no-privileges',
-        '--format=plain',
-        '%s > %s']) % (DATABASE, schema_dump))
-
-    sudo(' '.join([
-        'sudo -u mtgforge pg_dump -h localhost',
-        '--data-only',
-        '--disable-triggers',
-        '--no-owner',
-        '--format=custom',
-        '-T oracle_dataproviderpage -T django_session',
-        '%s > %s']) % (DATABASE, data_dump))
-
-    get('/tmp/mtgforge.dump.*', DOWNLOADS)
-
-
-def are_you_sure(ask_message, default='no'):
-    yes = r'y(e(p|a[h]*)?)?|true|1'
-    no = r'n(o(pe)?)?|false|0'
-
-    def yes_no(value):
-        value = value.strip().lower()
-        if not re.match(r'^%s|%s$' % (yes, no), value):
-            raise Exception('It is a yes/no question.')
-        return bool(re.match(yes, value))
-
-    return prompt(u'%s Are you sure? [yes/no]' % ask_message, default=default,
-                  validate=yes_no)
-
-
-@task
-def pg_restore():
-    if are_you_sure('This will destroy current database.'):
-        local('dropdb %s' % DATABASE)
-        local('createdb %s' % DATABASE)
-        local('psql %s < %s' % (DATABASE, join(DOWNLOADS, DUMP_SCHEMA)))
-        local('pg_restore -d mtgforge --format=c %s' % join(
-            DOWNLOADS, DUMP_DATA))
-
-
-@task
-def reset_images():
-    if are_you_sure('This will remove all image and thumbnails data.'):
-        local('psql %s -c "truncate oracle_cardimagethumb"' % DATABASE)
-        local('psql %s -c "update oracle_cardimage set file = null"' % DATABASE)
-        local('rm -rf media/*')
