@@ -1,7 +1,7 @@
 import re
 from lxml import etree
 from lxml.html import document_fromstring
-from scrapy.selector import HtmlXPathSelector, XPathSelector
+from scrapy.selector import Selector
 from scrapy.contrib.spiders import CrawlSpider
 from scrapy.http import FormRequest, Request
 from urlparse import urljoin
@@ -32,11 +32,10 @@ class GathererSpider(CrawlSpider):
     def parse_paginagor(self, response):
         card_set = response.request.meta.get('card_set', CardSetItem())
 
-        hxs = HtmlXPathSelector(response)
-        page_select = '//div[contains(@class, "pagingControls")]//a'
-        for page_link in hxs.select(page_select):
-            page_url = page_link.select('@href').extract()[0]
-            page_num = page_link.select('text()').extract()[0].strip()
+        sel = Selector(response)
+        for page_link in sel.css('div.pagingControls a'):
+            page_url = page_link.xpath('@href').extract()[0]
+            page_num = page_link.xpath('text()').extract()[0].strip()
             if page_url and page_num.isdigit():
                 yield Request(
                     urljoin(response.request.url, page_url),
@@ -52,20 +51,20 @@ class GathererSpider(CrawlSpider):
         @returns requests 100 106
         '''
         card_set = response.request.meta.get('card_set', CardSetItem())
-        hxs = HtmlXPathSelector(response)
-        for card_row in hxs.select('//tr[contains(@class, "cardItem")]'):
-            a = card_row.select('.//td[contains(@class, "name")]//a')
-            card_url = a.select('@href').extract()[0]
-            card_name = a.select('text()').extract()[0].strip()
+        sel = Selector(response)
+        for card_row in sel.css('tr.cardItem'):
+            a = card_row.css('td.name a')
+            card_url = a.xpath('@href').extract()[0]
+            card_name = a.xpath('text()').extract()[0].strip()
 
             # Next we should parse 'printings' block. It contains card links
             # for all card releases in all sets. We will get all links for
             # current set. We should use these links because some cards might
             # have several printing in one set (e.g. Forest, High Tide)
-            get_href = lambda a: a.select('@href').extract()[0]
-            get_alt = lambda a: a.select('.//img/@alt').extract()[0]
-            printings = {get_href(a): get_alt(a) for a in card_row.select(
-                './/td[contains(@class, "printings")]//a')}
+            get_href = lambda a: a.xpath('@href').extract()[0]
+            get_alt = lambda a: a.xpath('.//img/@alt').extract()[0]
+            printings = {get_href(a): get_alt(a) for a in card_row.css(
+                'td.printings a')}
             slug = printings[card_url]
 
             # Fill card set slug and return an item if not returned yet
@@ -84,12 +83,12 @@ class GathererSpider(CrawlSpider):
         # We dont need to use `encode_mana` here, because mana value node
         # contains only mana symbols. It's easy to extract them from
         # img sources params.
-        mana = el_selector.select('.//img/@src').re(r'name=(.+?)&')
+        mana = el_selector.xpath('.//img/@src').re(r'name=(.+?)&')
         return ''.join(['{%s}' % s for s in mana])
 
     def extract_text(self, el_selector):
         blocks = []
-        for block in el_selector.select('.//div[contains(@class, "cardtextbox")]'):
+        for block in el_selector.css('div.cardtextbox'):
             blocks.append(extract_text(encode_mana(block)))
         return '\n'.join(blocks)
 
@@ -116,15 +115,15 @@ class GathererSpider(CrawlSpider):
         subcontent_re = re.compile('MainContent_SubContent_SubContent')
         ignore_fields = ['playerRating', 'otherSets']
 
-        hxs = HtmlXPathSelector(response)
-        for details in hxs.select('//table[contains(@class, "cardDetails")]'):
-            for field_row in details.select('.//td[contains(@class, "rightCol")]//div[contains(@class, "row")]'):
-                id = field_row.select('@id').extract()[0]
+        sel = Selector(response)
+        for details in sel.css('table.cardDetails'):
+            for field_row in details.css('td.rightCol div.row'):
+                id = field_row.xpath('@id').extract()[0]
                 if subcontent_re.search(id):
                     k = id.split('_')[-1][:-3]
                     if k in ignore_fields:
                         continue
-                    value = field_row.select('.//div[contains(@class, "value")]')
+                    value = field_row.css('div.value')
                     extract = 'extract_' + k
                     if hasattr(self, extract):
                         value = getattr(self, extract)(value)
@@ -141,9 +140,9 @@ def extract_text(element):
     '''Extract text from element and its descendants. It also normalizes
     spaces and other valuable symbols.
     '''
-    is_selector = lambda e: isinstance(e, XPathSelector)
+    is_selector = lambda e: isinstance(e, Selector)
     if is_selector(element) or (isinstance(element, list) and all(is_selector(e) for e in element)):
-        text = ' '.join(element.select('.//text()').extract())
+        text = ' '.join(element.xpath('.//text()').extract())
     elif isinstance(element, basestring):
         text = element
     else:

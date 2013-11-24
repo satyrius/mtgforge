@@ -12,9 +12,9 @@ BOT_NAME = 'planeswalker'
 SPIDER_MODULES = ['planeswalker.spiders']
 NEWSPIDER_MODULE = 'planeswalker.spiders'
 
-ITEM_PIPELINES = [
-    'planeswalker.pipelines.CardsPipeline',
-]
+ITEM_PIPELINES = {
+    'planeswalker.pipelines.CardsPipeline': 100,
+}
 
 HTTPCACHE_ENABLED = True
 HTTPCACHE_DIR = '/tmp/planeswalker'
