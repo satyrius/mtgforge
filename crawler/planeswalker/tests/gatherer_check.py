@@ -30,3 +30,14 @@ class TestGathererSpider(GathererSpider):
         # @field art http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=239961&type=card
         # @field title Avacyn, Angel of Hope
         return super(TestGathererSpider, self).parse_card(response)
+
+    def rules_with_comments(self, response):
+        '''Parse card rules with comments
+
+        @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=178135
+        @returns items 1 1
+        @returns requests 0 0
+        @field name Adventuring Gear
+        @field text Landfall - Whenever a land enters the battlefield under your control, equipped creature gets +2/+2 until end of turn.\\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)
+        '''
+        return super(TestGathererSpider, self).parse_card(response)
