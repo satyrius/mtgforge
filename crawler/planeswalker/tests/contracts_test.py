@@ -73,6 +73,22 @@ class TestSpider(BaseSpider):
         """
         return TestItem(name='Anton\nEgorov')
 
+    def field_with_empty_value(self, response):
+        """ returns item with name and empty url
+        @url http://scrapy.org
+        @field name Anton Egorov
+        @field url
+        """
+        return TestItem(name='Anton Egorov', url='')
+
+    def field_with_empty_value_fail(self, response):
+        """ returns item with name and empty url
+        @url http://scrapy.org
+        @field name Anton Egorov
+        @field url
+        """
+        return TestItem(name='Anton Egorov', url='/foo/bar')
+
 
 class ContractsTest(unittest.TestCase):
     contracts = [UrlContract, ItemContract, FieldContract]
@@ -122,7 +138,21 @@ class ContractsTest(unittest.TestCase):
         self.should_fail()
 
     def test_multiline_field(self):
-        request = self.conman.from_method(self.spider.multiline_field, self.results)
+        request = self.conman.from_method(
+            self.spider.multiline_field, self.results)
         output = request.callback(self.response)
         self.assertEqual([type(x) for x in output], [TestItem])
         self.should_succeed()
+
+    def test_field_with_empty_value(self):
+        request = self.conman.from_method(
+            self.spider.field_with_empty_value, self.results)
+        output = request.callback(self.response)
+        self.assertEqual([type(x) for x in output], [TestItem])
+        self.should_succeed()
+
+    def test_field_with_empty_value_fail(self):
+        request = self.conman.from_method(
+            self.spider.field_with_empty_value_fail, self.results)
+        request.callback(self.response)
+        self.should_fail()
