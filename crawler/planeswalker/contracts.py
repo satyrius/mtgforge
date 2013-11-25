@@ -24,7 +24,7 @@ class ItemContract(Contract):
     def post_process(self, output):
         for x in output:
             if isinstance(x, BaseItem):
-                if dict(x) != self.expected_json:
-                    raise ContractFail(
-                        u'The following data expected\n{}\ngot\n{}'.format(
-                            self.expected_json, x))
+                try:
+                    self.testcase_post.assertEqual(dict(x), self.expected_json)
+                except AssertionError as e:
+                    raise ContractFail(e)
