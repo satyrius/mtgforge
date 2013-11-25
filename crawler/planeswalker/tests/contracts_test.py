@@ -81,6 +81,14 @@ class TestSpider(BaseSpider):
         """
         return TestItem(name='Anton Egorov', url='')
 
+    def field_with_empty_value_2(self, response):
+        """ returns item with name and empty url
+        @url http://scrapy.org
+        @field name Anton Egorov
+        @field url
+        """
+        return TestItem(name='Anton Egorov')
+
     def field_with_empty_value_fail(self, response):
         """ returns item with name and empty url
         @url http://scrapy.org
@@ -147,6 +155,12 @@ class ContractsTest(unittest.TestCase):
     def test_field_with_empty_value(self):
         request = self.conman.from_method(
             self.spider.field_with_empty_value, self.results)
+        output = request.callback(self.response)
+        self.assertEqual([type(x) for x in output], [TestItem])
+        self.should_succeed()
+
+        request = self.conman.from_method(
+            self.spider.field_with_empty_value_2, self.results)
         output = request.callback(self.response)
         self.assertEqual([type(x) for x in output], [TestItem])
         self.should_succeed()

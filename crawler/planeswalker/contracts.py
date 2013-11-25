@@ -48,9 +48,14 @@ class FieldContract(Contract):
         for x in output:
             if isinstance(x, BaseItem):
                 f = self.field_name
+                v = self.field_value
                 if not f in x:
-                    raise ContractFail("'{}' field is missing".format(f))
+                    if v == '':
+                        # Empty value expected
+                        continue
+                    else:
+                        raise ContractFail("'{}' field is missing".format(f))
                 try:
-                    self.testcase_post.assertEqual(x[f], self.field_value)
+                    self.testcase_post.assertEqual(x[f], v)
                 except AssertionError, e:
                     raise ContractFail(e)
