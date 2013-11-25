@@ -49,11 +49,7 @@ class TestGathererSpider(GathererSpider):
         @returns items 1 1
         @returns requests 0 0
         @field name Forest
-        @field set Return to Ravnica
-        @field artist Yeong-Hao Han
         @field text G
-        @field number 271
-        @field mvid 289326
         @field rarity Common
         @field type Basic Land - Forest
         '''
