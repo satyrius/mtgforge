@@ -16,6 +16,10 @@ ITEM_PIPELINES = {
     'planeswalker.pipelines.CardsPipeline': 100,
 }
 
+SPIDER_CONTRACTS = {
+    'planeswalker.contracts.ItemContract': 100,
+}
+
 HTTPCACHE_ENABLED = True
 HTTPCACHE_DIR = '/tmp/planeswalker'
 
