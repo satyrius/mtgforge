@@ -59,3 +59,16 @@ class FieldContract(Contract):
                     self.testcase_post.assertEqual(x[f], v)
                 except AssertionError, e:
                     raise ContractFail(e)
+
+
+class MetaContract(Contract):
+    '''Pass request meta
+    @meta name Anton Egorov
+    '''
+    name = 'meta'
+
+    def adjust_request_args(self, kwargs):
+        if 'meta' not in kwargs or not kwargs['meta']:
+            kwargs['meta'] = {}
+        kwargs['meta'][self.args[0]] = u' '.join(self.args[1:])
+        return kwargs

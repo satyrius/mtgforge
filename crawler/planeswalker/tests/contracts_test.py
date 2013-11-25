@@ -7,7 +7,7 @@ from scrapy.item import Item, Field
 from scrapy.contracts import ContractsManager
 from scrapy.contracts.default import UrlContract
 
-from planeswalker.contracts import ItemContract, FieldContract
+from planeswalker.contracts import ItemContract, FieldContract, MetaContract
 
 
 class TestItem(Item):
@@ -97,9 +97,16 @@ class TestSpider(BaseSpider):
         """
         return TestItem(name='Anton Egorov', url='/foo/bar')
 
+    def with_meta(self, response):
+        """ returns nothing
+        @url http://scrapy.org
+        @meta name Anton Egorov
+        """
+        return
+
 
 class ContractsTest(unittest.TestCase):
-    contracts = [UrlContract, ItemContract, FieldContract]
+    contracts = [UrlContract, ItemContract, FieldContract, MetaContract]
 
     def setUp(self):
         self.conman = ContractsManager(self.contracts)
@@ -170,3 +177,8 @@ class ContractsTest(unittest.TestCase):
             self.spider.field_with_empty_value_fail, self.results)
         request.callback(self.response)
         self.should_fail()
+
+    def test_request_meta(self):
+        request = self.conman.from_method(self.spider.with_meta, self.results)
+        self.assertIn('name', request.meta)
+        self.assertEqual(request.meta['name'], 'Anton Egorov')
