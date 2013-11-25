@@ -25,12 +25,12 @@ class GathererSpider(CrawlSpider):
         for name in self.card_set_names():
             yield FormRequest(
                 url=self.search_url, method='GET',
-                callback=self.parse_paginagor,
+                callback=self.parse_paginator,
                 formdata={'set': '[%s]' % name, 'output': 'compact'},
                 meta={'card_set': CardSetItem(name=name)})
             return
 
-    def parse_paginagor(self, response):
+    def parse_paginator(self, response):
         card_set = response.request.meta.get('card_set', CardSetItem())
 
         sel = Selector(response)
@@ -74,10 +74,9 @@ class GathererSpider(CrawlSpider):
 
             for url, cs in printings.items():
                 if cs == slug:
-                    card = CardItem(name=card_name)
                     yield Request(
                         urljoin(response.request.url, url),
-                        meta={'card': card, 'card_set': card_set},
+                        meta={'card': card_name, 'card_set': card_set},
                         callback=self.parse_card)
 
     def extract_mana(self, el_selector):
@@ -102,20 +101,17 @@ class GathererSpider(CrawlSpider):
 
     def parse_card(self, response):
         '''Parse compact card list and follow card details for each printing.
-
-        @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=239961
-        @returns items 1 1
-        @scrapes name mana cmc pt
-        @returns requests 0 0
         '''
         # Restore card item from request meta (it may content basic card
         # details like name or card set) or create new one.
         r = response.request
-        card = r.meta.get('card', CardItem())
+        card_name = r.meta.get('card')
+        card = CardItem()
         card['mvid'] = dict(parse_qsl(urlparse(r.url).query))['multiverseid']
 
         subcontent_re = re.compile('MainContent_SubContent_SubContent')
-        ignore_fields = ['playerRating', 'otherSets']
+        ignore_fields = ['player_rating', 'other_sets']
+        name_field = 'name'
 
         sel = Selector(response)
         for details in sel.css('table.cardDetails'):
@@ -123,6 +119,8 @@ class GathererSpider(CrawlSpider):
                 id = field_row.xpath('@id').extract()[0]
                 if subcontent_re.search(id):
                     k = id.split('_')[-1][:-3]
+                    # Camel case to underscore
+                    k = re.sub('([A-Z]+)', r'_\1', k).lower()
                     if k in ignore_fields:
                         continue
                     value = field_row.css('div.value')
@@ -131,11 +129,16 @@ class GathererSpider(CrawlSpider):
                         value = getattr(self, extract)(value)
                     else:
                         value = extract_text(value)
-                    card[k] = value
-            yield card
 
-            # Temporary parse only one cardDetail
-            break
+                    # Break if it is not the card face you are looking for
+                    if card_name and k == name_field and value != card_name:
+                        break
+                    card[k] = value
+
+            # Return card only if we found exactly what we need
+            if name_field in card:
+                yield card
+                return
 
 
 def extract_text(element):

@@ -65,3 +65,28 @@ class TestGathererSpider(GathererSpider):
         @field text
         '''
         return super(TestGathererSpider, self).parse_card(response)
+
+    def double_faced_card_front(self, response):
+        '''Parse double faced card front face
+
+        @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=244683
+        @returns items 1 1
+        @returns requests 0 0
+        @field name Hanweir Watchkeep
+        @field number 145a
+        @field color_indicator
+        '''
+        return super(TestGathererSpider, self).parse_card(response)
+
+    def double_faced_card_back(self, response):
+        '''Parse double faced card back
+
+        @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=244687
+        @meta card Bane of Hanweir
+        @returns items 1 1
+        @returns requests 0 0
+        @field name Bane of Hanweir
+        @field number 145b
+        @field color_indicator Red
+        '''
+        return super(TestGathererSpider, self).parse_card(response)

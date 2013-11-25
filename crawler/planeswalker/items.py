@@ -13,6 +13,7 @@ class CardItem(Item):
     set = Field()  # card set full name
 
     mana = Field()  # encoded mana cost, e.g. {B}{G}
+    color_indicator = Field()  # color for double faced cards back
     cmc = Field()  # converted mana cost
     type = Field()  # type line
     text = Field()  # rules text
