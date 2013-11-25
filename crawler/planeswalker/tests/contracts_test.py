@@ -7,7 +7,7 @@ from scrapy.item import Item, Field
 from scrapy.contracts import ContractsManager
 from scrapy.contracts.default import UrlContract
 
-from planeswalker.contracts import ItemContract
+from planeswalker.contracts import ItemContract, FieldContract
 
 
 class TestItem(Item):
@@ -52,9 +52,23 @@ class TestSpider(BaseSpider):
         """
         return TestItem(name='multi\nline', url=response.url)
 
+    def field_ok(self, response):
+        """ returns item with name and url
+        @url http://scrapy.org
+        @field name Anton Egorov
+        """
+        return TestItem(name='Anton Egorov')
+
+    def field_fail(self, response):
+        """ returns item with name and url
+        @url http://scrapy.org
+        @field name Anton Egorov
+        """
+        return TestItem(name='Anton')
+
 
 class ContractsTest(unittest.TestCase):
-    contracts = [UrlContract, ItemContract]
+    contracts = [UrlContract, ItemContract, FieldContract]
 
     def setUp(self):
         self.conman = ContractsManager(self.contracts)
@@ -88,3 +102,14 @@ class ContractsTest(unittest.TestCase):
         output = request.callback(self.response)
         self.assertEqual([type(x) for x in output], [TestItem])
         self.should_succeed()
+
+    def test_field_ok(self):
+        request = self.conman.from_method(self.spider.field_ok, self.results)
+        output = request.callback(self.response)
+        self.assertEqual([type(x) for x in output], [TestItem])
+        self.should_succeed()
+
+    def test_field_fail(self):
+        request = self.conman.from_method(self.spider.field_fail, self.results)
+        request.callback(self.response)
+        self.should_fail()
