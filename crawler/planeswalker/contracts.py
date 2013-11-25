@@ -42,7 +42,7 @@ class FieldContract(Contract):
     def __init__(self, *args, **kwargs):
         super(FieldContract, self).__init__(*args, **kwargs)
         self.field_name = args[1]
-        self.field_value = u' '.join(args[2:])
+        self.field_value = u' '.join(args[2:]).replace('\\n', '\n')
 
     def post_process(self, output):
         for x in output:
@@ -50,7 +50,7 @@ class FieldContract(Contract):
                 f = self.field_name
                 if not f in x:
                     raise ContractFail("'{}' field is missing".format(f))
-                if x[f] != self.field_value:
-                    raise ContractFail(
-                        "Field '{}' expected to be '{}', got '{}'".format(
-                            f, self.field_value, x[f]))
+                try:
+                    self.testcase_post.assertEqual(x[f], self.field_value)
+                except AssertionError, e:
+                    raise ContractFail(e)

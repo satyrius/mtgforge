@@ -66,6 +66,13 @@ class TestSpider(BaseSpider):
         """
         return TestItem(name='Anton')
 
+    def multiline_field(self, response):
+        """ returns item with name and url
+        @url http://scrapy.org
+        @field name Anton\\nEgorov
+        """
+        return TestItem(name='Anton\nEgorov')
+
 
 class ContractsTest(unittest.TestCase):
     contracts = [UrlContract, ItemContract, FieldContract]
@@ -113,3 +120,9 @@ class ContractsTest(unittest.TestCase):
         request = self.conman.from_method(self.spider.field_fail, self.results)
         request.callback(self.response)
         self.should_fail()
+
+    def test_multiline_field(self):
+        request = self.conman.from_method(self.spider.multiline_field, self.results)
+        output = request.callback(self.response)
+        self.assertEqual([type(x) for x in output], [TestItem])
+        self.should_succeed()
