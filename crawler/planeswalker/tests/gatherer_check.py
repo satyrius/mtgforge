@@ -8,27 +8,25 @@ class TestGathererSpider(GathererSpider):
     '''
 
     def avacyn_angel_of_hope(self, response):
-        '''Parse compact card list and follow card details for each printing.
+        '''Parse creature details
 
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=239961
         @returns items 1 1
         @returns requests 0 0
-        @item_json {\
-            "set": "Avacyn Restored",\
-            "name": "Avacyn, Angel of Hope",\
-            "pt": "8 / 8",\
-            "artist": "Jason Chan",\
-            "text": "Flying, vigilance, indestructible\\nOther permanents you control have indestructible.",\
-            "cmc": "8",\
-            "number": "6",\
-            "mvid": "239961",\
-            "rarity": "Mythic Rare",\
-            "mana": "{5}{W}{W}{W}",\
-            "flavor": "A golden helix streaked skyward from the Helvault. A thunderous explosion shattered the silver monolith and Avacyn emerged, free from her prison at last.",\
-            "type": "Legendary Creature - Angel"\
-        }
+        @field name Avacyn, Angel of Hope
+        @field set Avacyn Restored
+        @field pt 8 / 8
+        @field artist Jason Chan
+        @field text Flying, vigilance, indestructible\\nOther permanents you control have indestructible.
+        @field cmc 8
+        @field number 6
+        @field mvid 239961
+        @field rarity Mythic Rare
+        @field mana {5}{W}{W}{W}
+        @field flavor A golden helix streaked skyward from the Helvault. A thunderous explosion shattered the silver monolith and Avacyn emerged, free from her prison at last.
+        @field type Legendary Creature - Angel
         '''
         # TODO check that the following data parsed or computed
-        # "art": "http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=239961&type=card",\
-        # "title": "Avacyn, Angel of Hope",\
+        # @field art http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=239961&type=card
+        # @field title Avacyn, Angel of Hope
         return super(TestGathererSpider, self).parse_card(response)
