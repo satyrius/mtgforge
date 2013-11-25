@@ -41,3 +41,20 @@ class TestGathererSpider(GathererSpider):
         @field text Landfall - Whenever a land enters the battlefield under your control, equipped creature gets +2/+2 until end of turn.\\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)
         '''
         return super(TestGathererSpider, self).parse_card(response)
+
+    def basic_land(self, response):
+        '''Parse basic land card
+
+        @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=289326
+        @returns items 1 1
+        @returns requests 0 0
+        @field name Forest
+        @field set Return to Ravnica
+        @field artist Yeong-Hao Han
+        @field text G
+        @field number 271
+        @field mvid 289326
+        @field rarity Common
+        @field type Basic Land - Forest
+        '''
+        return super(TestGathererSpider, self).parse_card(response)
