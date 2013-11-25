@@ -25,6 +25,7 @@ class ItemContract(Contract):
         for x in output:
             if isinstance(x, BaseItem):
                 try:
+                    self.testcase_post.maxDiff = None
                     self.testcase_post.assertEqual(dict(x), self.expected_json)
                 except AssertionError as e:
                     raise ContractFail(e)

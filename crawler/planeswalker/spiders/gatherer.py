@@ -6,6 +6,7 @@ from scrapy.contrib.spiders import CrawlSpider
 from scrapy.http import FormRequest, Request
 from urlparse import urljoin
 from planeswalker.items import CardSetItem, CardItem
+from urlparse import urlparse, parse_qsl
 
 
 class GathererSpider(CrawlSpider):
@@ -111,6 +112,7 @@ class GathererSpider(CrawlSpider):
         # details like name or card set) or create new one.
         r = response.request
         card = r.meta.get('card', CardItem())
+        card['mvid'] = dict(parse_qsl(urlparse(r.url).query))['multiverseid']
 
         subcontent_re = re.compile('MainContent_SubContent_SubContent')
         ignore_fields = ['playerRating', 'otherSets']
@@ -152,11 +154,11 @@ def extract_text(element):
     nl = '__new_line__'
     text = re.sub(u'\n', nl, text)
     # Normalize spaces
-    #text = re.sub(u'\xa0', ' ', text)
+    text = re.sub(u'\xa0', ' ', text)
     text = re.sub(r'\s+', ' ', text)
 
-    #text = re.sub(u'\xe2\x80\x99|\u2019', '\'', text)
-    #text = re.sub(u'\s*(\xe2\x80\x94|\u2014)\s*', ' - ', text)
+    text = re.sub(u'\xe2\x80\x99|\u2019', '\'', text)
+    text = re.sub(u'\s*(\xe2\x80\x94|\u2014)\s*', ' - ', text)
 
     # Remove spaces around bracets
     text = re.sub(r'\(\s+', '(', text)
