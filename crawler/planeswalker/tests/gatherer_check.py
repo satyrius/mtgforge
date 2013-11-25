@@ -58,3 +58,14 @@ class TestGathererSpider(GathererSpider):
         @field type Basic Land - Forest
         '''
         return super(TestGathererSpider, self).parse_card(response)
+
+    def vanilla_creature(self, response):
+        '''Parse vanilla creature
+
+        @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=265383
+        @returns items 1 1
+        @returns requests 0 0
+        @field name Axebane Stag
+        @field text
+        '''
+        return super(TestGathererSpider, self).parse_card(response)
