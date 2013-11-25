@@ -5,3 +5,4 @@ media/*
 *.py[co]
 *.sw[po]
 .env
+__pycache__
