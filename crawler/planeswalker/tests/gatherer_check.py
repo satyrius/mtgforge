@@ -11,8 +11,11 @@ class TestGathererSpider(GathererSpider):
         '''Parse creature details
 
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=239961
+        @meta card Avacyn, Angel of Hope
+
         @returns items 1 1
         @returns requests 0 0
+
         @field name Avacyn, Angel of Hope
         @field set Avacyn Restored
         @field pt 8 / 8
@@ -25,6 +28,9 @@ class TestGathererSpider(GathererSpider):
         @field mana {5}{W}{W}{W}
         @field flavor A golden helix streaked skyward from the Helvault. A thunderous explosion shattered the silver monolith and Avacyn emerged, free from her prison at last.
         @field type Legendary Creature - Angel
+
+        This card has only one face
+        @field sibling
         '''
         # TODO check that the following data parsed or computed
         # @field art http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=239961&type=card
@@ -70,9 +76,13 @@ class TestGathererSpider(GathererSpider):
         '''Parse double faced card front face
 
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=244683
+        @meta card Hanweir Watchkeep
+
         @returns items 1 1
         @returns requests 0 0
+
         @field name Hanweir Watchkeep
+        @field sibling Bane of Hanweir
         @field number 145a
         @field color_indicator
         '''
@@ -83,9 +93,12 @@ class TestGathererSpider(GathererSpider):
 
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=244687
         @meta card Bane of Hanweir
+
         @returns items 1 1
         @returns requests 0 0
+
         @field name Bane of Hanweir
+        @field sibling Hanweir Watchkeep
         @field number 145b
         @field color_indicator Red
         '''

@@ -102,19 +102,32 @@ class GathererSpider(CrawlSpider):
     def parse_card(self, response):
         '''Parse compact card list and follow card details for each printing.
         '''
-        # Restore card item from request meta (it may content basic card
-        # details like name or card set) or create new one.
+        # Restore card item name from request meta
         r = response.request
         card_name = r.meta.get('card')
-        card = CardItem()
-        card['mvid'] = dict(parse_qsl(urlparse(r.url).query))['multiverseid']
+        sibling = ''
+        # Extract multiverse id from card page url
+        mvid = dict(parse_qsl(urlparse(r.url).query))['multiverseid']
 
         subcontent_re = re.compile('MainContent_SubContent_SubContent')
         ignore_fields = ['player_rating', 'other_sets']
-        name_field = 'name'
 
         sel = Selector(response)
-        for details in sel.css('table.cardDetails'):
+        faces = sel.css('table.cardDetails')
+
+        # Look for sibling name for double faced or splited cards
+        if len(faces) > 1:
+            all_names = faces.css('td.rightCol div[id$="nameRow"] div.value')
+            for name_block in all_names:
+                value = extract_text(name_block)
+                if value != card_name:
+                    sibling = value
+                    break
+
+        # Iterate over all card faces on the page, parse details and look for
+        # the one with requested name.
+        for details in faces:
+            card = CardItem(mvid=mvid, sibling=sibling)
             for field_row in details.css('td.rightCol div.row'):
                 id = field_row.xpath('@id').extract()[0]
                 if subcontent_re.search(id):
@@ -131,12 +144,12 @@ class GathererSpider(CrawlSpider):
                         value = extract_text(value)
 
                     # Break if it is not the card face you are looking for
-                    if card_name and k == name_field and value != card_name:
+                    if card_name and k == 'name' and value != card_name:
                         break
                     card[k] = value
 
             # Return card only if we found exactly what we need
-            if name_field in card:
+            if 'name' in card:
                 yield card
                 return
 

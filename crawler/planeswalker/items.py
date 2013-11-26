@@ -9,6 +9,7 @@ class CardSetItem(Item):
 class CardItem(Item):
     mvid = Field()  # Multiverse ID
     name = Field()  # card name
+    sibling = Field()  # name of the sibling card face
     card_set_slug = Field()  # card set slug from list page
     set = Field()  # card set full name
 
