@@ -103,3 +103,33 @@ class TestGathererSpider(GathererSpider):
         @field color_indicator Red
         '''
         return super(TestGathererSpider, self).parse_card(response)
+
+    def flipped_card_normal(self, response):
+        '''Parse flipped card not flipped face
+
+        @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=78694
+        @meta card Akki Lavarunner
+
+        @returns items 1 1
+        @returns requests 0 0
+
+        @field name Akki Lavarunner
+        @field sibling Tok-Tok, Volcano Born
+        @field number 153a
+        '''
+        return super(TestGathererSpider, self).parse_card(response)
+
+    def flipped_card_flip(self, response):
+        '''Parse flipped face
+
+        @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=78694
+        @meta card Tok-Tok, Volcano Born
+
+        @returns items 1 1
+        @returns requests 0 0
+
+        @field name Tok-Tok, Volcano Born
+        @field sibling Akki Lavarunner
+        @field number 153b
+        '''
+        return super(TestGathererSpider, self).parse_card(response)
