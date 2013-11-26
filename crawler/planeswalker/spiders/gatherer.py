@@ -90,7 +90,7 @@ class GathererSpider(CrawlSpider):
         blocks = []
         for block in el_selector.css('div.cardtextbox'):
             blocks.append(extract_text(encode_mana(block)))
-        return '\n'.join(blocks)
+        return '\n'.join(blocks).strip()
 
     def extract_rarity(self, el_selector):
         value = extract_text(el_selector)
