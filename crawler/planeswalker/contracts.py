@@ -2,6 +2,8 @@ from scrapy.contracts import Contract
 from scrapy.item import BaseItem
 from scrapy.exceptions import ContractFail
 import json
+from urlparse import urlparse, parse_qsl, urlunparse
+from urllib import urlencode
 
 
 class ItemContract(Contract):
@@ -29,6 +31,30 @@ class ItemContract(Contract):
                     self.testcase_post.assertEqual(dict(x), self.expected_json)
                 except AssertionError as e:
                     raise ContractFail(e)
+
+
+class PartialContract(ItemContract):
+    '''Contracts to check one of the result items data has expected json.
+        @partial {\
+            "foo": "value",\
+        }
+    '''
+    name = 'partial'
+
+    def post_process(self, output):
+        data = []
+        for x in output:
+            if isinstance(x, BaseItem):
+                try:
+                    self.testcase_post.maxDiff = None
+                    expected = set(self.expected_json.items())
+                    item = set(dict(x).items())
+                    self.testcase_post.assertTrue(expected <= item)
+                    return
+                except AssertionError:
+                    data.append(x)
+        raise ContractFail('Expected data\n{}\nnot found in output\n{}'.format(
+            self.expected_json, data))
 
 
 class FieldContract(Contract):
@@ -71,4 +97,20 @@ class MetaContract(Contract):
         if 'meta' not in kwargs or not kwargs['meta']:
             kwargs['meta'] = {}
         kwargs['meta'][self.args[0]] = u' '.join(self.args[1:])
+        return kwargs
+
+
+class QueryContract(Contract):
+    '''Add given query param to the request url
+    @url_query name Anton Egorov
+    '''
+    name = 'url_query'
+
+    def adjust_request_args(self, kwargs):
+        if 'url' in kwargs:
+            url = list(urlparse(kwargs['url']))
+            query = dict(parse_qsl(url[4]))
+            query[self.args[0]] = u' '.join(self.args[1:])
+            url[4] = urlencode(query)
+            kwargs['url'] = urlunparse(url)
         return kwargs

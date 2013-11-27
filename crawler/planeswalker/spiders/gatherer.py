@@ -1,12 +1,12 @@
 import re
+import itertools as it
 from lxml import etree
 from lxml.html import document_fromstring
 from scrapy.selector import Selector
 from scrapy.contrib.spiders import CrawlSpider
 from scrapy.http import FormRequest, Request
-from urlparse import urljoin
+from urlparse import urljoin, urlparse, parse_qsl
 from planeswalker.items import CardSetItem, CardItem
-from urlparse import urlparse, parse_qsl
 
 
 class GathererSpider(CrawlSpider):
@@ -45,11 +45,6 @@ class GathererSpider(CrawlSpider):
 
     def parse_list(self, response):
         '''Parse compact card list and follow card details for each printing.
-
-        @url http://gatherer.wizards.com/Pages/Search/Default.aspx?output=compact&set=%5BTheros%5D
-        @returns items 0 0
-        @scrapes slug
-        @returns requests 100 106
         '''
         card_set = response.request.meta.get('card_set', CardSetItem())
         sel = Selector(response)
@@ -102,32 +97,25 @@ class GathererSpider(CrawlSpider):
     def parse_card(self, response):
         '''Parse compact card list and follow card details for each printing.
         '''
-        # Restore card item name from request meta
-        r = response.request
-        card_name = r.meta.get('card')
-        sibling = ''
-        # Extract multiverse id from card page url
-        mvid = dict(parse_qsl(urlparse(r.url).query))['multiverseid']
-
-        subcontent_re = re.compile('MainContent_SubContent_SubContent')
-        ignore_fields = ['player_rating', 'other_sets']
-
         sel = Selector(response)
+        ignore_fields = ['player_rating', 'other_sets']
+        subcontent_re = re.compile('MainContent_SubContent_SubContent')
+
+        # Card title
+        title = sel.css('div.contentTitle span::text').extract()[0].strip()
+        suffixes = number_suffixes(title)
+
+        # All card faces
         faces = sel.css('table.cardDetails')
 
-        # Look for sibling name for double faced or splited cards
-        if len(faces) > 1:
-            all_names = faces.css('td.rightCol div[id$="nameRow"] div.value')
-            for name_block in all_names:
-                value = extract_text(name_block)
-                if value != card_name:
-                    sibling = value
-                    break
+        # Get name for all card face on the card page
+        names = {n.strip() for n in faces.css(
+            'td.rightCol div[id$="nameRow"] div.value::text').extract()}
 
-        # Iterate over all card faces on the page, parse details and look for
-        # the one with requested name.
         for details in faces:
-            card = CardItem(mvid=mvid, sibling=sibling)
+            card = CardItem()
+
+            # Iterate over card details rows and parse data
             for field_row in details.css('td.rightCol div.row'):
                 id = field_row.xpath('@id').extract()[0]
                 if subcontent_re.search(id):
@@ -142,16 +130,24 @@ class GathererSpider(CrawlSpider):
                         value = getattr(self, extract)(value)
                     else:
                         value = extract_text(value)
-
-                    # Break if it is not the card face you are looking for
-                    if card_name and k == 'name' and value != card_name:
-                        break
                     card[k] = value
 
-            # Return card only if we found exactly what we need
-            if 'name' in card:
-                yield card
-                return
+                    # Get sibling name for multifaces cards
+                    if k == 'name' and len(names) > 1:
+                        card['sibling'] = (names - {value}).pop()
+
+            # Fix card numner suffix
+            if 'number' in card and len(suffixes) > 1:
+                card['number'] = re.sub(r'\D+', '', card['number']) + \
+                    suffixes[card['name']]
+
+            # Get image url and extract multiverse id
+            img_src = list(urlparse(urljoin(response.request.url, details.css(
+                'td.leftCol img::attr(src)').extract()[0])))
+            img_query = dict(parse_qsl(img_src[4]))
+            card['mvid'] = img_query['multiverseid']
+
+            yield card
 
 
 def extract_text(element):
@@ -212,3 +208,13 @@ def encode_mana(el_selector):
                 parts.append(e.tail)
         return ' '.join(parts).strip()
     return gettext(html_el)
+
+
+def number_suffixes(title):
+    names = re.split(r'\s+//\s+', title)
+
+    # No need to add any suffixes for not splited cards
+    if len(names) == 1:
+        return {title: ''}
+
+    return {n: s for n, s in it.izip(names, 'abcdefg')}

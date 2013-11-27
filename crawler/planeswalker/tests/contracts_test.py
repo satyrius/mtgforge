@@ -7,7 +7,8 @@ from scrapy.item import Item, Field
 from scrapy.contracts import ContractsManager
 from scrapy.contracts.default import UrlContract
 
-from planeswalker.contracts import ItemContract, FieldContract, MetaContract
+from planeswalker.contracts import ItemContract, FieldContract, MetaContract,\
+    QueryContract, PartialContract
 
 
 class TestItem(Item):
@@ -104,9 +105,42 @@ class TestSpider(BaseSpider):
         """
         return
 
+    def with_query_param(self, response):
+        """ returns nothing
+        @url http://scrapy.org
+        @url_query name Anton Egorov
+        """
+        return
+
+    def partial_item_ok(self, response):
+        """ returns items with name and url
+        @url http://scrapy.org
+        @partial {\
+            "name": "docs"\
+        }
+        @partial {\
+            "name": "github"\
+        }
+        """
+        yield TestItem(name='docs', url="http://docs.scrapy.org")
+        yield TestItem(name='github', url="https://github.com/scrapy/scrapy")
+
+    def partial_item_fail(self, response):
+        """ returns items with name and url
+        @url http://scrapy.org
+        @partial {\
+            "name": "bitbucket"\
+        }
+        """
+        yield TestItem(name='docs', url="http://docs.scrapy.org")
+        yield TestItem(name='github', url="https://github.com/scrapy/scrapy")
+
 
 class ContractsTest(unittest.TestCase):
-    contracts = [UrlContract, ItemContract, FieldContract, MetaContract]
+    contracts = [
+        UrlContract, ItemContract, FieldContract, MetaContract, QueryContract,
+        PartialContract
+    ]
 
     def setUp(self):
         self.conman = ContractsManager(self.contracts)
@@ -182,3 +216,21 @@ class ContractsTest(unittest.TestCase):
         request = self.conman.from_method(self.spider.with_meta, self.results)
         self.assertIn('name', request.meta)
         self.assertEqual(request.meta['name'], 'Anton Egorov')
+
+    def test_request_query_param(self):
+        request = self.conman.from_method(self.spider.with_query_param, self.results)
+        self.assertEqual(request.url, 'http://scrapy.org?name=Anton+Egorov')
+
+    def test_partial_item_json_ok(self):
+        request = self.conman.from_method(
+            self.spider.partial_item_ok, self.results)
+        output = request.callback(self.response)
+        self.assertEqual([type(x) for x in output], [TestItem, TestItem])
+        self.should_succeed()
+
+    def test_partial_item_json_fail(self):
+        request = self.conman.from_method(
+            self.spider.partial_item_fail, self.results)
+        output = request.callback(self.response)
+        self.assertEqual([type(x) for x in output], [TestItem, TestItem])
+        self.should_fail()

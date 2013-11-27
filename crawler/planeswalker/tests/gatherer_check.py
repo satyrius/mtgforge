@@ -11,7 +11,6 @@ class TestGathererSpider(GathererSpider):
         '''Parse creature details
 
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=239961
-        @meta card Avacyn, Angel of Hope
 
         @returns items 1 1
         @returns requests 0 0
@@ -41,23 +40,12 @@ class TestGathererSpider(GathererSpider):
         '''Parse card rules with comments
 
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=178135
+
         @returns items 1 1
         @returns requests 0 0
+
         @field name Adventuring Gear
         @field text Landfall - Whenever a land enters the battlefield under your control, equipped creature gets +2/+2 until end of turn.\\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)
-        '''
-        return super(TestGathererSpider, self).parse_card(response)
-
-    def basic_land(self, response):
-        '''Parse basic land card
-
-        @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=289326
-        @returns items 1 1
-        @returns requests 0 0
-        @field name Forest
-        @field text G
-        @field rarity Common
-        @field type Basic Land - Forest
         '''
         return super(TestGathererSpider, self).parse_card(response)
 
@@ -65,71 +53,110 @@ class TestGathererSpider(GathererSpider):
         '''Parse vanilla creature
 
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=265383
+
         @returns items 1 1
         @returns requests 0 0
+
         @field name Axebane Stag
         @field text
         '''
         return super(TestGathererSpider, self).parse_card(response)
 
-    def double_faced_card_front(self, response):
-        '''Parse double faced card front face
+    def basic_land(self, response):
+        '''Parse basic land card
+
+        @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=289326
+
+        @returns items 1 1
+        @returns requests 0 0
+
+        @field name Forest
+        @field text G
+        @field rarity Common
+        @field type Basic Land - Forest
+        @field mvid 289326
+        @field artist Yeong-Hao Han
+        '''
+        return super(TestGathererSpider, self).parse_card(response)
+
+    def double_faced_card(self, response):
+        '''Parse double faced card
 
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=244683
-        @meta card Hanweir Watchkeep
 
-        @returns items 1 1
+        @returns items 2 2
         @returns requests 0 0
 
-        @field name Hanweir Watchkeep
-        @field sibling Bane of Hanweir
-        @field number 145a
-        @field color_indicator
+        @partial {\
+            "name": "Hanweir Watchkeep",\
+            "sibling": "Bane of Hanweir",\
+            "number": "145a",\
+            "mvid": "244683"\
+        }
+
+        @partial {\
+            "name": "Bane of Hanweir",\
+            "sibling": "Hanweir Watchkeep",\
+            "number": "145b",\
+            "mvid": "244687",\
+            "color_indicator": "Red"\
+        }
         '''
         return super(TestGathererSpider, self).parse_card(response)
 
-    def double_faced_card_back(self, response):
-        '''Parse double faced card back
-
-        @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=244687
-        @meta card Bane of Hanweir
-
-        @returns items 1 1
-        @returns requests 0 0
-
-        @field name Bane of Hanweir
-        @field sibling Hanweir Watchkeep
-        @field number 145b
-        @field color_indicator Red
-        '''
-        return super(TestGathererSpider, self).parse_card(response)
-
-    def flipped_card_normal(self, response):
-        '''Parse flipped card not flipped face
+    def flipped_card(self, response):
+        '''Parse flipped card
 
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=78694
-        @meta card Akki Lavarunner
 
-        @returns items 1 1
+        @returns items 2 2
         @returns requests 0 0
 
-        @field name Akki Lavarunner
-        @field sibling Tok-Tok, Volcano Born
-        @field number 153a
+        @partial {\
+            "name": "Akki Lavarunner",\
+            "sibling": "Tok-Tok, Volcano Born",\
+            "number": "153a"\
+        }
+
+        @partial {\
+            "name": "Tok-Tok, Volcano Born",\
+            "sibling": "Akki Lavarunner",\
+            "number": "153b"\
+        }
         '''
         return super(TestGathererSpider, self).parse_card(response)
 
-    def flipped_card_flip(self, response):
-        '''Parse flipped face
+    def splitted_card(self, response):
+        '''Parse splitted card first face
 
-        @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=78694
-        @meta card Tok-Tok, Volcano Born
+        @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=27166
 
-        @returns items 1 1
+        @returns items 2 2
         @returns requests 0 0
 
-        @field name Tok-Tok, Volcano Born
-        @field sibling Akki Lavarunner
-        @field number 153b
+        @partial {\
+            "name": "Fire",\
+            "sibling": "Ice",\
+            "text": "Fire deals 2 damage divided as you choose among one or two target creatures and/or players.",\
+            "number": "128a"\
+        }
+
+        @partial {\
+            "name": "Ice",\
+            "sibling": "Fire",\
+            "text": "Tap target permanent.\\nDraw a card.",\
+            "number": "128b"\
+        }
         '''
         return super(TestGathererSpider, self).parse_card(response)
+
+    def parse_list(self, response):
+        '''Parse compact card list
+
+        @url http://gatherer.wizards.com/Pages/Search/Default.aspx?output=compact&set=%5BTheros%5D
+        @returns items 0 0
+
+        100 items per page, but +3 additional land card for Forest and Island
+        @returns requests 106 106
+        '''
+        return super(TestGathererSpider, self).parse_list(response)

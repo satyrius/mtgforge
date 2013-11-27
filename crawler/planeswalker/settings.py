@@ -17,9 +17,11 @@ ITEM_PIPELINES = {
 }
 
 SPIDER_CONTRACTS = {
+    'planeswalker.contracts.QueryContract': 98,
     'planeswalker.contracts.MetaContract': 99,
     'planeswalker.contracts.FieldContract': 100,
-    'planeswalker.contracts.ItemContract': 101,
+    'planeswalker.contracts.PartialContract': 101,
+    'planeswalker.contracts.ItemContract': 102,
 }
 
 HTTPCACHE_ENABLED = True
