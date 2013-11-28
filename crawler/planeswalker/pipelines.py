@@ -2,6 +2,10 @@ from scrapy.exceptions import DropItem
 from planeswalker.items import CardItem
 
 
+class Duplicate(DropItem):
+    pass
+
+
 class DupsHandlePipeline(object):
     def __init__(self):
         self.found = []
@@ -17,7 +21,7 @@ class DupsHandlePipeline(object):
             if sibling and number:
                 key = (item['set'], number)
                 if key in self.found:
-                    raise DropItem(
+                    raise Duplicate(
                         '"{}" has already scraped for "{}"'.format(
                             item['name'], item['set']))
                 else:
