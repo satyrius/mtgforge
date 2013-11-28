@@ -1,6 +1,6 @@
 from planeswalker.items import CardSetItem
 from scrapy.contrib.spiders import CrawlSpider
-from scrapy.selector import HtmlXPathSelector
+from scrapy.selector import Selector
 
 
 class SetsSpider(CrawlSpider):
@@ -9,6 +9,8 @@ class SetsSpider(CrawlSpider):
     start_urls = ['http://gatherer.wizards.com/Pages/Default.aspx']
 
     def parse(self, response):
-        hxs = HtmlXPathSelector(response)
-        cs_select = '//select[@id="ctl00_ctl00_MainContent_Content_SearchControls_setAddText"]/option[@value!=""]/@value'
-        return [CardSetItem(name=name) for name in hxs.select(cs_select).extract()]
+        sel = Selector(response)
+        id = 'ctl00_ctl00_MainContent_Content_SearchControls_setAddText'
+        cs_select = '//select[@id="{}"]/option[@value!=""]/@value'.format(id)
+        for name in sel.xpath(cs_select).extract():
+            yield CardSetItem(name=name)
