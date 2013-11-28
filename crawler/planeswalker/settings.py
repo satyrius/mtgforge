@@ -17,6 +17,10 @@ ITEM_PIPELINES = {
     'planeswalker.pipelines.CardsPipeline': 110,
 }
 
+FEED_EXPORTERS = {
+    'name': 'planeswalker.exporters.ItemNameExporter',
+}
+
 SPIDER_CONTRACTS = {
     'planeswalker.contracts.QueryContract': 98,
     'planeswalker.contracts.MetaContract': 99,
