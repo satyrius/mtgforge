@@ -1,3 +1,4 @@
+import re
 from scrapy.exceptions import DropItem
 from planeswalker.items import CardItem
 
@@ -33,6 +34,8 @@ class DupsHandlePipeline(object):
 class CardsPipeline(object):
     def process_item(self, item, spider):
         if isinstance(item, CardItem):
+            key = re.sub('[^a-z0-9]', '_', item['set'].lower())
+            spider.crawler.stats.inc_value(u'card_item_count/{}'.format(key))
             # Save the card
             pass
         return item
