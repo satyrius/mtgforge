@@ -13,7 +13,8 @@ SPIDER_MODULES = ['planeswalker.spiders']
 NEWSPIDER_MODULE = 'planeswalker.spiders'
 
 ITEM_PIPELINES = {
-    'planeswalker.pipelines.CardsPipeline': 100,
+    'planeswalker.pipelines.DupsHandlePipeline': 100,
+    'planeswalker.pipelines.CardsPipeline': 110,
 }
 
 SPIDER_CONTRACTS = {
