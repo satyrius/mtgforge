@@ -1,11 +1,14 @@
-import re
 import itertools as it
+import re
+import sys
+from urlparse import urljoin, urlparse, parse_qsl
+
 from lxml import etree
 from lxml.html import document_fromstring
-from scrapy.selector import Selector
 from scrapy.contrib.spiders import CrawlSpider
 from scrapy.http import FormRequest, Request
-from urlparse import urljoin, urlparse, parse_qsl
+from scrapy.selector import Selector
+
 from planeswalker.items import CardSetItem, CardItem
 
 
@@ -15,7 +18,15 @@ class GathererSpider(CrawlSpider):
     search_url = 'http://gatherer.wizards.com/Pages/Search/Default.aspx'
 
     def __init__(self, card_set=None, *args, **kwargs):
-        self.card_sets = [card_set or 'Theros']
+        '''You should specify card set to parse. Use names from Gatherer
+        search form. Otherwise names will be read from stdin.
+        '''
+        self.card_sets = []
+        if card_set:
+            self.card_sets.append(card_set)
+        else:
+            for name in sys.stdin.readlines():
+                self.card_sets.append(name.strip())
 
     def card_set_names(self):
         for name in self.card_sets:
@@ -28,7 +39,6 @@ class GathererSpider(CrawlSpider):
                 callback=self.parse_paginator,
                 formdata={'set': '[%s]' % name, 'output': 'compact'},
                 meta={'card_set': CardSetItem(name=name)})
-            return
 
     def parse_paginator(self, response):
         card_set = response.request.meta.get('card_set', CardSetItem())
