@@ -3,8 +3,8 @@ from scrapy.contrib.spiders import CrawlSpider
 from scrapy.selector import Selector
 
 
-class SetsSpider(CrawlSpider):
-    name = 'sets'
+class ProductsSpider(CrawlSpider):
+    name = 'products'
     allowed_domains = ['gatherer.wizards.com']
     start_urls = ['http://gatherer.wizards.com/Pages/Default.aspx']
 
