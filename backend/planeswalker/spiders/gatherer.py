@@ -21,16 +21,14 @@ class GathererSpider(CrawlSpider):
         '''You should specify card set to parse. Use names from Gatherer
         search form. Otherwise names will be read from stdin.
         '''
-        self.card_sets = []
-        if card_set:
-            self.card_sets.append(card_set)
-        else:
-            for name in sys.stdin.readlines():
-                self.card_sets.append(name.strip())
+        self.card_set = card_set
 
     def card_set_names(self):
-        for name in self.card_sets:
-            yield name
+        if self.card_set:
+            yield self.card_set
+        else:
+            for name in sys.stdin.readlines():
+                yield name.strip()
 
     def start_requests(self):
         for name in self.card_set_names():
