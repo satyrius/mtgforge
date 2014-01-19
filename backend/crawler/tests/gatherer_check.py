@@ -1,4 +1,4 @@
-from planeswalker.spiders.gatherer import GathererSpider
+from crawler.spiders.gatherer import GathererSpider
 
 
 class TestGathererSpider(GathererSpider):

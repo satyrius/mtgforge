@@ -9,7 +9,7 @@ from scrapy.contrib.spiders import CrawlSpider
 from scrapy.http import FormRequest, Request
 from scrapy.selector import Selector
 
-from planeswalker.items import CardSetItem, CardItem
+from crawler.items import CardSetItem, CardItem
 
 
 class GathererSpider(CrawlSpider):

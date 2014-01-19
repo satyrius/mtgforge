@@ -1,6 +1,6 @@
 import re
+from crawler.items import CardItem
 from scrapy.exceptions import DropItem
-from planeswalker.items import CardItem
 
 
 class Duplicate(DropItem):

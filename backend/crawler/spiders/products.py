@@ -1,4 +1,4 @@
-from planeswalker.items import CardSetItem
+from crawler.items import CardSetItem
 from scrapy.contrib.spiders import CrawlSpider
 from scrapy.selector import Selector
 

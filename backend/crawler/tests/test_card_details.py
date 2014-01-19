@@ -1,5 +1,5 @@
 import unittest
-from planeswalker.spiders.gatherer import number_suffixes
+from crawler.spiders.gatherer import number_suffixes
 
 
 class NumberSiffixTest(unittest.TestCase):

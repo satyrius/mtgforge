@@ -7,7 +7,7 @@ from scrapy.item import Item, Field
 from scrapy.contracts import ContractsManager
 from scrapy.contracts.default import UrlContract
 
-from planeswalker.contracts import ItemContract, FieldContract, MetaContract,\
+from crawler.contracts import ItemContract, FieldContract, MetaContract,\
     QueryContract, PartialContract
 
 
