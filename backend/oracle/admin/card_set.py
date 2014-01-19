@@ -2,7 +2,6 @@ from django.contrib import admin
 from modeltranslation.admin import TranslationAdmin
 
 from oracle import models
-from crawler.admin import DataSourceInline
 from oracle.forms import CardSetForm
 
 
@@ -11,7 +10,6 @@ class CardSetAdmin(TranslationAdmin):
     list_display = ('name', 'acronym', 'cards', 'released_at')
     ordering = ['-released_at']
     list_per_page = 150
-    inlines = [DataSourceInline]
 
     class Media:
         js = (

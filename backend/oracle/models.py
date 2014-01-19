@@ -2,13 +2,11 @@ import re
 
 from arrayfields import IntegerArrayField
 from django.conf import settings
-from django.contrib.contenttypes import generic
 from django.db import models
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
 from contrib.fields import NullCharField, NullTextField
-from crawler.models import DataSource
 from oracle.utils import Color
 
 
@@ -131,7 +129,6 @@ class CardSet(models.Model):
     acronym = models.CharField(max_length=10, unique=True)
     cards = models.PositiveIntegerField(null=True, blank=True)
     released_at = models.DateField(null=True, blank=True)
-    sources = generic.GenericRelation(DataSource)
 
     def __unicode__(self):
         return self.name
@@ -182,8 +179,6 @@ class CardRelease(models.Model):
 
     art = models.ForeignKey(CardImage, null=True, blank=True)
 
-    sources = generic.GenericRelation(DataSource)
-
     def __unicode__(self):
         return u'{0} ({1})'.format(self.card.name, self.card_set.name)
 
@@ -204,7 +199,5 @@ class CardL10n(models.Model):
 
     class Meta:
         unique_together = (('card_face', 'card_release', 'language'),)
-
-    sources = generic.GenericRelation(DataSource)
 
 # }}}

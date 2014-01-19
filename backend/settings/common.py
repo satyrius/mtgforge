@@ -130,7 +130,6 @@ INSTALLED_APPS = (
 
     # Our apps
     'oracle',
-    'crawler',
     'forge',
 
     'south',
@@ -146,9 +145,6 @@ CACHES = {
         'OPTIONS': {
             'MAX_ENTRIES': 100000
         }
-    },
-    'provider_page': {
-        'BACKEND': 'crawler.pages.cache.PageCache',
     },
 }
 
