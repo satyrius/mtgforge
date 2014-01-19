@@ -7,7 +7,7 @@ class Duplicate(DropItem):
     pass
 
 
-class BaseCarditemPipeline(object):
+class BaseCardItemPipeline(object):
     def _process_item(self, item, spider):
         raise NotImplemented()
 
@@ -17,7 +17,7 @@ class BaseCarditemPipeline(object):
         return item
 
 
-class DupsHandlePipeline(BaseCarditemPipeline):
+class DupsHandlePipeline(BaseCardItemPipeline):
     def __init__(self):
         self.found = []
 
@@ -38,7 +38,7 @@ class DupsHandlePipeline(BaseCarditemPipeline):
                 self.found.append(key)
 
 
-class CardsPipeline(BaseCarditemPipeline):
+class CardsPipeline(BaseCardItemPipeline):
     def _process_item(self, item, spider):
         key = re.sub('[^a-z0-9]', '_', item['set'].lower())
         spider.crawler.stats.inc_value(u'card_item_count/{}'.format(key))
