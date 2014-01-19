@@ -15,6 +15,7 @@ NEWSPIDER_MODULE = 'crawler.spiders'
 ITEM_PIPELINES = {
     'crawler.pipelines.cards.DupsHandlePipeline': 100,
     'crawler.pipelines.cards.CardsPipeline': 110,
+    'crawler.pipelines.sets.CardSetsPipeline': 120,
 }
 
 FEED_EXPORTERS = {
