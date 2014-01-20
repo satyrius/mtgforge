@@ -7,7 +7,8 @@ from oracle.forms import CardSetForm
 
 class CardSetAdmin(TranslationAdmin):
     form = CardSetForm
-    list_display = ('name', 'acronym', 'cards', 'released_at')
+    list_display = ('name', 'acronym', 'cards', 'released_at', 'created_at',
+                    'updated_at')
     ordering = ['-released_at']
     list_per_page = 150
 

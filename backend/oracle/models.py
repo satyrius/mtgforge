@@ -129,6 +129,8 @@ class CardSet(models.Model):
     acronym = models.CharField(max_length=10, unique=True)
     cards = models.PositiveIntegerField(null=True, blank=True)
     released_at = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
         return self.name
