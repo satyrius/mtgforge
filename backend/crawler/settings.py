@@ -16,8 +16,7 @@ ITEM_PIPELINES = {
     'crawler.pipelines.cards.DupsHandlePipeline': 100,
     'crawler.pipelines.cards.CardsPipeline': 110,
     'crawler.pipelines.sets.CardSetsPipeline': 200,
-    'crawler.pipelines.sets.GathererPipeline': 210,
-    'crawler.pipelines.sets.InfoPipeline': 220,
+    'crawler.pipelines.sets.InfoPipeline': 210,
 }
 
 FEED_EXPORTERS = {

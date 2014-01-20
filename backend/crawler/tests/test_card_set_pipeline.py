@@ -38,7 +38,8 @@ class BaseCardSetPipelineTest(unittest.TestCase):
 
 class CardSetPipelineTest(TestCase):
     def setUp(self):
-        self.spider = Mock()
+        self.domain = 'example.com'
+        self.spider = Mock(allowed_domains=[self.domain])
         self.pipeline = sets.CardSetsPipeline()
         self.cs_recipe = Recipe(CardSet, name=seq('Magic Set '))
 
@@ -67,6 +68,7 @@ class CardSetPipelineTest(TestCase):
         alias = CardSetAlias.objects.get(name=name)
         cs = CardSet.objects.get(name=name)
         self.assertEqual(alias.card_set, cs)
+        self.assertEqual(alias.domain, self.domain)
 
         # Ensure the default card set acronym was specified
         slug.assert_called_once_with(name)
@@ -99,47 +101,6 @@ class CardSetPipelineTest(TestCase):
         self.pipeline.process_item(CardSetItem(name=cs.name), self.spider)
         self.assertEqual(count(CardSet), cs_count)
         self.assertEqual(count(CardSetAlias), alias_count)
-
-
-class GathererPipelineTest(TestCase):
-    def setUp(self):
-        self.spider = Mock()
-        self.pipeline = sets.GathererPipeline()
-        card_set = Recipe(CardSet, name=seq('Magic Set '), acronym=seq('set'))
-        self.recipe = Recipe(CardSetAlias, name=seq('Magic Set Alias '),
-                             card_set=foreign_key(card_set))
-
-    def test_inheritance(self):
-        self.assertTrue(issubclass(
-            sets.GathererPipeline,
-            sets.BaseCardSetItemPipeline))
-
-    def test_flag_gatherer_alias(self):
-        # Create new alias with alias flagged as `is_gatherer`
-        alias = self.recipe.make()
-        self.assertFalse(alias.is_gatherer)
-        self.pipeline.process_item(
-            CardSetItem(name=alias.name, is_gatherer=True),
-            self.spider)
-        alias = CardSetAlias.objects.get(name=alias.name)
-        self.assertTrue(alias.is_gatherer)
-        cs = alias.card_set
-        aliases = cs.cardsetalias_set.all()
-        self.assertEqual(aliases.count(), 1)
-
-        # Add another alias
-        alias2 = self.recipe.make(card_set=alias.card_set)
-        self.assertFalse(alias2.is_gatherer)
-        # And move `is_gatherer` flag to it
-        self.pipeline.process_item(
-            CardSetItem(name=alias2.name, is_gatherer=True),
-            self.spider)
-        alias2 = CardSetAlias.objects.get(name=alias2.name)
-        self.assertTrue(alias2.is_gatherer)
-
-        # Ensure that only one alias is flaged as `is_gatherer`
-        self.assertEqual(aliases.count(), 2)
-        self.assertEqual(aliases.filter(is_gatherer=True).count(), 1)
 
 
 class InfoPipelineTest(TestCase):

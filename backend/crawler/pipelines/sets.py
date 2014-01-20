@@ -87,18 +87,9 @@ class CardSetsPipeline(BaseCardSetItemPipeline):
 
         # Save card set alias
         alias, _ = CardSetAlias.objects.get_or_create(
-            name=item['name'], defaults={'card_set': cs})
+            name=item['name'], defaults={
+                'card_set': cs, 'domain': spider.allowed_domains[0]})
         assert alias.card_set == cs
-
-
-class GathererPipeline(BaseCardSetItemPipeline):
-    def _process_item(self, item, spider):
-        if item.get('is_gatherer'):
-            alias = CardSetAlias.objects.get(name=item['name'])
-            alias.is_gatherer = True
-            alias.save()
-            alias.card_set.cardsetalias_set.all().\
-                exclude(pk=alias.id).update(is_gatherer=False)
 
 
 class InfoPipeline(BaseCardSetItemPipeline):

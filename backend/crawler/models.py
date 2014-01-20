@@ -7,6 +7,5 @@ class CardSetAlias(models.Model):
     app CardSet model name alias.
     '''
     name = models.CharField(max_length=255, unique=True)
-    card_set = models.ForeignKey(om.CardSet, null=True, blank=True)
-    is_gatherer = models.BooleanField(default=False,
-                                      help_text='Gatherer card set name')
+    card_set = models.ForeignKey(om.CardSet)
+    domain = models.CharField(max_length=50)
