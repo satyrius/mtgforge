@@ -3,7 +3,7 @@ import uuid
 from django.test import TestCase
 from mock import patch, Mock
 from model_mommy import mommy
-from model_mommy.recipe import Recipe, seq
+from model_mommy.recipe import Recipe, seq, foreign_key
 
 from crawler.items import CardSetItem, CardItem
 from crawler.models import CardSetAlias
@@ -99,23 +99,41 @@ class CardSetPipelineTest(TestCase):
         self.assertEqual(count(CardSet), cs_count)
         self.assertEqual(count(CardSetAlias), alias_count)
 
+
+class GathererPipelineTest(TestCase):
+    def setUp(self):
+        self.spider = Mock()
+        self.pipeline = sets.GathererPipeline()
+        card_set = Recipe(CardSet, name=seq('Magic Set '), acronym=seq('set'))
+        self.recipe = Recipe(CardSetAlias, name=seq('Magic Set Alias '),
+                             card_set=foreign_key(card_set))
+
+    def test_inheritance(self):
+        self.assertTrue(issubclass(
+            sets.GathererPipeline,
+            sets.BaseCardSetItemPipeline))
+
     def test_flag_gatherer_alias(self):
-        # Create new set with alias flagged as `is_gatherer`
-        item = self._fetch_item(is_gatherer=True)
-        self.pipeline.process_item(item, self.spider)
-        alias = CardSetAlias.objects.get(name=item['name'])
+        # Create new alias with alias flagged as `is_gatherer`
+        alias = self.recipe.make()
+        self.assertFalse(alias.is_gatherer)
+        self.pipeline.process_item(
+            CardSetItem(name=alias.name, is_gatherer=True),
+            self.spider)
+        alias = CardSetAlias.objects.get(name=alias.name)
         self.assertTrue(alias.is_gatherer)
         cs = alias.card_set
         aliases = cs.cardsetalias_set.all()
         self.assertEqual(aliases.count(), 1)
 
         # Add another alias
-        item2 = self._fetch_item(is_gatherer=True)
-        self.assertNotEqual(item['name'], item2['name'])
-        alias2 = mommy.make(CardSetAlias, card_set=cs, name=item2['name'])
+        alias2 = self.recipe.make(card_set=alias.card_set)
+        self.assertFalse(alias2.is_gatherer)
         # And move `is_gatherer` flag to it
-        self.pipeline.process_item(item2, self.spider)
-        alias2 = CardSetAlias.objects.get(name=item2['name'])
+        self.pipeline.process_item(
+            CardSetItem(name=alias2.name, is_gatherer=True),
+            self.spider)
+        alias2 = CardSetAlias.objects.get(name=alias2.name)
         self.assertTrue(alias2.is_gatherer)
 
         # Ensure that only one alias is flaged as `is_gatherer`
