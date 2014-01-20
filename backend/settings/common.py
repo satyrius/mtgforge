@@ -129,8 +129,9 @@ INSTALLED_APPS = (
     'tastypie',
 
     # Our apps
-    'oracle',
+    'crawler',
     'forge',
+    'oracle',
 
     'south',
     'django_nose',  # it should be after south (http://pypi.python.org/pypi/django-nose, Caveats)

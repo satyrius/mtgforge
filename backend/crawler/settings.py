@@ -1,11 +1,11 @@
-#import os
-#import sys
-#from os.path import abspath, dirname, join
+import os
+import sys
+from os.path import abspath, dirname, join
 
-## Setup Django environment
-#DJANGO_PROJECT = abspath(join(dirname(__file__), '../../backend'))
-#sys.path.append(DJANGO_PROJECT)
-#os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+# Setup Django environment
+DJANGO_PROJECT = abspath(join(dirname(__file__), '..'))
+sys.path.append(DJANGO_PROJECT)
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
 
 BOT_NAME = 'crawler'
 
