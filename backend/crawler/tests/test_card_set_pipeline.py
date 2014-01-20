@@ -46,10 +46,10 @@ class CardSetPipelineTest(TestCase):
             sets.CardSetsPipeline,
             sets.BaseCardSetItemPipeline))
 
-    def _fetch_item(self):
+    def _fetch_item(self, is_gatherer=False):
         # Use model_mommy to generate new card set name (DO NOT SAVE)
         name = self.cs_recipe.prepare().name
-        return CardSetItem(name=name)
+        return CardSetItem(name=name, is_gatherer=is_gatherer)
 
     @patch.object(sets, 'generate_slug')
     def test_save_card_set(self, slug):
@@ -98,3 +98,26 @@ class CardSetPipelineTest(TestCase):
         self.pipeline.process_item(CardSetItem(name=cs.name), self.spider)
         self.assertEqual(count(CardSet), cs_count)
         self.assertEqual(count(CardSetAlias), alias_count)
+
+    def test_flag_gatherer_alias(self):
+        # Create new set with alias flagged as `is_gatherer`
+        item = self._fetch_item(is_gatherer=True)
+        self.pipeline.process_item(item, self.spider)
+        alias = CardSetAlias.objects.get(name=item['name'])
+        self.assertTrue(alias.is_gatherer)
+        cs = alias.card_set
+        aliases = cs.cardsetalias_set.all()
+        self.assertEqual(aliases.count(), 1)
+
+        # Add another alias
+        item2 = self._fetch_item(is_gatherer=True)
+        self.assertNotEqual(item['name'], item2['name'])
+        alias2 = mommy.make(CardSetAlias, card_set=cs, name=item2['name'])
+        # And move `is_gatherer` flag to it
+        self.pipeline.process_item(item2, self.spider)
+        alias2 = CardSetAlias.objects.get(name=item2['name'])
+        self.assertTrue(alias2.is_gatherer)
+
+        # Ensure that only one alias is flaged as `is_gatherer`
+        self.assertEqual(aliases.count(), 2)
+        self.assertEqual(aliases.filter(is_gatherer=True).count(), 1)

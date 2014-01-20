@@ -64,8 +64,19 @@ def generate_slug(name):
 class CardSetsPipeline(BaseCardSetItemPipeline):
     @xact
     def _process_item(self, item, spider):
-        # Return immediately if alias already exists
-        if CardSetAlias.objects.filter(name=item['name']).count():
+        is_gatherer = item.get('is_gatherer')
+
+        try:
+            alias = CardSetAlias.objects.get(name=item['name'])
+        except CardSetAlias.DoesNotExist:
+            pass
+        else:
+            if is_gatherer:
+                alias.is_gatherer = True
+                alias.save()
+                alias.card_set.cardsetalias_set.all().\
+                    exclude(pk=alias.id).update(is_gatherer=False)
+            # Return immediately if alias already exists
             return
 
         # Get existing card set by name or create new one
@@ -83,4 +94,7 @@ class CardSetsPipeline(BaseCardSetItemPipeline):
         # Save card set alias
         alias, _ = CardSetAlias.objects.get_or_create(
             name=item['name'], defaults={'card_set': cs})
+        if is_gatherer:
+            alias.is_gatherer = True
+            alias.save()
         assert alias.card_set == cs

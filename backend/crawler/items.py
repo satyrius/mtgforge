@@ -4,6 +4,7 @@ from scrapy.item import Item, Field
 class CardSetItem(Item):
     name = Field()
     slug = Field()
+    is_gatherer = Field()
 
 
 class CardItem(Item):

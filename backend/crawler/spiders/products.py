@@ -13,4 +13,4 @@ class ProductsSpider(CrawlSpider):
         id = 'ctl00_ctl00_MainContent_Content_SearchControls_setAddText'
         cs_select = '//select[@id="{}"]/option[@value!=""]/@value'.format(id)
         for name in sel.xpath(cs_select).extract():
-            yield CardSetItem(name=name)
+            yield CardSetItem(name=name, is_gatherer=True)
