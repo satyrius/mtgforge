@@ -1,3 +1,4 @@
+import datetime
 import re
 from xact import xact
 from scrapy.exceptions import DropItem
@@ -94,3 +95,25 @@ class GathererPipeline(BaseCardSetItemPipeline):
             alias.save()
             alias.card_set.cardsetalias_set.all().\
                 exclude(pk=alias.id).update(is_gatherer=False)
+
+
+class InfoPipeline(BaseCardSetItemPipeline):
+    def _process_item(self, item, spider):
+        # TODO use CardSetForm
+
+        cards = item.get('cards')
+        released_at = item.get('released_at')
+
+        if cards or released_at:
+            cs = CardSetAlias.objects.get(name=item['name']).card_set
+
+            if cards and cs.cards is None:
+                cs.cards = int(cards)
+
+            if released_at and not cs.released_at:
+                # Use first of given month, because particular day of
+                # month is not provided
+                cs.released_at = datetime.datetime.strptime(
+                    '1 ' + released_at, '%d %B %Y')
+
+            cs.save()

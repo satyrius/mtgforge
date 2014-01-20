@@ -1,3 +1,4 @@
+import datetime as dt
 import unittest
 import uuid
 from django.test import TestCase
@@ -139,3 +140,49 @@ class GathererPipelineTest(TestCase):
         # Ensure that only one alias is flaged as `is_gatherer`
         self.assertEqual(aliases.count(), 2)
         self.assertEqual(aliases.filter(is_gatherer=True).count(), 1)
+
+
+class InfoPipelineTest(TestCase):
+    def setUp(self):
+        self.spider = Mock()
+        self.pipeline = sets.InfoPipeline()
+        card_set = Recipe(CardSet, name=seq('Magic Set '), acronym=seq('set'))
+        self.recipe = Recipe(CardSetAlias, name=seq('Magic Set Alias '),
+                             card_set=foreign_key(card_set))
+
+    def test_inheritance(self):
+        self.assertTrue(issubclass(
+            sets.InfoPipeline,
+            sets.BaseCardSetItemPipeline))
+
+    def test_update_cards_count(self):
+        alias = self.recipe.make()
+        self.assertIsNone(alias.card_set.cards)
+        self.pipeline.process_item(
+            CardSetItem(name=alias.name, cards='123'),
+            self.spider)
+        cs = CardSet.objects.get(pk=alias.card_set_id)
+        self.assertEqual(cs.cards, 123)
+
+        # Do not update
+        self.pipeline.process_item(
+            CardSetItem(name=alias.name, cards='234'),
+            self.spider)
+        cs = CardSet.objects.get(pk=alias.card_set_id)
+        self.assertEqual(cs.cards, 123)
+
+    def test_update_release_date(self):
+        alias = self.recipe.make()
+        self.assertIsNone(alias.card_set.released_at)
+        self.pipeline.process_item(
+            CardSetItem(name=alias.name, released_at='September 2013'),
+            self.spider)
+        cs = CardSet.objects.get(pk=alias.card_set_id)
+        self.assertEqual(cs.released_at, dt.date(2013, 9, 1))
+
+        # Do not update
+        self.pipeline.process_item(
+            CardSetItem(name=alias.name, released_at='October 2013'),
+            self.spider)
+        cs = CardSet.objects.get(pk=alias.card_set_id)
+        self.assertEqual(cs.released_at, dt.date(2013, 9, 1))
