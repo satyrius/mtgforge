@@ -65,17 +65,21 @@ def generate_slug(name):
 class CardSetsPipeline(BaseCardSetItemPipeline):
     @xact
     def _process_item(self, item, spider):
+        name = item['name'].strip()
         # Return immediately if alias already exists
-        if CardSetAlias.objects.filter(name=item['name']).count():
+        if CardSetAlias.objects.filter(name=name).count():
             return
 
         # Get existing card set by name or create new one
         try:
-            cs = CardSet.objects.get(name=item['name'])
+            cs = CardSet.objects.get(name=name)
         except CardSet.DoesNotExist:
             # Save card set using form to pass all validation
-            data = dict(item)
-            data['acronym'] = generate_slug(data['name'])
+
+            data = {
+                'name': name,
+                'acronym': generate_slug(name),
+            }
             form = CardSetForm(data, instance=None)
             if not form.is_valid():
                 raise InvalidData(form.errors.as_text())
@@ -110,7 +114,7 @@ class InfoPipeline(BaseCardSetItemPipeline):
             if cards and cs.cards is None:
                 cs.cards = int(cards)
 
-            if released_at and not cs.released_at:
+            if released_at and re.match(r'\w+ \d+', released_at) and not cs.released_at:
                 # Use first of given month, because particular day of
                 # month is not provided
                 cs.released_at = datetime.datetime.strptime(
