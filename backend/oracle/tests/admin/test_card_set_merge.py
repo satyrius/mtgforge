@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+import datetime as dt
+
 from django.db import models
 from django.test import TestCase
 from mock import patch, Mock
@@ -70,3 +73,17 @@ class CardSetMergeActionTest(TestCase):
         admin.merge_card_sets(Mock(), Mock(), queryset)
         # Choose any record if there is no related objects
         merge.assert_called_once_with(queryset, cs1)
+
+    def test_mege_fields(self):
+        cs1 = self.cs_recipe.make(
+            cards=123, released_at=None, name_ru='')
+        cs2 = self.cs_recipe.make(
+            cards=None, released_at=dt.date(2013, 1, 1), name_ru=u'Картон')
+
+        # Merge and refresh card set
+        admin._merge(CardSet.objects.filter(pk__in=(cs1.pk, cs2.pk)), cs1)
+        cs1 = CardSet.objects.get(pk=cs1.pk)
+
+        self.assertEqual(cs1.cards, 123)
+        self.assertEqual(cs1.released_at, cs2.released_at)
+        self.assertEqual(cs1.name_ru, cs2.name_ru)

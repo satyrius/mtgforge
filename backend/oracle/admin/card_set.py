@@ -1,3 +1,5 @@
+from xact import xact
+
 from django.contrib import admin
 from modeltranslation.admin import TranslationAdmin
 
@@ -8,9 +10,18 @@ from oracle import models
 from oracle.forms import CardSetForm
 
 
+@xact
 def _merge(queryset, master):
     CardSetAlias.objects.filter(card_set__in=queryset).update(card_set=master)
+    values = queryset.exclude(pk=master.pk).values()
+    for f in master._meta.fields:
+        if not f.primary_key and not getattr(master, f.name):
+            for data in values:
+                if data[f.name]:
+                    setattr(master, f.name, data[f.name])
+                    break
     queryset.exclude(pk=master.pk).delete()
+    master.save()
 
 
 def merge_card_sets(modeladmin, request, queryset):
