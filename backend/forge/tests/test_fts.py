@@ -1,7 +1,7 @@
 from django_any import any_model
 
 from forge.tests.base import SerpTest
-from oracle.models import CardFace, CardSet, CardImage, CardRelease
+from oracle.models import CardFace
 
 
 class SearchTest(SerpTest):
@@ -84,9 +84,7 @@ class SearchTest(SerpTest):
             type_line='Planeswalker - Gideon'
         )
         expected.append(gideon.name)
-        any_model(CardRelease, card=gideon.card,
-                  card_set=any_model(CardSet, name='Zendikar'),
-                  art=any_model(CardImage))
+        self.release_recipe.make(card=gideon.card)
         data = self.search(types='planeswalker')
         self.assertEqual(self.get_cards(data), expected)
 
@@ -125,3 +123,21 @@ class SearchTest(SerpTest):
         )
         data = self.search(type='instant')
         self.assertEqual(self.get_cards(data), expected)
+
+    def test_not_published_sets(self):
+        set1 = self.cs_recipe.make(is_published=True)
+        set2 = self.cs_recipe.make(is_published=False)
+
+        face1 = self.face_recipe.make()
+        self.release_recipe.make(card_set=set1, card=face1.card)
+        face2 = self.face_recipe.make()
+        self.release_recipe.make(card_set=set1, card=face2.card)
+        self.release_recipe.make(card_set=set2, card=face2.card)
+        # This card should not appears on the serp, because it was released for
+        # unpublished card set only
+        face3 = self.face_recipe.make()
+        self.release_recipe.make(card_set=set2, card=face3.card)
+
+        expected = {face1.name, face2.name}
+        data = self.search()
+        self.assertEqual(set(self.get_cards(data)), expected)
