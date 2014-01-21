@@ -15,6 +15,7 @@ class TestGathererSpider(GathererSpider):
         @returns items 1 1
         @returns requests 0 0
 
+        @field title Avacyn, Angel of Hope
         @field name Avacyn, Angel of Hope
         @field set Avacyn Restored
         @field pt 8 / 8
@@ -33,7 +34,6 @@ class TestGathererSpider(GathererSpider):
         '''
         # TODO check that the following data parsed or computed
         # @field art http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=239961&type=card
-        # @field title Avacyn, Angel of Hope
         return super(TestGathererSpider, self).parse_card(response)
 
     def rules_with_comments(self, response):
@@ -87,6 +87,35 @@ class TestGathererSpider(GathererSpider):
         @returns items 2 2
         @returns requests 0 0
 
+        @field title Hanweir Watchkeep
+
+        @partial {\
+            "name": "Hanweir Watchkeep",\
+            "sibling": "Bane of Hanweir",\
+            "number": "145a",\
+            "mvid": "244683"\
+        }
+
+        @partial {\
+            "name": "Bane of Hanweir",\
+            "sibling": "Hanweir Watchkeep",\
+            "number": "145b",\
+            "mvid": "244687",\
+            "color_indicator": "Red"\
+        }
+        '''
+        return super(TestGathererSpider, self).parse_card(response)
+
+    def double_faced_card_from_second_page(self, response):
+        '''Parse double faced card
+
+        @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=244687
+
+        @returns items 2 2
+        @returns requests 0 0
+
+        @field title Hanweir Watchkeep
+
         @partial {\
             "name": "Hanweir Watchkeep",\
             "sibling": "Bane of Hanweir",\
@@ -112,6 +141,8 @@ class TestGathererSpider(GathererSpider):
         @returns items 2 2
         @returns requests 0 0
 
+        @field title Akki Lavarunner
+
         @partial {\
             "name": "Akki Lavarunner",\
             "sibling": "Tok-Tok, Volcano Born",\
@@ -133,6 +164,8 @@ class TestGathererSpider(GathererSpider):
 
         @returns items 2 2
         @returns requests 0 0
+
+        @field title Fire // Ice
 
         @partial {\
             "name": "Fire",\

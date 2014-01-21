@@ -109,19 +109,22 @@ class GathererSpider(CrawlSpider):
         ignore_fields = ['player_rating', 'other_sets']
         subcontent_re = re.compile('MainContent_SubContent_SubContent')
 
-        # Card title
-        title = sel.css('div.contentTitle span::text').extract()[0].strip()
-        suffixes = number_suffixes(title)
-
         # All card faces
         faces = sel.css('table.cardDetails')
 
         # Get name for all card face on the card page
-        names = {n.strip() for n in faces.css(
-            'td.rightCol div[id$="nameRow"] div.value::text').extract()}
+        names = [n.strip() for n in faces.css(
+            'td.rightCol div[id$="nameRow"] div.value::text').extract()]
+
+        # Card title
+        title = extract_text(
+            sel.css('div.contentTitle span::text').extract()[0].strip())
+        suffixes = number_suffixes(title)
+        if len(names) > 1 and len(suffixes) == 1:
+            title = names[0]
 
         for details in faces:
-            card = CardItem()
+            card = CardItem(title=title)
 
             # Iterate over card details rows and parse data
             for field_row in details.css('td.rightCol div.row'):
@@ -142,7 +145,7 @@ class GathererSpider(CrawlSpider):
 
                     # Get sibling name for multifaces cards
                     if k == 'name' and len(names) > 1:
-                        card['sibling'] = (names - {value}).pop()
+                        card['sibling'] = (set(names) - {value}).pop()
 
             # Fix card numner suffix
             if 'number' in card and len(suffixes) > 1:

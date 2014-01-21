@@ -1,10 +1,17 @@
 import re
 from xact import xact
-from crawler.items import CardItem
 from scrapy.exceptions import DropItem
+
+from crawler.items import CardItem
+from oracle.forms import CardFaceForm
+from oracle import models as m
 
 
 class Duplicate(DropItem):
+    pass
+
+
+class InvalidError(DropItem):
     pass
 
 
@@ -42,8 +49,10 @@ class DupsHandlePipeline(BaseCardItemPipeline):
 class CardsPipeline(BaseCardItemPipeline):
     @xact
     def _process_item(self, item, spider):
-        # Save the card
         face = get_or_create_card_face(item)
+        # Update card before face. Faces count is required to detect face type
+        update_card(face.card, item)
+        face = save_card_face(face, item)
         get_or_create_card_image(item)
         get_or_create_card_release(item, face.card)
         # Increment stat counter
@@ -52,7 +61,44 @@ class CardsPipeline(BaseCardItemPipeline):
 
 
 def get_or_create_card_face(item):
-    pass
+    card = None
+
+    # Get existing card face and card by name
+    try:
+        return m.CardFace.objects.get(name=item['name'])
+    except m.CardFace.DoesNotExist:
+        pass
+
+    # If cannot find face by name and card item has sibling name
+    # use it to fing existing card. Still have to create new card face.
+    if 'sibling' in item:
+        try:
+            sibling = m.CardFace.objects.get(name=item['sibling'])
+            card = sibling.card
+        except m.CardFace.DoesNotExist:
+            pass
+
+    # If card was not found neither by name nor by sibling name, create new one
+    if not card:
+        card = m.Card.objects.create(name=item['title'])
+
+    # Create new card face instance if it is not exists
+    return m.CardFace(card=card)
+
+
+def save_card_face(face, item):
+    # Save card face using form to pass through all magic and validation
+    form = CardFaceForm(dict(item), instance=face)
+    if not form.is_valid():
+        raise InvalidError(form.errors)
+    return form.save()
+
+
+def update_card(card, item):
+    if 'sibling' in item:
+        card.faces_count = 2
+        card.save()
+    return card
 
 
 def get_or_create_card_image(item):

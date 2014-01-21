@@ -11,6 +11,7 @@ class CardSetItem(Item):
 
 class CardItem(Item):
     mvid = Field()  # Multiverse ID
+    title = Field()  # card title
     name = Field()  # card name
     sibling = Field()  # name of the sibling card face
     card_set_slug = Field()  # card set slug from list page
