@@ -9,3 +9,6 @@ class CardSetAlias(models.Model):
     name = models.CharField(max_length=255, unique=True)
     card_set = models.ForeignKey(om.CardSet)
     domain = models.CharField(max_length=50)
+
+    def __unicode__(self):
+        return self.name

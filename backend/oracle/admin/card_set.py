@@ -39,7 +39,7 @@ def merge_card_sets(modeladmin, request, queryset):
         from_wizards = CardSetAlias.objects.filter(
             card_set__in=queryset, domain=ProductsInfoSpider.domain)
         if from_wizards:
-            master = from_wizards[0]
+            master = from_wizards[0].card_set
 
     if not master:
         master = queryset[0]
