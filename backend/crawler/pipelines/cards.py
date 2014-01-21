@@ -1,4 +1,5 @@
 import re
+from xact import xact
 from crawler.items import CardItem
 from scrapy.exceptions import DropItem
 
@@ -39,7 +40,24 @@ class DupsHandlePipeline(BaseCardItemPipeline):
 
 
 class CardsPipeline(BaseCardItemPipeline):
+    @xact
     def _process_item(self, item, spider):
+        # Save the card
+        face = get_or_create_card_face(item)
+        get_or_create_card_image(item)
+        get_or_create_card_release(item, face.card)
+        # Increment stat counter
         key = re.sub('[^a-z0-9]', '_', item['set'].lower())
         spider.crawler.stats.inc_value(u'card_item_count/{}'.format(key))
-        # Save the card
+
+
+def get_or_create_card_face(item):
+    pass
+
+
+def get_or_create_card_image(item):
+    pass
+
+
+def get_or_create_card_release(item, card):
+    pass
