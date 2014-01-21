@@ -6,7 +6,8 @@ from scrapy.selector import Selector
 
 class ProductsSpider(CrawlSpider):
     name = 'products'
-    allowed_domains = ['gatherer.wizards.com']
+    domain = 'gatherer.wizards.com'
+    allowed_domains = [domain]
     start_urls = ['http://gatherer.wizards.com/Pages/Default.aspx']
 
     def parse(self, response):
@@ -19,7 +20,8 @@ class ProductsSpider(CrawlSpider):
 
 class ProductsInfoSpider(CrawlSpider):
     name = 'products_info'
-    allowed_domains = ['www.wizards.com']
+    domain = 'www.wizards.com'
+    allowed_domains = [domain]
     start_urls = [
         'http://www.wizards.com/magic/TCG/Article.aspx?'
         'x=mtg/tcg/products/allproducts']

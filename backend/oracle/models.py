@@ -174,7 +174,7 @@ class CardRelease(models.Model):
     )
 
     card = models.ForeignKey(Card)
-    card_set = models.ForeignKey(CardSet)
+    card_set = models.ForeignKey(CardSet, on_delete=models.PROTECT)
 
     rarity = NullCharField(max_length=1, choices=RARITY_CHOICES)
     card_number = models.PositiveIntegerField(null=True, blank=True)

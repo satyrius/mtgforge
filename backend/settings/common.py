@@ -178,9 +178,15 @@ MODELTRANSLATION_TRANSLATION_FILES = (
     'oracle.translation',
 )
 
-# Data provider settings
-DATA_PROVIDER_TIMEOUT = 10  # Ten seconds
-DATA_PROVIDER_CACHE_TIMEOUT = 60 * 60 * 2  # Two hours
+
+def gen_null_string(max_length):
+    from model_mommy import generators
+    return generators.gen_string(max_length)
+gen_null_string.required = ['max_length']
+
+MOMMY_CUSTOM_FIELDS_GEN = {
+    'contrib.fields.NullCharField': gen_null_string,
+}
 
 DEBUG_TOOLBAR_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
