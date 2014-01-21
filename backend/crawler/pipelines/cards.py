@@ -22,7 +22,7 @@ class DupsHandlePipeline(BaseCardItemPipeline):
         self.found = []
 
     def _process_item(self, item, spider):
-        # Check only cars that have siblings (double faced, splited and
+        # Check only cards that have siblings (double faced, splited and
         # fliped cards). Only these cards may have duped because there
         # more than one link follows to the card page and a card page has
         # all card faces on on it.
