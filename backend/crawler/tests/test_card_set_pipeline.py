@@ -74,6 +74,9 @@ class CardSetPipelineTest(TestCase):
         slug.assert_called_once_with(name)
         self.assertEqual(cs.acronym, slug())
 
+        # Newly created sets are not published
+        self.assertFalse(cs.is_published)
+
     def test_existing_alias(self):
         # Create card set and alias with the different names
         cs = self.cs_recipe.make(acronym=seq('set'))
