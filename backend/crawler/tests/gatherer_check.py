@@ -160,3 +160,26 @@ class TestGathererSpider(GathererSpider):
         @returns requests 106 106
         '''
         return super(TestGathererSpider, self).parse_list(response)
+
+    def planechase_rancor(self, response):
+        '''Parse creature details.
+
+        Old crawler went wrong with this page. Issue #9
+
+        @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=275266
+
+        @returns items 1 1
+        @returns requests 0 0
+
+        @field name Rancor
+        @field set Planechase 2012 Edition
+        @field artist Kev Walker
+        @field text Enchant creature\\nEnchanted creature gets +2/+0 and has trample.\\nWhen Rancor is put into a graveyard from the battlefield, return Rancor to its owner's hand.
+        @field cmc 1
+        @field number 76
+        @field mvid 275266
+        @field rarity Common
+        @field mana {G}
+        @field type Enchantment - Aura
+        '''
+        return super(TestGathererSpider, self).parse_card(response)
