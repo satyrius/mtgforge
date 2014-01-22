@@ -16,7 +16,7 @@ def manage(command):
             sudo('./py ./backend/manage.py %s' % command, user='www-data')
 
 
-@task(alias='deploy', default=True)
+@task(default=True)
 def full_deploy():
     update()
     backend()
