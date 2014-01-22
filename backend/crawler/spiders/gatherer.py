@@ -153,9 +153,9 @@ class GathererSpider(CrawlSpider):
                     suffixes[card['name']]
 
             # Get image url and extract multiverse id
-            img_src = list(urlparse(urljoin(response.request.url, details.css(
-                'td.leftCol img::attr(src)').extract()[0])))
-            img_query = dict(parse_qsl(img_src[4]))
+            card['art'] = urljoin(response.request.url, details.css(
+                'td.leftCol img::attr(src)').extract()[0])
+            img_query = dict(parse_qsl(list(urlparse(card['art']))[4]))
             card['mvid'] = img_query['multiverseid']
 
             yield card

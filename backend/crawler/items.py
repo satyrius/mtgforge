@@ -16,6 +16,7 @@ class CardItem(Item):
     sibling = Field()  # name of the sibling card face
     card_set_slug = Field()  # card set slug from list page
     set = Field()  # card set full name
+    art = Field()  # url for card scan
 
     mana = Field()  # encoded mana cost, e.g. {B}{G}
     color_indicator = Field()  # color for double faced cards back

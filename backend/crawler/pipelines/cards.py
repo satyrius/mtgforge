@@ -3,7 +3,7 @@ from xact import xact
 from scrapy.exceptions import DropItem
 
 from crawler.items import CardItem
-from oracle.forms import CardFaceForm
+from oracle.forms import CardFaceForm, CardImageForm
 from oracle import models as m
 
 
@@ -53,8 +53,8 @@ class CardsPipeline(BaseCardItemPipeline):
         # Update card before face. Faces count is required to detect face type
         update_card(face.card, item)
         face = save_card_face(face, item)
-        get_or_create_card_image(item)
-        get_or_create_card_release(item, face.card)
+        img = get_or_create_card_image(item)
+        get_or_create_card_release(item, face.card, img)
         # Increment stat counter
         key = re.sub('[^a-z0-9]', '_', item['set'].lower())
         spider.crawler.stats.inc_value(u'card_item_count/{}'.format(key))
@@ -102,8 +102,20 @@ def update_card(card, item):
 
 
 def get_or_create_card_image(item):
-    pass
+    mvid = int(item['mvid'])
+    try:
+        img = m.CardImage.objects.get(mvid=mvid)
+    except m.CardImage.DoesNotExist:
+        cif = CardImageForm(data=dict(mvid=mvid, scan=item['art']))
+        img = cif.save()
+
+    artist = m.Artist.objects.get_or_create(name=item['artist'])[0]
+    if not img.artist or img.artist.id != artist.id:
+        img.artist = artist
+        img.save()
+
+    return img
 
 
-def get_or_create_card_release(item, card):
+def get_or_create_card_release(item, card, img):
     pass

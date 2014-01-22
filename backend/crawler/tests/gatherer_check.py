@@ -19,7 +19,6 @@ class TestGathererSpider(GathererSpider):
         @field name Avacyn, Angel of Hope
         @field set Avacyn Restored
         @field pt 8 / 8
-        @field artist Jason Chan
         @field text Flying, vigilance, indestructible\\nOther permanents you control have indestructible.
         @field cmc 8
         @field number 6
@@ -29,11 +28,12 @@ class TestGathererSpider(GathererSpider):
         @field flavor A golden helix streaked skyward from the Helvault. A thunderous explosion shattered the silver monolith and Avacyn emerged, free from her prison at last.
         @field type Legendary Creature - Angel
 
+        @field artist Jason Chan
+        @field art http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=239961&type=card
+
         This card has only one face
         @field sibling
         '''
-        # TODO check that the following data parsed or computed
-        # @field art http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=239961&type=card
         return super(TestGathererSpider, self).parse_card(response)
 
     def rules_with_comments(self, response):
@@ -75,7 +75,9 @@ class TestGathererSpider(GathererSpider):
         @field rarity Common
         @field type Basic Land - Forest
         @field mvid 289326
+        @field number 271
         @field artist Yeong-Hao Han
+        @field art http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=289326&type=card
         '''
         return super(TestGathererSpider, self).parse_card(response)
 
