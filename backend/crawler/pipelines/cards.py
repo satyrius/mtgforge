@@ -150,7 +150,8 @@ def get_or_create_card_release(item, card, img):
                 u'Card release for MVID {} card id is {}, expected {}'.format(
                     img.mvid, release.card_id, card.id))
     if not release:
+        # TODO user form
         release = m.CardRelease.objects.create(
             card_set=cs, card=card, art=img, card_number=number,
-            rarity=item['rarity'])
+            rarity=item['rarity'].lower()[0])
     return release

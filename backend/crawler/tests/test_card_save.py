@@ -201,7 +201,7 @@ class CardSavePipelineTest(TestCase):
         get_cs.return_value = cs
         new_release = self.release_recipe.prepare()
         item = CardItem(
-            set=cs.name, rarity=new_release.rarity,
+            set=cs.name, rarity='Common',
             number=str(new_release.card_number))
         before = m.CardRelease.objects.all().count()
         res = cards.get_or_create_card_release(
@@ -212,7 +212,7 @@ class CardSavePipelineTest(TestCase):
         self.assertEqual(res.card, card)
         self.assertEqual(res.art, img)
         self.assertEqual(res.card_number, int(item['number']))
-        self.assertEqual(res.rarity, item['rarity'])
+        self.assertEqual(res.rarity, m.CardRelease.COMMON)
         self.assertEqual(m.CardRelease.objects.all().count(), before + 1)
 
     def test_get_card_set(self):
