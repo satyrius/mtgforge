@@ -6,13 +6,17 @@ from os.path import abspath, dirname, join
 DJANGO_PROJECT = abspath(join(dirname(__file__), '..'))
 sys.path.append(DJANGO_PROJECT)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+from django.conf import settings
 
 BOT_NAME = 'crawler'
 
 SPIDER_MODULES = ['crawler.spiders']
 NEWSPIDER_MODULE = 'crawler.spiders'
 
+IMAGES_STORE = settings.MEDIA_ROOT
+
 ITEM_PIPELINES = {
+    'crawler.pipelines.cards.ArtImagePipeline': 1,
     'crawler.pipelines.cards.DupsHandlePipeline': 100,
     'crawler.pipelines.cards.CardsPipeline': 110,
     'crawler.pipelines.sets.CardSetsPipeline': 200,

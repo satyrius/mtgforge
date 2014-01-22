@@ -1,6 +1,9 @@
 import re
-from xact import xact
+from django.core.files.base import File
+from scrapy.contrib.pipeline.images import ImagesPipeline
 from scrapy.exceptions import DropItem
+from scrapy.http import Request
+from xact import xact
 
 from crawler.items import CardItem
 from crawler.models import CardSetAlias
@@ -62,6 +65,21 @@ class CardsPipeline(BaseCardItemPipeline):
         spider.crawler.stats.inc_value(u'card_item_count/{}'.format(key))
 
 
+class ArtImagePipeline(ImagesPipeline):
+    def get_media_requests(self, item, info):
+        if 'art' in item:
+            yield Request(item['art'])
+
+    def item_completed(self, results, item, info):
+        image_paths = [x['path'] for ok, x in results if ok]
+        if not image_paths:
+            raise DropItem('Item contains no images')
+        if len(image_paths) > 1:
+            raise DropItem('Item canot contain more than one art image')
+        item['art_path'] = self.store._get_filesystem_path(image_paths[0])
+        return item
+
+
 def get_or_create_card_face(item):
     card = None
 
@@ -110,6 +128,11 @@ def get_or_create_card_image(item):
     except m.CardImage.DoesNotExist:
         cif = CardImageForm(data=dict(mvid=mvid, scan=item['art']))
         img = cif.save()
+
+    if not img.file:
+        name = '{0}.image'.format(img.mvid)
+        with open(item['art_path'], 'rb') as f:
+            img.file.save(name, File(f))
 
     artist = m.Artist.objects.get_or_create(name=item['artist'])[0]
     if not img.artist or img.artist.id != artist.id:
