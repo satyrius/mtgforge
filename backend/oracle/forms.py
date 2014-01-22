@@ -117,7 +117,7 @@ class CardFaceForm(CardPageForm):
 
 
 def validate_collectors_number(number, required=False):
-    match = re.match('^(\d+)([a-z])?', number or '')
+    match = re.match('^(\d+)([a-z])?', str(number) if number else '')
     if not match:
         if required:
             raise ValidationError(u'Collector\'s number "{}" does not match '

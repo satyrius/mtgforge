@@ -3,8 +3,10 @@ from xact import xact
 from scrapy.exceptions import DropItem
 
 from crawler.items import CardItem
-from oracle.forms import CardFaceForm, CardImageForm
+from crawler.models import CardSetAlias
 from oracle import models as m
+from oracle.forms import CardFaceForm, CardImageForm, \
+    validate_collectors_number
 
 
 class Duplicate(DropItem):
@@ -117,5 +119,38 @@ def get_or_create_card_image(item):
     return img
 
 
+def get_card_set(item):
+    name = item['set']
+    try:
+        return CardSetAlias.objects.get(name=name).card_set
+    except CardSetAlias.DoesNotExist:
+        raise InvalidError(u'Cannot find card set with name "{}"'.format(name))
+
+
 def get_or_create_card_release(item, card, img):
-    pass
+    release = None
+    try:
+        release = m.CardRelease.objects.get(art__mvid=img.mvid)
+    except m.CardRelease.DoesNotExist:
+        cs = get_card_set(item)
+        number, sub_number = validate_collectors_number(item['number'])
+        try:
+            release = m.CardRelease.objects.get(
+                card_set=cs, card=card, card_number=number)
+        except m.CardRelease.DoesNotExist:
+            pass
+        else:
+            # Update multiverseid when process card front face
+            if not release.art or sub_number == 'a':
+                release.art = img
+                release.save()
+    else:
+        if release.card_id != card.id:
+            raise InvalidError(
+                u'Card release for MVID {} card id is {}, expected {}'.format(
+                    img.mvid, release.card_id, card.id))
+    if not release:
+        release = m.CardRelease.objects.create(
+            card_set=cs, card=card, art=img, card_number=number,
+            rarity=item['rarity'])
+    return release
