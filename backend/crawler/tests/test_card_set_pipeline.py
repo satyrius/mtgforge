@@ -95,7 +95,6 @@ class CardSetPipelineTest(TestCase):
 
     def test_existing_set(self):
         cs = self.cs_recipe.make(acronym=seq('set'))
-        mommy.make(CardSetAlias, card_set=cs, name=cs.name)
 
         # Fetch the same card set again
         count = lambda m: m.objects.filter().count()
@@ -103,7 +102,7 @@ class CardSetPipelineTest(TestCase):
         alias_count = count(CardSetAlias)
         self.pipeline.process_item(CardSetItem(name=cs.name), self.spider)
         self.assertEqual(count(CardSet), cs_count)
-        self.assertEqual(count(CardSetAlias), alias_count)
+        self.assertEqual(count(CardSetAlias), alias_count + 1)
 
 
 class InfoPipelineTest(TestCase):
