@@ -27,24 +27,29 @@ def _merge(queryset, master):
 def merge_card_sets(modeladmin, request, queryset):
     master = None
 
-    links = None
-    for cs in queryset:
-        if links is None:
-            links = [rel.get_accessor_name()
-                     for rel in cs._meta.get_all_related_objects()
-                     if rel.var_name != 'cardsetalias']
-        for link in links:
-            if getattr(cs, link).all().count():
-                if master is None:
-                    master = cs
-                else:
-                    modeladmin.message_user(
-                        request,
-                        u'Both "{}" and "{}" has related objects, '
-                        u'cannot merge automatically'.format(
-                            master.name, cs.name))
-                    return
-                break
+    published = queryset.filter(is_published=True)
+    if len(published) == 1:
+        master = published[0]
+
+    if not master:
+        links = None
+        for cs in queryset:
+            if links is None:
+                links = [rel.get_accessor_name()
+                         for rel in cs._meta.get_all_related_objects()
+                         if rel.var_name != 'cardsetalias']
+            for link in links:
+                if getattr(cs, link).all().count():
+                    if master is None:
+                        master = cs
+                    else:
+                        modeladmin.message_user(
+                            request,
+                            u'Both "{}" and "{}" has related objects, '
+                            u'cannot merge automatically'.format(
+                                master.name, cs.name))
+                        return
+                    break
 
     if not master:
         from_wizards = CardSetAlias.objects.filter(
@@ -65,7 +70,7 @@ merge_card_sets.short_description = 'Merge card sets'
 class CardSetAdmin(TranslationAdmin):
     form = CardSetForm
     list_display = ('name', 'acronym', 'cards', 'released_at', 'created_at',
-                    'updated_at')
+                    'updated_at', 'is_published')
     ordering = ['-released_at']
     list_per_page = 200
     inlines = [CardSetAliasInline]

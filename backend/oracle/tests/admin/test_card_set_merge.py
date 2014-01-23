@@ -44,6 +44,15 @@ class CardSetMergeActionTest(TestCase):
             admin._merge(CardSet.objects.filter(pk__in=(cs1.pk, cs2.pk)), cs1)
 
     @patch.object(admin, '_merge')
+    def test_choose_master_record_by_publish(self, merge):
+        cs1 = self.cs_recipe.make()
+        cs2 = self.cs_recipe.make(is_published=True)
+        queryset = CardSet.objects.filter(pk__in=(cs1.pk, cs2.pk))
+        admin.merge_card_sets(Mock(), Mock(), queryset)
+        # Master record is a published record
+        merge.assert_called_once_with(queryset, cs2)
+
+    @patch.object(admin, '_merge')
     def test_choose_master_record_by_related_objects(self, merge):
         cs1 = self.cs_recipe.make()
         self.alias_recipe.make(card_set=cs1, domain=ProductsInfoSpider.domain)
