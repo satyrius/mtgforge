@@ -194,6 +194,30 @@ class CardSavePipelineTest(TestCase):
         self.assertEqual(res.art, img_a)  # Still front face image
 
     @patch.object(cards, 'get_card_set')
+    def test_get_create_new_release_if_no_number(self, get_cs):
+        cs = self.cs_recipe.make()
+        card = self.card_recipe.make()
+        img1 = self.img_recipe.make()
+        release1 = self.release_recipe.make(
+            card_set=cs, card=card, art=img1, card_number=None)
+
+        # Create another release for the same card (without number)
+        get_cs.return_value = cs
+        img2 = self.img_recipe.make()
+        item = CardItem(set=cs.name, number=None, rarity='Common')
+        before = m.CardRelease.objects.all().count()
+        res = cards.get_or_create_card_release(
+            item, card, img2)
+        get_cs.assert_called_once_with(item)
+        self.assertIsNotNone(res)
+        self.assertNotEqual(res, release1)
+        self.assertEqual(res.card_set, cs)
+        self.assertEqual(res.card, card)
+        self.assertEqual(res.art, img2)
+        self.assertIsNone(res.card_number)
+        self.assertEqual(m.CardRelease.objects.all().count(), before + 1)
+
+    @patch.object(cards, 'get_card_set')
     def test_create_new_release(self, get_cs):
         cs = self.cs_recipe.make()
         card = self.card_recipe.make()

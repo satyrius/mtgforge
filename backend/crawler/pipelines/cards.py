@@ -155,17 +155,18 @@ def get_or_create_card_release(item, card, img):
         release = m.CardRelease.objects.get(art__mvid=img.mvid)
     except m.CardRelease.DoesNotExist:
         cs = get_card_set(item)
-        number, sub_number = validate_collectors_number(item['number'])
-        try:
-            release = m.CardRelease.objects.get(
-                card_set=cs, card=card, card_number=number)
-        except m.CardRelease.DoesNotExist:
-            pass
-        else:
-            # Update multiverseid when process card front face
-            if not release.art or sub_number == 'a':
-                release.art = img
-                release.save()
+        number, sub_number = validate_collectors_number(item.get('number'))
+        if number:
+            try:
+                release = m.CardRelease.objects.get(
+                    card_set=cs, card=card, card_number=number)
+            except m.CardRelease.DoesNotExist:
+                pass
+            else:
+                # Update multiverseid when process card front face
+                if not release.art or sub_number == 'a':
+                    release.art = img
+                    release.save()
     else:
         if release.card_id != card.id:
             raise InvalidError(
