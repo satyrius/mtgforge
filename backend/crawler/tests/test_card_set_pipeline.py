@@ -48,14 +48,9 @@ class CardSetPipelineTest(TestCase):
             sets.CardSetsPipeline,
             sets.BaseCardSetItemPipeline))
 
-    def _fetch_item(self, is_gatherer=False):
-        # Use model_mommy to generate new card set name (DO NOT SAVE)
-        name = self.cs_recipe.prepare().name
-        return CardSetItem(name=name, is_gatherer=is_gatherer)
-
     @patch.object(sets, 'generate_slug')
     def test_save_card_set(self, slug):
-        item = self._fetch_item()
+        item = CardSetItem(name=self.cs_recipe.prepare().name)
         name = item['name']
         slug.return_value = uuid.uuid4().get_hex()[:10]
         # Assert it is a new item

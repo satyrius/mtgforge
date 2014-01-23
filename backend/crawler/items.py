@@ -6,7 +6,6 @@ class CardSetItem(Item):
     slug = Field()
     cards = Field()
     released_at = Field()
-    is_gatherer = Field()
 
 
 class CardItem(Item):
