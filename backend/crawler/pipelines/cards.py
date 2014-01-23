@@ -72,11 +72,10 @@ class ArtImagePipeline(ImagesPipeline):
 
     def item_completed(self, results, item, info):
         image_paths = [x['path'] for ok, x in results if ok]
-        if not image_paths:
-            raise DropItem('Item contains no images')
-        if len(image_paths) > 1:
-            raise DropItem('Item canot contain more than one art image')
-        item['art_path'] = self.store._get_filesystem_path(image_paths[0])
+        if image_paths:
+            if len(image_paths) > 1:
+                raise DropItem('Item canot contain more than one art image')
+            item['art_path'] = self.store._get_filesystem_path(image_paths[0])
         return item
 
 
