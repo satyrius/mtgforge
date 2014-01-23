@@ -129,7 +129,7 @@ def get_or_create_card_image(item):
         cif = CardImageForm(data=dict(mvid=mvid, scan=item['art']))
         img = cif.save()
 
-    if not img.file:
+    if not img.file and 'art_path' in item:
         name = '{0}.image'.format(img.mvid)
         with open(item['art_path'], 'rb') as f:
             img.file.save(name, File(f))
