@@ -192,7 +192,19 @@ class TestGathererSpider(GathererSpider):
         @returns items 0 0
 
         100 items per page, but +3 additional land card for Forest and Island
-        @returns requests 106 106
+        and +3 pagination requests
+        @returns requests 109 109
+        '''
+        return super(TestGathererSpider, self).parse_list(response)
+
+    def parse_list_without_pagination(self, response):
+        '''Parse compact card list without pagination
+
+        @url http://gatherer.wizards.com/Pages/Search/Default.aspx?output=compact&set=%5BUnglued%5D
+        @returns items 0 0
+
+        This set has 94 cards released
+        @returns requests 94 94
         '''
         return super(TestGathererSpider, self).parse_list(response)
 

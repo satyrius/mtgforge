@@ -34,13 +34,16 @@ class GathererSpider(CrawlSpider):
         for name in self.card_set_names():
             yield FormRequest(
                 url=self.search_url, method='GET',
-                callback=self.parse_paginator,
+                callback=self.parse_list,
                 formdata={'set': '[%s]' % name, 'output': 'compact'},
                 meta={'card_set': CardSetItem(name=name)})
 
-    def parse_paginator(self, response):
+    def parse_list(self, response):
+        '''Parse compact card list and follow card details for each printing.
+        '''
         card_set = response.request.meta.get('card_set', CardSetItem())
 
+        # Follow pagination
         sel = Selector(response)
         for page_link in sel.css('div.pagingControls a'):
             page_url = page_link.xpath('@href').extract()[0]
@@ -51,10 +54,6 @@ class GathererSpider(CrawlSpider):
                     callback=self.parse_list,
                     meta={'card_set': card_set})
 
-    def parse_list(self, response):
-        '''Parse compact card list and follow card details for each printing.
-        '''
-        card_set = response.request.meta.get('card_set', CardSetItem())
         sel = Selector(response)
         for card_row in sel.css('tr.cardItem'):
             a = card_row.css('td.name a')
