@@ -90,6 +90,11 @@ class ColorsTest(TestCase):
         self.assertEqual(c.identity, self.w)
         self.assertEqual(c.colors, [self.w])
 
+        # Little Girl costs half white mana
+        c = Color('{500}')
+        self.assertEqual(c.identity, self.w)
+        self.assertEqual(c.colors, [self.w])
+
     def test_create_with_explicit_colors(self):
         c = Color([self.w])
         self.assertEqual(c.identity, self.w)

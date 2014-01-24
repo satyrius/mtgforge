@@ -49,6 +49,10 @@ class Color(object):
         colors = []
 
         if mana_cost:
+            # The only Little girl has half white mana
+            if mana_cost == '{500}':
+                return self.WHITE, [self.WHITE]
+
             costs = set(mana_cost.lower())
             has_colorless_mana = len(filter(lambda s: s.isdigit() or s == 'x', costs)) > 0
             allowed_symbols = self.MAP.keys()

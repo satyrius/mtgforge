@@ -105,6 +105,8 @@ def update_fixed_power_and_thoughtness(sender, **kwargs):
             m = re.match('^(\d+)[^*]*$', value)
             if m:
                 value = int(m.group(1))
+            elif re.match('^\{[^}]+\}$', value):
+                value = 0
             else:
                 value = None
         setattr(card_face, field, value)
