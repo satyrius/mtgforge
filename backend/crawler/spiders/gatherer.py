@@ -114,6 +114,11 @@ class GathererSpider(CrawlSpider):
         # Get name for all card face on the card page
         names = [n.strip() for n in faces.css(
             'td.rightCol div[id$="nameRow"] div.value::text').extract()]
+        names_set = set(names)
+        # Big Fury Monster case. It's page looks like a double faced card page,
+        # but phisically it is a one card released twice with the same name
+        # (like a basic lands).
+        is_bfm = len(names) > len(names_set)
 
         # Card title
         title = extract_text(
@@ -143,8 +148,8 @@ class GathererSpider(CrawlSpider):
                     card[k] = value
 
                     # Get sibling name for multifaces cards
-                    if k == 'name' and len(names) > 1:
-                        card['sibling'] = (set(names) - {value}).pop()
+                    if k == 'name' and len(names) > 1 and not is_bfm:
+                        card['sibling'] = (names_set - {value}).pop()
 
             # Fix card numner suffix
             if 'number' in card and len(suffixes) > 1:

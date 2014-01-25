@@ -230,3 +230,36 @@ class TestGathererSpider(GathererSpider):
         @field type Enchantment - Aura
         '''
         return super(TestGathererSpider, self).parse_card(response)
+
+    def big_fury_monster(self, response):
+        '''Parse Big Fury Monster
+
+        Is is a shity card from a shity un-set, it is only the one of a kind
+        but I want my crawler to be perfect. Issue #14
+
+        @url http://gatherer.wizards.com/Pages/Card/Details.aspx?printed=false&multiverseid=9780
+
+        @returns items 2 2
+        @returns requests 0 0
+
+        @field title B.F.M. (Big Furry Monster)
+        @field name B.F.M. (Big Furry Monster)
+        @field set Unglued
+        @field artist Douglas Shuler
+        @field rarity Rare
+
+        @partial {\
+            "mvid": "9780",\
+            "number": "28b",\
+            "text": "You must play both B.F.M. cards to put\\nleaves play, sacrifice the other.\\nB.F.M. can be blocked only by three or"\
+        }
+
+        @partial {\
+            "mvid": "9844",\
+            "number": "29b",\
+            "mana": "{B}{B}{B}{B}{B}{B}{B}{B}{B}{B}{B}{B}{B}{B}{B}",\
+            "cmc": "15",\
+            "text": "B.F.M. into play. If either B.F.M. card\\n\\nmore creatures."\
+        }
+        '''
+        return super(TestGathererSpider, self).parse_card(response)
