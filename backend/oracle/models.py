@@ -20,6 +20,11 @@ class Card(models.Model):
     name = NullCharField(max_length=255)
     faces_count = models.PositiveSmallIntegerField(default=1)
 
+    is_locked = models.BooleanField(
+        default=False, help_text='Locked for update with crawler. It is '
+                                 'important to do not override cards fixed '
+                                 'munually.')
+
     def __unicode__(self):
         return self.name
 

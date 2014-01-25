@@ -1,5 +1,6 @@
 import re
 from django.core.files.base import File
+from scrapy import log
 from scrapy.contrib.pipeline.images import ImagesPipeline
 from scrapy.exceptions import DropItem
 from scrapy.http import Request
@@ -106,6 +107,11 @@ def get_or_create_card_face(item):
 
 
 def save_card_face(face, item):
+    # Do not update locked cards
+    if face.id and face.card.is_locked:
+        log.msg(u'"{}" is locked, cannot update "{}"'.format(
+            face.card.name, item['name']), level=log.WARNING)
+        return face
     # Save card face using form to pass through all magic and validation
     form = CardFaceForm(dict(item), instance=face)
     if not form.is_valid():

@@ -86,6 +86,15 @@ class CardSavePipelineTest(TestCase):
         is_valid.assert_called_once_with()
         save.assert_called_once_with()
 
+    @patch.object(forms.CardFaceForm, 'save')
+    def test_do_not_save_locked_card(self, save):
+        card = self.card_recipe.make(is_locked=True)
+        face = self.face_recipe.make(card=card)
+        save.return_value = face
+        res = cards.save_card_face(face, item=CardItem())
+        self.assertEqual(res, face)
+        self.assertFalse(save.called)
+
     @patch.object(forms.CardFaceForm, 'is_valid', return_value=False)
     def test_save_invalid_card_face(self, is_valid):
         face = self.face_recipe.prepare()
