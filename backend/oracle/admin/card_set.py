@@ -1,6 +1,7 @@
 from xact import xact
 
 from django.contrib import admin
+from django.db.models import Count
 from modeltranslation.admin import TranslationAdmin
 
 from crawler.admin import CardSetAliasInline
@@ -67,9 +68,22 @@ def merge_card_sets(modeladmin, request, queryset):
 merge_card_sets.short_description = 'Merge card sets'
 
 
+def cards_count(obj):
+    return obj.cards_count
+cards_count.short_description = 'Scraped Cards'
+
+
+def cards_count_ok(obj):
+    if not obj.cards_count:
+        return False
+    return obj.cards is None or obj.cards_count == obj.cards
+cards_count_ok.boolean = True
+cards_count_ok.short_description = 'Status'
+
+
 class CardSetAdmin(TranslationAdmin):
     form = CardSetForm
-    list_display = ('name', 'acronym', 'cards', 'released_at', 'created_at',
+    list_display = ('name', 'acronym', 'cards', cards_count, cards_count_ok, 'released_at', 'created_at',
                     'updated_at', 'is_published')
     ordering = ['-released_at']
     list_per_page = 200
@@ -83,5 +97,9 @@ class CardSetAdmin(TranslationAdmin):
         css = {
             'screen': ('/static/grappelli_modeltranslation/css/tabbed_translation_fields.css',),
         }
+
+    def queryset(self, request):
+        qs = super(CardSetAdmin, self).queryset(request)
+        return qs.annotate(cards_count=Count('cardrelease__card'))
 
 admin.site.register(models.CardSet, CardSetAdmin)
