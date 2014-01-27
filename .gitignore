@@ -2,6 +2,7 @@
 media/*
 .DS_Store
 .noseids
-*.pyc
-*.swp
-*.swo
+*.py[co]
+*.sw[po]
+.env
+__pycache__

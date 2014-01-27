@@ -1,7 +1,4 @@
-from django_any import any_model
-
 from forge.tests.base import SerpTest
-from oracle.models import CardSet
 
 
 class SerpSortTest(SerpTest):
@@ -220,8 +217,8 @@ class SerpSortTest(SerpTest):
         by collector's number. And it does not matter thar it had released in
         a few sets with different collector's number.
         '''
-        m14 = any_model(CardSet, name='Magic 2014', acronym='m14')
-        reissue = any_model(CardSet, acronym='rei')
+        m14 = self.cs_recipe.make(name='Magic 2014', acronym='m14')
+        reissue = self.cs_recipe.make(acronym='rei')
 
         act_of_treason = self.create_card(
             name='Act of Treason', card_set=m14, card_number=125)

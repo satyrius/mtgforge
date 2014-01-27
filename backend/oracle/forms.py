@@ -61,7 +61,10 @@ class CardFaceForm(CardPageForm):
     def __init__(self, data=None, **kwargs):
         if data:
             self._fix_data(data, 'mana_cost', 'mana')
-            self._fix_data(data, 'cmc', 'cmc', cast=int)
+            self._fix_data(
+                data, 'cmc', 'cmc', cast=lambda v:
+                None if isinstance(v, basestring) and not v.isdigit() else
+                int(v))
             self._fix_data(data, 'type_line', 'type')
             self._fix_data(data, 'rules', 'text')
             self._fix_data(data, 'power', 'power')
@@ -117,7 +120,7 @@ class CardFaceForm(CardPageForm):
 
 
 def validate_collectors_number(number, required=False):
-    match = re.match('^(\d+)([a-z])?', number or '')
+    match = re.match('^(\d+)([a-z])?', str(number) if number else '')
     if not match:
         if required:
             raise ValidationError(u'Collector\'s number "{}" does not match '

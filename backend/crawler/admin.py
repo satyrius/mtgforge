@@ -1,13 +1,7 @@
-from django.contrib.contenttypes import generic
-from crawler.models import DataSource
+from django.contrib import admin
+from crawler.models import CardSetAlias
 
 
-class DataSourceInline(generic.GenericTabularInline):
-    model = DataSource
+class CardSetAliasInline(admin.TabularInline):
+    model = CardSetAlias
     extra = 0
-    readonly_fields = ('provider', 'url',)
-    can_delete = False
-    can_add = False
-
-    def has_add_permission(self, *args, **kwargs):
-        return False

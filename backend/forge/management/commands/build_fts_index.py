@@ -24,12 +24,16 @@ class Command(BaseCommand):
             INSERT INTO forge_cardftsindex (
                 card_id, card_face_id, fts, color_identity,
                 color_identity_idx, face_order)
-            SELECT card_id, id, ''::tsvector, 0, ARRAY[]::int[], CASE
-                WHEN place = '{CardFace.FRONT}' THEN 0
-                WHEN place = '{CardFace.SPLIT}' THEN 1
+            SELECT f.card_id, f.id, ''::tsvector, 0, ARRAY[]::int[], CASE
+                WHEN f.place = '{CardFace.FRONT}' THEN 0
+                WHEN f.place = '{CardFace.SPLIT}' THEN 1
                 ELSE 2
             END
-            FROM oracle_cardface
+            FROM oracle_cardface AS f
+            JOIN oracle_cardrelease AS r ON r.card_id = f.card_id
+            JOIN oracle_cardset AS cs ON cs.id = r.card_set_id
+            WHERE cs.is_published
+            GROUP BY f.card_id, f.id, f.place
             """,
 
             # {{{ NAME AND RULES
@@ -141,7 +145,10 @@ class Command(BaseCommand):
             UPDATE forge_cardftsindex set sets = (
                 SELECT array_agg(r.card_set_id)
                 FROM oracle_cardrelease r
-                WHERE r.card_id = forge_cardftsindex.card_id
+                JOIN oracle_cardset AS cs ON cs.id = r.card_set_id
+                WHERE TRUE
+                    AND cs.is_published
+                    AND r.card_id = forge_cardftsindex.card_id
             )
             """,
 
@@ -157,6 +164,8 @@ class Command(BaseCommand):
                 END) AS rarity
                 FROM oracle_card AS c
                 JOIN oracle_cardrelease AS r ON r.card_id = c.id
+                JOIN oracle_cardset AS cs ON cs.id = r.card_set_id
+                WHERE cs.is_published
                 GROUP BY c.id
             ) AS n
             WHERE n.id = card_id

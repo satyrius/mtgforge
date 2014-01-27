@@ -6,5 +6,5 @@ class CardSetResource(ModelResource):
     class Meta:
         resource_name = 'card_sets'
         limit = 0
-        queryset = CardSet.objects.all()
+        queryset = CardSet.objects.filter(is_published=True)
         allowed_methods = ['get']

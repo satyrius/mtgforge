@@ -2,13 +2,11 @@ import re
 
 from arrayfields import IntegerArrayField
 from django.conf import settings
-from django.contrib.contenttypes import generic
 from django.db import models
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
 from contrib.fields import NullCharField, NullTextField
-from crawler.models import DataSource
 from oracle.utils import Color
 
 
@@ -21,6 +19,11 @@ _ = lambda s: s
 class Card(models.Model):
     name = NullCharField(max_length=255)
     faces_count = models.PositiveSmallIntegerField(default=1)
+
+    is_locked = models.BooleanField(
+        default=False, help_text='Locked for update with crawler. It is '
+                                 'important to do not override cards fixed '
+                                 'munually.')
 
     def __unicode__(self):
         return self.name
@@ -107,6 +110,8 @@ def update_fixed_power_and_thoughtness(sender, **kwargs):
             m = re.match('^(\d+)[^*]*$', value)
             if m:
                 value = int(m.group(1))
+            elif re.match('^\{[^}]+\}$', value):
+                value = 0
             else:
                 value = None
         setattr(card_face, field, value)
@@ -131,7 +136,9 @@ class CardSet(models.Model):
     acronym = models.CharField(max_length=10, unique=True)
     cards = models.PositiveIntegerField(null=True, blank=True)
     released_at = models.DateField(null=True, blank=True)
-    sources = generic.GenericRelation(DataSource)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_published = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.name
@@ -175,14 +182,12 @@ class CardRelease(models.Model):
     )
 
     card = models.ForeignKey(Card)
-    card_set = models.ForeignKey(CardSet)
+    card_set = models.ForeignKey(CardSet, on_delete=models.PROTECT)
 
     rarity = NullCharField(max_length=1, choices=RARITY_CHOICES)
     card_number = models.PositiveIntegerField(null=True, blank=True)
 
     art = models.ForeignKey(CardImage, null=True, blank=True)
-
-    sources = generic.GenericRelation(DataSource)
 
     def __unicode__(self):
         return u'{0} ({1})'.format(self.card.name, self.card_set.name)
@@ -204,7 +209,5 @@ class CardL10n(models.Model):
 
     class Meta:
         unique_together = (('card_face', 'card_release', 'language'),)
-
-    sources = generic.GenericRelation(DataSource)
 
 # }}}

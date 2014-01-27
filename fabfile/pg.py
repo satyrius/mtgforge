@@ -27,7 +27,7 @@ def dump():
         '--disable-triggers',
         '--no-owner',
         '--format=custom',
-        '-T oracle_dataproviderpage -T django_session',
+        '-T django_session',
         '%s > %s']) % (db, data_dump))
 
     get('/tmp/mtgforge.dump.*', env['downloads'])
