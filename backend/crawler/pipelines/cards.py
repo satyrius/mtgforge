@@ -1,9 +1,7 @@
 import re
 from django.core.files.base import File
 from scrapy import log
-from scrapy.contrib.pipeline.images import ImagesPipeline
 from scrapy.exceptions import DropItem
-from scrapy.http import Request
 from xact import xact
 
 from crawler.items import CardItem
@@ -60,24 +58,11 @@ class CardsPipeline(BaseCardItemPipeline):
         update_card(face.card, item)
         face = save_card_face(face, item)
         img = get_or_create_card_image(item)
+        get_or_create_artist(item, img)
         get_or_create_card_release(item, face.card, img)
         # Increment stat counter
         key = re.sub('[^a-z0-9]', '_', item['set'].lower())
         spider.crawler.stats.inc_value(u'card_item_count/{}'.format(key))
-
-
-class ArtImagePipeline(ImagesPipeline):
-    def get_media_requests(self, item, info):
-        if 'art' in item:
-            yield Request(item['art'])
-
-    def item_completed(self, results, item, info):
-        image_paths = [x['path'] for ok, x in results if ok]
-        if image_paths:
-            if len(image_paths) > 1:
-                raise DropItem('Item canot contain more than one art image')
-            item['art_path'] = self.store._get_filesystem_path(image_paths[0])
-        return item
 
 
 def get_or_create_card_face(item):
@@ -110,7 +95,7 @@ def save_card_face(face, item):
     # Do not update locked cards
     if face.id and face.card.is_locked:
         log.msg(u'"{}" is locked, cannot update "{}"'.format(
-            face.card.name, item['name']), level=log.WARNING)
+            face.card.name, item.get('name', face.name)), level=log.WARNING)
         return face
     # Save card face using form to pass through all magic and validation
     form = CardFaceForm(dict(item), instance=face)
@@ -139,12 +124,15 @@ def get_or_create_card_image(item):
         with open(item['art_path'], 'rb') as f:
             img.file.save(name, File(f))
 
+    return img
+
+
+def get_or_create_artist(item, img):
     artist = m.Artist.objects.get_or_create(name=item['artist'])[0]
     if not img.artist or img.artist.id != artist.id:
         img.artist = artist
         img.save()
-
-    return img
+    return artist
 
 
 def get_card_set(item):

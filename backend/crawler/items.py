@@ -8,6 +8,12 @@ class CardSetItem(Item):
     released_at = Field()
 
 
+class CardImageItem(Item):
+    mvid = Field()  # Multiverse ID
+    art = Field()  # url for card scan
+    art_path = Field()  # file system path for downloaded card scan
+
+
 class CardItem(Item):
     mvid = Field()  # Multiverse ID
     title = Field()  # card title

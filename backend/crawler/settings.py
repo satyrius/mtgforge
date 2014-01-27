@@ -16,7 +16,8 @@ NEWSPIDER_MODULE = 'crawler.spiders'
 IMAGES_STORE = settings.MEDIA_ROOT
 
 ITEM_PIPELINES = {
-    'crawler.pipelines.cards.ArtImagePipeline': 1,
+    'crawler.pipelines.art.ArtPipeline': 1,
+    'crawler.pipelines.art.CardImagePipeline': 90,
     'crawler.pipelines.cards.DupsHandlePipeline': 100,
     'crawler.pipelines.cards.CardsPipeline': 110,
     'crawler.pipelines.sets.CardSetsPipeline': 200,
