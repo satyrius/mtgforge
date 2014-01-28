@@ -2,7 +2,7 @@ from unittest import TextTestRunner
 
 from twisted.trial import unittest
 
-from scrapy.spider import BaseSpider
+from scrapy.spider import Spider
 from scrapy.item import Item, Field
 from scrapy.contracts import ContractsManager
 from scrapy.contracts.default import UrlContract
@@ -20,7 +20,7 @@ class ResponseMock(object):
     url = 'http://scrapy.org'
 
 
-class TestSpider(BaseSpider):
+class TestSpider(Spider):
     name = 'demo_spider'
 
     def item_ok(self, response):
