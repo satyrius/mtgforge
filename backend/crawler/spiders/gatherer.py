@@ -1,7 +1,7 @@
 import itertools as it
 import re
 import sys
-from urlparse import urljoin, urlparse, parse_qsl
+from urlparse import urljoin
 
 from lxml import etree
 from lxml.html import document_fromstring
@@ -159,8 +159,6 @@ class GathererSpider(CrawlSpider):
             # Get image url and extract multiverse id
             card['art'] = urljoin(response.request.url, details.css(
                 'td.leftCol img::attr(src)').extract()[0])
-            img_query = dict(parse_qsl(list(urlparse(card['art']))[4]))
-            card['mvid'] = img_query['multiverseid']
 
             yield card
 

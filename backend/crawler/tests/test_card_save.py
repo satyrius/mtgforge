@@ -22,16 +22,16 @@ class CardSavePipelineTest(TestCase):
         self.cs_recipe = Recipe(
             m.CardSet, name=seq('Magic Set '), acronym=seq('set'))
 
+    @patch.object(m.CardImage.objects, 'get')
     @patch.object(cards, 'get_or_create_card_face')
-    @patch.object(cards, 'get_or_create_card_image')
     @patch.object(cards, 'get_or_create_artist')
     @patch.object(cards, 'get_or_create_card_release')
     @patch.object(cards, 'save_card_face')
     @patch.object(cards, 'update_card')
     def test_save_helpers_call(self, update_card, save, get_release,
-                               get_artist, get_image, get_face):
+                               get_artist, get_face, get_image):
         pipeline = cards.CardsPipeline()
-        item = CardItem()
+        item = CardItem(mvid=123)
         with patch.dict(item, set='Theros'):
             face = Mock()
             get_face.return_value = face
@@ -43,7 +43,7 @@ class CardSavePipelineTest(TestCase):
             get_face.assert_called_once_with(item)
             save.assert_called_once_with(face, item)
             update_card.assert_called_once_with(face.card, item)
-            get_image.assert_called_once_with(item)
+            get_image.assert_called_once_with(mvid=item['mvid'])
             get_artist.assert_called_once_with(item, img)
             get_release.assert_called_once_with(item, face.card, img)
 
@@ -127,27 +127,6 @@ class CardSavePipelineTest(TestCase):
             pipeline._process_item(item, Mock())
         self.assertTrue(update_card.called)
         self.assertFalse(save.called)
-
-    def test_existing_image_by_mvid(self):
-        img = self.img_recipe.make(_quantity=3)[-1]
-        self.assertIsNone(img.artist)
-        img_before = m.CardImage.objects.all().count()
-        item = CardItem(mvid=img.mvid)
-        res = cards.get_or_create_card_image(item)
-        self.assertEqual(res, img)
-        self.assertEqual(m.CardImage.objects.all().count(), img_before)
-
-    def test_create_new_image(self):
-        img1 = self.img_recipe.make(artist=self.artist_recipe.make())
-        img2 = self.img_recipe.prepare()
-        item2 = CardItem(
-            mvid=img2.mvid, art=img2.scan, artist=img1.artist.name)
-        img_before = m.CardImage.objects.all().count()
-        res = cards.get_or_create_card_image(item2)
-        self.assertNotEqual(res, img1)
-        self.assertEqual(res.mvid, img2.mvid)
-        self.assertEqual(res.scan, img2.scan)
-        self.assertEqual(m.CardImage.objects.all().count(), img_before + 1)
 
     def test_get_existing_artist(self):
         img = self.img_recipe.make()

@@ -11,7 +11,6 @@ class CardSetItem(Item):
 class CardImageItem(Item):
     mvid = Field()  # Multiverse ID
     art = Field()  # url for card scan
-    art_path = Field()  # file system path for downloaded card scan
 
 
 class CardItem(Item):
@@ -22,7 +21,6 @@ class CardItem(Item):
     card_set_slug = Field()  # card set slug from list page
     set = Field()  # card set full name
     art = Field()  # url for card scan
-    art_path = Field()  # file system path for downloaded card scan
 
     mana = Field()  # encoded mana cost, e.g. {B}{G}
     color_indicator = Field()  # color for double faced cards back
