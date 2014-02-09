@@ -8,12 +8,16 @@ from scrapy.contracts import ContractsManager
 from scrapy.contracts.default import UrlContract
 
 from crawler.contracts import ItemContract, FieldContract, MetaContract,\
-    QueryContract, PartialContract
+    QueryContract, PartialContract, ItemsClassContract
 
 
 class TestItem(Item):
     name = Field()
     url = Field()
+
+
+class MyItem(Item):
+    foo = Field()
 
 
 class ResponseMock(object):
@@ -135,11 +139,28 @@ class TestSpider(Spider):
         yield TestItem(name='docs', url="http://docs.scrapy.org")
         yield TestItem(name='github', url="https://github.com/scrapy/scrapy")
 
+    def expected_item_class_ok(self, response):
+        """ returns items of different classes
+        @url http://scrapy.org
+        @items TestItem 2
+        @items MyItem 1
+        """
+        yield TestItem(name='docs', url="http://docs.scrapy.org")
+        yield TestItem(name='github', url="https://github.com/scrapy/scrapy")
+        yield MyItem(foo='bar')
+
+    def expected_item_class_fail(self, response):
+        """ returns MyItem
+        @url http://scrapy.org
+        @items TestItem 2
+        """
+        yield MyItem(foo='bar')
+
 
 class ContractsTest(unittest.TestCase):
     contracts = [
         UrlContract, ItemContract, FieldContract, MetaContract, QueryContract,
-        PartialContract
+        PartialContract, ItemsClassContract
     ]
 
     def setUp(self):
@@ -233,4 +254,20 @@ class ContractsTest(unittest.TestCase):
             self.spider.partial_item_fail, self.results)
         output = request.callback(self.response)
         self.assertEqual([type(x) for x in output], [TestItem, TestItem])
+        self.should_fail()
+
+    def test_expected_items(self):
+        request = self.conman.from_method(
+            self.spider.expected_item_class_ok, self.results)
+        output = request.callback(self.response)
+        self.assertEqual(
+            [type(x) for x in output],
+            [TestItem, TestItem, MyItem])
+        self.should_succeed()
+
+    def test_expected_items_fail(self):
+        request = self.conman.from_method(
+            self.spider.expected_item_class_fail, self.results)
+        output = request.callback(self.response)
+        self.assertEqual([type(x) for x in output], [MyItem])
         self.should_fail()

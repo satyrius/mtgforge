@@ -114,3 +114,23 @@ class QueryContract(Contract):
             url[4] = urlencode(query)
             kwargs['url'] = urlunparse(url)
         return kwargs
+
+
+class ItemsClassContract(Contract):
+    '''Contract to check that output countains accurate number of items of
+    given Class. Example:
+
+    @items MyItem 2
+    '''
+    name = 'items'
+
+    def post_process(self, output):
+        cls, cnt = self.args
+        count = 0
+        for x in output:
+            if isinstance(x, BaseItem) and type(x).__name__ == cls:
+                count += 1
+
+        if count != int(cnt):
+            raise ContractFail('Expected to get {} of {}, got {}'.format(
+                cnt, cls, count))

@@ -30,9 +30,10 @@ FEED_EXPORTERS = {
 SPIDER_CONTRACTS = {
     'crawler.contracts.QueryContract': 98,
     'crawler.contracts.MetaContract': 99,
-    'crawler.contracts.FieldContract': 100,
-    'crawler.contracts.PartialContract': 101,
-    'crawler.contracts.ItemContract': 102,
+    'crawler.contracts.ItemsClassContract': 100,
+    'crawler.contracts.FieldContract': 110,
+    'crawler.contracts.PartialContract': 111,
+    'crawler.contracts.ItemContract': 112,
 }
 
 HTTPCACHE_ENABLED = True
