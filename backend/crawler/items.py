@@ -23,19 +23,17 @@ class BaseCarditem(Item):
     type = Field()  # type line
     text = Field()  # rules text
     flavor = Field()  # flavor text
+    sibling = Field()  # name of the sibling card face
 
 
 class CardItem(BaseCarditem):
-    sibling = Field()  # name of the sibling card face
     set = Field()  # card set full name
-
     mana = Field()  # encoded mana cost, e.g. {B}{G}
     color_indicator = Field()  # color for double faced cards back
     cmc = Field()  # converted mana cost
     pt = Field()  # power and thoughtness
     rarity = Field()  # card rarity
     artist = Field()  # artist name
-
     mark = Field()  # watermark, TODO alter db schema to store it
 
 
