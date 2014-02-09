@@ -1,4 +1,5 @@
 from scrapy.contracts import Contract
+from scrapy.http import Request
 from scrapy.item import BaseItem
 from scrapy.exceptions import ContractFail
 import json
@@ -134,3 +135,38 @@ class ItemsClassContract(Contract):
         if count != int(cnt):
             raise ContractFail('Expected to get {} of {}, got {}'.format(
                 cnt, cls, count))
+
+
+class RequestContract(Contract):
+    '''Contract to check returned request url and meta. To assert meta
+    pass key-value pairs right after url. Keys should starts with @.
+
+    @request http://example.com @foo 1 @bar Lorem ipsum
+    '''
+    name = 'request'
+
+    def __init__(self, *args, **kwargs):
+        super(RequestContract, self).__init__(*args, **kwargs)
+        self.url = self.args[0]
+        self.meta = {}
+        k = None
+        for x in self.args[1:]:
+            if x.startswith('@'):
+                k = x[1:]
+            elif k:
+                self.meta.setdefault(k, []).append(x)
+        self.meta = {k: u' '.join(v) for k, v in self.meta.items()}
+
+    def post_process(self, output):
+        for x in output:
+            if isinstance(x, Request):
+                if x.url == self.url:
+                    for k, v in self.meta.items():
+                        got = x.meta.get(k)
+                        if got != v:
+                            raise ContractFail(
+                                'Request with url {} has the following value '
+                                'for meta argument "{}": "{}". '
+                                'Expected "{}"'.format(x.url, k, got, v))
+                    return
+        raise ContractFail('Request with url {} expected'.format(self.url))

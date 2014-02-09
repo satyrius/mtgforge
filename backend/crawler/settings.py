@@ -31,6 +31,7 @@ SPIDER_CONTRACTS = {
     'crawler.contracts.QueryContract': 98,
     'crawler.contracts.MetaContract': 99,
     'crawler.contracts.ItemsClassContract': 100,
+    'crawler.contracts.RequestContract': 101,
     'crawler.contracts.FieldContract': 110,
     'crawler.contracts.PartialContract': 111,
     'crawler.contracts.ItemContract': 112,
