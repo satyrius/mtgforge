@@ -13,24 +13,31 @@ class CardImageItem(Item):
     art = Field()  # url for card scan
 
 
-class CardItem(Item):
+class BaseCarditem(Item):
+    art = Field()  # url for card scan
     mvid = Field()  # Multiverse ID
+    number = Field()  # collector's numner
+
     title = Field()  # card title
     name = Field()  # card name
+    type = Field()  # type line
+    text = Field()  # rules text
+    flavor = Field()  # flavor text
+
+
+class CardItem(BaseCarditem):
     sibling = Field()  # name of the sibling card face
-    card_set_slug = Field()  # card set slug from list page
     set = Field()  # card set full name
-    art = Field()  # url for card scan
 
     mana = Field()  # encoded mana cost, e.g. {B}{G}
     color_indicator = Field()  # color for double faced cards back
     cmc = Field()  # converted mana cost
-    type = Field()  # type line
-    text = Field()  # rules text
-    flavor = Field()  # flavor text
     pt = Field()  # power and thoughtness
     rarity = Field()  # card rarity
-    number = Field()  # collector's numner
     artist = Field()  # artist name
 
     mark = Field()  # watermark, TODO alter db schema to store it
+
+
+class L10nItem(BaseCarditem):
+    language = Field()

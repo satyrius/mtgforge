@@ -1,7 +1,8 @@
 import itertools as it
 import re
 import sys
-from urlparse import urljoin
+import urlparse as up
+from urllib import urlencode
 
 from lxml import etree
 from lxml.html import document_fromstring
@@ -9,7 +10,7 @@ from scrapy.contrib.spiders import CrawlSpider
 from scrapy.http import FormRequest, Request
 from scrapy.selector import Selector
 
-from crawler.items import CardSetItem, CardItem
+from crawler.items import CardSetItem, CardItem, L10nItem
 
 
 class GathererSpider(CrawlSpider):
@@ -50,7 +51,7 @@ class GathererSpider(CrawlSpider):
             page_num = page_link.xpath('text()').extract()[0].strip()
             if page_url and page_num.isdigit():
                 yield Request(
-                    urljoin(response.request.url, page_url),
+                    up.urljoin(response.request.url, page_url),
                     callback=self.parse_list,
                     meta={'card_set': card_set})
 
@@ -58,7 +59,6 @@ class GathererSpider(CrawlSpider):
         for card_row in sel.css('tr.cardItem'):
             a = card_row.css('td.name a')
             card_url = a.xpath('@href').extract()[0]
-            card_name = a.xpath('text()').extract()[0].strip()
 
             # Next we should parse 'printings' block. It contains card links
             # for all card releases in all sets. We will get all links for
@@ -77,8 +77,8 @@ class GathererSpider(CrawlSpider):
             for url, cs in printings.items():
                 if cs == slug:
                     yield Request(
-                        urljoin(response.request.url, url),
-                        meta={'card': card_name, 'card_set': card_set},
+                        up.urljoin(response.request.url, url),
+                        meta={'card_set': card_set},
                         callback=self.parse_card)
 
     def extract_mana(self, el_selector):
@@ -105,6 +105,7 @@ class GathererSpider(CrawlSpider):
         '''Parse compact card list and follow card details for each printing.
         '''
         sel = Selector(response)
+        page_url = response.request.url
         ignore_fields = ['player_rating', 'other_sets']
         subcontent_re = re.compile('MainContent_SubContent_SubContent')
 
@@ -157,10 +158,46 @@ class GathererSpider(CrawlSpider):
                     suffixes[card['name']]
 
             # Get image url and extract multiverse id
-            card['art'] = urljoin(response.request.url, details.css(
+            card['art'] = up.urljoin(page_url, details.css(
                 'td.leftCol img::attr(src)').extract()[0])
 
-            yield card
+            lang = response.meta.get('printed')
+            if not lang:
+                # Oracle rules page
+                yield card
+            else:
+                card_l10n = L10nItem(language=lang)
+                # Copy shared fields from card item
+                for n, _ in card_l10n.fields.items():
+                    card_l10n[n] = card.get(n)
+                yield card_l10n
+
+        # Go to Languages
+        if 'printed' not in response.meta:
+            yield Request(
+                url=printed_url(page_url),
+                callback=self.parse_card,
+                meta={'printed': 'English'})
+
+            lid = 'ctl00_ctl00_ctl00_MainContent_SubContent_'\
+                  'SubContentAnchors_DetailsAnchors_LanguagesLink'
+            langs = sel.css('#{id}::attr("href")'.format(id=lid)).extract()[0]
+            yield Request(
+                url=up.urljoin(page_url, langs),
+                callback=self.parse_languages)
+
+    def parse_languages(self, response):
+        sel = Selector(response)
+        page_url = response.request.url
+        for row in sel.css('table.cardList tr.cardItem'):
+            cells = row.xpath('.//td')
+            href = cells[0].xpath('.//a/@href').extract()[0]
+            print_url = printed_url(up.urljoin(page_url, href))
+            lang = cells[1].xpath('text()').extract()[0].strip()
+            yield Request(
+                url=print_url,
+                callback=self.parse_card,
+                meta={'printed': lang})
 
 
 def printed_url(url):

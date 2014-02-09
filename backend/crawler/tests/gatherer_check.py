@@ -6,6 +6,7 @@ class TestGathererSpider(GathererSpider):
     but has more processing methods to defile more contracts (because Scrapy
     support only one UrlContract per method docstring).
     '''
+    name = 'oracle_rules'
 
     def avacyn_angel_of_hope(self, response):
         '''Parse creature details
@@ -13,7 +14,7 @@ class TestGathererSpider(GathererSpider):
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=239961
 
         @returns items 1 1
-        @returns requests 0 0
+        @returns requests 2 2
 
         @field title Avacyn, Angel of Hope
         @field name Avacyn, Angel of Hope
@@ -41,7 +42,7 @@ class TestGathererSpider(GathererSpider):
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=178135
 
         @returns items 1 1
-        @returns requests 0 0
+        @returns requests 2 2
 
         @field name Adventuring Gear
         @field text Landfall - Whenever a land enters the battlefield under your control, equipped creature gets +2/+2 until end of turn.\\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)
@@ -54,7 +55,7 @@ class TestGathererSpider(GathererSpider):
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=265383
 
         @returns items 1 1
-        @returns requests 0 0
+        @returns requests 2 2
 
         @field name Axebane Stag
         @field text
@@ -67,7 +68,7 @@ class TestGathererSpider(GathererSpider):
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=289326
 
         @returns items 1 1
-        @returns requests 0 0
+        @returns requests 2 2
 
         @field name Forest
         @field text G
@@ -85,7 +86,7 @@ class TestGathererSpider(GathererSpider):
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=244683
 
         @returns items 2 2
-        @returns requests 0 0
+        @returns requests 2 2
 
         @field title Hanweir Watchkeep
 
@@ -112,7 +113,7 @@ class TestGathererSpider(GathererSpider):
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=244687
 
         @returns items 2 2
-        @returns requests 0 0
+        @returns requests 2 2
 
         @field title Hanweir Watchkeep
 
@@ -139,7 +140,7 @@ class TestGathererSpider(GathererSpider):
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=78694
 
         @returns items 2 2
-        @returns requests 0 0
+        @returns requests 2 2
 
         @field title Akki Lavarunner
 
@@ -163,7 +164,7 @@ class TestGathererSpider(GathererSpider):
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=27166
 
         @returns items 2 2
-        @returns requests 0 0
+        @returns requests 2 2
 
         @field title Fire // Ice
 
@@ -214,7 +215,7 @@ class TestGathererSpider(GathererSpider):
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=275266
 
         @returns items 1 1
-        @returns requests 0 0
+        @returns requests 2 2
 
         @field name Rancor
         @field set Planechase 2012 Edition
@@ -237,7 +238,7 @@ class TestGathererSpider(GathererSpider):
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?printed=false&multiverseid=9780
 
         @returns items 2 2
-        @returns requests 0 0
+        @returns requests 2 2
 
         @field title B.F.M. (Big Furry Monster)
         @field name B.F.M. (Big Furry Monster)
