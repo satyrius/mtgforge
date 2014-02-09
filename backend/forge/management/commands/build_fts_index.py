@@ -36,7 +36,7 @@ class Command(BaseCommand):
             GROUP BY f.card_id, f.id, f.place
             """,
 
-            # {{{ NAME AND RULES
+            # NAME AND RULES
 
             r"""--Populate tsvector from names, type_lines and rules
             UPDATE forge_cardftsindex SET fts = fts
@@ -55,9 +55,7 @@ class Command(BaseCommand):
             WHERE n.id = card_face_id
             """,
 
-            # }}}
-
-            # {{{ COLOR
+            # COLOR
 
             """--Poulate table with colors
             UPDATE forge_cardftsindex set color_identity = f.color_identity
@@ -115,9 +113,7 @@ class Command(BaseCommand):
             WHERE color_identity & 32 > 0
             """,
 
-            # }}}
-
-            # {{{ MANA COST
+            # MANA COST
 
             """--Populate table with converted mana cost (cmc)
             UPDATE forge_cardftsindex SET cmc = f.cmc
@@ -137,9 +133,7 @@ class Command(BaseCommand):
             WHERE cmc IS NOT NULL
             """,
 
-            # }}}
-
-            # {{{ RELEASE AT CARD SET AND RARITY
+            # RELEASE AT CARD SET AND RARITY
 
             """--Populate table with releases
             UPDATE forge_cardftsindex set sets = (
@@ -150,6 +144,18 @@ class Command(BaseCommand):
                     AND cs.is_published
                     AND r.card_id = forge_cardftsindex.card_id
             )
+            """,
+
+            """--Card set names
+            UPDATE forge_cardftsindex SET fts = fts
+                || setweight(to_tsvector(
+                    array_to_string((
+                        SELECT array_agg(cs.name)
+                        FROM oracle_cardset AS cs
+                        WHERE cs.id = ANY(sets)
+                    ), '')
+                ), 'B')
+
             """,
 
             """--Create rarity index
@@ -170,8 +176,6 @@ class Command(BaseCommand):
             ) AS n
             WHERE n.id = card_id
             """,
-
-            # }}}
         ]
 
         sql_no = 1
