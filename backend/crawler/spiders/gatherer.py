@@ -163,6 +163,14 @@ class GathererSpider(CrawlSpider):
             yield card
 
 
+def printed_url(url):
+    parts = list(up.urlparse(url))
+    query = dict(up.parse_qsl(parts[4]))
+    query['printed'] = 'true'
+    parts[4] = urlencode(query)
+    return up.urlunparse(parts)
+
+
 def extract_text(element):
     '''Extract text from element and its descendants. It also normalizes
     spaces and other valuable symbols.
