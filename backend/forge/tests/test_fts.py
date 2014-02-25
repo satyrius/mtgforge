@@ -141,3 +141,13 @@ class SearchTest(SerpTest):
         expected = {face1.name, face2.name}
         data = self.search()
         self.assertEqual(set(self.get_cards(data)), expected)
+
+    def test_search_by_set_name(self):
+        set1, set2 = self.cs_recipe.make(_quantity=2)
+        face1 = self.face_recipe.make()
+        self.release_recipe.make(card_set=set1, card=face1.card)
+        face2 = self.face_recipe.make()
+        self.release_recipe.make(card_set=set2, card=face2.card)
+
+        data = self.search(q=set1.name)
+        self.assertEqual(self.get_cards(data), [face1.name])
