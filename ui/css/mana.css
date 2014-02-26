@@ -1,0 +1,41 @@
+.mana-symbol {
+    width: 18px;
+    height: 18px;
+    border-radius: 15px;
+    display: inline-block;
+}
+
+.mana-symbol.red {
+    background-color: rgb(192, 138, 114);
+}
+
+.mana-symbol.white {
+    background-color: rgb(237, 231, 193);
+}
+
+.mana-symbol.green {
+    background-color: rgb(158, 185, 163);
+}
+
+.mana-symbol.blue {
+    background-color: rgb(169, 197, 215);
+}
+
+.mana-symbol.black {
+    background-color: rgb(180, 180, 180);
+}
+
+.mana-wheel {
+    font-size: 0;
+    line-height: 0;
+    display: inline-block;
+    width: 30px;
+    height: 60px;
+    text-align: center;
+    vertical-align: top;
+}
+
+.mana-wheel .mana-symbol {
+    margin-left: -8px;
+    margin-bottom: -8px;
+}

@@ -11,32 +11,47 @@ body {
 }
 
 .search-block {
-    width: 59px;
+    width: 310px;
+    left: -250px;
+    background: #f2f2f2;
     height: 60px;
     border-bottom: 1px solid #d8d8d8;
     font-size: 2.5rem;
-    text-align: center;
+    text-align: right;
+    padding-right: 16px;
     padding-top: 0.585rem;
     color: #ccc;
     transition: all 0.3s ease;
     position: relative;
     z-index: 2;
+    transition: all 0.3s ease;
 }
 
 .search-block:hover {
     color: #666;
-}
-
-.search-block:hover .hover-block {
-    left: 58px;
+    left: 0;
 }
 
 .hover-block {
     position: absolute;
-    width: 300px;
+    width: 240px;
     height: 61px;
-    left: -301px;
-    top: -1px;
-    transition: all 0.3s ease;
-    z-index: 1;
+    left: 10px;
+    top: 11px;
+}
+
+.card-place {
+    max-width: none;
+    padding-top: 30px;
+}
+
+.card-wrapper {
+    text-align: center;
+    margin-left: 15px;
+}
+
+.card-image {
+    margin: 0 15px 15px 0;
+    box-shadow: 0 2px 7px 2px #999;
+    border-radius: 10px;
 }
