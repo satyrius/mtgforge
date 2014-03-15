@@ -19,6 +19,7 @@ ITEM_PIPELINES = {
     'crawler.pipelines.art.CardImagePipeline': 1,
     'crawler.pipelines.cards.DupsHandlePipeline': 100,
     'crawler.pipelines.cards.CardsPipeline': 110,
+    'crawler.pipelines.l10n.L10nPipeline': 120,
     'crawler.pipelines.sets.CardSetsPipeline': 200,
     'crawler.pipelines.sets.InfoPipeline': 210,
 }

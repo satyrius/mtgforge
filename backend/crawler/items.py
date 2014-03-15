@@ -18,6 +18,7 @@ class BaseCarditem(Item):
     mvid = Field()  # Multiverse ID
     number = Field()  # collector's numner
 
+    set = Field()  # card set full name
     title = Field()  # card title
     name = Field()  # card name
     type = Field()  # type line
@@ -27,7 +28,6 @@ class BaseCarditem(Item):
 
 
 class CardItem(BaseCarditem):
-    set = Field()  # card set full name
     mana = Field()  # encoded mana cost, e.g. {B}{G}
     color_indicator = Field()  # color for double faced cards back
     cmc = Field()  # converted mana cost
