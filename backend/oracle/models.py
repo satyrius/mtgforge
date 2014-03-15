@@ -14,7 +14,7 @@ from oracle.utils import Color
 _ = lambda s: s
 
 
-# {{{ Cards and faces
+# Cards and faces
 
 class Card(models.Model):
     name = NullCharField(max_length=255)
@@ -126,10 +126,8 @@ def update_faces_count(sender, **kwargs):
         card.faces_count = count
         card.save()
 
-# }}}
 
-
-# {{{ Card release and localization models
+# Card release and localization models
 
 class CardSet(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -209,5 +207,3 @@ class CardL10n(models.Model):
 
     class Meta:
         unique_together = (('card_face', 'card_release', 'language'),)
-
-# }}}
