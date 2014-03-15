@@ -1,5 +1,5 @@
 #!/bin/sh
-# Parse card by multoverse id using gatherer crawler
+# Parse card by multiverse id using gatherer crawler with pipelines applied
 cd $(dirname $0)
 
 URL="http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=$1"
