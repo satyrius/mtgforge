@@ -166,10 +166,11 @@ class GathererSpider(CrawlSpider):
                 # Oracle rules page
                 yield card
             else:
-                card_l10n = L10nItem(language=lang)
+                card_l10n = L10nItem()
                 # Copy shared fields from card item
                 for n, _ in card_l10n.fields.items():
                     card_l10n[n] = card.get(n)
+                card_l10n['language'] = lang
                 yield card_l10n
 
         # Go to Languages

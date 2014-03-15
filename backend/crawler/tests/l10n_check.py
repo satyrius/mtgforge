@@ -31,13 +31,14 @@ class TestGathererSpider(GathererSpider):
 
         @returns items 1 1
         @items L10nItem 1
+        @field language English
 
         @returns requests 0 0
         '''
         return super(TestGathererSpider, self).parse_card(response)
 
     def print_for_each_language(self, response):
-        '''Return links to the card print for each langiage
+        '''Return links to the card print for each language
 
         @url http://gatherer.wizards.com/Pages/Card/Languages.aspx?multiverseid=239961
 
