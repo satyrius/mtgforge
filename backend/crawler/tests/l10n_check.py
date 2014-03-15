@@ -18,7 +18,7 @@ class TestGathererSpider(GathererSpider):
         @items CardItem 1
 
         @returns requests 2 2
-        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=239961&printed=true @printed English
+        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=239961&printed=true @language English
         @request http://gatherer.wizards.com/Pages/Card/Languages.aspx?multiverseid=239961
         '''
         return super(TestGathererSpider, self).parse_card(response)
@@ -27,7 +27,7 @@ class TestGathererSpider(GathererSpider):
         '''Do not return any request if we are already parsing card print page
 
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=239961&printed=true
-        @meta printed English
+        @meta language English
 
         @returns items 1 1
         @items L10nItem 1
@@ -43,7 +43,7 @@ class TestGathererSpider(GathererSpider):
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?printed=true&multiverseid=27166
 
         @returns items 2 2
-        @returns requests 2 2
+        @returns requests 0 0
 
         @field title Fire // Ice
 
@@ -68,15 +68,15 @@ class TestGathererSpider(GathererSpider):
 
         @returns items 0 0
         @returns requests 10 10
-        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=295034&printed=true @printed Chinese Traditional
-        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=340526&printed=true @printed German
-        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=295522&printed=true @printed French
-        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=296254&printed=true @printed Italian
-        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=294245&printed=true @printed Japanese
-        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=294790&printed=true @printed Korean
-        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=295278&printed=true @printed Portuguese (Brazil)
-        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=295766&printed=true @printed Russian
-        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=294546&printed=true @printed Chinese Simplified
-        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=296010&printed=true @printed Spanish
+        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=295034&printed=true @language Chinese Traditional
+        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=340526&printed=true @language German
+        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=295522&printed=true @language French
+        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=296254&printed=true @language Italian
+        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=294245&printed=true @language Japanese
+        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=294790&printed=true @language Korean
+        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=295278&printed=true @language Portuguese (Brazil)
+        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=295766&printed=true @language Russian
+        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=294546&printed=true @language Chinese Simplified
+        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=296010&printed=true @language Spanish
         '''
         return super(TestGathererSpider, self).parse_languages(response)

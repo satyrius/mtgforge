@@ -167,8 +167,7 @@ class GathererSpider(CrawlSpider):
             card['art'] = up.urljoin(page_url, details.css(
                 'td.leftCol img::attr(src)').extract()[0])
 
-            lang = response.meta.get('printed')
-            if not lang:
+            if not is_printed:
                 # Oracle rules page
                 yield card
             else:
@@ -176,15 +175,15 @@ class GathererSpider(CrawlSpider):
                 # Copy shared fields from card item
                 for n, _ in card_l10n.fields.items():
                     card_l10n[n] = card.get(n)
-                card_l10n['language'] = lang
+                card_l10n['language'] = response.meta.get('language')
                 yield card_l10n
 
         # Go to Languages
-        if 'printed' not in response.meta:
+        if not is_printed:
             yield Request(
                 url=printed_url(page_url),
                 callback=self.parse_card,
-                meta={'printed': 'English'})
+                meta={'language': 'English'})
 
             lid = 'ctl00_ctl00_ctl00_MainContent_SubContent_'\
                   'SubContentAnchors_DetailsAnchors_LanguagesLink'
@@ -204,7 +203,7 @@ class GathererSpider(CrawlSpider):
             yield Request(
                 url=print_url,
                 callback=self.parse_card,
-                meta={'printed': lang})
+                meta={'language': lang})
 
 
 def printed_url(url):
