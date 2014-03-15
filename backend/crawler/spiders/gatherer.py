@@ -10,7 +10,7 @@ from scrapy.contrib.spiders import CrawlSpider
 from scrapy.http import FormRequest, Request
 from scrapy.selector import Selector
 
-from crawler.items import CardSetItem, CardItem, L10nItem
+from crawler.items import CardItem, L10nItem
 
 
 class GathererSpider(CrawlSpider):
@@ -36,14 +36,11 @@ class GathererSpider(CrawlSpider):
             yield FormRequest(
                 url=self.search_url, method='GET',
                 callback=self.parse_list,
-                formdata={'set': '[%s]' % name, 'output': 'compact'},
-                meta={'card_set': CardSetItem(name=name)})
+                formdata={'set': '[%s]' % name, 'output': 'compact'})
 
     def parse_list(self, response):
         '''Parse compact card list and follow card details for each printing.
         '''
-        card_set = response.request.meta.get('card_set', CardSetItem())
-
         # Follow pagination
         sel = Selector(response)
         for page_link in sel.css('div.pagingControls a'):
@@ -52,8 +49,7 @@ class GathererSpider(CrawlSpider):
             if page_url and page_num.isdigit():
                 yield Request(
                     up.urljoin(response.request.url, page_url),
-                    callback=self.parse_list,
-                    meta={'card_set': card_set})
+                    callback=self.parse_list)
 
         sel = Selector(response)
         for card_row in sel.css('tr.cardItem'):
@@ -70,15 +66,10 @@ class GathererSpider(CrawlSpider):
                 'td.printings a')}
             slug = printings[card_url]
 
-            # Fill card set slug and return an item if not returned yet
-            if 'slug' not in card_set:
-                card_set['slug'] = slug
-
             for url, cs in printings.items():
                 if cs == slug:
                     yield Request(
                         up.urljoin(response.request.url, url),
-                        meta={'card_set': card_set},
                         callback=self.parse_card)
 
     def extract_mana(self, el_selector):
