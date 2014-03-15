@@ -1,7 +1,7 @@
 Django==1.5.4
 Fabric==1.8.0
 Pillow==2.3.0
-Scrapy==0.22.0
+Scrapy==0.22.2
 South==0.8.2
 Twisted==13.2.0 # required by Scrapy
 cssselect==0.9.1 # required by Scrapy
