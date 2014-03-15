@@ -200,6 +200,12 @@ def printed_url(url):
     return up.urlunparse(parts)
 
 
+def is_printed_url(url):
+    parts = list(up.urlparse(url))
+    query = dict(up.parse_qsl(parts[4]))
+    return 'printed' in query and query['printed'].lower() == 'true'
+
+
 def extract_text(element):
     '''Extract text from element and its descendants. It also normalizes
     spaces and other valuable symbols.

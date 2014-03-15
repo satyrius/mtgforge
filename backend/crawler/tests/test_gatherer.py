@@ -1,5 +1,6 @@
 from unittest import TestCase
-from crawler.spiders.gatherer import printed_url
+from nose_parameterized import parameterized
+from crawler.spiders.gatherer import printed_url, is_printed_url
 
 
 class GathererUtilsTest(TestCase):
@@ -22,3 +23,12 @@ class GathererUtilsTest(TestCase):
             'http://gatherer.wizards.com/Pages/Card/Details.aspx?'
             'multiverseid=378376&printed=true'
         )
+
+    @parameterized.expand([
+        ('multiverseid=378376', False),
+        ('printed=false&multiverseid=378376', False),
+        ('printed=true&multiverseid=378376', True),
+    ])
+    def test_is_print_url(self, query, is_printed):
+        url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?' + query
+        self.assertEqual(is_printed_url(url), is_printed)
