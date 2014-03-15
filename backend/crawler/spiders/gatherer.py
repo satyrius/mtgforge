@@ -2,6 +2,7 @@ import itertools as it
 import re
 import sys
 import urlparse as up
+from collections import OrderedDict
 from urllib import urlencode
 
 from lxml import etree
@@ -97,29 +98,36 @@ class GathererSpider(CrawlSpider):
         '''
         sel = Selector(response)
         page_url = response.request.url
+        is_printed = is_printed_url(page_url)
         ignore_fields = ['player_rating', 'other_sets']
         subcontent_re = re.compile('MainContent_SubContent_SubContent')
 
-        # All card faces
-        faces = sel.css('table.cardDetails')
+        # Card title
+        title = extract_text(sel.css(
+            'div.contentTitle span::text').extract()[0].strip())
+        suffixes = number_suffixes(title)
 
         # Get name for all card face on the card page
+        faces = sel.css('table.cardDetails')
         names = [n.strip() for n in faces.css(
             'td.rightCol div[id$="nameRow"] div.value::text').extract()]
+
+        # We have to extract splited card names from the tile, because
+        # card's printed vertion name contains both names for each face.
+        if len(names) == 2 and '//' in title and is_printed:
+            names = suffixes.keys()
+
         names_set = set(names)
         # Big Fury Monster case. It's page looks like a double faced card page,
         # but phisically it is a one card released twice with the same name
         # (like a basic lands).
         is_bfm = len(names) > len(names_set)
 
-        # Card title
-        title = extract_text(
-            sel.css('div.contentTitle span::text').extract()[0].strip())
-        suffixes = number_suffixes(title)
+        # Double faced cards has only one name in title, we should use first
         if len(names) > 1 and len(suffixes) == 1:
             title = names[0]
 
-        for details in faces:
+        for i, details in enumerate(faces):
             card = CardItem(title=title)
 
             # Iterate over card details rows and parse data
@@ -137,11 +145,18 @@ class GathererSpider(CrawlSpider):
                         value = getattr(self, extract)(value)
                     else:
                         value = extract_text(value)
-                    card[k] = value
 
-                    # Get sibling name for multifaces cards
+                    # Special name processing for multifaces cards
                     if k == 'name' and len(names) > 1 and not is_bfm:
+                        # Use name parsed from card totle for splited cards
+                        # localization, because name field contains title,
+                        # not a spell name.
+                        if value == title:
+                            value = names[i]
+                        # Get sibling name for multifaces cards
                         card['sibling'] = (names_set - {value}).pop()
+
+                    card[k] = value
 
             # Fix card numner suffix
             if 'number' in card and len(suffixes) > 1:
@@ -271,6 +286,6 @@ def number_suffixes(title):
 
     # No need to add any suffixes for not splited cards
     if len(names) == 1:
-        return {title: ''}
+        return OrderedDict({title: ''})
 
-    return {n: s for n, s in it.izip(names, 'abcdefg')}
+    return OrderedDict((n, s) for n, s in it.izip(names, 'abcdefg'))

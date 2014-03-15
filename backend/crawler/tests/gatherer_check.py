@@ -159,7 +159,7 @@ class TestGathererSpider(GathererSpider):
         return super(TestGathererSpider, self).parse_card(response)
 
     def splitted_card(self, response):
-        '''Parse splitted card first face
+        '''Parse splitted card
 
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=27166
 

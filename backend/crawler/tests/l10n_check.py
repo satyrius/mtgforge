@@ -37,6 +37,30 @@ class TestGathererSpider(GathererSpider):
         '''
         return super(TestGathererSpider, self).parse_card(response)
 
+    def splitted_card_print(self, response):
+        '''Parse splitted card
+
+        @url http://gatherer.wizards.com/Pages/Card/Details.aspx?printed=true&multiverseid=27166
+
+        @returns items 2 2
+        @returns requests 2 2
+
+        @field title Fire // Ice
+
+        @partial {\
+            "name": "Fire",\
+            "sibling": "Ice",\
+            "number": "128a"\
+        }
+
+        @partial {\
+            "name": "Ice",\
+            "sibling": "Fire",\
+            "number": "128b"\
+        }
+        '''
+        return super(TestGathererSpider, self).parse_card(response)
+
     def print_for_each_language(self, response):
         '''Return links to the card print for each language
 
