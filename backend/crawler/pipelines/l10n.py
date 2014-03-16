@@ -24,13 +24,7 @@ class L10nPipeline(BaseL10nItemPipeline):
     @xact
     def _process_item(self, item, spider):
         release, face = get_card_release(item)
-        language = l10n.get_code(item['language'])
-        try:
-            face_l10n = m.CardL10n.objects.get(
-                card_face=face, card_release=release, language=language)
-        except m.CardL10n.DoesNotExist:
-            face_l10n = m.CardL10n(
-                card_face=face, card_release=release, language=language)
+        face_l10n = get_l10n_instance(face, release, item['language'])
         save_card_l10n(face_l10n, item)
 
         # Increment stat counter
@@ -48,6 +42,17 @@ def get_card_release(item):
     release = m.CardRelease.objects.get(card_set=cs, card_number=number)
     face = m.CardFace.objects.get(card=release.card, sub_number=sub_number)
     return release, face
+
+
+def get_l10n_instance(face, release, language):
+    language = l10n.get_code(language)
+    try:
+        face_l10n = m.CardL10n.objects.get(
+            card_face=face, card_release=release, language=language)
+    except m.CardL10n.DoesNotExist:
+        face_l10n = m.CardL10n(
+            card_face=face, card_release=release, language=language)
+    return face_l10n
 
 
 def save_card_l10n(face_l10n, item):
