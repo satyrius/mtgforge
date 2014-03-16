@@ -51,10 +51,16 @@ def save_card_l10n(face_l10n, item):
         log.msg(u'"{}" is locked, cannot update "{}"'.format(
             face.card.name, item.get('name', face.name)), level=log.WARNING)
         return face
-    # Save card face using form to pass through all magic and validation
-    data = dict(item)
-    if face_l10n.language:
-        del data['language']
+
+    # Save card face using form to pass through all magic and validation.
+    # Face, release and language should be in instance.
+    data = {
+        'name': item['name'],
+        'type_line': item['type'],
+        'rules': item['text'],
+        'flavor': item['flavor'],
+        'art': m.CardImage.objects.get(mvid=item['mvid']).id,
+    }
     form = CardL10nForm(data, instance=face_l10n)
     if not form.is_valid():
         raise InvalidError(form.errors)

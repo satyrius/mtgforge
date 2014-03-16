@@ -136,14 +136,6 @@ class CardL10nForm(CardPageForm):
     class Meta:
         model = models.CardL10n
 
-    def __init__(self, data=None, **kwargs):
-        if data:
-            self._fix_data(data, 'type_line', 'type')
-            self._fix_data(data, 'rules', 'text')
-            self._fix_data(data, 'scan', 'art')
-
-        super(CardL10nForm, self).__init__(data=data, **kwargs)
-
 
 class CardImageForm(forms.ModelForm):
     class Meta:
