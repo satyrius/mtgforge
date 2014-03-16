@@ -39,7 +39,7 @@ class CardSavePipelineTest(TestCase):
             img = Mock()
             get_image.return_value = img
 
-            pipeline._process_item(item, Mock())
+            pipeline.process_item(item, Mock())
             get_face.assert_called_once_with(item)
             save.assert_called_once_with(face, item)
             update_card.assert_called_once_with(face.card, item)
