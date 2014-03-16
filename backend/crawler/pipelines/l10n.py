@@ -1,3 +1,5 @@
+import re
+
 from xact import xact
 from scrapy import log
 
@@ -30,6 +32,10 @@ class L10nPipeline(BaseL10nItemPipeline):
             face_l10n = m.CardL10n(
                 card_face=face, card_release=release, language=language)
         save_card_l10n(face_l10n, item)
+
+        # Increment stat counter
+        key = re.sub('[^a-z0-9]', '_', item['set'].lower())
+        spider.crawler.stats.inc_value(u'cards/{}/l10n'.format(key))
 
 
 def get_card_release(item):

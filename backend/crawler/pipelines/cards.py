@@ -64,7 +64,7 @@ class CardsPipeline(BaseCardItemPipeline):
 
         # Increment stat counter
         key = re.sub('[^a-z0-9]', '_', item['set'].lower())
-        spider.crawler.stats.inc_value(u'card_item_count/{}'.format(key))
+        spider.crawler.stats.inc_value(u'cards/{}/item'.format(key))
 
 
 def get_or_create_card_face(item):
