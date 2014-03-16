@@ -56,7 +56,7 @@ class CardsPipeline(BaseCardItemPipeline):
         update_card(face.card, item)
         face = save_card_face(face, item)
 
-        # We shure that image was already downloaded and saved by
+        # We sure that image was already downloaded and saved by
         # CardImagePipeline
         img = m.CardImage.objects.get(mvid=item['mvid'])
         get_or_create_artist(item, img)
