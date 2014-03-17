@@ -65,12 +65,14 @@ def save_card_l10n(face_l10n, item):
 
     # Save card face using form to pass through all magic and validation.
     # Face, release and language should be in instance.
+    mvid = item['mvid']
     data = {
+        'mvid': mvid,
         'name': item['name'],
         'type_line': item['type'],
         'rules': item['text'],
         'flavor': item['flavor'],
-        'art': m.CardImage.objects.get(mvid=item['mvid']).id,
+        'art': m.CardImage.objects.get(mvid=mvid).id,
     }
     form = CardL10nForm(data, instance=face_l10n)
     if not form.is_valid():

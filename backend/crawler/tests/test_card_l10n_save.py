@@ -93,20 +93,19 @@ class CardL10nSaveTest(TestCase):
             self.assertIsNone(l10n.save_card_l10n(cl, Mock()))
             self.assertFalse(save.called)
 
-    @patch.object(forms.CardL10nForm, 'is_valid')
     @patch.object(forms.CardL10nForm, 'save')
-    def test_l10n_save(self, save, is_valid):
+    def test_l10n_save(self, save):
         cr = self.release_recipe.make()
         cl = mommy.make(m.CardL10n, card_face__card=cr.card, card_release=cr)
         item = L10nItem(name='foo', type='bar', text='', flavor='', mvid='1')
         with patch.object(m.CardImage.objects, 'get') as get:
             get.return_value = mommy.make(m.CardImage)
 
-            is_valid.return_value = False
-            with self.assertRaises(l10n.InvalidError):
-                l10n.save_card_l10n(cl, item)
-                self.assertFalse(save.called)
+            with patch.object(forms.CardL10nForm, 'is_valid') as is_valid:
+                is_valid.return_value = False
+                with self.assertRaises(l10n.InvalidError):
+                    l10n.save_card_l10n(cl, item)
+                    self.assertFalse(save.called)
 
-            is_valid.return_value = True
             l10n.save_card_l10n(cl, item)
             self.assertTrue(save.called)

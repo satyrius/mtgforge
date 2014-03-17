@@ -192,6 +192,8 @@ class CardRelease(models.Model):
 
 
 class CardL10n(models.Model):
+    mvid = models.PositiveIntegerField(null=False, blank=False)
+
     card_face = models.ForeignKey(CardFace, blank=True)
     card_release = models.ForeignKey(CardRelease, blank=True)
     language = NullCharField(
@@ -206,4 +208,10 @@ class CardL10n(models.Model):
     art = models.ForeignKey(CardImage, null=True, blank=True)
 
     class Meta:
-        unique_together = (('card_face', 'card_release', 'language'),)
+        unique_together = (
+            ('card_face', 'card_release', 'language'),
+            # Multiverse id does not uniq for card localization, because
+            # each face has its own l10n record and splited/flied card faces
+            # has the same mvid for each face (double faced cards doesn't)
+            ('card_face', 'mvid'),
+        )
