@@ -4,6 +4,8 @@ Pillow==2.3.0
 Scrapy==0.22.2
 South==0.8.2
 Twisted==13.2.0 # required by Scrapy
+cffi==0.8.2 # required by cryptography
+cryptography==0.2.2 # required by pyOpenSSL
 cssselect==0.9.1 # required by Scrapy
 django-arrayfields==0.1.0
 django-debug-toolbar==0.9.4
@@ -23,7 +25,7 @@ nose-parameterized==0.3.3
 nose==1.3.0
 paramiko==1.11.1 # required by Fabric
 psycopg2==2.5.1
-pyOpenSSL==0.13.1 # required by Scrapy
+pyOpenSSL==0.14 # required by Scrapy
 pycrypto==2.6 # required by paramiko
 python-dateutil==2.1 # required by django-tastypie
 python-memcached==1.53
