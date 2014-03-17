@@ -1,0 +1,31 @@
+fieldset.grp-module .grp-row .c-1 {
+    width: 50px !important;
+    min-width: 50px !important;
+}
+
+fieldset.grp-module .grp-row .grp-cell.scan {
+    width: 223px;
+}
+
+fieldset.grp-module .grp-row .grp-cell.scan .c-1 {
+    display: none;
+}
+
+fieldset.grp-module .grp-row .grp-cell.scan img {
+    position: absolute;
+    z-index: 1;
+}
+
+fieldset.grp-module .grp-row .grp-cell.scan .grp-readonly {
+    border: 0;
+}
+
+fieldset.grp-module .grp-row.type_line,
+fieldset.grp-module .grp-row.rules,
+fieldset.grp-module .grp-row.flavor {
+    padding-left: 275px;
+}
+
+fieldset.grp-module .grp-row {
+    overflow: visible;
+}

@@ -1,18 +1,10 @@
 from django.contrib import admin
-from oracle import models
-from oracle.admin.card_face import CardFaceInline
 from django.contrib.admin import SimpleListFilter
 from django.utils.translation import ugettext_lazy as _
 
-
-class CardReleaseInline(admin.TabularInline):
-    model = models.CardRelease
-    extra = 0
-    ordering = ('card_set__released_at', 'card_set__name', 'card_number',)
-    raw_id_fields = ('art',)
-    related_lookup_fields = {
-        'fk': ['art'],
-    }
+from oracle import models
+from oracle.admin.card_face import CardFaceInline
+from oracle.admin.card_release import CardReleaseInline
 
 
 class PartsCountFilter(SimpleListFilter):
