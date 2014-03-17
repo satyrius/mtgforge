@@ -205,7 +205,7 @@ class CardL10n(models.Model):
     rules = NullTextField(null=True, blank=True)
     flavor = NullTextField(null=True, blank=True)
 
-    art = models.ForeignKey(CardImage, null=True, blank=True)
+    art = models.ForeignKey(CardImage, null=False, blank=False)
 
     class Meta:
         unique_together = (
