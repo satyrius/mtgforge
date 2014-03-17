@@ -2,9 +2,11 @@ from django.contrib import admin
 from django.utils.safestring import mark_safe
 
 from oracle import models
+from oracle.forms import CardL10nForm
 
 
 class CardL10nInline(admin.StackedInline):
+    form = CardL10nForm
     model = models.CardL10n
     readonly_fields = ('scan', 'card_release', 'card_face', 'language',
                        'type_line', 'mvid')
