@@ -1,7 +1,9 @@
 import itertools as it
 import re
 import sys
-from urlparse import urljoin, urlparse, parse_qsl
+import urlparse as up
+from collections import OrderedDict
+from urllib import urlencode
 
 from lxml import etree
 from lxml.html import document_fromstring
@@ -9,7 +11,7 @@ from scrapy.contrib.spiders import CrawlSpider
 from scrapy.http import FormRequest, Request
 from scrapy.selector import Selector
 
-from crawler.items import CardSetItem, CardItem
+from crawler.items import CardItem, L10nItem
 
 
 class GathererSpider(CrawlSpider):
@@ -35,14 +37,11 @@ class GathererSpider(CrawlSpider):
             yield FormRequest(
                 url=self.search_url, method='GET',
                 callback=self.parse_list,
-                formdata={'set': '[%s]' % name, 'output': 'compact'},
-                meta={'card_set': CardSetItem(name=name)})
+                formdata={'set': '[%s]' % name, 'output': 'compact'})
 
     def parse_list(self, response):
         '''Parse compact card list and follow card details for each printing.
         '''
-        card_set = response.request.meta.get('card_set', CardSetItem())
-
         # Follow pagination
         sel = Selector(response)
         for page_link in sel.css('div.pagingControls a'):
@@ -50,15 +49,13 @@ class GathererSpider(CrawlSpider):
             page_num = page_link.xpath('text()').extract()[0].strip()
             if page_url and page_num.isdigit():
                 yield Request(
-                    urljoin(response.request.url, page_url),
-                    callback=self.parse_list,
-                    meta={'card_set': card_set})
+                    up.urljoin(response.request.url, page_url),
+                    callback=self.parse_list)
 
         sel = Selector(response)
         for card_row in sel.css('tr.cardItem'):
             a = card_row.css('td.name a')
             card_url = a.xpath('@href').extract()[0]
-            card_name = a.xpath('text()').extract()[0].strip()
 
             # Next we should parse 'printings' block. It contains card links
             # for all card releases in all sets. We will get all links for
@@ -70,15 +67,10 @@ class GathererSpider(CrawlSpider):
                 'td.printings a')}
             slug = printings[card_url]
 
-            # Fill card set slug and return an item if not returned yet
-            if 'slug' not in card_set:
-                card_set['slug'] = slug
-
             for url, cs in printings.items():
                 if cs == slug:
                     yield Request(
-                        urljoin(response.request.url, url),
-                        meta={'card': card_name, 'card_set': card_set},
+                        up.urljoin(response.request.url, url),
                         callback=self.parse_card)
 
     def extract_mana(self, el_selector):
@@ -105,29 +97,37 @@ class GathererSpider(CrawlSpider):
         '''Parse compact card list and follow card details for each printing.
         '''
         sel = Selector(response)
+        page_url = response.request.url
+        is_printed = is_printed_url(page_url)
         ignore_fields = ['player_rating', 'other_sets']
         subcontent_re = re.compile('MainContent_SubContent_SubContent')
 
-        # All card faces
-        faces = sel.css('table.cardDetails')
+        # Card title
+        title = extract_text(sel.css(
+            'div.contentTitle span::text').extract()[0].strip())
+        suffixes = number_suffixes(title)
 
         # Get name for all card face on the card page
+        faces = sel.css('table.cardDetails')
         names = [n.strip() for n in faces.css(
             'td.rightCol div[id$="nameRow"] div.value::text').extract()]
+
+        # We have to extract splited card names from the tile, because
+        # card's printed vertion name contains both names for each face.
+        if len(names) == 2 and '//' in title and is_printed:
+            names = suffixes.keys()
+
         names_set = set(names)
         # Big Fury Monster case. It's page looks like a double faced card page,
         # but phisically it is a one card released twice with the same name
         # (like a basic lands).
         is_bfm = len(names) > len(names_set)
 
-        # Card title
-        title = extract_text(
-            sel.css('div.contentTitle span::text').extract()[0].strip())
-        suffixes = number_suffixes(title)
+        # Double faced cards has only one name in title, we should use first
         if len(names) > 1 and len(suffixes) == 1:
             title = names[0]
 
-        for details in faces:
+        for i, details in enumerate(faces):
             card = CardItem(title=title)
 
             # Iterate over card details rows and parse data
@@ -145,11 +145,18 @@ class GathererSpider(CrawlSpider):
                         value = getattr(self, extract)(value)
                     else:
                         value = extract_text(value)
-                    card[k] = value
 
-                    # Get sibling name for multifaces cards
+                    # Special name processing for multifaces cards
                     if k == 'name' and len(names) > 1 and not is_bfm:
+                        # Use name parsed from card totle for splited cards
+                        # localization, because name field contains title,
+                        # not a spell name.
+                        if value == title:
+                            value = names[i]
+                        # Get sibling name for multifaces cards
                         card['sibling'] = (names_set - {value}).pop()
+
+                    card[k] = value
 
             # Fix card numner suffix
             if 'number' in card and len(suffixes) > 1:
@@ -157,12 +164,67 @@ class GathererSpider(CrawlSpider):
                     suffixes[card['name']]
 
             # Get image url and extract multiverse id
-            card['art'] = urljoin(response.request.url, details.css(
+            card['art'] = up.urljoin(page_url, details.css(
                 'td.leftCol img::attr(src)').extract()[0])
-            img_query = dict(parse_qsl(list(urlparse(card['art']))[4]))
-            card['mvid'] = img_query['multiverseid']
 
-            yield card
+            if not is_printed:
+                # Oracle rules page
+                yield card
+            else:
+                card_l10n = L10nItem()
+                # Copy shared fields from card item
+                for n, _ in card_l10n.fields.items():
+                    card_l10n[n] = card.get(n)
+                card_l10n['language'] = response.meta.get('language')
+                yield card_l10n
+
+        # Go to Languages
+        if not is_printed:
+            yield Request(
+                url=printed_url(page_url),
+                callback=self.parse_card,
+                meta={'language': 'English'})
+
+            lid = 'ctl00_ctl00_ctl00_MainContent_SubContent_'\
+                  'SubContentAnchors_DetailsAnchors_LanguagesLink'
+            langs = sel.css('#{id}::attr("href")'.format(id=lid)).extract()[0]
+            yield Request(
+                url=up.urljoin(page_url, langs),
+                callback=self.parse_languages)
+
+    def parse_languages(self, response):
+        sel = Selector(response)
+        page_url = response.request.url
+        for row in sel.css('table.cardList tr.cardItem'):
+            cells = row.xpath('.//td')
+            href = cells[0].xpath('.//a/@href').extract()[0]
+            print_url = printed_url(up.urljoin(page_url, href))
+            lang = cells[1].xpath('text()').extract()[0].strip()
+            yield Request(
+                url=print_url,
+                callback=self.parse_card,
+                meta={'language': lang})
+
+        page_url = response.request.url
+        for link in sel.css('div.pagingControls a'):
+            if link.xpath('text()').extract()[0].strip().isdigit():
+                yield Request(
+                    url=up.urljoin(page_url, link.xpath('@href').extract()[0]),
+                    callback=self.parse_languages)
+
+
+def printed_url(url):
+    parts = list(up.urlparse(url))
+    query = dict(up.parse_qsl(parts[4]))
+    query['printed'] = 'true'
+    parts[4] = urlencode(query)
+    return up.urlunparse(parts)
+
+
+def is_printed_url(url):
+    parts = list(up.urlparse(url))
+    query = dict(up.parse_qsl(parts[4]))
+    return 'printed' in query and query['printed'].lower() == 'true'
 
 
 def extract_text(element):
@@ -230,6 +292,6 @@ def number_suffixes(title):
 
     # No need to add any suffixes for not splited cards
     if len(names) == 1:
-        return {title: ''}
+        return OrderedDict({title: ''})
 
-    return {n: s for n, s in it.izip(names, 'abcdefg')}
+    return OrderedDict((n, s) for n, s in it.izip(names, 'abcdefg'))

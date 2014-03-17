@@ -14,7 +14,7 @@ from oracle.utils import Color
 _ = lambda s: s
 
 
-# {{{ Cards and faces
+# Cards and faces
 
 class Card(models.Model):
     name = NullCharField(max_length=255)
@@ -126,10 +126,8 @@ def update_faces_count(sender, **kwargs):
         card.faces_count = count
         card.save()
 
-# }}}
 
-
-# {{{ Card release and localization models
+# Card release and localization models
 
 class CardSet(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -194,6 +192,8 @@ class CardRelease(models.Model):
 
 
 class CardL10n(models.Model):
+    mvid = models.PositiveIntegerField(null=False, blank=False)
+
     card_face = models.ForeignKey(CardFace, blank=True)
     card_release = models.ForeignKey(CardRelease, blank=True)
     language = NullCharField(
@@ -205,9 +205,13 @@ class CardL10n(models.Model):
     rules = NullTextField(null=True, blank=True)
     flavor = NullTextField(null=True, blank=True)
 
-    art = models.ForeignKey(CardImage, null=True, blank=True)
+    art = models.ForeignKey(CardImage, null=False, blank=False)
 
     class Meta:
-        unique_together = (('card_face', 'card_release', 'language'),)
-
-# }}}
+        unique_together = (
+            ('card_face', 'card_release', 'language'),
+            # Multiverse id does not uniq for card localization, because
+            # each face has its own l10n record and splited/flied card faces
+            # has the same mvid for each face (double faced cards doesn't)
+            ('card_face', 'mvid'),
+        )

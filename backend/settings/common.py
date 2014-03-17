@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 from os.path import join, dirname, abspath
+from contrib import l10n
 
 DEBUG = False
 TEMPLATE_DEBUG = False
@@ -66,6 +67,7 @@ STATICFILES_DIRS = [
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     os.path.join(PROJECT_ROOT, 'frontend', 'public'),
+    os.path.join(PROJECT_ROOT, 'backend', 'oracle', 'static'),
 ]
 
 # List of finder classes that know how to find static files in
@@ -161,19 +163,19 @@ SOUTH_TESTS_MIGRATE = True
 # http://code.google.com/p/django-modeltranslation/wiki/InstallationAndUsage03
 gettext = lambda s: s
 LANGUAGES = (
-    ('en', gettext('English')),
-    ('ru', gettext('Русский')),
-    ('tw', gettext('繁體中文')),
-    ('cn', gettext('简体中文')),
-    ('de', gettext('Deutsch')),
-    ('fr', gettext('Français')),
-    ('it', gettext('Italiano')),
-    ('jp', gettext('日本語')),
-    ('ko', gettext('한국어')),
-    ('pt', gettext('Português')),
-    ('es', gettext('Español')),
+    (l10n.EN, gettext('English')),
+    (l10n.RU, gettext('Русский')),
+    (l10n.TW, gettext('繁體中文')),
+    (l10n.CN, gettext('简体中文')),
+    (l10n.DE, gettext('Deutsch')),
+    (l10n.FR, gettext('Français')),
+    (l10n.IT, gettext('Italiano')),
+    (l10n.JP, gettext('日本語')),
+    (l10n.KO, gettext('한국어')),
+    (l10n.PT, gettext('Português')),
+    (l10n.ES, gettext('Español')),
 )
-MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
+MODELTRANSLATION_DEFAULT_LANGUAGE = l10n.EN
 MODELTRANSLATION_TRANSLATION_FILES = (
     'oracle.translation',
 )

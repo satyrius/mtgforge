@@ -1,5 +1,4 @@
 import re
-from django.core.files.base import File
 from scrapy import log
 from scrapy.exceptions import DropItem
 from xact import xact
@@ -7,8 +6,7 @@ from xact import xact
 from crawler.items import CardItem
 from crawler.models import CardSetAlias
 from oracle import models as m
-from oracle.forms import CardFaceForm, CardImageForm, \
-    validate_collectors_number
+from oracle.forms import CardFaceForm, validate_collectors_number
 
 
 class Duplicate(DropItem):
@@ -57,12 +55,16 @@ class CardsPipeline(BaseCardItemPipeline):
         # Update card before face. Faces count is required to detect face type
         update_card(face.card, item)
         face = save_card_face(face, item)
-        img = get_or_create_card_image(item)
+
+        # We sure that image was already downloaded and saved by
+        # CardImagePipeline
+        img = m.CardImage.objects.get(mvid=item['mvid'])
         get_or_create_artist(item, img)
         get_or_create_card_release(item, face.card, img)
+
         # Increment stat counter
         key = re.sub('[^a-z0-9]', '_', item['set'].lower())
-        spider.crawler.stats.inc_value(u'card_item_count/{}'.format(key))
+        spider.crawler.stats.inc_value(u'cards/{}/item'.format(key))
 
 
 def get_or_create_card_face(item):
@@ -109,22 +111,6 @@ def update_card(card, item):
         card.faces_count = 2
         card.save()
     return card
-
-
-def get_or_create_card_image(item):
-    mvid = int(item['mvid'])
-    try:
-        img = m.CardImage.objects.get(mvid=mvid)
-    except m.CardImage.DoesNotExist:
-        cif = CardImageForm(data=dict(mvid=mvid, scan=item['art']))
-        img = cif.save()
-
-    if not img.file and 'art_path' in item:
-        name = '{0}.image'.format(img.mvid)
-        with open(item['art_path'], 'rb') as f:
-            img.file.save(name, File(f))
-
-    return img
 
 
 def get_or_create_artist(item, img):

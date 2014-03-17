@@ -6,6 +6,7 @@ class TestGathererSpider(GathererSpider):
     but has more processing methods to defile more contracts (because Scrapy
     support only one UrlContract per method docstring).
     '''
+    name = 'oracle_rules'
 
     def avacyn_angel_of_hope(self, response):
         '''Parse creature details
@@ -13,7 +14,7 @@ class TestGathererSpider(GathererSpider):
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=239961
 
         @returns items 1 1
-        @returns requests 0 0
+        @returns requests 2 2
 
         @field title Avacyn, Angel of Hope
         @field name Avacyn, Angel of Hope
@@ -22,7 +23,6 @@ class TestGathererSpider(GathererSpider):
         @field text Flying, vigilance, indestructible\\nOther permanents you control have indestructible.
         @field cmc 8
         @field number 6
-        @field mvid 239961
         @field rarity Mythic Rare
         @field mana {5}{W}{W}{W}
         @field flavor A golden helix streaked skyward from the Helvault. A thunderous explosion shattered the silver monolith and Avacyn emerged, free from her prison at last.
@@ -42,7 +42,7 @@ class TestGathererSpider(GathererSpider):
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=178135
 
         @returns items 1 1
-        @returns requests 0 0
+        @returns requests 2 2
 
         @field name Adventuring Gear
         @field text Landfall - Whenever a land enters the battlefield under your control, equipped creature gets +2/+2 until end of turn.\\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)
@@ -55,7 +55,7 @@ class TestGathererSpider(GathererSpider):
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=265383
 
         @returns items 1 1
-        @returns requests 0 0
+        @returns requests 2 2
 
         @field name Axebane Stag
         @field text
@@ -68,13 +68,12 @@ class TestGathererSpider(GathererSpider):
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=289326
 
         @returns items 1 1
-        @returns requests 0 0
+        @returns requests 2 2
 
         @field name Forest
         @field text G
         @field rarity Common
         @field type Basic Land - Forest
-        @field mvid 289326
         @field number 271
         @field artist Yeong-Hao Han
         @field art http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=289326&type=card
@@ -87,7 +86,7 @@ class TestGathererSpider(GathererSpider):
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=244683
 
         @returns items 2 2
-        @returns requests 0 0
+        @returns requests 2 2
 
         @field title Hanweir Watchkeep
 
@@ -95,14 +94,14 @@ class TestGathererSpider(GathererSpider):
             "name": "Hanweir Watchkeep",\
             "sibling": "Bane of Hanweir",\
             "number": "145a",\
-            "mvid": "244683"\
+            "art": "http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=244683&type=card"\
         }
 
         @partial {\
             "name": "Bane of Hanweir",\
             "sibling": "Hanweir Watchkeep",\
             "number": "145b",\
-            "mvid": "244687",\
+            "art": "http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=244687&type=card",\
             "color_indicator": "Red"\
         }
         '''
@@ -114,7 +113,7 @@ class TestGathererSpider(GathererSpider):
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=244687
 
         @returns items 2 2
-        @returns requests 0 0
+        @returns requests 2 2
 
         @field title Hanweir Watchkeep
 
@@ -122,14 +121,14 @@ class TestGathererSpider(GathererSpider):
             "name": "Hanweir Watchkeep",\
             "sibling": "Bane of Hanweir",\
             "number": "145a",\
-            "mvid": "244683"\
+            "art": "http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=244683&type=card"\
         }
 
         @partial {\
             "name": "Bane of Hanweir",\
             "sibling": "Hanweir Watchkeep",\
             "number": "145b",\
-            "mvid": "244687",\
+            "art": "http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=244687&type=card",\
             "color_indicator": "Red"\
         }
         '''
@@ -141,7 +140,7 @@ class TestGathererSpider(GathererSpider):
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=78694
 
         @returns items 2 2
-        @returns requests 0 0
+        @returns requests 2 2
 
         @field title Akki Lavarunner
 
@@ -160,12 +159,12 @@ class TestGathererSpider(GathererSpider):
         return super(TestGathererSpider, self).parse_card(response)
 
     def splitted_card(self, response):
-        '''Parse splitted card first face
+        '''Parse splitted card
 
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=27166
 
         @returns items 2 2
-        @returns requests 0 0
+        @returns requests 2 2
 
         @field title Fire // Ice
 
@@ -216,7 +215,7 @@ class TestGathererSpider(GathererSpider):
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=275266
 
         @returns items 1 1
-        @returns requests 0 0
+        @returns requests 2 2
 
         @field name Rancor
         @field set Planechase 2012 Edition
@@ -224,7 +223,6 @@ class TestGathererSpider(GathererSpider):
         @field text Enchant creature\\nEnchanted creature gets +2/+0 and has trample.\\nWhen Rancor is put into a graveyard from the battlefield, return Rancor to its owner's hand.
         @field cmc 1
         @field number 76
-        @field mvid 275266
         @field rarity Common
         @field mana {G}
         @field type Enchantment - Aura
@@ -240,7 +238,7 @@ class TestGathererSpider(GathererSpider):
         @url http://gatherer.wizards.com/Pages/Card/Details.aspx?printed=false&multiverseid=9780
 
         @returns items 2 2
-        @returns requests 0 0
+        @returns requests 2 2
 
         @field title B.F.M. (Big Furry Monster)
         @field name B.F.M. (Big Furry Monster)
@@ -249,13 +247,13 @@ class TestGathererSpider(GathererSpider):
         @field rarity Rare
 
         @partial {\
-            "mvid": "9780",\
+            "art": "http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=9780&type=card",\
             "number": "28b",\
             "text": "You must play both B.F.M. cards to put\\nleaves play, sacrifice the other.\\nB.F.M. can be blocked only by three or"\
         }
 
         @partial {\
-            "mvid": "9844",\
+            "art": "http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=9844&type=card",\
             "number": "29b",\
             "mana": "{B}{B}{B}{B}{B}{B}{B}{B}{B}{B}{B}{B}{B}{B}{B}",\
             "cmc": "15",\
