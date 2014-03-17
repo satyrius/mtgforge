@@ -61,7 +61,7 @@ def save_card_l10n(face_l10n, item):
     if face.card.is_locked:
         log.msg(u'"{}" is locked, cannot update "{}"'.format(
             face.card.name, item.get('name', face.name)), level=log.WARNING)
-        return face
+        return None
 
     # Save card face using form to pass through all magic and validation.
     # Face, release and language should be in instance.
