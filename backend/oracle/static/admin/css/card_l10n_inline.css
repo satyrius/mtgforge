@@ -20,7 +20,7 @@ fieldset.grp-module .grp-row .grp-cell.scan .grp-readonly {
     border: 0;
 }
 
-fieldset.grp-module .grp-row.type_line,
+fieldset.grp-module .grp-row.name,
 fieldset.grp-module .grp-row.rules,
 fieldset.grp-module .grp-row.flavor {
     padding-left: 275px;

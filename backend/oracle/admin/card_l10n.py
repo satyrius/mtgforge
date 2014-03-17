@@ -17,8 +17,8 @@ class CardL10nInline(admin.StackedInline):
     fieldsets = (
         (None, {
             'fields': (
-                ('scan', 'name', 'mvid', 'language'),
-                'type_line',
+                ('scan', 'language', 'type_line', 'mvid'),
+                'name',
                 'rules',
                 'flavor',
             )
