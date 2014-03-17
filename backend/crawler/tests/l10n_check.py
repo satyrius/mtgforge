@@ -80,3 +80,14 @@ class TestGathererSpider(GathererSpider):
         @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=296010&printed=true @language Spanish
         '''
         return super(TestGathererSpider, self).parse_languages(response)
+
+    def languages_pagination(self, response):
+        '''Return links for languages pagination
+
+        @url http://gatherer.wizards.com/Pages/Card/Languages.aspx?multiverseid=245247
+
+        @returns items 0 0
+        @request http://gatherer.wizards.com/Pages/Card/Languages.aspx?page=0&multiverseid=245247
+        @request http://gatherer.wizards.com/Pages/Card/Languages.aspx?page=1&multiverseid=245247
+        '''
+        return super(TestGathererSpider, self).parse_languages(response)

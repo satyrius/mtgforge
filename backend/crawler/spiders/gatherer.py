@@ -205,6 +205,13 @@ class GathererSpider(CrawlSpider):
                 callback=self.parse_card,
                 meta={'language': lang})
 
+        page_url = response.request.url
+        for link in sel.css('div.pagingControls a'):
+            if link.xpath('text()').extract()[0].strip().isdigit():
+                yield Request(
+                    url=up.urljoin(page_url, link.xpath('@href').extract()[0]),
+                    callback=self.parse_languages)
+
 
 def printed_url(url):
     parts = list(up.urlparse(url))

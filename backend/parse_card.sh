@@ -5,4 +5,4 @@ cd $(dirname $0)
 URL="http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=$1"
 echo "Parse $URL"
 
-scrapy parse --spider gatherer --pipeline --depth 3 --callback parse_card $URL
+scrapy parse --spider gatherer --pipeline --depth 4 --callback parse_card $URL
