@@ -10,13 +10,13 @@ cssselect==0.9.1 # required by Scrapy
 django-arrayfields==0.1.0
 django-debug-toolbar==1.0.1
 django-extensions==0.8
-django-grappelli==2.4.6
+django-grappelli==2.4.9
 django-modeltranslation==0.4.1
 django-nose==1.2
 django-storages==1.1.8
 django-tastypie==0.10.0
 -e git://github.com/coagulant/django-whatever.git@62d5c8de195de88a2e4b6ce38a3698aaa24a3a62#egg=django_whatever-dev
-grappelli-modeltranslation==0.1.2
+grappelli-modeltranslation==0.1.3
 lxml==3.3.3
 mimeparse==0.1.3 # required by django-tastypie
 mock==1.0.1
