@@ -27,7 +27,7 @@ paramiko==1.11.1 # required by Fabric
 psycopg2==2.5.2
 pyOpenSSL==0.14 # required by Scrapy
 pycrypto==2.6 # required by paramiko
-python-dateutil==2.1 # required by django-tastypie
+python-dateutil==2.2 # required by django-tastypie
 python-memcached==1.53
 queuelib==1.1.1 # required by Scrapy
 six==1.4.1 # required by python-dateutil
