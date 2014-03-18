@@ -8,7 +8,7 @@ cffi==0.8.2 # required by cryptography
 cryptography==0.2.2 # required by pyOpenSSL
 cssselect==0.9.1 # required by Scrapy
 django-arrayfields==0.1.0
-django-debug-toolbar==0.9.4
+django-debug-toolbar==1.0.1
 django-extensions==0.8
 django-grappelli==2.4.6
 django-modeltranslation==0.4.1
