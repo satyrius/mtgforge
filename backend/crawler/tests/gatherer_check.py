@@ -16,6 +16,7 @@ class TestGathererSpider(GathererSpider):
         @returns items 1 1
         @returns requests 2 2
 
+        @field mvid 239961
         @field title Avacyn, Angel of Hope
         @field name Avacyn, Angel of Hope
         @field set Avacyn Restored
@@ -44,6 +45,7 @@ class TestGathererSpider(GathererSpider):
         @returns items 1 1
         @returns requests 2 2
 
+        @field mvid 178135
         @field name Adventuring Gear
         @field text Landfall - Whenever a land enters the battlefield under your control, equipped creature gets +2/+2 until end of turn.\\nEquip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)
         '''
@@ -57,6 +59,7 @@ class TestGathererSpider(GathererSpider):
         @returns items 1 1
         @returns requests 2 2
 
+        @field mvid 265383
         @field name Axebane Stag
         @field text
         '''
@@ -70,6 +73,7 @@ class TestGathererSpider(GathererSpider):
         @returns items 1 1
         @returns requests 2 2
 
+        @field mvid 289326
         @field name Forest
         @field text G
         @field rarity Common
@@ -91,6 +95,7 @@ class TestGathererSpider(GathererSpider):
         @field title Hanweir Watchkeep
 
         @partial {\
+            "mvid": "244683",\
             "name": "Hanweir Watchkeep",\
             "sibling": "Bane of Hanweir",\
             "number": "145a",\
@@ -98,6 +103,7 @@ class TestGathererSpider(GathererSpider):
         }
 
         @partial {\
+            "mvid": "244687",\
             "name": "Bane of Hanweir",\
             "sibling": "Hanweir Watchkeep",\
             "number": "145b",\
@@ -118,6 +124,7 @@ class TestGathererSpider(GathererSpider):
         @field title Hanweir Watchkeep
 
         @partial {\
+            "mvid": "244683",\
             "name": "Hanweir Watchkeep",\
             "sibling": "Bane of Hanweir",\
             "number": "145a",\
@@ -125,6 +132,7 @@ class TestGathererSpider(GathererSpider):
         }
 
         @partial {\
+            "mvid": "244687",\
             "name": "Bane of Hanweir",\
             "sibling": "Hanweir Watchkeep",\
             "number": "145b",\
@@ -142,6 +150,7 @@ class TestGathererSpider(GathererSpider):
         @returns items 2 2
         @returns requests 2 2
 
+        @field mvid 78694
         @field title Akki Lavarunner
 
         @partial {\
@@ -166,6 +175,7 @@ class TestGathererSpider(GathererSpider):
         @returns items 2 2
         @returns requests 2 2
 
+        @field mvid 27166
         @field title Fire // Ice
 
         @partial {\
@@ -217,6 +227,7 @@ class TestGathererSpider(GathererSpider):
         @returns items 1 1
         @returns requests 2 2
 
+        @field mvid 275266
         @field name Rancor
         @field set Planechase 2012 Edition
         @field artist Kev Walker
@@ -247,12 +258,14 @@ class TestGathererSpider(GathererSpider):
         @field rarity Rare
 
         @partial {\
+            "mvid": "9780",\
             "art": "http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=9780&type=card",\
             "number": "28b",\
             "text": "You must play both B.F.M. cards to put\\nleaves play, sacrifice the other.\\nB.F.M. can be blocked only by three or"\
         }
 
         @partial {\
+            "mvid": "9844",\
             "art": "http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=9844&type=card",\
             "number": "29b",\
             "mana": "{B}{B}{B}{B}{B}{B}{B}{B}{B}{B}{B}{B}{B}{B}{B}",\

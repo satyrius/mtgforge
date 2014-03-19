@@ -13,7 +13,7 @@ BOT_NAME = 'crawler'
 SPIDER_MODULES = ['crawler.spiders']
 NEWSPIDER_MODULE = 'crawler.spiders'
 
-IMAGES_STORE = settings.MEDIA_ROOT
+FILES_STORE = settings.MEDIA_ROOT
 
 ITEM_PIPELINES = {
     'crawler.pipelines.art.CardImagePipeline': 1,

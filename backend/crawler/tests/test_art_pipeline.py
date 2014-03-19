@@ -65,24 +65,23 @@ class CardImagePipelineTest(TestCase):
             'checksum': '2b00042f7481c7b056c4b410d28f33cf',
             'path': path, 'url': img.scan,
         })]
-        res = self.pipeline.item_completed(results, CardItem(), Mock())
-        self.assertEqual(res['mvid'], img.mvid)
+        self.pipeline.item_completed(results, CardItem(), Mock())
         save_file.assert_called_once_with(img, path)
         self.assertEqual(CardImage.objects.all().count(), before)
 
     @patch.object(CardImagePipeline, '_save_file')
     def test_create_new_image(self, save_file):
         img1 = self.img_recipe.make()
-        url2 = self.img_recipe.prepare().scan
-        self.assertNotEqual(img1.scan, url2)
+        img2 = self.img_recipe.prepare()  # do not save!
+        self.assertNotEqual(img1.scan, img2.scan)
         before = CardImage.objects.all().count()
         path = 'full/7d97e98f8af710c7e7fe703abc8f639e0ee507c4.jpg'
         results = [(True, {
             'checksum': '2b00042f7481c7b056c4b410d28f33cf',
-            'path': path, 'url': url2,
+            'path': path, 'url': img2.scan,
         })]
-        res = self.pipeline.item_completed(results, CardItem(), Mock())
+        self.pipeline.item_completed(results, CardItem(), Mock())
         self.assertEqual(CardImage.objects.all().count(), before + 1)
-        img2 = CardImage.objects.get(mvid=res['mvid'])
-        self.assertEqual(img2.scan, url2)
-        save_file.assert_called_once_with(img2, path)
+        saved = CardImage.objects.get(mvid=img2.mvid)
+        self.assertEqual(saved.scan, img2.scan)
+        save_file.assert_called_once_with(saved, path)
