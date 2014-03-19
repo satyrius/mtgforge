@@ -22,7 +22,7 @@ class Command(BaseCommand):
             '--quality',
             dest='quality',
             type='int',
-            default=80,
+            default=90,
             help='JPEG quality'),
     )
 
@@ -58,7 +58,7 @@ def thumb_spec(fmt):
     return width, height
 
 
-def create_thumbnail(card_image, thumb_format, quality=80):
+def create_thumbnail(card_image, thumb_format, quality=90):
     thumb, _ = CardImageThumb.objects.get_or_create(
         original=card_image, format=thumb_format)
     card_image.file.seek(0)
