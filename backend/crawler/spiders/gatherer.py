@@ -4,6 +4,7 @@ import sys
 import urlparse as up
 from collections import OrderedDict
 from urllib import urlencode
+from urlparse import urlparse, parse_qsl
 
 from lxml import etree
 from lxml.html import document_fromstring
@@ -170,6 +171,8 @@ class GathererSpider(CrawlSpider):
             # Get image url and extract multiverse id
             card['art'] = up.urljoin(page_url, details.css(
                 'td.leftCol img::attr(src)').extract()[0])
+            # Convert mvid for item field values convention to be strings
+            card['mvid'] = str(get_mvid(card['art']))
 
             if not is_printed:
                 # Oracle rules page
@@ -302,3 +305,10 @@ def number_suffixes(title):
         return OrderedDict({title: ''})
 
     return OrderedDict((n, s) for n, s in it.izip(names, 'abcdefg'))
+
+
+def get_mvid(url):
+    img_query = dict(parse_qsl(list(urlparse(url))[4]))
+    if 'multiverseid' in img_query:
+        return int(img_query['multiverseid'])
+    return None

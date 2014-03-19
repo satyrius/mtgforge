@@ -1,5 +1,4 @@
 import re
-from urlparse import urlparse, parse_qsl
 
 from django.core.files.base import File
 from scrapy.contrib.pipeline.images import ImagesPipeline
@@ -8,6 +7,7 @@ from scrapy.http import Request
 
 from oracle.forms import CardImageForm
 from oracle.models import CardImage
+from crawler.spiders.gatherer import get_mvid
 
 
 class CardImagePipeline(ImagesPipeline):
@@ -23,7 +23,7 @@ class CardImagePipeline(ImagesPipeline):
                 raise DropItem('Item cannot contain more than one art image')
 
             path, url = images[0]
-            mvid = get_mvid(url)
+            mvid = item['mvid'] if 'mvid' in item else get_mvid(url)
             if mvid is None:
                 raise DropItem(
                     u'Image url {url} does not contain multiverse id'.format(
@@ -38,8 +38,6 @@ class CardImagePipeline(ImagesPipeline):
             if not img.file:
                 self._save_file(img, path)
 
-            item['mvid'] = mvid
-
         return item
 
     def _save_file(self, img, path):
@@ -47,10 +45,3 @@ class CardImagePipeline(ImagesPipeline):
         name = '{0}.image'.format(img.mvid)
         with open(abs_path, 'rb') as f:
             img.file.save(name, File(f))
-
-
-def get_mvid(url):
-    img_query = dict(parse_qsl(list(urlparse(url))[4]))
-    if 'multiverseid' in img_query:
-        return int(img_query['multiverseid'])
-    return None
