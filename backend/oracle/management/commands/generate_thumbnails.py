@@ -30,7 +30,7 @@ class Command(BaseCommand):
         refresh = options['refresh']
         quality = options['quality']
         for fmt in settings.CARD_IMAGE_THUMBS:
-            images = CardImage.objects.exclude(file=None)
+            images = CardImage.objects.exclude(file='')
             if not refresh:
                 images = images.exclude(cardimagethumb__format=fmt)
 
