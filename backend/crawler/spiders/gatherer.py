@@ -19,11 +19,15 @@ class GathererSpider(CrawlSpider):
     allowed_domains = ['gatherer.wizards.com']
     search_url = 'http://gatherer.wizards.com/Pages/Search/Default.aspx'
 
-    def __init__(self, card_set=None, *args, **kwargs):
+    def __init__(self, card_set=None, no_l10n=False, *args, **kwargs):
         '''You should specify card set to parse. Use names from Gatherer
         search form. Otherwise names will be read from stdin.
+
+        If you want to skip downloading prints for all languages set
+        no_l10n to True
         '''
         self.card_set = card_set
+        self.no_l10n = bool(no_l10n)
 
     def card_set_names(self):
         if self.card_set:
@@ -184,6 +188,9 @@ class GathererSpider(CrawlSpider):
                 url=printed_url(page_url),
                 callback=self.parse_card,
                 meta={'language': 'English'})
+
+            if self.no_l10n:
+                return
 
             lid = 'ctl00_ctl00_ctl00_MainContent_SubContent_'\
                   'SubContentAnchors_DetailsAnchors_LanguagesLink'
