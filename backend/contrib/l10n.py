@@ -21,6 +21,7 @@ LANG_MAP = {
     'Japanese': JP,
     'Korean': KO,
     'Portuguese (Brazil)': PT,
+    'Portuguese': PT,
     'Spanish': ES,
 }
 
