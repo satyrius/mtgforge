@@ -46,7 +46,8 @@ class Command(BaseCommand):
                     thumb.file.url, fmt,
                     float(img.file.size) * 100 / float(thumb.file.size)
                 ))
-                map(lambda m: m.file.close(), [img, thumb])
+                img.file.close()
+                thumb.file.close()
 
 
 def thumb_spec(fmt):
