@@ -24,6 +24,12 @@ LANG_MAP = {
     'Spanish': ES,
 }
 
+LANG_NAMES = {v: k for k, v in LANG_MAP.items()}
+
 
 def get_code(name):
     return LANG_MAP[name]
+
+
+def get_name(code):
+    return LANG_NAMES[code]

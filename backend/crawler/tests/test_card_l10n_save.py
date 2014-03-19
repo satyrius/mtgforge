@@ -5,6 +5,7 @@ from model_mommy.recipe import Recipe, seq, foreign_key
 
 from crawler.items import L10nItem
 from crawler.pipelines import l10n
+from crawler.pipelines import cards
 from oracle import models as m
 from oracle import forms
 
@@ -16,9 +17,13 @@ class CardL10nSaveTest(TestCase):
             m.CardFace, name=seq('Card '), card=foreign_key(self.card_recipe))
         self.cs_recipe = Recipe(
             m.CardSet, name=seq('Magic Set '), acronym=seq('set'))
+        self.img_recipe = Recipe(
+            m.CardImage, mvid=seq(0),
+            scan=seq('http://gatherer.wizards.com/image'))
         self.release_recipe = Recipe(
             m.CardRelease, card=foreign_key(self.card_recipe),
-            card_set=foreign_key(self.cs_recipe), card_number=seq(0))
+            card_set=foreign_key(self.cs_recipe), card_number=seq(0),
+            art=foreign_key(self.img_recipe))
 
     @patch.object(l10n, 'get_card_release')
     @patch.object(l10n, 'get_l10n_instance')
@@ -37,13 +42,28 @@ class CardL10nSaveTest(TestCase):
         get_instance.assert_called_once_with(face, release, lang)
         save_l10n.assert_called_once_with(face_l10n, item)
 
-    def test_cannot_get_release_if_no_number(self):
-        item = L10nItem(name='Forest')
+    @patch.object(cards, 'get_card_set')
+    def test_get_by_mvid_if_no_card_number(self, get_card_set):
+        cr = self.release_recipe.make()
+        cf = self.face_recipe.make(card=cr.card)
+        get_card_set.return_value = cr.card_set
+        item = L10nItem(name='Forest', language='English',
+                        mvid=str(cr.art.mvid))
+
+        self.assertEqual(l10n.get_card_release(item), (cr, cf))
+        get_card_set.assert_called_once_with(item)
+
+    @patch.object(cards, 'get_card_set')
+    def test_cannot_get_non_english_release_if_no_number(self, get_card_set):
+        cr = self.release_recipe.make()
+        get_card_set.return_value = cr.card_set
+        item = L10nItem(name='Forest', language='Russian',
+                        mvid=str(cr.art.mvid))
         with self.assertRaisesRegexp(l10n.InvalidError,
                                      'Cannot setup localization'):
             l10n.get_card_release(item)
 
-    @patch.object(l10n, 'get_card_set')
+    @patch.object(cards, 'get_card_set')
     def test_no_release(self, get_card_set):
         cr1 = self.release_recipe.make()
         cs2 = self.cs_recipe.make()
@@ -55,7 +75,7 @@ class CardL10nSaveTest(TestCase):
             l10n.get_card_release(item)
         get_card_set.assert_called_once_with(item)
 
-    @patch.object(l10n, 'get_card_set')
+    @patch.object(cards, 'get_card_set')
     def test_no_face(self, get_card_set):
         cr = self.release_recipe.make()
         get_card_set.return_value = cr.card_set
@@ -64,8 +84,8 @@ class CardL10nSaveTest(TestCase):
             l10n.get_card_release(item)
         get_card_set.assert_called_once_with(item)
 
-    @patch.object(l10n, 'get_card_set')
-    def test_get_release_and_face(self, get_card_set):
+    @patch.object(cards, 'get_card_set')
+    def test_get_release_and_face_by_card_number(self, get_card_set):
         cr = self.release_recipe.make()
         cf = self.face_recipe.make(card=cr.card)
         get_card_set.return_value = cr.card_set

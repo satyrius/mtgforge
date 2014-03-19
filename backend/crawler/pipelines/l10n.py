@@ -5,7 +5,8 @@ from scrapy import log
 
 from contrib import l10n
 from crawler.items import L10nItem
-from crawler.pipelines.cards import get_card_set, InvalidError
+from crawler.pipelines import cards
+from crawler.pipelines.cards import InvalidError
 from oracle.forms import validate_collectors_number, CardL10nForm
 from oracle import models as m
 
@@ -34,13 +35,19 @@ class L10nPipeline(BaseL10nItemPipeline):
 
 def get_card_release(item):
     number, sub_number = validate_collectors_number(item.get('number'))
-    if not number:
+    cs = cards.get_card_set(item)
+    if number:
+        # Try to get release by its number first
+        release = m.CardRelease.objects.get(card_set=cs, card_number=number)
+    elif item['language'] == l10n.get_name(l10n.EN):
+        # Otherwise we can try to get it by mvid for english cards
+        release = m.CardRelease.objects.get(
+            card_set=cs, art__mvid=item['mvid'])
+    else:
         raise InvalidError(u'Cannot setup localization for card without '
                            u'collector\'s number for "{name}"'.format(
                                name=item['name']))
-    cs = get_card_set(item)
-    release = m.CardRelease.objects.get(card_set=cs, card_number=number)
-    face = m.CardFace.objects.get(card=release.card, sub_number=sub_number)
+    face = release.card.cardface_set.get(sub_number=sub_number)
     return release, face
 
 
