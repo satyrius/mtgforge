@@ -1,7 +1,7 @@
 import re
 
 from django.core.files.base import File
-from scrapy.contrib.pipeline.images import ImagesPipeline
+from scrapy.contrib.pipeline.files import FilesPipeline
 from scrapy.exceptions import DropItem
 from scrapy.http import Request
 
@@ -10,7 +10,7 @@ from oracle.models import CardImage
 from crawler.spiders.gatherer import get_mvid
 
 
-class CardImagePipeline(ImagesPipeline):
+class CardImagePipeline(FilesPipeline):
     def get_media_requests(self, item, info):
         if 'art' in item:
             url = re.sub('&?options=rotate90', '', item['art'])
