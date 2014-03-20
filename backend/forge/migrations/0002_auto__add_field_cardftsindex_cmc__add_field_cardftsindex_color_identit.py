@@ -8,8 +8,8 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
 
-        db.execute("CREATE EXTENSION intarray")
-        
+        db.execute("CREATE EXTENSION IF NOT EXISTS intarray")
+
         # Adding field 'CardFtsIndex.cmc'
         db.add_column('forge_cardftsindex', 'cmc', self.gf('django.db.models.fields.IntegerField')(null=True), keep_default=False)
 
@@ -19,13 +19,13 @@ class Migration(SchemaMigration):
         db.execute("ALTER TABLE forge_cardftsindex ADD COLUMN sets int[]")
         db.execute("""
             CREATE INDEX forge_cardftsindex_sets_idx
-            ON forge_cardftsindex 
+            ON forge_cardftsindex
             USING GIST (sets gist__int_ops)
         """)
 
 
     def backwards(self, orm):
-        
+
         # Deleting field 'CardFtsIndex.cmc'
         db.delete_column('forge_cardftsindex', 'cmc')
 
