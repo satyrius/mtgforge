@@ -10,14 +10,16 @@ class SearchTest(SerpTest):
         for `white` cards, for example, both `white` and `red-white` will be
         found but not `red`.
         '''
-        expected = []
-        expected.append(self.create_card(mana_cost='w').id)
-        expected.append(self.create_card(mana_cost='rw').id)
-        self.create_card(mana_cost='r')
+        c1 = self.face_recipe.make(mana_cost='w')
+        self.release_recipe.make(card=c1.card)
+        c2 = self.face_recipe.make(mana_cost='rw')
+        self.release_recipe.make(card=c2.card)
+        c3 = self.face_recipe.make(mana_cost='r')
+        self.release_recipe.make(card=c3.card)
 
         data = self.search(color=['w'])
         self.assertEqual(data['meta']['total_count'], 2)
-        self.assertEqual(set(self.get_cards(data, field='id')), set(expected))
+        self.assertEqual(set(self.get_cards(data, field='id')), {c1.id, c2.id})
 
     def test_plural(self):
         '''There is no difference between single and plural form of term word.
@@ -25,17 +27,18 @@ class SearchTest(SerpTest):
         So `creature` and `creatures` will be normalized and will be the same
         for search engine
         '''
-        expected = []
-        expected.append(self.create_card(
+        angel = self.face_recipe.make(
             type_line='Artifact Creature - Angel',
             rules='Flying'
-        ).id)
+        )
+        self.release_recipe.make(card=angel.card)
 
         data = self.search(q='artifact flying creature')
-        self.assertEqual(self.get_cards(data, field='id'), expected)
+        self.assertEqual(self.get_cards(data, field='id'), [angel.id])
 
+        # Note plural form: creature[s]
         data = self.search(q='artifact flying creatures')
-        self.assertEqual(self.get_cards(data, field='id'), expected)
+        self.assertEqual(self.get_cards(data, field='id'), [angel.id])
 
     def test_merge_multifaced(self):
         '''All faces of multipart card should be merged.
@@ -55,8 +58,8 @@ class SearchTest(SerpTest):
             type_line='Planeswalker - Garruk',
             place=CardFace.FRONT
         )
-        self.assertEqual(front.card_id, back.card_id)
         self.release_recipe.make(card=back.card)
+
         # Assert order of just created card faces. We need it to ensure that
         # default order is not what we want when merge faces for SERP.
         self.assertEqual(
@@ -67,6 +70,7 @@ class SearchTest(SerpTest):
         # If both faces matched, only front face should be shown
         data = self.search(q='garruk')
         self.assertEqual(self.get_cards(data), [front.name])
+
         # If exact face is matched it will be shown
         data = self.search(q='veil cursed')
         self.assertEqual(self.get_cards(data), [back.name])
@@ -77,15 +81,14 @@ class SearchTest(SerpTest):
         If a card was released several times, we still should show only one
         it's release.
         '''
-        expected = []
-        gideon = self.create_card(
+        gideon = self.face_recipe.make(
             name='Gideon Jura',
             type_line='Planeswalker - Gideon'
         )
-        expected.append(gideon.name)
-        self.release_recipe.make(card=gideon.card)
+        self.release_recipe.make(card=gideon.card, _quantity=2)
+
         data = self.search(types='planeswalker')
-        self.assertEqual(self.get_cards(data), expected)
+        self.assertEqual(self.get_cards(data), [gideon.name])
 
     def test_no_comments(self):
         '''Do not add abilities comments to FTS index.
@@ -94,12 +97,13 @@ class SearchTest(SerpTest):
         creatures when we search for `artifact`, because rules contains
         "can't be blocked except by artifact creatures..." comment.
         '''
-        expected = []
-        expected.append(self.create_card(
+        angel = self.face_recipe.make(
             name='Platinum Angel',
             type_line='Artifact Creature - Angel',
-        ).name)
-        self.create_card(
+        )
+        self.release_recipe.make(card=angel.card)
+
+        hunder = self.face_recipe.make(
             name='Halo Hunter',
             rules='Intimidate (This creature can\'t be blocked except by '
                   'artifact creatures and/or creatures that share a color '
@@ -107,21 +111,26 @@ class SearchTest(SerpTest):
                   'When Halo Hunter enters the battlefield, destroy target '
                   'Angel.'
         )
+        self.release_recipe.make(card=hunder.card)
+
         data = self.search(q='artifact')
-        self.assertEqual(self.get_cards(data), expected)
+        self.assertEqual(self.get_cards(data), [angel.name])
 
     def test_filter_by_type(self):
-        expected = []
-        expected.append(self.create_card(
+        decay = self.face_recipe.make(
             name='Abrupt Decay',
             type_line='Instant',
-        ).name)
-        self.create_card(
+        )
+        self.release_recipe.make(card=decay.card)
+
+        dreaadbore = self.face_recipe.make(
             name='Dreadbore',
             type_line='Sorcery',
         )
+        self.release_recipe.make(card=dreaadbore.card)
+
         data = self.search(type='instant')
-        self.assertEqual(self.get_cards(data), expected)
+        self.assertEqual(self.get_cards(data), [decay.name])
 
     def test_not_published_sets(self):
         set1 = self.cs_recipe.make(is_published=True)
