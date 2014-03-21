@@ -1,7 +1,7 @@
 import re
+from django.db.transaction import atomic
 from scrapy import log
 from scrapy.exceptions import DropItem
-from xact import xact
 
 from crawler.items import CardItem
 from crawler.models import CardSetAlias
@@ -49,7 +49,7 @@ class DupsHandlePipeline(BaseCardItemPipeline):
 
 
 class CardsPipeline(BaseCardItemPipeline):
-    @xact
+    @atomic
     def _process_item(self, item, spider):
         face = get_or_create_card_face(item)
         # Update card before face. Faces count is required to detect face type

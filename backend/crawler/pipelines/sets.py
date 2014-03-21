@@ -1,6 +1,6 @@
 import datetime
 import re
-from xact import xact
+from django.db.transaction import atomic
 from scrapy.exceptions import DropItem
 
 from crawler.items import CardSetItem
@@ -63,7 +63,7 @@ def generate_slug(name):
 
 
 class CardSetsPipeline(BaseCardSetItemPipeline):
-    @xact
+    @atomic
     def _process_item(self, item, spider):
         name = item['name'].strip()
         # Return immediately if alias already exists

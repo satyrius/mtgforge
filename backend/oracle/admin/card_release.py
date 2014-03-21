@@ -22,7 +22,7 @@ class CardReleaseInline(admin.TabularInline):
         return qs.select_related('card', 'card_set', 'art')
 
     def release_link(self, instance):
-        a, m = instance._meta.app_label, instance._meta.module_name
+        a, m = instance._meta.app_label, instance._meta.model_name
         url = reverse('admin:{}_{}_change'.format(a, m), args=[instance.pk])
         # TODO use small and croped thumb for the card
         art = instance.art

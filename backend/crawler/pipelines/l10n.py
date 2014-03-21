@@ -1,6 +1,6 @@
 import re
 
-from xact import xact
+from django.db.transaction import atomic
 from scrapy import log
 
 from contrib import l10n
@@ -22,7 +22,7 @@ class BaseL10nItemPipeline(object):
 
 
 class L10nPipeline(BaseL10nItemPipeline):
-    @xact
+    @atomic
     def _process_item(self, item, spider):
         release, face = get_card_release(item)
         face_l10n = get_l10n_instance(face, release, item['language'])
