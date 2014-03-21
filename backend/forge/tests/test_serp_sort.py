@@ -222,8 +222,8 @@ class SerpSortTest(SerpTest):
 
         act_of_treason = self.create_card(
             name='Act of Treason', card_set=m14, card_number=125)
-        self.create_card_release(
-            act_of_treason.card, card_set=reissue, card_number=1)
+        self.release_recipe.make(
+            card=act_of_treason.card, card_set=reissue, card_number=1)
         cancel = self.create_card(
             name='Cancel', card_set=m14, card_number=45)
 

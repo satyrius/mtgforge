@@ -39,15 +39,11 @@ class SerpTest(ResourceTestCase):
 
     def create_card(self, card_set=None, card_number=None, **kwargs):
         face = self.face_recipe.make(colors=[], **kwargs)
-        self.create_card_release(face.card, card_set, card_number)
+        if card_set is None:
+            card_set = self.cs_recipe.make()
+        self.release_recipe.make(card=face.card, card_set=card_set,
+                                 card_number=card_number)
         return face
-
-    def create_card_release(self, card, card_set=None, card_number=None):
-        extra = {}
-        extra['card_set'] = self.cs_recipe.make() if not card_set else card_set
-        if card_number:
-            extra['card_number'] = card_number
-        return self.release_recipe.make(card=card, **extra)
 
     def get_cards(self, serp, field='name'):
         return [cf[field] for cf in serp['objects']]
