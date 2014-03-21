@@ -13,12 +13,13 @@ from oracle.forms import CardSetForm
 @atomic
 def _merge(queryset, master):
     CardSetAlias.objects.filter(card_set__in=queryset).update(card_set=master)
-    values = queryset.exclude(pk=master.pk).values()
+    objects = queryset.exclude(pk=master.pk)
     for f in master._meta.fields:
         if not f.primary_key and not getattr(master, f.name):
-            for data in values:
-                if data[f.name]:
-                    setattr(master, f.name, data[f.name])
+            for obj in objects:
+                val = getattr(obj, f.name)
+                if val:
+                    setattr(master, f.name, val)
                     break
     queryset.exclude(pk=master.pk).delete()
     master.save()
