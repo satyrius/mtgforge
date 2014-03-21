@@ -1,5 +1,3 @@
-from django_any import any_model
-
 from forge.tests.base import SerpTest
 from oracle.models import CardFace
 
@@ -46,18 +44,19 @@ class SearchTest(SerpTest):
         face of this card should appear in SERP. But exact match with back
         face will return fliped card.
         '''
-        back = self.create_card(
+        back = self.face_recipe.make(
             name='Garruk, the Veil-Cursed',
             type_line='Planeswalker - Garruk',
             place=CardFace.BACK
         )
-        front = any_model(
-            CardFace, card=back.card, colors=[],
+        front = self.face_recipe.make(
+            card=back.card, colors=[],
             name='Garruk Relentless',
             type_line='Planeswalker - Garruk',
             place=CardFace.FRONT
         )
         self.assertEqual(front.card_id, back.card_id)
+        self.release_recipe.make(card=back.card)
         # Assert order of just created card faces. We need it to ensure that
         # default order is not what we want when merge faces for SERP.
         self.assertEqual(

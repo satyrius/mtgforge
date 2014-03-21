@@ -1,6 +1,5 @@
 import urllib
 import urls  # to be able to reverse resource url
-from django_any import any_model
 from model_mommy.recipe import Recipe, seq, foreign_key
 from tastypie.test import ResourceTestCase
 
@@ -39,10 +38,8 @@ class SerpTest(ResourceTestCase):
         return self.deserialize(self.api_client.get(self.uri, data=kwargs))
 
     def create_card(self, card_set=None, card_number=None, **kwargs):
-        # TODO replace `any_model` with `model_mommy` recipes
-        card = any_model(Card)
-        face = any_model(CardFace, card=card, colors=[], **kwargs)
-        self.create_card_release(card, card_set, card_number)
+        face = self.face_recipe.make(colors=[], **kwargs)
+        self.create_card_release(face.card, card_set, card_number)
         return face
 
     def create_card_release(self, card, card_set=None, card_number=None):

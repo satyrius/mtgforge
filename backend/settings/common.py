@@ -115,13 +115,12 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'grappelli',
     'grappelli_modeltranslation',
     'django.contrib.admin',
 
-    # Third-party apps
     'debug_toolbar',
-    'django_any',
     'django_extensions',
     'modeltranslation',
     'storages',

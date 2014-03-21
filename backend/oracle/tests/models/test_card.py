@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
-from django_any import any_model
 from django.test import TestCase
+from model_mommy.recipe import Recipe, seq
+
 from oracle.models import Card, CardFace, Color
 
 
 class CardModelTest(TestCase):
     def setUp(self):
-        pass
+        self.card_recipe = Recipe(Card)
+        self.face_recipe = Recipe(CardFace, name=seq('Card '))
 
     def test_card_face_create(self):
         name = 'Mind Spring'
@@ -45,16 +47,16 @@ class CardModelTest(TestCase):
         self.assertEqual(face.colors, [Color.BLUE])
 
     def test_faces_count_update(self):
-        card = any_model(Card, faces_count=1)
+        card = self.card_recipe.make(faces_count=1)
 
         # First face
-        any_model(CardFace, card=card, colors=[])
+        self.face_recipe.make(card=card, colors=[])
         card = Card.objects.get(pk=card.id)
         self.assertEqual(card.cardface_set.count(), 1)
         self.assertEqual(card.faces_count, 1)
 
         # Second face creation updates faces count
-        any_model(CardFace, card=card, colors=[])
+        self.face_recipe.make(card=card, colors=[])
         card = Card.objects.get(pk=card.id)
         self.assertEqual(card.cardface_set.count(), 2)
         self.assertEqual(card.faces_count, 2)
@@ -63,7 +65,7 @@ class CardModelTest(TestCase):
         # than faces attached. This case is for fetch_gatherer.
         card.faces_count = 5
         card.save()
-        any_model(CardFace, card=card, colors=[])
+        self.face_recipe.make(card=card, colors=[])
         card = Card.objects.get(pk=card.id)
         self.assertEqual(card.cardface_set.count(), 3)
         self.assertEqual(card.faces_count, 5)
