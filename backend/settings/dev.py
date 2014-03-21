@@ -39,10 +39,8 @@ if os.getenv('DEBUG_DB'):
 # Log all oracle management commangs messages
 LOGGING['loggers']['oracle.management']['level'] = 'DEBUG'
 
-# Enable django debug toolbar
-#MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + (
-#    'debug_toolbar.middleware.DebugToolbarMiddleware',
-#)
+# To enable django debug toolbar set this variable to True
+DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 try:
     from settings.local import *
