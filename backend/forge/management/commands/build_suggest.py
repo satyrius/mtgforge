@@ -5,7 +5,7 @@ from oracle.management.base import BaseCommand
 
 
 class Command(BaseCommand):
-    @transaction.commit_on_success
+    @transaction.atomic
     def handle(self, *args, **options):
         cursor = connection.cursor()
         cursor.execute('DELETE FROM forge_ftssuggest')

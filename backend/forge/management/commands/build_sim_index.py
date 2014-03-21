@@ -17,7 +17,7 @@ def exists(cur, keyword):
 
 class Command(BaseCommand):
 
-    @transaction.commit_on_success
+    @transaction.atomic
     def handle(self, *args, **options):
 
         cursor = connection.cursor()

@@ -1,4 +1,4 @@
-Django==1.5.4
+Django==1.6.2
 Fabric==1.8.0
 Pillow==2.3.0
 Scrapy==0.22.2
@@ -7,7 +7,7 @@ Twisted==13.2.0 # required by Scrapy
 cssselect==0.9.1 # required by Scrapy
 django-arrayfields==0.1.0
 django-debug-toolbar==1.0.1
-django-extensions==0.8
+django-extensions==1.2.0
 django-grappelli==2.4.9
 django-modeltranslation==0.4.1
 django-nose==1.2
@@ -31,4 +31,3 @@ queuelib==1.1.1 # required by Scrapy
 six==1.4.1 # required by python-dateutil
 w3lib==1.5 # required by Scrapy
 zope.interface==4.0.5 # required by Twisted
--e git://github.com/ostrovok-team/xact.git@65e19094eea1d281fdd03b0ad413e6b3bf6b4593#egg=xact-dev

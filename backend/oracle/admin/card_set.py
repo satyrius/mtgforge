@@ -1,7 +1,6 @@
-from xact import xact
-
 from django.contrib import admin
 from django.db.models import Count
+from django.db.transaction import atomic
 from modeltranslation.admin import TranslationAdmin
 
 from crawler.admin import CardSetAliasInline
@@ -11,7 +10,7 @@ from oracle import models
 from oracle.forms import CardSetForm
 
 
-@xact
+@atomic
 def _merge(queryset, master):
     CardSetAlias.objects.filter(card_set__in=queryset).update(card_set=master)
     values = queryset.exclude(pk=master.pk).values()
