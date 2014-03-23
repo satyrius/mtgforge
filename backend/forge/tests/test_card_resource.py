@@ -3,13 +3,14 @@ from forge.tests.base import SerpTest
 
 class SearchTest(SerpTest):
     def test_rules_as_array(self):
-        self.create_card(
+        angel = self.face_recipe.make(
             name='Angel of Despair',
             type_line='Creature - Angel',
             rules='Flying\n'
                   'When Angel of Despair enters the battlefield, destroy '
                   'target permanent.'
         )
+        self.release_recipe.make(card=angel.card)
         data = self.search(q='angel')
         card = data['objects'][0]
         rules = card['rules']

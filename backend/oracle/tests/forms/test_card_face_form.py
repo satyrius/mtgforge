@@ -1,4 +1,3 @@
-from django_any import any_model
 from django.test import TestCase
 from model_mommy.recipe import Recipe, seq
 
@@ -11,18 +10,19 @@ class TestCardFaceForm(TestCase):
     def setUp(self):
         self.card_recipe = Recipe(Card)
         self.face_recipe = Recipe(CardFace, name=seq('Card '))
+        self.card_type = Recipe(CardType)
 
     def test_save_as_in_admin(self):
         types = (
-            any_model(CardType, name='a', category=CardType.SUBTYPE).id,
-            any_model(CardType, name='b', category=CardType.TYPE).id,
-            any_model(CardType, name='c', category=CardType.SUBTYPE).id,
-            any_model(CardType, name='d', category=CardType.SUPERTYPE).id,
+            self.card_type.make(name='a', category=CardType.SUBTYPE).id,
+            self.card_type.make(name='b', category=CardType.TYPE).id,
+            self.card_type.make(name='c', category=CardType.SUBTYPE).id,
+            self.card_type.make(name='d', category=CardType.SUPERTYPE).id,
         )
         form = CardFaceForm(dict(
             name='New Test Angel',
             types=types,
-            card=any_model(Card).id,
+            card=self.card_recipe.make().id,
         ))
         face = form.save()
         self.assertEqual(face.type_line, 'd b - a c')
@@ -31,8 +31,8 @@ class TestCardFaceForm(TestCase):
         form = CardFaceForm(dict(
             name='New Test Angel',
             types=(
-                any_model(CardType, name='e', category=CardType.TYPE).id,
-                any_model(CardType, name='f', category=CardType.SUPERTYPE).id,
+                self.card_type.make(name='e', category=CardType.TYPE).id,
+                self.card_type.make(name='f', category=CardType.SUPERTYPE).id,
             )
         ), instance=face)
         face = form.save()
