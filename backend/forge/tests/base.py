@@ -19,13 +19,16 @@ class SerpTest(ResourceTestCase):
     def setUp(self):
         super(SerpTest, self).setUp()
         self.uri = CardResource('v1').get_resource_search_uri()
+
         self.cs_recipe = Recipe(
             CardSet, name=seq('Magic Set '), acronym=seq('set'),
             is_published=True)
+
         self.release_recipe = Recipe(
             CardRelease, card_number=seq(0),
             card_set=foreign_key(self.cs_recipe),
             art=foreign_key(Recipe(CardImage)))
+
         self.face_recipe = Recipe(
             CardFace, name=seq('Card '), card=foreign_key(Recipe(Card)))
 
@@ -36,14 +39,6 @@ class SerpTest(ResourceTestCase):
         if build_fts:
             self.build_fts()
         return self.deserialize(self.api_client.get(self.uri, data=kwargs))
-
-    def create_card(self, card_set=None, card_number=None, **kwargs):
-        face = self.face_recipe.make(colors=[], **kwargs)
-        if card_set is None:
-            card_set = self.cs_recipe.make()
-        self.release_recipe.make(card=face.card, card_set=card_set,
-                                 card_number=card_number)
-        return face
 
     def get_cards(self, serp, field='name'):
         return [cf[field] for cf in serp['objects']]
