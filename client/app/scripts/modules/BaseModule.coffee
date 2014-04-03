@@ -3,7 +3,7 @@ module.exports = class BaseModule extends Marionette.Module
     @mainView = new @MainView(vent: @app.vent)
     @listenTo @mainView, 'stop:notification:module', @stop
 
-    @region.show(@mainView)
+    @region.show @mainView
 
   onStop: ->
     @region.close()

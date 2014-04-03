@@ -8,11 +8,11 @@ module.exports = class ToggleableRegion extends Backbone.Marionette.Region
 
   initShow: ->
     @emptyView = new EmptyRegionView()
-    @show(@emptyView)
+    @show @emptyView
     @listenTo @emptyView, 'region:on', @activateModule
 
   activateModule: ->
     @module.start()
 
   onClose: (view) ->
-    @initShow() unless view instanceof EmptyRegionView 
+    @initShow() unless view instanceof EmptyRegionView
