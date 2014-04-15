@@ -80,6 +80,7 @@ gulp.task('watch', function () {
 
   gulp.watch(paths.src + 'scripts/**', ['scripts']);
   gulp.watch(paths.src + 'styles/**/*.styl', ['styles']);
+  gulp.watch(paths.vendor + 'scripts/**', ['vendor-scripts']);
   gulp.watch(paths.src + 'index.jade', ['html']);
 
   gulp.watch([
