@@ -25,4 +25,3 @@ module.exports = class TodoView extends Backbone.Marionette.ItemView
   removeTodo: ->
     @model.destroy()
     @vent.trigger 'new:notification', "Removed todo: " + @model.get('text')
-

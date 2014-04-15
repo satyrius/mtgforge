@@ -1,7 +1,5 @@
-ToggleableRegion = require './regions/ToggleableRegion'
 AppView = require './views/AppView'
-TodoModule = require './modules/todo/TodoModule'
-NotificationModule = require './modules/notification/NotificationModule'
+SearchModule = require './modules/search/SearchModule'
 
 class App extends Backbone.Marionette.Application
   initialize: =>
@@ -12,17 +10,13 @@ class App extends Backbone.Marionette.Application
 
     @addInitializer (options) =>
       @addRegions
-        notificationRegion:
-          selector: "#notifications"
-          regionType: ToggleableRegion
-          module: @submodules.Notification
-        todoRegion:
-          selector: "#todos"
-          regionType: ToggleableRegion
-          module: @submodules.Todo
+        header: '#td-search'
+        main: '#td-main'
 
-    @module 'Notification', NotificationModule
-    @module 'Todo', TodoModule
+    @module 'Search', SearchModule
+
+    @reqres.setHandler 'header:region', => @getRegion('header')
+    @reqres.setHandler 'default:region', => @getRegion('main')
 
     @start()
 
