@@ -71,6 +71,7 @@ gulp.task('styles', function () {
   gulp.src(paths.src + 'styles/**/*.styl')
     .pipe(plumber())
     .pipe(stylus({ use: ['nib']}))
+    .pipe(concat('main.css'))
     .pipe(gulp.dest(paths.dest + 'css/'))
 });
 
