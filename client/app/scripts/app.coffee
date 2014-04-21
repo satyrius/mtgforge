@@ -1,10 +1,10 @@
 AppView = require './views/AppView'
-SearchModule = require './modules/search/SearchModule'
+Entities = require './entities/Entities'
+SearchModule  = require './modules/search/SearchModule'
+ProductsModule = require './modules/products/ProductsModule'
 
 class App extends Backbone.Marionette.Application
   initialize: =>
-    console.log 'Initializing app...'
-
     @addInitializer (options) =>
       (new AppView()).render()
 
@@ -13,7 +13,9 @@ class App extends Backbone.Marionette.Application
         header: '#td-search'
         main: '#td-main'
 
+    @module 'Entities', Entities
     @module 'Search', SearchModule
+    @module 'Products', ProductsModule
 
     @reqres.setHandler 'header:region', => @getRegion('header')
     @reqres.setHandler 'default:region', => @getRegion('main')
