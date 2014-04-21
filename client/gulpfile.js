@@ -39,7 +39,8 @@ gulp.task('vendor-scripts', function() {
       paths.vendor + 'scripts/underscore.js',
       paths.vendor + 'scripts/backbone.js',
       paths.vendor + 'scripts/backbone.syphon.js',
-      paths.vendor + 'scripts/backbone.marionette.js'
+      paths.vendor + 'scripts/backbone.marionette.js',
+      paths.vendor + 'scripts/backbone.tastypie.js'
     ])
     .pipe(plumber())
     .pipe(concat("vendor.js"))
@@ -51,6 +52,7 @@ gulp.task('scripts', function() {
   gulp.src(paths.src + 'scripts/index.coffee', { read: false })
     .pipe(plumber())
     .pipe(browserify({
+      debug: true,
       transform: ['coffeeify', 'jadeify'],
       extensions: ['.coffee', '.jade']
     }))
