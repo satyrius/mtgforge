@@ -1,7 +1,7 @@
 #!/bin/sh
 DIR=$(dirname $0)
 
-cd $DIR/frontend
-brunch watch &
+cd $DIR/client
+gulp watch &
 
 ../backend/manage.py runserver $@
