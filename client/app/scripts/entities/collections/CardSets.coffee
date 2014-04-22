@@ -1,6 +1,6 @@
 CardSet = require '../models/CardSet'
 
-module.exports = class CardSets extends Backbone.Tastypie.Collection
+module.exports = class CardSets extends Backbone.Collection
   url: "/api/v1/card_sets/"
   model: CardSet
 

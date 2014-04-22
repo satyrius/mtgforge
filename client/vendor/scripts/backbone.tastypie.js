@@ -1,105 +1,166 @@
-// https://github.com/amccloud/backbone-tastypie
-(function($, _, Backbone) {
-    Backbone.Tastypie = {
-        defaultLimit: 20
-    };
+/**
+ * Backbone-tastypie.js 0.2
+ * (c) 2011 Paul Uithol
+ * 
+ * Backbone-tastypie may be freely distributed under the MIT license.
+ * Add or override Backbone.js functionality, for compatibility with django-tastypie.
+ * Depends on Backbone (and thus on Underscore as well): https://github.com/documentcloud/backbone.
+ */
+( function( root, factory ) {
+	// Set up Backbone-relational for the environment. Start with AMD.
+	if ( typeof define === 'function' && define.amd ) {
+		define( [ 'exports', 'backbone', 'underscore' ], factory );
+	}
+	// Next for Node.js or CommonJS.
+	else if ( typeof exports !== 'undefined' ) {
+		factory( exports, require( 'backbone' ), require( 'underscore' ) );
+	}
+	// Finally, as a browser global. Use `root` here as it references `window`.
+	else {
+		factory( root, root.Backbone, root._ );
+	}
+}( this, function( exports, Backbone, _ ) {
+	"use strict";
 
-    Backbone.Tastypie.Model = Backbone.Model.extend({
-        idAttribute: 'resource_uri',
+	Backbone.Tastypie = {
+		doGetOnEmptyPostResponse: true,
+		doGetOnEmptyPutResponse: false,
+		apiKey: {
+			username: '',
+			key: ''
+		},
+		csrfToken: ''
+	};
 
-        url: function() {
-            var url = getValue(this, 'urlRoot') || getValue(this.collection, 'urlRoot') || urlError();
+	/**
+	 * Override Backbone's sync function, to do a GET upon receiving a HTTP CREATED.
+	 * This requires 2 requests to do a create, so you may want to use some other method in production.
+	 * Modified from http://joshbohde.com/blog/backbonejs-and-django
+	 */
+	Backbone.oldSync = Backbone.sync;
+	Backbone.sync = function( method, model, options ) {
+		var headers = {};
 
-            if (this.isNew())
-                return url;
+		if ( Backbone.Tastypie.apiKey && Backbone.Tastypie.apiKey.username ) {
+			headers[ 'Authorization' ] = 'ApiKey ' + Backbone.Tastypie.apiKey.username + ':' + Backbone.Tastypie.apiKey.key;
+		}
 
-            return this.get('resource_uri');
-        },
-        _getId: function() {
-            if (this.has('id'))
-                return this.get('id');
+		if ( Backbone.Tastypie.csrfToken ) {
+			headers[ 'X-CSRFToken' ] = Backbone.Tastypie.csrfToken;
+		}
 
-            return _.chain(this.get('resource_uri').split('/')).compact().last().value();
-        }
-    });
+		// Keep `headers` for a potential second request
+		headers = _.extend( headers, options.headers );
+		options.headers = headers;
 
-    Backbone.Tastypie.Collection = Backbone.Collection.extend({
-        constructor: function(models, options) {
-            Backbone.Collection.prototype.constructor.apply(this, arguments);
+		if ( ( method === 'create' && Backbone.Tastypie.doGetOnEmptyPostResponse ) ||
+			( method === 'update' && Backbone.Tastypie.doGetOnEmptyPutResponse ) ) {
+			var dfd = new $.Deferred();
 
-            this.meta = {};
-            this.filters = {
-                limit: Backbone.Tastypie.defaultLimit,
-                offset: 0
-            };
+			// Set up 'success' handling
+			var success = options.success;
+			dfd.done( function( resp, textStatus, xhr ) {
+				_.isFunction( success ) && success( resp );
+			});
 
-            if (options && options.filters)
-                _.extend(this.filters, options.filters);
-        },
-        url: function(models) {
-            var url = this.urlRoot;
+			options.success = function( resp, textStatus, xhr ) {
+				// If create is successful but doesn't return a response, fire an extra GET.
+				// Otherwise, resolve the deferred (which triggers the original 'success' callbacks).
+				if ( !resp && ( xhr.status === 201 || xhr.status === 202 || xhr.status === 204 ) ) { // 201 CREATED, 202 ACCEPTED or 204 NO CONTENT; response null or empty.
+					var location = xhr.getResponseHeader( 'Location' ) || model.url();
+					return Backbone.ajax({
+						url: location,
+						headers: headers,
+						success: dfd.resolve,
+						error: dfd.reject
+					});
+				}
+				else {
+					return dfd.resolveWith( options.context || options, [ resp, textStatus, xhr ] );
+				}
+			};
 
-            if (models) {
-                var ids = _.map(models, function(model) {
-                    return model._getId();
-                });
+			// Set up 'error' handling
+			var error = options.error;
+			dfd.fail( function( xhr, textStatus, errorThrown ) {
+				_.isFunction( error ) && error( xhr.responseText );
+			});
 
-                url += 'set/' + ids.join(';') + '/';
-            }
+			options.error = function( xhr, textStatus, errorText ) {
+				dfd.rejectWith( options.context || options, [ xhr, textStatus, xhr.responseText ] );
+			};
 
-            return url + this._getQueryString();
-        },
-        parse: function(response) {
-            if (response && response.meta)
-                this.meta = response.meta;
+			// Create the request, and make it accessibly by assigning it to the 'request' property on the deferred
+			dfd.request = Backbone.oldSync( method, model, options );
+			return dfd;
+		}
 
-            return response && response.objects;
-        },
-        fetchNext: function(options) {
-            options = options || {};
-            options.add = true;
+		return Backbone.oldSync( method, model, options );
+	};
 
-            this.filters.limit = this.meta.limit;
-            this.filters.offset = this.meta.offset + this.meta.limit;
+	Backbone.Model.prototype.idAttribute = 'resource_uri';
 
-            if (this.filters.offset > this.meta.total_count)
-                this.filters.offset = this.meta.total_count;
+	Backbone.Model.prototype.url = function() {
+		// Use the 'resource_uri' if possible
+		var url = this.get( 'resource_uri' );
 
-            return this.fetch.call(this, options);
-        },
-        fetchPrevious: function(options) {
-            options = options || {};
-            options.add = true;
-            options.at = 0;
+		// If there's no idAttribute, use the 'urlRoot'. Fallback to try to have the collection construct a url.
+		// Explicitly add the 'id' attribute if the model has one.
+		if ( !url ) {
+			url = _.result( this, 'urlRoot' ) || ( this.collection && _.result( this.collection, 'url' ) );
 
-            this.filters.limit = this.meta.limit;
-            this.filters.offset = this.meta.offset - this.meta.limit;
+			if ( url && this.has( 'id' ) ) {
+				url = addSlash( url ) + this.get( 'id' );
+			}
+		}
 
-            if (this.filters.offset < 0){
-                this.filters.limit += this.filters.offset;
-                this.filters.offset = 0;
-            }
+		url = url && addSlash( url );
 
-            return this.fetch.call(this, options);
-        },
-        _getQueryString: function() {
-            if (!this.filters)
-                return '';
+		return url || null;
+	};
 
-            return '?' + $.param(this.filters);
-        }
-    });
+	/**
+	 * Return the first entry in 'data.objects' if it exists and is an array, or else just plain 'data'.
+	 */
+	Backbone.Model.prototype.parse = function( data ) {
+		return data && data.objects && ( _.isArray( data.objects ) ? data.objects[ 0 ] : data.objects ) || data;
+	};
 
-    // Helper function from Backbone to get a value from a Backbone
-    // object as a property or as a function.
-    var getValue = function(object, prop) {
-        if ((object && object[prop]))
-            return _.isFunction(object[prop]) ? object[prop]() : object[prop];
-    };
+	/**
+	 * Return 'data.objects' if it exists.
+	 * If present, the 'data.meta' object is assigned to the 'collection.meta' var.
+	 */
+	Backbone.Collection.prototype.parse = function( data ) {
+		if ( data && data.meta ) {
+			this.meta = data.meta;
+		}
 
-    // Helper function from Backbone that raises error when a model's
-    // url cannot be determined.
-    var urlError = function() {
-        throw new Error('A "url" property or function must be specified');
-    };
-})(window.$, window._, window.Backbone);
+		return data && data.objects || data;
+	};
+
+	Backbone.Collection.prototype.url = function( models ) {
+		var url = _.result( this, 'urlRoot' );
+		// If the collection doesn't specify an url, try to obtain one from a model in the collection
+		if ( !url ) {
+			var model = models && models.length && models[ 0 ];
+			url = model && _.result( model, 'urlRoot' );
+		}
+		url = url && addSlash( url );
+
+		// Build a url to retrieve a set of models. This assume the last part of each model's idAttribute
+		// (set to 'resource_uri') contains the model's id.
+		if ( models && models.length ) {
+			var ids = _.map( models, function( model ) {
+				var parts = _.compact( model.url().split( '/' ) );
+				return parts[ parts.length - 1 ];
+			});
+			url += 'set/' + ids.join( ';' ) + '/';
+		}
+
+		return url || null;
+	};
+
+	var addSlash = function( str ) {
+		return str + ( ( str.length > 0 && str.charAt( str.length - 1 ) === '/' ) ? '' : '/' );
+	};
+}));
