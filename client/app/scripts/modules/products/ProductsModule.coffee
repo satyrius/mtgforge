@@ -6,11 +6,15 @@ module.exports = class ProductsModule extends Marionette.Module
 
   getRegion: ->
     if not @region
-      @region = @app.request('default:region')
+      @region = @app.request 'default:region'
     return @region
 
   onStart: ->
     view = new @mainView
-      collection: @app.request('cardset:entities')
-
+    # The empty view will be shown instead of products list
     @getRegion().show view
+
+    (@app.request 'cardset:entities').done (collection) ->
+      view.collection = collection
+      # Rerender view for products list to be shown
+      view.render()

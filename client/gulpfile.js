@@ -38,6 +38,7 @@ gulp.task('vendor-scripts', function() {
       paths.vendor + 'scripts/bootstrap.js',
       paths.vendor + 'scripts/underscore.js',
       paths.vendor + 'scripts/backbone.js',
+      paths.vendor + 'scripts/backbone.defered.jquery.js',
       paths.vendor + 'scripts/backbone.syphon.js',
       paths.vendor + 'scripts/backbone.marionette.js',
       paths.vendor + 'scripts/backbone.tastypie.js'

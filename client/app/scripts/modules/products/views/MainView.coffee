@@ -4,15 +4,13 @@ module.exports = class MainView extends Backbone.Marionette.CompositeView
   itemView: require './RowView'
   emptyView: require './EmptyView'
 
-  onCompositeCollectionBeforeRender: () ->
-    console.log 'before render', @collection
-
   # Group card sets collection by year and pass splits to the row view
-  showCollection: () ->
-    console.log 'show collection'
+  showCollection: ->
+    console.log 'show collection', @collection
+    console.log 'grouped by year', @collection.groupBy (cs) -> cs.year
     _.each (@collection.groupBy (cs) -> cs.year), (sets, year) ->
       console.log 'split for', year, sets
       view = @getItemView
         year: year
         collection: sets
-      @additemView view
+      @addItemView view

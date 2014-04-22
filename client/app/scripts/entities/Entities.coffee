@@ -4,8 +4,8 @@ CardSets = require './collections/CardSets'
 API =
   getCardSets: ->
     sets = new CardSets()
-    sets.fetch()
-    return sets
+    # Return defer
+    return sets.fetch()
 
 module.exports = class Entities extends Marionette.Module
   initialize: ->
