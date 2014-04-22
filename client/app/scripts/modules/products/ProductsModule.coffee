@@ -14,7 +14,7 @@ module.exports = class ProductsModule extends Marionette.Module
     # The empty view will be shown instead of products list
     @getRegion().show view
 
-    (@app.request 'cardset:entities').done (collection) ->
-      view.collection = collection
+    (@app.request 'cardset:entities').done (result) ->
+      view.collection = result.objects
       # Rerender view for products list to be shown
       view.render()
