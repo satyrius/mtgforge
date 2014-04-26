@@ -1,17 +1,20 @@
-require 'views/index'
-require 'views/search'
-require 'views/search_results'
-require 'views/spinner'
-require 'collections/cards'
-require 'collections/sets'
+Backbone = require 'backbone'
+require '../vendor/scripts/backbone-mediator'
+$ = require 'jquery'
+_ = require 'underscore'
+IndexView = require './views/index'
+SearchView = require './views/search'
+SearchResultsView = require './views/search_results'
+SpinnerView = require './views/spinner'
+CardsCollection = require './collections/cards'
 
-class Forge.Router extends Backbone.Router
+module.exports = class Router extends Backbone.Router
   constructor: (options) ->
     super(options)
-    @searchView = new Forge.SearchView()
+    @searchView = new SearchView({app: @})
     Backbone.Mediator.subscribe 'search:q', (query) =>
       query = $.unserialize query if typeof query == 'string'
-      q = _.extend @query, query;
+      q = _.extend @query, query
       @navigate "search?#{$.serialize(q, true)}", {trigger: true}
 
   query: {}
@@ -22,19 +25,19 @@ class Forge.Router extends Backbone.Router
 
   index: ->
     unless @indexView?
-      @indexView = new Forge.IndexView()
+      @indexView = new IndexView({app: @})
     @indexView.render()
 
   search: (query) ->
     query = query
     unless @searchResultsView?
-      @searchResultsView = new Forge.SearchResultsView()
+      @searchResultsView = new SearchResultsView({app: @})
 
     unless @spinnerView?
-      @spinnerView = new Forge.SpinnerView()
+      @spinnerView = new SpinnerView({app: @})
 
     unless @cardsCollection?
-      @cardsCollection = new Forge.CardsCollection()
+      @cardsCollection = new CardsCollection({app: @})
 
     Backbone.Mediator.publish 'cards:loading'
     @cardsCollection.fetch({

@@ -1,4 +1,8 @@
-class Forge.SearchView extends Backbone.View
+Backbone = require 'backbone'
+$ = require 'jquery'
+UserVoice = require '../../vendor/scripts/user-voice'
+
+module.exports = class SearchView extends Backbone.View
   el: '#td-search'
   template: require '../templates/search/form'
 
@@ -42,7 +46,7 @@ class Forge.SearchView extends Backbone.View
 
   showUserVoice: ()->
     unless @UserVoice?
-      @UserVoice = window.UserVoice || []
+      @UserVoice = UserVoice
 
     @UserVoice.push ['showLightbox', 'classic_widget',
       mode: 'full'

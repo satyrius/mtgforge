@@ -1,7 +1,7 @@
-window.Forge = {}
-
-require 'router'
+Backbone = require 'backbone'
+app = require './app'
+$ = require 'jquery'
 
 $ ->
-  Forge.app = new Forge.Router()
+  window.Forge = app
   Backbone.history.start()

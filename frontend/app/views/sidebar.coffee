@@ -1,4 +1,6 @@
-class Forge.SidebarView extends Backbone.View
+Backbone = require 'backbone'
+
+module.exports = class SidebarView extends Backbone.View
   el: "#td-sidebar"
   template: require '../templates/sidebar'
   events:

@@ -1,4 +1,6 @@
-class Forge.CardSet extends Backbone.Model
+Backbone = require 'backbone'
+
+module.exports = class CardSet extends Backbone.Model
     initialize: () ->
         @year = new Number @get("released_at")[..3]
         @queryFilter = {set: @get "acronym"}

@@ -1,4 +1,8 @@
-class Forge.SpinnerView extends Backbone.View
+Backbone = require 'backbone'
+Spinner = require 'spin'
+$ = require 'jquery'
+
+module.exports = class SpinnerView extends Backbone.View
   el: "#td-main"
 
   subscriptions:

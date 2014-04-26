@@ -1,3 +1,6 @@
+var Backbone = require('backbone'),
+    _ = require('underscore');
+
 Backbone.Model.prototype.parse = function(resp, xhr) {
 	return (resp && 'objects' in resp) ? (resp['objects'][0] || {}) : resp;
 };

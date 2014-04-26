@@ -1,15 +1,19 @@
-require 'helpers'
+Backbone = require 'backbone'
+CardSetsCollection = require '../collections/sets'
+_ = require 'underscore'
+Handlebars = require 'hbsfy/runtime'
+require '../helpers'
 
 Handlebars.registerPartial 'card_sets', require '../templates/cs_links'
 
-class Forge.IndexView extends Backbone.View
+module.exports = class IndexView extends Backbone.View
   el: '#td-main'
   template: require '../templates/index'
 
   render: ->
     # Fetch card set collection or use cached
     unless @csCollection?
-      @csCollection = new Forge.CardSetsCollection()
+      @csCollection = new CardSetsCollection()
       @csCollection.fetch().done =>
         @_renderSets()
     else

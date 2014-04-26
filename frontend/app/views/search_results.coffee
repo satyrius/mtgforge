@@ -1,13 +1,18 @@
-require 'views/card_info'
+Backbone = require 'backbone'
+BaseView = require './base'
+CardInfoView = require './card_info'
+_ = require 'underscore'
+$ = require 'jquery'
+Handlebars = require 'hbsfy/runtime'
 
 Handlebars.registerPartial 'card', require '../templates/search/card'
 
-class Forge.SearchResultsView extends Backbone.View
+module.exports = class SearchResultsView extends BaseView
   el: '#td-main'
   template: require '../templates/search/results'
   notFoundTemplate: require '../templates/search/notfound'
   newRowTemplate: require '../templates/search/new_row'
-  newCardsTemplate: '../templates/search/new_card'
+  newCardsTemplate: require '../templates/search/new_card'
   CARD_WIDTH: 223
   CARD_HEIGHT: 310
   CARD_MARGIN: 15
@@ -83,7 +88,7 @@ class Forge.SearchResultsView extends Backbone.View
     target = $ event.target
     card = @data.get target.data('id')
     unless @cardInfoView?
-      @cardInfoView = new Forge.CardInfoView {parent: @}
+      @cardInfoView = new CardInfoView {parent: @, app: @app}
 
     el = target.closest '.td-card'
     Backbone.Mediator.publish 'card:details', card, el

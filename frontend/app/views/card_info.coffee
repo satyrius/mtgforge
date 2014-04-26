@@ -1,4 +1,8 @@
-class Forge.CardInfoView extends Backbone.View
+Backbone = require 'backbone'
+BaseView = require './base'
+$ = require 'jquery'
+
+module.exports = class CardInfoView extends BaseView
   template: require '../templates/search/card_info'
 
   events:
@@ -12,7 +16,7 @@ class Forge.CardInfoView extends Backbone.View
     'search:focus': 'hide'
 
   initialize: (options) ->
-    super()
+    super(options)
     @parent = options.parent
     @reset()
     $(document).on 'keydown', (event) =>
@@ -100,7 +104,7 @@ class Forge.CardInfoView extends Backbone.View
         scroll += elBottom - windowBottom
 
       # And at the end check card info top border is visible
-      barHeight = Forge.app.searchView.$el.outerHeight()
+      barHeight = @app.searchView.$el.outerHeight()
       if elTop - barHeight < scroll
         scroll -= scroll - elTop + barHeight
 

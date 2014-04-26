@@ -1,8 +1,9 @@
-require 'models/card'
+Backbone = require 'backbone'
+Card = require '../models/card'
 
-class Forge.CardsCollection extends Backbone.Collection
+module.exports = class CardsCollection extends Backbone.Collection
     url: "api/v1/cards/search"
-    model: Forge.Card
+    model: Card
 
     initialize: () ->
         @bind('reset', () ->
@@ -16,4 +17,3 @@ class Forge.CardsCollection extends Backbone.Collection
             @url = oldUrl
             Backbone.Mediator.publish('cardsCollection:updated', resp.objects)
         )
-
