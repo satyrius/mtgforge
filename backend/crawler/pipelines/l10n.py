@@ -50,7 +50,7 @@ def get_card_release(item):
             release = m.CardRelease.objects.get(card_set=cs, card_number=number)
         except m.CardRelease.MultipleObjectsReturned:
             message = u'There are few card releases with number {n} for the '\
-                      u'card "{c}"'.format(n=number, c=item.get('name'))
+                      u'card set "{cs}"'.format(n=number, cs=cs.name)
             log.msg(message, level=log.WARNING)
             if not en_mvid:
                 raise InvalidError(u'{msg}, cannot choose right card release '
@@ -62,8 +62,8 @@ def get_card_release(item):
             release = m.CardRelease.objects.get(card_set=cs, art__mvid=en_mvid)
         else:
             raise InvalidError(u'Cannot setup localization for card without '
-                               u'collector\'s number for "{name}"'.format(
-                                   name=item.get('name')))
+                               u'collector\'s number for MVID "{mvid}"'.format(
+                                   mvid=item.get('mvid')))
 
     face = release.card.cardface_set.get(sub_number=sub_number)
     return release, face
