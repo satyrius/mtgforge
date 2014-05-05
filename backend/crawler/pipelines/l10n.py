@@ -36,17 +36,35 @@ class L10nPipeline(BaseL10nItemPipeline):
 def get_card_release(item):
     number, sub_number = validate_collectors_number(item.get('number'))
     cs = cards.get_card_set(item)
+    release = None
+
+    # Get oracle rules page mvid
+    en_mvid = item.get('en_mvid') or None
+    if item.get('language') == l10n.get_name(l10n.EN):
+        en_mvid = item['mvid']
+
+    # First try to get card release by collector number if exists
     if number:
-        # Try to get release by its number first
-        release = m.CardRelease.objects.get(card_set=cs, card_number=number)
-    elif item['language'] == l10n.get_name(l10n.EN):
-        # Otherwise we can try to get it by mvid for english cards
-        release = m.CardRelease.objects.get(
-            card_set=cs, art__mvid=item['mvid'])
-    else:
-        raise InvalidError(u'Cannot setup localization for card without '
-                           u'collector\'s number for "{name}"'.format(
-                               name=item['name']))
+        try:
+            # Try to get release by its number first
+            release = m.CardRelease.objects.get(card_set=cs, card_number=number)
+        except m.CardRelease.MultipleObjectsReturned:
+            message = u'There are few card releases with number {n} for the '\
+                      u'card set "{cs}"'.format(n=number, cs=cs.name)
+            log.msg(message, level=log.WARNING)
+            if not en_mvid:
+                raise InvalidError(u'{msg}, cannot choose right card release '
+                                   u'without EN mvid.'.format(msg=message))
+
+    # Otherwise we can try to get it by mvid for english cards
+    if not release:
+        if en_mvid:
+            release = m.CardRelease.objects.get(card_set=cs, art__mvid=en_mvid)
+        else:
+            raise InvalidError(u'Cannot setup localization for card without '
+                               u'collector\'s number for MVID "{mvid}"'.format(
+                                   mvid=item.get('mvid')))
+
     face = release.card.cardface_set.get(sub_number=sub_number)
     return release, face
 

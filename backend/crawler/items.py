@@ -39,3 +39,4 @@ class CardItem(BaseCarditem):
 
 class L10nItem(BaseCarditem):
     language = Field()
+    en_mvid = Field()  # Multiverse ID of English oracle rules page
