@@ -183,6 +183,9 @@ class CardRelease(models.Model):
     card_set = models.ForeignKey(CardSet, on_delete=models.PROTECT)
 
     rarity = NullCharField(max_length=1, choices=RARITY_CHOICES)
+
+    # 1. Store only numeric part of collector's number
+    # 2. Keep this field not unique because of missprints and fixed prints
     card_number = models.PositiveIntegerField(null=True, blank=True)
 
     art = models.ForeignKey(CardImage, null=True, blank=True)

@@ -183,6 +183,7 @@ class GathererSpider(CrawlSpider):
                 for n, _ in card_l10n.fields.items():
                     card_l10n[n] = card.get(n)
                 card_l10n['language'] = response.meta.get('language')
+                card_l10n['en_mvid'] = response.meta.get('en_mvid')
                 yield card_l10n
 
         # Go to Languages
@@ -205,6 +206,8 @@ class GathererSpider(CrawlSpider):
     def parse_languages(self, response):
         sel = Selector(response)
         page_url = response.request.url
+        en_mvid = get_mvid(page_url)
+
         for row in sel.css('table.cardList tr.cardItem'):
             cells = row.xpath('.//td')
             href = cells[0].xpath('.//a/@href').extract()[0]
@@ -213,9 +216,8 @@ class GathererSpider(CrawlSpider):
             yield Request(
                 url=print_url,
                 callback=self.parse_card,
-                meta={'language': lang})
+                meta={'language': lang, 'en_mvid': en_mvid and str(en_mvid)})
 
-        page_url = response.request.url
         for link in sel.css('div.pagingControls a'):
             if link.xpath('text()').extract()[0].strip().isdigit():
                 yield Request(
