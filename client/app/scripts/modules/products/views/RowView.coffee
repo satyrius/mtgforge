@@ -4,5 +4,6 @@ module.exports = class RowView extends Backbone.Marionette.CompositeView
   itemView: require './ProductView'
 
   initialize: (opts) ->
-    @year = opts.year
-    @collection = opts.collection
+    @collection = new Backbone.Collection (_.toArray @model.attributes)
+    @model = new Backbone.Model
+      year: @collection.first().year

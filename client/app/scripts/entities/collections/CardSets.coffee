@@ -1,6 +1,6 @@
 CardSet = require '../models/CardSet'
 
-module.exports = class CardSets extends Backbone.Collection
+module.exports = class CardSets extends Backbone.Deferred.Collection
   url: "/api/v1/card_sets/"
   model: CardSet
 
