@@ -2,6 +2,7 @@ class ProductsView extends Backbone.Marionette.CollectionView
   itemView: require './ProductView'
 
 module.exports = class RowView extends Backbone.Marionette.Layout
+  className: 'row'
   template: require './templates/row'
   regions:
     core: '.cs-core'
