@@ -2,6 +2,7 @@ AppView = require './views/main'
 Entities = require './entities/module'
 SearchModule  = require './modules/search/module'
 ProductsModule = require './modules/products/module'
+SerpModule = require './modules/serp/module'
 
 class App extends Backbone.Marionette.Application
   initialize: ->
@@ -16,6 +17,7 @@ class App extends Backbone.Marionette.Application
     @module 'Entities', Entities
     @module 'Search', SearchModule
     @module 'Products', ProductsModule
+    @module 'Serp', SerpModule
 
     @reqres.setHandler 'header:region', => @getRegion('header')
     @reqres.setHandler 'default:region', => @getRegion('main')
