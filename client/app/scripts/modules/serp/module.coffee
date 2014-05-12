@@ -1,9 +1,5 @@
-Router = require './router'
-Controller = require './controller'
+BaseModule = require '../base'
 
-module.exports = class SerpModule extends Marionette.Module
-  initialize: ->
-    ctrl = new Controller(app: @app)
-    @addInitializer (options) ->
-      new Router
-        controller: ctrl
+module.exports = class SerpModule extends BaseModule
+  Controller: require './controller'
+  Router: require './router'
