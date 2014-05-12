@@ -1,15 +1,7 @@
-module.exports = class SerpController extends Marionette.Controller
+ApplicationController = require '../../controller'
+
+module.exports = class SerpController extends ApplicationController
   mainView: require './views/main'
 
-  initialize: (options) ->
-    @app = options.app
-
-  getRegion: ->
-    if not @region
-      @region = @app.request 'default:region'
-    return @region
-
   listCards: ->
-    console.log 'serp'
-    view = new @mainView
-    @getRegion().show view
+    @show new @mainView
