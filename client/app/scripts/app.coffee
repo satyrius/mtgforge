@@ -4,11 +4,11 @@ SearchModule  = require './modules/search/SearchModule'
 ProductsModule = require './modules/products/ProductsModule'
 
 class App extends Backbone.Marionette.Application
-  initialize: =>
-    @addInitializer (options) =>
+  initialize: ->
+    @addInitializer (options) ->
       (new AppView()).render()
 
-    @addInitializer (options) =>
+    @addInitializer (options) ->
       @addRegions
         header: '#td-search'
         main: '#td-main'
