@@ -1,9 +1,6 @@
 module.exports = class SearchModule extends Marionette.Module
   mainView: require './views/main'
 
-  initialize: ->
-    @startWithParent = true
-
   getRegion: ->
     if not @region
       @region = @app.reqres.request('header:region')
