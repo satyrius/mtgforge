@@ -2,7 +2,6 @@ AppView = require './views/main'
 Entities = require './entities/module'
 SearchModule  = require './modules/search/module'
 ProductsModule = require './modules/products/module'
-Router = require './router'
 
 class App extends Backbone.Marionette.Application
   initialize: ->
@@ -13,9 +12,6 @@ class App extends Backbone.Marionette.Application
       @addRegions
         header: '#td-search'
         main: '#td-main'
-
-    @addInitializer (options) ->
-      new Router()
 
     @module 'Entities', Entities
     @module 'Search', SearchModule
