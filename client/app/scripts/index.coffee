@@ -1,4 +1,4 @@
-App = require './app'
+app = require './app'
 
 $ ->
-  App.initialize()
+  app.initialize()
