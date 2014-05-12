@@ -1,7 +1,7 @@
-AppView = require './views/AppView'
-Entities = require './entities/Entities'
-SearchModule  = require './modules/search/SearchModule'
-ProductsModule = require './modules/products/ProductsModule'
+AppView = require './views/main'
+Entities = require './entities/module'
+SearchModule  = require './modules/search/module'
+ProductsModule = require './modules/products/module'
 Router = require './router'
 
 class App extends Backbone.Marionette.Application

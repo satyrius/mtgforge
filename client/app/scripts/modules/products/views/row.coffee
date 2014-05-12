@@ -1,5 +1,5 @@
 class ProductsView extends Backbone.Marionette.CollectionView
-  itemView: require './ProductView'
+  itemView: require './product'
 
 module.exports = class RowView extends Backbone.Marionette.Layout
   className: 'row'

@@ -1,9 +1,8 @@
-CardSet = require './models/CardSet'
-CardSets = require './collections/CardSets'
+CardSetCollection = require './collections/card_set'
 
 API =
   getCardSets: ->
-    sets = new CardSets()
+    sets = new CardSetCollection()
     # Return defer
     return sets.fetch()
 

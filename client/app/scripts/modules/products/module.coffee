@@ -1,5 +1,5 @@
 module.exports = class ProductsModule extends Marionette.Module
-  mainView: require './views/MainView'
+  mainView: require './views/main'
 
   initialize: ->
     @startWithParent = true

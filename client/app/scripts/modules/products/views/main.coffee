@@ -1,8 +1,8 @@
 module.exports = class MainView extends Backbone.Marionette.CompositeView
   template: require './templates/main'
   itemViewContainer: '#products-list'
-  itemView: require './RowView'
-  emptyView: require './EmptyView'
+  itemView: require './row'
+  emptyView: require './empty'
 
   initialize: ->
     byYear = @collection.groupBy (cs) -> cs.year
