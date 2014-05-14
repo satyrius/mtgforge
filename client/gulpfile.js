@@ -109,12 +109,8 @@ gulp.task('watch', function () {
   gulp.watch(paths.vendor + 'scripts/**', ['vendor-scripts']);
   gulp.watch(paths.src + 'index.jade', ['templates']);
 
-  gulp.watch([
-      paths.dest + 'js/*.js',
-      paths.dest + 'css/*.css',
-      paths.dest + '**/*.html'
-    ], function(evt) {
-      server.changed(evt.path);
+  gulp.watch(paths.dest + '/**').on('change', function(file) {
+      server.changed(file.path);
     });
 });
 
