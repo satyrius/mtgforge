@@ -8,6 +8,7 @@ var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var minify = require('gulp-minify-css');
 
+var environment = 'dev';
 var paths = {
   src: './app/',
   dest: './public/',
@@ -15,25 +16,33 @@ var paths = {
   assets: './assets/'
 }
 
+gulp.task('set-prod', function() {
+  environment = 'prod';
+});
+
 gulp.task('assets', function() {
- gulp.src(paths.assets + "**")
+ gulp.src(paths.assets + '**')
     .pipe(plumber())
     .pipe(gulp.dest(paths.dest));
 });
 
 gulp.task('vendor-styles', function() {
-  gulp.src([
+  stream = gulp.src([
       paths.vendor + 'styles/bootstrap.css',
       paths.vendor + 'styles/bootstrap-theme.css'
     ])
     .pipe(plumber())
-    .pipe(concat("vendor.css"))
-    .pipe(minify())
-    .pipe(gulp.dest(paths.dest + 'css/'))
+    .pipe(concat('vendor.css'))
+
+  if (environment == 'prod') {
+    stream.pipe(minify())
+  }
+
+  stream.pipe(gulp.dest(paths.dest + 'css/'))
 });
 
 gulp.task('vendor-scripts', function() {
-  gulp.src([
+  stream = gulp.src([
       paths.vendor + 'scripts/jquery.js',
       paths.vendor + 'scripts/bootstrap.js',
       paths.vendor + 'scripts/underscore.js',
@@ -45,37 +54,51 @@ gulp.task('vendor-scripts', function() {
     ])
     .pipe(plumber())
     .pipe(concat("vendor.js"))
-    // .pipe(uglify())
-    .pipe(gulp.dest(paths.dest + 'js/'))
+
+  if (environment == 'prod') {
+    stream.pipe(uglify())
+  }
+
+  stream.pipe(gulp.dest(paths.dest + 'js/'))
 });
 
 gulp.task('scripts', function() {
-  gulp.src(paths.src + 'scripts/index.coffee', { read: false })
+  stream = gulp.src(paths.src + 'scripts/index.coffee', { read: false })
     .pipe(plumber())
     .pipe(browserify({
-      debug: true,
+      debug: environment == 'dev',
       transform: ['coffeeify', 'jadeify'],
       extensions: ['.coffee', '.jade']
     }))
     .pipe(concat('index.js'))
-    .pipe(gulp.dest(paths.dest + 'js/'))
+
+  if (environment == 'prod') {
+    stream.pipe(uglify())
+  }
+
+  stream.pipe(gulp.dest(paths.dest + 'js/'))
 });
 
-gulp.task('html', function() {
+gulp.task('templates', function() {
   gulp.src(paths.src + 'index.jade')
     .pipe(plumber())
     .pipe(jade({
-      pretty: true
+      pretty: environment == 'dev'
     }))
     .pipe(gulp.dest(paths.dest))
 });
 
 gulp.task('styles', function () {
-  gulp.src(paths.src + 'styles/**/*.styl')
+  stream = gulp.src(paths.src + 'styles/**/*.styl')
     .pipe(plumber())
     .pipe(stylus({ use: ['nib']}))
     .pipe(concat('main.css'))
-    .pipe(gulp.dest(paths.dest + 'css/'))
+
+  if (environment == 'prod') {
+    stream.pipe(minify())
+  }
+
+  stream.pipe(gulp.dest(paths.dest + 'css/'))
 });
 
 gulp.task('watch', function () {
@@ -84,7 +107,7 @@ gulp.task('watch', function () {
   gulp.watch(paths.src + 'scripts/**', ['scripts']);
   gulp.watch(paths.src + 'styles/**/*.styl', ['styles']);
   gulp.watch(paths.vendor + 'scripts/**', ['vendor-scripts']);
-  gulp.watch(paths.src + 'index.jade', ['html']);
+  gulp.watch(paths.src + 'index.jade', ['templates']);
 
   gulp.watch([
       paths.dest + 'js/*.js',
@@ -96,6 +119,7 @@ gulp.task('watch', function () {
 });
 
 gulp.task('vendor', ['vendor-styles', 'vendor-scripts']);
-gulp.task('compile', ['html', 'styles', 'scripts']);
+gulp.task('compile', ['templates', 'styles', 'scripts']);
 
 gulp.task('default', ['assets', 'vendor', 'compile']);
+gulp.task('prod', ['set-prod', 'default']);
