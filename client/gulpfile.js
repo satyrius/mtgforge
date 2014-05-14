@@ -1,23 +1,39 @@
-var gulp = require('gulp');
-var jade = require('gulp-jade');
-var livereload = require('gulp-livereload');
-var plumber = require('gulp-plumber');
-var stylus = require('gulp-stylus');
-var browserify = require('gulp-browserify');
-var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
-var minify = require('gulp-minify-css');
+var gulp = require('gulp'),
+    plumber = require('gulp-plumber'),
+    streamqueue = require('streamqueue'),
+    concat = require('gulp-concat'),
+    clean = require('gulp-clean'),
+    browserify = require('gulp-browserify'),
+    jade = require('gulp-jade'),
+    stylus = require('gulp-stylus'),
+    uglify = require('gulp-uglify'),
+    minify = require('gulp-minify-css'),
+    livereload = require('gulp-livereload');
 
 var environment = 'dev';
 var paths = {
   src: './app/',
   dest: './public/',
   vendor: './vendor/',
-  assets: './assets/'
+  assets: './assets/',
+  styles: {
+    vendor: [
+    './vendor/styles/bootstrap.css',
+    './vendor/styles/bootstrap-theme.css'
+    ],
+    app: [
+      './app/styles/**/*.styl'
+    ]
+  }
 }
 
 gulp.task('set-prod', function() {
   environment = 'prod';
+});
+
+gulp.task('clean', function() {
+  return gulp.src(paths.dist + '**/*', {read: false})
+    .pipe(clean());
 });
 
 gulp.task('assets', function() {
@@ -26,13 +42,12 @@ gulp.task('assets', function() {
     .pipe(gulp.dest(paths.dest));
 });
 
-gulp.task('vendor-styles', function() {
-  stream = gulp.src([
-      paths.vendor + 'styles/bootstrap.css',
-      paths.vendor + 'styles/bootstrap-theme.css'
-    ])
-    .pipe(plumber())
-    .pipe(concat('vendor.css'))
+gulp.task('styles', function () {
+  var stream = streamqueue({ objectMode: true },
+      gulp.src(paths.styles.vendor),
+      gulp.src(paths.styles.app).pipe(stylus())
+    )
+      .pipe(concat('app.css'))
 
   if (environment == 'prod') {
     stream.pipe(minify())
@@ -88,24 +103,11 @@ gulp.task('templates', function() {
     .pipe(gulp.dest(paths.dest))
 });
 
-gulp.task('styles', function () {
-  stream = gulp.src(paths.src + 'styles/**/*.styl')
-    .pipe(plumber())
-    .pipe(stylus({ use: ['nib']}))
-    .pipe(concat('main.css'))
-
-  if (environment == 'prod') {
-    stream.pipe(minify())
-  }
-
-  stream.pipe(gulp.dest(paths.dest + 'css/'))
-});
-
 gulp.task('watch', function () {
   var server = livereload();
 
   gulp.watch(paths.src + 'scripts/**', ['scripts']);
-  gulp.watch(paths.src + 'styles/**/*.styl', ['styles']);
+  gulp.watch(paths.styles.app, ['styles']);
   gulp.watch(paths.src + 'index.jade', ['templates']);
 
   gulp.watch(paths.dest + '/**').on('change', function(file) {
@@ -113,8 +115,8 @@ gulp.task('watch', function () {
     });
 });
 
-gulp.task('vendor', ['vendor-styles', 'vendor-scripts']);
+gulp.task('vendor', ['vendor-scripts']);
 gulp.task('compile', ['templates', 'styles', 'scripts']);
 
-gulp.task('default', ['assets', 'vendor', 'compile']);
+gulp.task('default', ['clean', 'assets', 'vendor', 'compile']);
 gulp.task('prod', ['set-prod', 'default']);

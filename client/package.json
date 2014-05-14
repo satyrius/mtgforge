@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "author": "Anton Egorov",
   "description": "Topdeck, the MTG Forge API client",
-  "devDependencies": {
+  "dependencies": {
+    "gulp-clean": "^0.2.4",
     "gulp": "~3.5.2",
     "gulp-jade": "~0.4.1",
     "gulp-livereload": "~1.1.1",
@@ -16,6 +17,7 @@
     "gulp-minify-css": "~0.3.0",
     "jade": "~1.1.5",
     "browserify": "~3.28.2",
-    "jadeify": "~2.1.1"
+    "jadeify": "~2.1.1",
+    "streamqueue": "0.0.7"
   }
 }
