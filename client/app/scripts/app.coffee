@@ -25,6 +25,8 @@ class App extends Backbone.Marionette.Application
     @start()
 
   onInitializeAfter: ->
+    # define a route for index page
+    @Products.router.appRoute '', 'listProducts'
     Backbone.history.start()
 
 module.exports = new App()
