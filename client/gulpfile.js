@@ -43,11 +43,21 @@ gulp.task('assets', function() {
 });
 
 gulp.task('styles', function () {
-  var stream = streamqueue({ objectMode: true },
-      gulp.src(paths.styles.vendor),
-      gulp.src(paths.styles.app).pipe(stylus())
-    )
-      .pipe(concat('app.css'))
+  var stream = gulp.src(paths.styles.app)
+    .pipe(plumber())
+    .pipe(stylus())
+    .pipe(concat('app.css'));
+
+  if (environment == 'prod') {
+    stream.pipe(minify())
+  }
+
+  stream.pipe(gulp.dest(paths.dest + 'css/'))
+});
+
+gulp.task('vendor-styles', function () {
+  var stream = gulp.src(paths.styles.vendor)
+    .pipe(concat('vendor.css'));
 
   if (environment == 'prod') {
     stream.pipe(minify())
@@ -103,7 +113,7 @@ gulp.task('templates', function() {
     .pipe(gulp.dest(paths.dest))
 });
 
-gulp.task('watch', function () {
+gulp.task('watch', ['default'], function () {
   var server = livereload();
 
   gulp.watch(paths.src + 'scripts/**', ['scripts']);
@@ -115,7 +125,7 @@ gulp.task('watch', function () {
     });
 });
 
-gulp.task('vendor', ['vendor-scripts']);
+gulp.task('vendor', ['vendor-styles', 'vendor-scripts']);
 gulp.task('compile', ['templates', 'styles', 'scripts']);
 
 gulp.task('default', ['clean', 'assets', 'vendor', 'compile']);
