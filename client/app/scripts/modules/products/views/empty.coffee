@@ -1,2 +1,4 @@
-module.exports = class EmptyView extends Backbone.Marionette.ItemView
+Marionette = require 'backbone.marionette'
+
+module.exports = class EmptyView extends Marionette.ItemView
   template: require './templates/empty'

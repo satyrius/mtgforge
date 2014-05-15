@@ -1,4 +1,8 @@
-module.exports = class MainView extends Backbone.Marionette.CompositeView
+_ = require 'underscore'
+Backbone = require 'backbone'
+Marionette = require 'backbone.marionette'
+
+module.exports = class MainView extends Marionette.CompositeView
   template: require './templates/main'
   itemViewContainer: '#products-list'
   itemView: require './row'

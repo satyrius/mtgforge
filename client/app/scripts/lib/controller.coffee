@@ -1,3 +1,5 @@
+Marionette = require 'backbone.marionette'
+
 module.exports = class ApplicationController extends Marionette.Controller
   initialize: (options) ->
     @app = options.app

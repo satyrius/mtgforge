@@ -1,3 +1,5 @@
+Marionette = require 'backbone.marionette'
+
 module.exports = class SearchModule extends Marionette.Module
   mainView: require './views/main'
 

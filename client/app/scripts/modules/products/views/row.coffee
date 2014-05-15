@@ -1,7 +1,11 @@
-class ProductsView extends Backbone.Marionette.CollectionView
+_ = require 'underscore'
+Backbone = require 'backbone'
+Marionette = require 'backbone.marionette'
+
+class ProductsView extends Marionette.CollectionView
   itemView: require './product'
 
-module.exports = class RowView extends Backbone.Marionette.Layout
+module.exports = class RowView extends Marionette.Layout
   className: 'row'
   template: require './templates/row'
   regions:

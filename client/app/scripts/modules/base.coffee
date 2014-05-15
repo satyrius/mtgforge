@@ -1,3 +1,5 @@
+Marionette = require 'backbone.marionette'
+
 module.exports = class BaseModule extends Marionette.Module
   initialize: ->
     ctrl = new @Controller

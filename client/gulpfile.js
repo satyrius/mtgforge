@@ -1,5 +1,6 @@
 var gulp = require('gulp'),
     plumber = require('gulp-plumber'),
+    debug = require('gulp-debug'),
     streamqueue = require('streamqueue'),
     concat = require('gulp-concat'),
     clean = require('gulp-clean'),
@@ -10,29 +11,31 @@ var gulp = require('gulp'),
     minify = require('gulp-minify-css'),
     livereload = require('gulp-livereload');
 
-var environment = 'dev';
-var paths = {
-  src: './app/',
-  dest: './public/',
-  vendor: './vendor/',
-  assets: './assets/',
-  styles: {
-    vendor: [
-    './vendor/styles/bootstrap.css',
-    './vendor/styles/bootstrap-theme.css'
-    ],
-    app: [
-      './app/styles/**/*.styl'
-    ]
-  }
-}
+var environment = 'dev',
+    verbose = false,
+    paths = {
+      src: './app/',
+      dest: './public/',
+      vendor: './vendor/',
+      assets: './assets/',
+      scripts: './app/scripts/index.coffee',
+      styles: {
+        vendor: [
+          './vendor/styles/bootstrap.css',
+          './vendor/styles/bootstrap-theme.css'
+        ],
+        app: [
+          './app/styles/*.styl'
+        ]
+      }
+    }
 
 gulp.task('set-prod', function() {
   environment = 'prod';
 });
 
 gulp.task('clean', function() {
-  return gulp.src(paths.dist + '**/*', {read: false})
+  return gulp.src(paths.dest + '**/*', {read: false})
     .pipe(clean());
 });
 
@@ -45,6 +48,7 @@ gulp.task('assets', function() {
 gulp.task('styles', function () {
   var stream = gulp.src(paths.styles.app)
     .pipe(plumber())
+    //.pipe(debug({verbose: verbose}))
     .pipe(stylus())
     .pipe(concat('app.css'));
 
@@ -66,29 +70,8 @@ gulp.task('vendor-styles', function () {
   stream.pipe(gulp.dest(paths.dest + 'css/'))
 });
 
-gulp.task('vendor-scripts', function() {
-  stream = gulp.src([
-      paths.vendor + 'scripts/jquery.js',
-      paths.vendor + 'scripts/bootstrap.js',
-      paths.vendor + 'scripts/underscore.js',
-      paths.vendor + 'scripts/backbone.js',
-      paths.vendor + 'scripts/backbone.defered.jquery.js',
-      paths.vendor + 'scripts/backbone.syphon.js',
-      paths.vendor + 'scripts/backbone.marionette.js',
-      paths.vendor + 'scripts/backbone.tastypie.js'
-    ])
-    .pipe(plumber())
-    .pipe(concat("vendor.js"))
-
-  if (environment == 'prod') {
-    stream.pipe(uglify())
-  }
-
-  stream.pipe(gulp.dest(paths.dest + 'js/'))
-});
-
 gulp.task('scripts', function() {
-  stream = gulp.src(paths.src + 'scripts/index.coffee', { read: false })
+  stream = gulp.src(paths.scripts, { read: false })
     .pipe(plumber())
     .pipe(browserify({
       debug: environment == 'dev',
@@ -125,8 +108,7 @@ gulp.task('watch', ['default'], function () {
     });
 });
 
-gulp.task('vendor', ['vendor-styles', 'vendor-scripts']);
 gulp.task('compile', ['templates', 'styles', 'scripts']);
 
-gulp.task('default', ['clean', 'assets', 'vendor', 'compile']);
+gulp.task('default', ['clean', 'assets', 'vendor-styles', 'compile']);
 gulp.task('prod', ['set-prod', 'default']);

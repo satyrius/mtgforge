@@ -1,10 +1,12 @@
+Backbone = require 'backbone'
+Marionette = require 'backbone.marionette'
 AppView = require './views/main'
 Entities = require './entities/module'
 SearchModule  = require './modules/search/module'
 ProductsModule = require './modules/products/module'
 SerpModule = require './modules/serp/module'
 
-class App extends Backbone.Marionette.Application
+class App extends Marionette.Application
   initialize: ->
     @addInitializer (options) ->
       (new AppView()).render()
