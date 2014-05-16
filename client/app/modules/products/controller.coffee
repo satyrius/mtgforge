@@ -9,3 +9,6 @@ module.exports = class ProductsController extends ApplicationController
       collection.deferred.done () =>
         @view = new MainView collection: collection
         @show @view
+
+  showCardSet: (cardSet) ->
+    @app.trigger 'cardset:show', cardSet
