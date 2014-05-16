@@ -20,7 +20,10 @@ var environment = 'dev',
       index: './app/index.jade',
       scripts: {
         index: './app/index.coffee',
-        all: './app/**/*.coffee'
+        all: [
+          './app/**/*.coffee',
+          './app/**/*.jade'
+        ]
       },
       styles: {
         vendor: [
