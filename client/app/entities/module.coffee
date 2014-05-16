@@ -1,9 +1,12 @@
 Marionette = require 'backbone.marionette'
 CardSetCollection = require './collections/card_set'
 
+cache = {}
+
 API =
   getCardSets: ->
-    return new CardSetCollection()
+    cache.cardSets = new CardSetCollection() unless cache.cardSets
+    return cache.cardSets
 
 module.exports = class Entities extends Marionette.Module
   initialize: ->
