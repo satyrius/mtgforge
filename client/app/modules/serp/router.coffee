@@ -1,5 +1,5 @@
-Marionette = require 'backbone.marionette'
+Router = require '../../lib/router'
 
-module.exports = class SerpRouter extends Marionette.AppRouter
+module.exports = class SerpRouter extends Router
   appRoutes:
     'search?:params': 'listCards'
