@@ -18,7 +18,10 @@ var environment = 'dev',
       vendor: './vendor/',
       assets: './assets/',
       index: './app/index.jade',
-      scripts: './app/index.coffee',
+      scripts: {
+        index: './app/index.coffee',
+        all: './app/**/*.coffee'
+      },
       styles: {
         vendor: [
           './vendor/styles/bootstrap.css',
@@ -71,14 +74,14 @@ gulp.task('vendor-styles', function () {
 });
 
 gulp.task('scripts', function() {
-  stream = gulp.src(paths.scripts, { read: false })
+  stream = gulp.src(paths.scripts.index, { read: false })
     .pipe(plumber())
     .pipe(browserify({
       debug: environment == 'dev',
       transform: ['coffeeify', 'jadeify'],
       extensions: ['.coffee', '.jade']
     }))
-    .pipe(concat('index.js'))
+    .pipe(concat('app.js'))
 
   if (environment == 'prod') {
     stream.pipe(uglify())
@@ -99,13 +102,13 @@ gulp.task('index', function() {
 gulp.task('watch', ['default'], function () {
   var server = livereload();
 
-  gulp.watch(paths.scripts, ['scripts']);
+  gulp.watch(paths.scripts.all, ['scripts']);
   gulp.watch(paths.styles.app, ['styles']);
   gulp.watch(paths.index, ['index']);
 
   gulp.watch(paths.dest + '/**').on('change', function(file) {
       server.changed(file.path);
-    });
+  });
 });
 
 gulp.task('compile', ['index', 'styles', 'scripts']);
