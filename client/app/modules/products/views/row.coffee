@@ -14,7 +14,7 @@ module.exports = class RowView extends Marionette.Layout
     duel: '.cs-duel'
     other: '.cs-other'
 
-  initialize: (opts) ->
+  initialize: ->
     # This view initialized from composite MainView and only model option
     # passed, which is actially array of CardSet models (one of grouped by
     # year subsets). This is a nested collection views workaround.
@@ -27,5 +27,5 @@ module.exports = class RowView extends Marionette.Layout
   onShow: ->
     grouped = @collection.groupBy (cs) -> cs.type
     _.each grouped, (sets, type) =>
-      @getRegion(type).show new ProductsView
-        collection: new Backbone.Collection(sets)
+      (@getRegion type).show new ProductsView
+        collection: new Backbone.Collection sets
