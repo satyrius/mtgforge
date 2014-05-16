@@ -14,18 +14,18 @@ var gulp = require('gulp'),
 var environment = 'dev',
     verbose = false,
     paths = {
-      src: './app/',
       dest: './public/',
       vendor: './vendor/',
       assets: './assets/',
-      scripts: './app/scripts/index.coffee',
+      index: './app/index.jade',
+      scripts: './app/index.coffee',
       styles: {
         vendor: [
           './vendor/styles/bootstrap.css',
           './vendor/styles/bootstrap-theme.css'
         ],
         app: [
-          './app/styles/*.styl'
+          './styles/*.styl'
         ]
       }
     }
@@ -87,8 +87,8 @@ gulp.task('scripts', function() {
   stream.pipe(gulp.dest(paths.dest + 'js/'))
 });
 
-gulp.task('templates', function() {
-  gulp.src(paths.src + 'index.jade')
+gulp.task('index', function() {
+  gulp.src(paths.index)
     .pipe(plumber())
     .pipe(jade({
       pretty: environment == 'dev'
@@ -99,16 +99,16 @@ gulp.task('templates', function() {
 gulp.task('watch', ['default'], function () {
   var server = livereload();
 
-  gulp.watch(paths.src + 'scripts/**', ['scripts']);
+  gulp.watch(paths.scripts, ['scripts']);
   gulp.watch(paths.styles.app, ['styles']);
-  gulp.watch(paths.src + 'index.jade', ['templates']);
+  gulp.watch(paths.index, ['index']);
 
   gulp.watch(paths.dest + '/**').on('change', function(file) {
       server.changed(file.path);
     });
 });
 
-gulp.task('compile', ['templates', 'styles', 'scripts']);
+gulp.task('compile', ['index', 'styles', 'scripts']);
 
 gulp.task('default', ['clean', 'assets', 'vendor-styles', 'compile']);
 gulp.task('prod', ['set-prod', 'default']);
