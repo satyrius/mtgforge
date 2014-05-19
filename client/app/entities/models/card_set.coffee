@@ -22,7 +22,7 @@ module.exports = class CardSet extends Backbone.Model
     ///
     DUEL_DECK_RE = /Duel|vs\./
     @type = switch
-      when not @has 'name' or (@get 'name').search(REISSUE_RE) != -1 then 'other'
+      when (not @has 'name') or ((@get 'name').search(REISSUE_RE) != -1) then 'other'
       when (@get 'name').search(CORE_SET_RE) != -1 then 'core'
       when (@get 'name').search(DUEL_DECK_RE) != -1 then 'other'
       else 'block'
