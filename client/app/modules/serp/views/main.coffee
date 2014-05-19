@@ -1,5 +1,13 @@
+SpinnerView = require './spinner'
 Marionette = require 'backbone.marionette'
 
-module.exports = class MainView extends Marionette.CompositeView
+module.exports = class MainView extends Marionette.Layout
   template: require './templates/main'
-  emptyView: require './spinner'
+
+  regions:
+    info: '#td-serp-info'
+    cards: '#td-serp-cards'
+    spinner: '#td-serp-spinner'
+
+  onShow: ->
+    @spinner.show new SpinnerView()
