@@ -1,7 +1,7 @@
 Backbone = require 'backbone'
 CardSet = require '../models/card_set'
 
-module.exports = class CardSetCollection extends Backbone.Collection
+module.exports = class CardSetsCollection extends Backbone.Collection
   url: '/api/v1/card_sets/'
   model: CardSet
 

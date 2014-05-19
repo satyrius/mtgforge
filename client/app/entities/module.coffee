@@ -1,12 +1,12 @@
 Marionette = require 'backbone.marionette'
-CardSetCollection = require './collections/card_set'
+CardSetsCollection = require './collections/card_sets'
 CardSet = require './models/card_set'
 
 cache = {}
 
 API =
   getCardSets: ->
-    cache.cardSets = new CardSetCollection() unless cache.cardSets
+    cache.cardSets = new CardSetsCollection() unless cache.cardSets
     return cache.cardSets
 
   getCardSet: (data) ->
