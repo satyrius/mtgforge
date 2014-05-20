@@ -4,7 +4,7 @@ Marionette = require 'backbone.marionette'
 
 module.exports = class MainView extends Marionette.CompositeView
   template: require './templates/main'
-  itemViewContainer: '#products-list'
+  itemViewContainer: '#td-products'
   itemView: require './row'
   emptyView: require './empty'
 
