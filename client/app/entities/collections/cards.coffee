@@ -12,3 +12,14 @@ module.exports = class CardsCollection extends Backbone.Collection
 
   makeQuery: (options) ->
     set: options.set
+
+  isPending: ->
+    @deferred.state() is 'pending'
+
+  loadMore: ->
+    if not @isPending() and @meta.next
+      oldUrl = @url
+      @url = @meta.next
+      @deferred = @fetch update: true, remove: false
+      @deferred.done =>
+        @url = oldUrl
