@@ -6,7 +6,7 @@ module.exports = class MainView extends Marionette.Layout
 
   regions:
     info: '#td-serp-info'
-    cards: '#td-serp-cards'
+    result: '#td-serp-cards'
     spinner: '#td-serp-spinner'
 
   onShow: ->

@@ -31,7 +31,8 @@ var environment = 'dev',
           './vendor/styles/bootstrap-theme.css'
         ],
         app: [
-          './styles/*.styl'
+          './styles/*.styl',
+          './app/**/*.styl'
         ]
       }
     }
@@ -55,7 +56,7 @@ gulp.task('styles', function () {
   var stream = gulp.src(paths.styles.app)
     .pipe(plumber())
     //.pipe(debug({verbose: verbose}))
-    .pipe(stylus())
+    .pipe(stylus({use: ['nib']}))
     .pipe(concat('app.css'));
 
   if (environment == 'prod') {
