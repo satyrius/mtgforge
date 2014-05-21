@@ -14,4 +14,3 @@ module.exports = class SerpController extends ApplicationController
       view = new ResultView
         collection: cards
       layout.result.show view
-      layout.spinner.close()

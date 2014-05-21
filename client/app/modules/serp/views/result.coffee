@@ -6,8 +6,14 @@ module.exports = class ResultView extends Marionette.CollectionView
   itemView: require './card'
 
   initialize: ->
-    ($ window).on 'scroll.SerpResult', _.throttle(_.bind(@checkScroll, @), 500)
     @body = $ 'body'
+    ($ window).on 'scroll.SerpResult', _.throttle(_.bind(@checkScroll, @), 500)
+
+    # Notify related views about collection was synced or started loading more
+    @listenTo @collection, 'sync', =>
+      @trigger 'collection:sync'
+    @listenTo @collection, 'more', =>
+      @trigger 'collection:more'
 
   onClose: ->
     ($ window).off 'scroll.SerpResult'

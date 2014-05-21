@@ -18,6 +18,7 @@ module.exports = class CardsCollection extends Backbone.Collection
 
   loadMore: ->
     if not @isPending() and @meta.next
+      @trigger 'more'
       oldUrl = @url
       @url = @meta.next
       @deferred = @fetch update: true, remove: false
