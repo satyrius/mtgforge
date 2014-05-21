@@ -14,3 +14,12 @@ module.exports = class SerpController extends ApplicationController
       view = new ResultView
         collection: cards
       layout.result.show view
+
+  searchCards: (fts) ->
+    layout = new MainView()
+    @show layout
+    cards = @app.request 'card:entities:fts', fts
+    cards.deferred.done ->
+      view = new ResultView
+        collection: cards
+      layout.result.show view

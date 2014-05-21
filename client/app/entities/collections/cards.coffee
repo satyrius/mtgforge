@@ -11,7 +11,10 @@ module.exports = class CardsCollection extends Backbone.Collection
       data: @makeQuery options
 
   makeQuery: (options) ->
-    set: options.set
+    query = {}
+    query.q = options.fts if options.fts
+    query.set = options.set if options.set
+    return query
 
   isPending: ->
     @deferred.state() is 'pending'

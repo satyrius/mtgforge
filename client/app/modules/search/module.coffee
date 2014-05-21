@@ -1,12 +1,14 @@
 Marionette = require 'backbone.marionette'
+MainView = require './views/main'
 
 module.exports = class SearchModule extends Marionette.Module
-  mainView: require './views/main'
-
   getRegion: ->
     if not @region
       @region = @app.reqres.request('header:region')
     return @region
 
   onStart: ->
-    @getRegion().show new @mainView()
+    view = new MainView()
+    view.on 'search', (fts) =>
+      @app.trigger 'cards:search', fts
+    @getRegion().show view

@@ -19,6 +19,9 @@ API =
   getCardsBySet: (cardSet) ->
     new CardsCollection [], set: cardSet
 
+  getCardsByFTS: (query) ->
+    new CardsCollection [], fts: query
+
 module.exports = class Entities extends Marionette.Module
   initialize: ->
     @app.reqres.setHandler 'cardset:entities', ->
@@ -29,3 +32,6 @@ module.exports = class Entities extends Marionette.Module
 
     @app.reqres.setHandler 'card:entities:by_set', (cardSet) ->
       API.getCardsBySet cardSet
+
+    @app.reqres.setHandler 'card:entities:fts', (query) ->
+      API.getCardsByFTS query
