@@ -6,20 +6,16 @@ module.exports = class SerpController extends ApplicationController
   listCards: ->
     @show new MainView()
 
-  showCardSet: (cardSet) ->
+  showCards: (cards) ->
     layout = new MainView()
     @show layout
-    cards = @app.request 'card:entities:by_set', cardSet
     cards.deferred.done ->
       view = new ResultView
         collection: cards
       layout.result.show view
 
+  showCardSet: (cardSet) ->
+    @showCards @app.request('card:entities:by_set', cardSet)
+
   searchCards: (fts) ->
-    layout = new MainView()
-    @show layout
-    cards = @app.request 'card:entities:fts', fts
-    cards.deferred.done ->
-      view = new ResultView
-        collection: cards
-      layout.result.show view
+    @showCards @app.request('card:entities:fts', fts)
