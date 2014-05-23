@@ -1,4 +1,3 @@
-$ = require 'jquery'
 Marionette = require 'backbone.marionette'
 
 module.exports = class MainView extends Marionette.ItemView
@@ -13,3 +12,6 @@ module.exports = class MainView extends Marionette.ItemView
   handleSubmit: ->
     @trigger 'search', @ui.input.val()
     return false
+
+  resetFTS: (fts) ->
+    @ui.input.val fts or ''

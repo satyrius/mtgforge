@@ -19,16 +19,7 @@ class App extends Marionette.Application
     @module 'Entities', Entities
     @module 'Search', SearchModule
     @module 'Products', ProductsModule
-    serp = @module 'Serp', SerpModule
-
-    # Define cross module comunication with vent
-    serp.addInitializer ->
-      # Card set spoiler
-      @app.on 'cardset:show', (cardSet) =>
-        @controller.showCardSet cardSet
-      # Cards FTS request
-      @app.on 'cards:search', (fts) =>
-        @controller.searchCards fts
+    @module 'Serp', SerpModule
 
     @reqres.setHandler 'header:region', => @getRegion('header')
     @reqres.setHandler 'default:region', => @getRegion('main')

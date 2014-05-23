@@ -1,4 +1,3 @@
-$ = require 'jquery'
 Marionette = require 'backbone.marionette'
 Spinner = require 'spin.js'
 

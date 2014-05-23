@@ -1,4 +1,3 @@
-$ = require 'jquery'
 Backbone = require 'backbone'
 Card = require '../models/card'
 

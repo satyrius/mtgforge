@@ -27,8 +27,5 @@ module.exports = class Entities extends Marionette.Module
     @app.reqres.setHandler 'cardset:entity', (data) ->
       API.getCardSet data
 
-    @app.reqres.setHandler 'card:entities:by_set', (cardSet) ->
-      API.getCards set: cardSet
-
-    @app.reqres.setHandler 'card:entities:fts', (query) ->
-      API.getCards q: query
+    @app.reqres.setHandler 'card:entities', (query) ->
+      API.getCards query

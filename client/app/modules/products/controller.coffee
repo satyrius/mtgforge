@@ -11,4 +11,4 @@ module.exports = class ProductsController extends ApplicationController
         @show @view
 
   showCardSet: (cardSet) ->
-    @app.trigger 'cardset:show', cardSet
+    @app.commands.execute 'cards:search', set: cardSet

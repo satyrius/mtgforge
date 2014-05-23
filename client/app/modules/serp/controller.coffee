@@ -1,21 +1,22 @@
+_ = require 'underscore'
+qs = require 'qs'
 ApplicationController = require '../../lib/controller'
 MainView = require './views/main'
 ResultView = require './views/result'
 
 module.exports = class SerpController extends ApplicationController
-  listCards: ->
-    @show new MainView()
-
-  showCards: (cards) ->
+  listCards: (query) ->
     layout = new MainView()
     @show layout
-    cards.deferred.done ->
+
+    if _.isString query
+      query = qs.parse query
+    @app.vent.trigger 'form:reset:fts', query.q
+
+    cards = @app.request('card:entities', query)
+    cards.deferred.done =>
       view = new ResultView
         collection: cards
       layout.result.show view
-
-  showCardSet: (cardSet) ->
-    @showCards @app.request('card:entities:by_set', cardSet)
-
-  searchCards: (fts) ->
-    @showCards @app.request('card:entities:fts', fts)
+      view.on 'close', =>
+        @app.vent.trigger 'form:reset:fts', ''

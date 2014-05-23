@@ -7,4 +7,4 @@ module.exports = class ProductsRouter extends Router
 
   reverse:
     spoiler: (cardSet) ->
-      "#/#{cardSet}/spoiler"
+      "#{cardSet}/spoiler"

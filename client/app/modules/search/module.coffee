@@ -9,6 +9,11 @@ module.exports = class SearchModule extends Marionette.Module
 
   onStart: ->
     view = new MainView()
-    view.on 'search', (fts) =>
-      @app.trigger 'cards:search', fts
     @getRegion().show view
+
+    # Listen to form submit and broadcast event to show search result
+    view.on 'search', (fts) =>
+      @app.commands.execute 'cards:search', q: fts, true
+
+    @app.vent.on 'form:reset:fts', (fts) ->
+      view.resetFTS fts
