@@ -20,3 +20,6 @@ module.exports = class SerpController extends ApplicationController
       layout.result.show view
       view.on 'close', =>
         @app.vent.trigger 'form:reset:fts', ''
+
+  showCardSet: (cardSet) ->
+    @listCards set: cardSet

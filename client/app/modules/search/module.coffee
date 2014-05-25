@@ -4,7 +4,7 @@ MainView = require './views/main'
 module.exports = class SearchModule extends Marionette.Module
   onStart: ->
     view = new MainView()
-    region = @app.reqres.request('header:region')
+    region = @app.reqres.request 'header:region'
     region.show view
 
     # Listen to form submit and broadcast event to show search result
