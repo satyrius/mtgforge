@@ -5,6 +5,7 @@ Entities = require './entities/module'
 SearchModule  = require './modules/search/module'
 ProductsModule = require './modules/products/module'
 SerpModule = require './modules/serp/module'
+FeedbackModule = require './modules/feedback/module'
 
 class App extends Marionette.Application
   initialize: ->
@@ -20,6 +21,7 @@ class App extends Marionette.Application
     @module 'Search', SearchModule
     @module 'Products', ProductsModule
     @module 'Serp', SerpModule
+    @module 'Feedback', FeedbackModule
 
     @reqres.setHandler 'header:region', => @getRegion('header')
     @reqres.setHandler 'default:region', => @getRegion('main')
