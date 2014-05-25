@@ -6,7 +6,6 @@ module.exports = class FeedbackModule extends Marionette.Module
     apiKey = 'JQfSXfyNsMd9hupTfhZRyQ'
     src = "//widget.uservoice.com/#{apiKey}.js"
     $.getScript src, ->
-      console.log 'configure User Voice'
       UserVoice.push ['set',
         accent_color: '#448dd6'
         trigger_color: 'white'
