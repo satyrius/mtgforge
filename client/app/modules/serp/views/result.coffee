@@ -4,6 +4,7 @@ Marionette = require 'backbone.marionette'
 
 module.exports = class ResultView extends Marionette.CollectionView
   itemView: require './card'
+  emptyView: require './empty'
 
   initialize: ->
     @body = $ 'body'
