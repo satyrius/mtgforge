@@ -17,11 +17,16 @@ API =
     new CardSet data
 
   getCards: (query) ->
-    new CardsCollection [], query: query
+    # Cache last cards collection to get get cards from it
+    cache.cards = new CardsCollection [], query: query
+    return cache.cards
 
-  getDeferredCard: (id) ->
-    card = new Card id: id
-    card.deferred = card.fetch()
+  getCard: (id) ->
+    # Check latest collection for the needle
+    card = cache.cards.get id if cache.cards
+    unless card
+      card = new Card id: id
+      card.deferred = card.fetch()
     return card
 
 module.exports = class Entities extends Marionette.Module
@@ -36,4 +41,4 @@ module.exports = class Entities extends Marionette.Module
       API.getCards query
 
     @app.reqres.setHandler 'card:entity', (id) ->
-      API.getDeferredCard id
+      API.getCard id

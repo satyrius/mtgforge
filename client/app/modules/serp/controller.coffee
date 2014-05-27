@@ -18,19 +18,6 @@ module.exports = class SerpController extends ApplicationController
       view = new ResultView
         collection: cards
 
-      oldHandler = @app.reqres.getHandler 'card:entity'
-      # Replace entities get card handler, return models from current
-      # collection from a search sesults
-      @app.reqres.setHandler 'card:entity', (id) ->
-        card = cards.get id
-        # Set deferred object to unify card model usage, see cards/controller
-        card.deferred = cards.deferred
-        return card
-      # Restore old gettings card entity handler
-      if oldHandler
-        view.on 'close', =>
-          @app.reqres.setHandler 'card:entity', oldHandler
-
       # Reset FTS input on close
       view.on 'close', =>
         @app.vent.trigger 'form:reset:fts', ''

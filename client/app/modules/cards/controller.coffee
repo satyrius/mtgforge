@@ -5,5 +5,9 @@ module.exports = class CardsController extends ApplicationController
   showCard: (id) ->
     region = @app.reqres.request 'info:region'
     card = @app.reqres.request 'card:entity', id
-    card.deferred.done ->
-      region.show new MainView model: card
+    view = new MainView model: card
+    if card.deferred
+      card.deferred.done ->
+        region.show view
+    else
+      region.show view
