@@ -19,6 +19,11 @@ API =
   getCards: (query) ->
     new CardsCollection [], query: query
 
+  getDeferredCard: (id) ->
+    card = new Card id: id
+    card.deferred = card.fetch()
+    return card
+
 module.exports = class Entities extends Marionette.Module
   initialize: ->
     @app.reqres.setHandler 'cardset:entities', ->
@@ -29,3 +34,6 @@ module.exports = class Entities extends Marionette.Module
 
     @app.reqres.setHandler 'card:entities', (query) ->
       API.getCards query
+
+    @app.reqres.setHandler 'card:entity', (id) ->
+      API.getDeferredCard id
