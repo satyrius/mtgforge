@@ -6,10 +6,9 @@ module.exports = class ProductView extends Marionette.ItemView
 
   initialize: ->
     # TODO find a fancy way to pass app to the view
-    app = require '../../../app'
-    @reqres = app.reqres
+    @app = require '../../../app'
 
   serializeData: () ->
     data = super()
-    data.spoilerUri = @reqres.request 'spoiler:uri', data.acronym
+    data.spoilerUri = @app.reqres.request 'spoiler:uri', data.acronym
     return data
