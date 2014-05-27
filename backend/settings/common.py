@@ -225,6 +225,14 @@ LOGGING = {
     }
 }
 
+# Log database requests to the console output
+if os.getenv('DEBUG_DB'):
+    LOGGING['loggers']['django.db'] = {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+        'propagate': True,
+    }
+
 GRAPPELLI_ADMIN_TITLE = 'MTG Forge'
 
 CARD_IMAGE_SERP_THUMB = '223x310'
