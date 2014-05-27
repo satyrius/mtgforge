@@ -18,16 +18,21 @@ def get_uri(resource, **kwargs):
 class SerpTest(ResourceTestCase):
     def setUp(self):
         super(SerpTest, self).setUp()
-        self.uri = CardResource('v1').get_resource_search_uri()
+        self.resource = CardResource('v1')
+        self.uri = self.resource.get_resource_search_uri()
 
         self.cs_recipe = Recipe(
             CardSet, name=seq('Magic Set '), acronym=seq('set'),
             is_published=True)
 
+        self.img_recipe = Recipe(
+            CardImage, mvid=seq(0),
+            scan=seq('http://gatherer.wizards.com/image?multiverseid='))
+
         self.release_recipe = Recipe(
             CardRelease, card_number=seq(0),
             card_set=foreign_key(self.cs_recipe),
-            art=foreign_key(Recipe(CardImage)))
+            art=foreign_key(self.img_recipe))
 
         self.face_recipe = Recipe(
             CardFace, name=seq('Card '), card=foreign_key(Recipe(Card)))
