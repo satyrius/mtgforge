@@ -2,21 +2,24 @@ var gulp = require('gulp'),
     plumber = require('gulp-plumber'),
     debug = require('gulp-debug'),
     streamqueue = require('streamqueue'),
+    path = require('path'),
     concat = require('gulp-concat'),
     clean = require('gulp-clean'),
     browserify = require('gulp-browserify'),
     jade = require('gulp-jade'),
     stylus = require('gulp-stylus'),
+    less = require('gulp-less'),
     uglify = require('gulp-uglify'),
     minify = require('gulp-minify-css'),
     livereload = require('gulp-livereload');
+
+var twbs_path = path.join(__dirname, 'node_modules', 'twitter-bootstrap-3.0.0')
 
 var environment = 'dev',
     verbose = false,
     paths = {
       dest: './public/',
       vendor: './vendor/',
-      assets: './assets/',
       index: './app/index.jade',
       scripts: {
         index: './app/index.coffee',
@@ -25,11 +28,16 @@ var environment = 'dev',
           './app/**/*.jade'
         ]
       },
+      bootstrap: {
+        styles: './vendor/styles/bootstrap.less',
+        fonts: [
+          path.join(twbs_path, 'fonts', '*.eot'),
+          path.join(twbs_path, 'fonts', '*.svg'),
+          path.join(twbs_path, 'fonts', '*.ttf'),
+          path.join(twbs_path, 'fonts', '*.woff')
+        ]
+      },
       styles: {
-        vendor: [
-          './vendor/styles/bootstrap.css',
-          './vendor/styles/bootstrap-theme.css'
-        ],
         app: [
           './styles/*.styl',
           './app/**/*.styl'
@@ -46,10 +54,22 @@ gulp.task('clean', function() {
     .pipe(clean());
 });
 
-gulp.task('assets', function() {
- gulp.src(paths.assets + '**')
-    .pipe(plumber())
-    .pipe(gulp.dest(paths.dest));
+gulp.task('bootstrap', function () {
+  var stream = gulp.src(paths.bootstrap.styles)
+    .pipe(less({
+      paths: [path.join(twbs_path, 'less')]
+    }))
+    .pipe(concat('vendor.css'));
+
+  if (environment == 'prod') {
+    stream.pipe(minify())
+  }
+
+  stream.pipe(gulp.dest(paths.dest + 'css/'))
+
+  // Also copy fonts
+  gulp.src(paths.bootstrap.fonts)
+    .pipe(gulp.dest(paths.dest + 'fonts/'))
 });
 
 gulp.task('styles', function () {
@@ -58,17 +78,6 @@ gulp.task('styles', function () {
     //.pipe(debug({verbose: verbose}))
     .pipe(stylus({use: ['nib']}))
     .pipe(concat('app.css'));
-
-  if (environment == 'prod') {
-    stream.pipe(minify())
-  }
-
-  stream.pipe(gulp.dest(paths.dest + 'css/'))
-});
-
-gulp.task('vendor-styles', function () {
-  var stream = gulp.src(paths.styles.vendor)
-    .pipe(concat('vendor.css'));
 
   if (environment == 'prod') {
     stream.pipe(minify())
@@ -117,5 +126,5 @@ gulp.task('watch', ['default'], function () {
 
 gulp.task('compile', ['index', 'styles', 'scripts']);
 
-gulp.task('default', ['clean', 'assets', 'vendor-styles', 'compile']);
+gulp.task('default', ['clean', 'bootstrap', 'compile']);
 gulp.task('prod', ['set-prod', 'default']);
