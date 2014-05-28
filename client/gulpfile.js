@@ -37,12 +37,7 @@ var environment = 'dev',
           path.join(twbs_path, 'fonts', '*.woff')
         ]
       },
-      styles: {
-        app: [
-          './styles/*.styl',
-          './app/**/*.styl'
-        ]
-      }
+      styles: './app/**/*.styl'
     }
 
 gulp.task('set-prod', function() {
@@ -73,7 +68,7 @@ gulp.task('bootstrap', function () {
 });
 
 gulp.task('styles', function () {
-  var stream = gulp.src(paths.styles.app)
+  var stream = gulp.src(paths.styles)
     .pipe(plumber())
     //.pipe(debug({verbose: verbose}))
     .pipe(stylus({use: ['nib']}))
