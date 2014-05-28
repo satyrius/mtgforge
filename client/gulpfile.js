@@ -11,6 +11,7 @@ var gulp = require('gulp'),
     less = require('gulp-less'),
     uglify = require('gulp-uglify'),
     minify = require('gulp-minify-css'),
+    replace = require('gulp-replace'),
     livereload = require('gulp-livereload');
 
 var twbs_path = path.join(__dirname, 'node_modules', 'twitter-bootstrap-3.0.0')
@@ -82,6 +83,9 @@ gulp.task('styles', function () {
 });
 
 gulp.task('scripts', function() {
+  host = process.env.API_HOST
+  host = host ? 'http://' + host : ''
+
   stream = gulp.src(paths.scripts.index, { read: false })
     .pipe(plumber())
     .pipe(browserify({
@@ -89,6 +93,7 @@ gulp.task('scripts', function() {
       transform: ['coffeeify', 'jadeify'],
       extensions: ['.coffee', '.jade']
     }))
+    .pipe(replace('$API_HOST', host))
     .pipe(concat('app.js'))
 
   if (environment == 'prod') {

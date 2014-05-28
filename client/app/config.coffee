@@ -1,2 +1,2 @@
 module.exports =
-  apiBaseUrl: '/api/v1'
+  apiBaseUrl: '$API_HOST/api/v1'
