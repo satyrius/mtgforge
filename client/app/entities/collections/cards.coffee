@@ -1,8 +1,8 @@
-Backbone = require 'backbone'
+ApiCollection = require '../../lib/collection'
 Card = require '../models/card'
 
-module.exports = class CardsCollection extends Backbone.Collection
-  url: '/api/v1/cards/search'
+module.exports = class CardsCollection extends ApiCollection
+  _url: 'cards/search'
   model: Card
 
   initialize: (models, options) ->

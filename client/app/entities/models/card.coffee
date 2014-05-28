@@ -1,5 +1,5 @@
-Backbone = require 'backbone'
+ApiModel = require '../../lib/model'
 
-module.exports = class Card extends Backbone.Model
-  urlRoot: '/api/v1/cards'
+module.exports = class Card extends ApiModel
+  urlRoot: 'cards'
   idAttribute: 'id'

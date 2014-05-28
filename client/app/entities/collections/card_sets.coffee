@@ -1,8 +1,8 @@
-Backbone = require 'backbone'
+ApiCollection = require '../../lib/collection'
 CardSet = require '../models/card_set'
 
-module.exports = class CardSetsCollection extends Backbone.Collection
-  url: '/api/v1/card_sets/'
+module.exports = class CardSetsCollection extends ApiCollection
+  _url: 'card_sets'
   model: CardSet
 
   comparator: (cs) ->
