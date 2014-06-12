@@ -1,6 +1,7 @@
 Backbone = require 'backbone'
 Marionette = require 'backbone.marionette'
 AppView = require './views/main'
+ModalRegion = require './lib/modal_region'
 
 Entities = require './entities/module'
 SearchModule  = require './modules/search/module'
@@ -18,6 +19,9 @@ class App extends Marionette.Application
       @addRegions
         header: '#td-search'
         main: '#td-main'
+        modal:
+          selector: '#td-modal'
+          regionType: ModalRegion
 
     @module 'Entities', Entities
     @module 'Search', SearchModule

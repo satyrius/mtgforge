@@ -18,6 +18,13 @@ module.exports = class SerpController extends ApplicationController
       view = new ResultView
         collection: cards
 
+      # Replace default info region with modal region to show card info
+      infoRegion = @app.request 'info:region'
+      view.on 'show', =>
+        @app.reqres.setHandler 'info:region', => @app.getRegion('modal')
+      view.on 'close', =>
+        @app.reqres.setHandler 'info:region', -> infoRegion
+
       # Reset FTS input on close
       view.on 'close', =>
         @app.vent.trigger 'form:reset:fts', ''
