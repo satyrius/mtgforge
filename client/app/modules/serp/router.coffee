@@ -12,3 +12,11 @@ module.exports = class SerpRouter extends Router
 
     spoiler: (cardSet) ->
       "cat/#{cardSet}"
+
+  onRoute: ->
+    # This is to go back to the previous serp from modal windows
+    fragment = @getCurrentFragment()
+    app = @_getController().app
+    do (app, fragment) =>
+      app.commands.setHandler 'last:search:navigate', =>
+        @navigate fragment, {trigger: false}
