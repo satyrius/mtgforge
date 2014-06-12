@@ -20,8 +20,10 @@ module.exports = class SerpController extends ApplicationController
 
       # Replace default info region with modal region to show card info
       infoRegion = @app.request 'info:region'
+      modalRegion = @app.getRegion('modal')
       view.on 'show', =>
-        @app.reqres.setHandler 'info:region', => @app.getRegion('modal')
+        modalRegion.close()
+        @app.reqres.setHandler 'info:region', -> modalRegion
       view.on 'close', =>
         @app.reqres.setHandler 'info:region', -> infoRegion
 

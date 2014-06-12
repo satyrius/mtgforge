@@ -10,3 +10,6 @@ module.exports = class ModalRegion extends Marionette.Region
 
   onShow: (view) ->
     @$el.modal 'show'
+
+  onClose: ->
+    @$el.modal 'hide'
