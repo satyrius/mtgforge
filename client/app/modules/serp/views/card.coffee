@@ -9,6 +9,6 @@ module.exports = class CardView extends Marionette.ItemView
     @app = require '../../../app'
 
   serializeData: () ->
-    data = super()
+    data = super
     data.uri = @app.reqres.request 'card:uri', data.id
     return data

@@ -5,7 +5,7 @@ module.exports = class SerpModule extends BaseModule
   Router: require './router'
 
   initialize: (options) ->
-    super(options)
+    super options
 
     @app.commands.setHandler 'cards:search', (query, navigate) =>
       if navigate

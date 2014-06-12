@@ -9,6 +9,6 @@ module.exports = class ProductView extends Marionette.ItemView
     @app = require '../../../app'
 
   serializeData: () ->
-    data = super()
+    data = super
     data.spoilerUri = @app.reqres.request 'spoiler:uri', data.acronym
     return data
