@@ -116,7 +116,7 @@ gulp.task('watch', ['default'], function () {
   var server = livereload();
 
   gulp.watch(paths.scripts.all, ['scripts']);
-  gulp.watch(paths.styles.app, ['styles']);
+  gulp.watch(paths.styles, ['styles']);
   gulp.watch(paths.index, ['index']);
 
   gulp.watch(paths.dest + '/**').on('change', function(file) {
