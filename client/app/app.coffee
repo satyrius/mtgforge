@@ -1,7 +1,7 @@
 Backbone = require 'backbone'
 Marionette = require 'backbone.marionette'
 AppView = require './views/main'
-ModalRegion = require './lib/modal_region'
+ModalRegion = require './lib/modal/region'
 
 Entities = require './entities/module'
 SearchModule  = require './modules/search/module'
