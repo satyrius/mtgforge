@@ -5,8 +5,6 @@ ModalView = require './view'
 module.exports = class ModalRegion extends Marionette.Region
   show: (view, options) ->
     # Wrap view into layout modal view and delegate 'show' call
-    @ensureEl()
-    @$el.addClass 'modal'
     layout = new ModalView
     super layout
     layout.body.show view, options
@@ -18,6 +16,8 @@ module.exports = class ModalRegion extends Marionette.Region
     return $el
 
   onShow: (view) ->
+    @$el.addClass 'modal'
+    @$el.attr 'tabIndex', '-1'
     @$el.modal 'show'
 
   onClose: ->
