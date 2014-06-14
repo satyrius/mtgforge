@@ -1,6 +1,6 @@
 _ = require 'underscore'
 Marionette = require 'backbone.marionette'
-ModalView = require './view'
+ModalView = require './views/modal'
 
 module.exports = class ModalRegion extends Marionette.Region
   show: (view, options) ->
