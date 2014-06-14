@@ -17,6 +17,7 @@ var gulp = require('gulp'),
 var twbs_path = path.join(__dirname, 'node_modules', 'twitter-bootstrap-3.0.0')
 
 var environment = 'dev',
+    reload = false,
     verbose = false,
     paths = {
       dest: './public/',
@@ -45,6 +46,11 @@ gulp.task('set-prod', function() {
   environment = 'prod';
 });
 
+gulp.task('set-reload', function() {
+  reload = true;
+  livereload.listen();
+});
+
 gulp.task('clean', function() {
   return gulp.src(paths.dest + '**/*', {read: false})
     .pipe(clean());
@@ -61,11 +67,11 @@ gulp.task('bootstrap', function () {
     stream.pipe(minify())
   }
 
-  stream.pipe(gulp.dest(paths.dest + 'css/'))
+  stream.pipe(gulp.dest(paths.dest + 'css'))
 
   // Also copy fonts
   gulp.src(paths.bootstrap.fonts)
-    .pipe(gulp.dest(paths.dest + 'fonts/'))
+    .pipe(gulp.dest(paths.dest + 'fonts'))
 });
 
 gulp.task('styles', function () {
@@ -79,7 +85,11 @@ gulp.task('styles', function () {
     stream.pipe(minify())
   }
 
-  stream.pipe(gulp.dest(paths.dest + 'css/'))
+  stream.pipe(gulp.dest(paths.dest + 'css'));
+
+  if (environment == 'dev' && reload) {
+    stream.pipe(livereload());
+  }
 });
 
 gulp.task('scripts', function() {
@@ -100,7 +110,7 @@ gulp.task('scripts', function() {
     stream.pipe(uglify())
   }
 
-  stream.pipe(gulp.dest(paths.dest + 'js/'))
+  stream.pipe(gulp.dest(paths.dest + 'js'))
 });
 
 gulp.task('index', function() {
@@ -112,16 +122,10 @@ gulp.task('index', function() {
     .pipe(gulp.dest(paths.dest))
 });
 
-gulp.task('watch', ['default'], function () {
-  var server = livereload();
-
+gulp.task('watch', ['default', 'set-reload'], function () {
   gulp.watch(paths.scripts.all, ['scripts']);
   gulp.watch(paths.styles, ['styles']);
   gulp.watch(paths.index, ['index']);
-
-  gulp.watch(paths.dest + '/**').on('change', function(file) {
-      server.changed(file.path);
-  });
 });
 
 gulp.task('compile', ['index', 'styles', 'scripts']);
