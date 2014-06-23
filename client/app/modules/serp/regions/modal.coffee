@@ -9,12 +9,6 @@ module.exports = class ModalRegion extends Marionette.Region
       super new ModalView
     @currentView.body.show view, options
 
-  setPrev: (model) ->
-    @currentView.prev.show model
-
-  setNext: (model) ->
-    @currentView.next.show model
-
   onShow: (view) ->
     @$el.addClass 'modal'
     @$el.attr 'tabIndex', '-1'

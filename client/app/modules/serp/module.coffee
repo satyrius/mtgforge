@@ -1,4 +1,5 @@
 BaseModule = require '../base'
+ModalRegion = require './regions/modal'
 
 module.exports = class SerpModule extends BaseModule
   Controller: require './controller'
@@ -11,3 +12,8 @@ module.exports = class SerpModule extends BaseModule
       if navigate
         @app.execute 'search:navigate', query
       @controller.listCards query
+
+    @app.addRegions
+      modal:
+        selector: '#td-modal'
+        regionType: ModalRegion
