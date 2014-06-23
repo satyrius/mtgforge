@@ -9,9 +9,31 @@ module.exports = class SerpController extends ApplicationController
     layout = new MainView()
     @show layout
 
-    # Close modal region immediately
+    # Modal region to show card info
     modalRegion = @app.getRegion('modal')
+    reqres = @app.reqres
+    # Close modal region immediately for cleanup previous states
     modalRegion.close()
+    # Handle showing card in a modal region to add next/prev links
+    navHandler = (modalLayout) ->
+      modalLayout.body.on 'show', (view) ->
+        next = reqres.request 'next:card:entity', view.model
+        if next
+          next.set 'uri', (reqres.request 'card:uri', next.id)
+          modalRegion.setNext next
+        prev = reqres.request 'prev:card:entity', view.model
+        if prev
+          prev.set 'uri', (reqres.request 'card:uri', prev.id)
+          modalRegion.setPrev prev
+    modalRegion.on 'show', navHandler
+    # Back to the last search page on modal close
+    backHandler = =>
+      @app.execute 'last:search:navigate'
+    modalRegion.on 'close', backHandler
+    # Remove handlers
+    layout.once 'close', ->
+      modalRegion.off 'show', navHandler
+      modalRegion.off 'close', backHandler
 
     if _.isString query
       query = qs.parse query

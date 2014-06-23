@@ -5,20 +5,22 @@ ModalView = require './views/modal'
 module.exports = class ModalRegion extends Marionette.Region
   show: (view, options) ->
     # Wrap view into layout modal view and delegate 'show' call
-    layout = new ModalView
-    super layout
-    layout.body.show view, options
+    if not @currentView or @currentView.isClosed
+      super new ModalView
+    @currentView.body.show view, options
 
-  getEl: (selector) ->
-    $el = Marionette.$ selector
-    # Close region if modal element was hidden
-    $el.on 'hidden.bs.modal', (_.bind @close, @)
-    return $el
+  setPrev: (model) ->
+    @currentView.prev.show model
+
+  setNext: (model) ->
+    @currentView.next.show model
 
   onShow: (view) ->
     @$el.addClass 'modal'
     @$el.attr 'tabIndex', '-1'
     @$el.modal 'show'
+    @$el.on 'hidden.bs.modal', (_.bind @close, @)
 
   onClose: ->
+    @$el.off 'hidden.bs.modal'
     @$el.modal 'hide'

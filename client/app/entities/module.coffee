@@ -29,6 +29,18 @@ API =
       card.deferred = card.fetch()
     return card
 
+  getNextCard: (currentCard) ->
+    return unless cache.cards
+    idx = cache.cards.indexOf currentCard
+    unless idx < 0
+      return cache.cards.at (idx + 1)
+
+  getPrevCard: (currentCard) ->
+    return unless cache.cards
+    idx = cache.cards.indexOf currentCard
+    if idx > 0
+      return cache.cards.at (idx - 1)
+
 module.exports = class Entities extends Marionette.Module
   initialize: ->
     @app.reqres.setHandler 'cardset:entities', ->
@@ -42,3 +54,9 @@ module.exports = class Entities extends Marionette.Module
 
     @app.reqres.setHandler 'card:entity', (id) ->
       API.getCard id
+
+    @app.reqres.setHandler 'next:card:entity', (currentCard) ->
+      API.getNextCard currentCard
+
+    @app.reqres.setHandler 'prev:card:entity', (currentCard) ->
+      API.getPrevCard currentCard
