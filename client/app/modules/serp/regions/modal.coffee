@@ -14,7 +14,21 @@ module.exports = class ModalRegion extends Marionette.Region
     @$el.attr 'tabIndex', '-1'
     @$el.modal 'show'
     @$el.on 'hidden.bs.modal', (_.bind @close, @)
+    @navOn()
 
   onClose: ->
+    @navOff()
     @$el.off 'hidden.bs.modal'
     @$el.modal 'hide'
+
+  navOn: ->
+    @$el.on 'keyup.next', (e) =>
+      if e.which == 39
+        @currentView.trigger 'next'
+    @$el.on 'keyup.prev', (e) =>
+      if e.which == 37
+        @currentView.trigger 'prev'
+
+  navOff: ->
+    @$el.off 'keyup.next'
+    @$el.off 'keyup.prev'
