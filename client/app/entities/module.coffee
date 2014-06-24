@@ -27,27 +27,29 @@ API =
     collection = cache.cards unless collection
     collection.loadMore() if collection
 
-  getCard: (id) ->
-    # Check latest collection for the needle
-    card = cache.cards.get id if cache.cards
-    unless card
-      card = new Card id: id
-      card.deferred = card.fetch()
-    return card
-
-  _nullDeferred: ->
+  _resolvedDefer: ->
     # This deferred stub used to handle `return null` cases in the same manner
     # as if actual data will be returned
     return (new $.Deferred).resolve()
 
+  getCard: (id) ->
+    deferred = new $.Deferred
+    # Check latest collection for the needle
+    card = cache.cards.get id if cache.cards
+    return (deferred.resolve card) if card
+    card = new Card id: id
+    card.fetch().done ->
+      deferred.resolve card
+    return deferred
+
   getNextCard: (currentCard) ->
     idx = if cache.cards then cache.cards.indexOf currentCard else -1
-    return @_nullDeferred() if idx < 0
+    return @_resolvedDefer() if idx < 0
     return cache.cards.deferredAt (idx + 1)
 
   getPrevCard: (currentCard) ->
     idx = if cache.cards then cache.cards.indexOf currentCard else -1
-    return @_nullDeferred() unless idx > 0
+    return @_resolvedDefer() unless idx > 0
     return cache.cards.deferredAt (idx - 1)
 
 module.exports = class Entities extends Marionette.Module
