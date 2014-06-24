@@ -16,11 +16,10 @@ module.exports = class CardsCollection extends ApiCollection
   loadMore: ->
     if not @isPending() and @meta.next
       @trigger 'more'
-      oldUrl = @url
-      @url = @meta.next
-      @deferred = @fetch update: true, remove: false
-      @deferred.done =>
-        @url = oldUrl
+      @deferred = @fetch
+        url: @meta.next
+        update: true,
+        remove: false
     return @deferred
 
   deferredAt: (index) ->
