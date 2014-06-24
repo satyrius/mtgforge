@@ -11,13 +11,11 @@ var gulp = require('gulp'),
     less = require('gulp-less'),
     uglify = require('gulp-uglify'),
     minify = require('gulp-minify-css'),
-    replace = require('gulp-replace'),
-    livereload = require('gulp-livereload');
+    replace = require('gulp-replace');
 
 var twbs_path = path.join(__dirname, 'node_modules', 'twitter-bootstrap-3.0.0')
 
 var environment = 'dev',
-    reload = false,
     verbose = false,
     paths = {
       dest: './public/',
@@ -44,11 +42,6 @@ var environment = 'dev',
 
 gulp.task('set-prod', function() {
   environment = 'prod';
-});
-
-gulp.task('set-reload', function() {
-  reload = true;
-  livereload.listen();
 });
 
 gulp.task('clean', function() {
@@ -86,10 +79,6 @@ gulp.task('styles', function () {
   }
 
   stream.pipe(gulp.dest(paths.dest + 'css'));
-
-  if (environment == 'dev' && reload) {
-    stream.pipe(livereload());
-  }
 });
 
 gulp.task('scripts', function() {
@@ -122,7 +111,7 @@ gulp.task('index', function() {
     .pipe(gulp.dest(paths.dest))
 });
 
-gulp.task('watch', ['default', 'set-reload'], function () {
+gulp.task('watch', ['default'], function () {
   gulp.watch(paths.scripts.all, ['scripts']);
   gulp.watch(paths.styles, ['styles']);
   gulp.watch(paths.index, ['index']);
