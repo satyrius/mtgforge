@@ -26,25 +26,22 @@ module.exports = class ModalView extends Marionette.Layout
 
   onShow: ->
     @body.on 'show', (view) =>
-      next = @app.request 'next:card:entity', view.model
-      @off 'next'
-      if next
-        next.set 'uri', (@app.request 'card:uri', next.id)
-        @next.show next
-        @on 'next', =>
-          @navigate next.get 'uri'
-      else
-        @next.close()
+      @showRelated view.model, 'next'
+      @showRelated view.model, 'prev'
 
-      prev = @app.request 'prev:card:entity', view.model
-      @off 'prev'
-      if prev
-        prev.set 'uri', (@app.request 'card:uri', prev.id)
-        @prev.show prev
-        @on 'prev', =>
-          @navigate prev.get 'uri'
-      else
-        @prev.close()
+  showRelated: (current, wanted) ->
+    event = regionName = wanted
+    # NOTE `wanted` should be a string (e.g. next, prev)
+    model = @app.request "#{wanted}:card:entity", current
+    region = @getRegion regionName
+    @off event
+    if model
+      model.set 'uri', (@app.request 'card:uri', model.id)
+      region.show model
+      @on event, =>
+        @navigate model.get 'uri'
+    else
+      region.close()
 
   onClose: ->
     @app.execute 'last:search:navigate'
