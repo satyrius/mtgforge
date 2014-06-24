@@ -8,5 +8,6 @@ module.exports = class CardsController extends ApplicationController
 
     # Get deferred card model and show info when it's load will be done
     deferred = @app.reqres.request 'card:entity', id
-    deferred.done (card) ->
+    deferred.done (card) =>
       region.show new MainView model: card
+      @app.vent.trigger 'show:card', card

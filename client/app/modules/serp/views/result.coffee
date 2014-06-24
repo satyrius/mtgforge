@@ -19,6 +19,16 @@ module.exports = class ResultView extends Marionette.CollectionView
     @listenTo @collection, 'more', =>
       @trigger 'more:collection'
 
+    @app.vent.on 'show:card', @scrollTo
+
+  scrollTo: (model) =>
+    return unless model and @children.length
+    idx = @collection.indexOf model
+    return if idx < 0
+    view = @children.findByIndex idx
+    return unless view
+    @body.scrollTop (view.$el.offset().top - @body.offset().top)
+
   onClose: ->
     ($ window).off 'scroll.SerpResult'
 
@@ -26,7 +36,7 @@ module.exports = class ResultView extends Marionette.CollectionView
     # TODO check scroll direction to handle scroll down only
     return if @collection.isPending() or not @children.length
     # TODO cache last child and update it with collection
-    lastCard = @children.findByIndex(@children.length - 1)
+    lastCard = @children.findByIndex (@children.length - 1)
     windowBottomPosition = @body.scrollTop() + window.outerHeight
     if windowBottomPosition >= lastCard.$el.offset().top
       @app.execute 'more:card:entities'
