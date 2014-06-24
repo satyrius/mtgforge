@@ -21,6 +21,11 @@ API =
     cache.cards = new CardsCollection [], query: query
     return cache.cards
 
+  loadMoreCards: (collection) ->
+    # Use last searched cards collection if nothing specified explicitly
+    collection = cache.cards unless collection
+    collection.loadMore() if collection
+
   getCard: (id) ->
     # Check latest collection for the needle
     card = cache.cards.get id if cache.cards
@@ -51,6 +56,9 @@ module.exports = class Entities extends Marionette.Module
 
     @app.reqres.setHandler 'card:entities', (query) ->
       API.getCards query
+
+    @app.commands.setHandler 'more:card:entities', (collection) ->
+      API.loadMoreCards collection
 
     @app.reqres.setHandler 'card:entity', (id) ->
       API.getCard id

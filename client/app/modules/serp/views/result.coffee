@@ -10,6 +10,9 @@ module.exports = class ResultView extends Marionette.CollectionView
     @body = $ 'body'
     ($ window).on 'scroll.SerpResult', _.throttle(_.bind(@checkScroll, @), 500)
 
+    # TODO find a better way to access app instance
+    @app = require '../../../app'
+
     # Notify related views about collection was synced or started loading more
     @listenTo @collection, 'sync', =>
       @trigger 'collection:sync'
@@ -26,4 +29,4 @@ module.exports = class ResultView extends Marionette.CollectionView
     lastCard = @children.findByIndex(@children.length - 1)
     windowBottomPosition = @body.scrollTop() + window.outerHeight
     if windowBottomPosition >= lastCard.$el.offset().top
-      @collection.loadMore()
+      @app.execute 'more:card:entities'
