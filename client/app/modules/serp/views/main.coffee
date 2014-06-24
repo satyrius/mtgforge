@@ -12,11 +12,11 @@ module.exports = class MainView extends Marionette.Layout
     @result.on 'show', (view) =>
       # Close spinner when result view was shown
       @spinner.close()
-      view.on 'collection:sync', =>
+      view.on 'sync:collection', =>
         # ... and again when additional model was fetched
         @spinner.close()
       # Show spinner again while loading more cards
-      view.on 'collection:more', =>
+      view.on 'more:collection', =>
         @spin()
 
   spin: ->

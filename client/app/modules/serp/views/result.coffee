@@ -15,9 +15,9 @@ module.exports = class ResultView extends Marionette.CollectionView
 
     # Notify related views about collection was synced or started loading more
     @listenTo @collection, 'sync', =>
-      @trigger 'collection:sync'
+      @trigger 'sync:collection'
     @listenTo @collection, 'more', =>
-      @trigger 'collection:more'
+      @trigger 'more:collection'
 
   onClose: ->
     ($ window).off 'scroll.SerpResult'
