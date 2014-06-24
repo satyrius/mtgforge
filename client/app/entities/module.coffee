@@ -1,3 +1,4 @@
+$ = require 'jquery'
 Marionette = require 'backbone.marionette'
 
 CardSet = require './models/card_set'
@@ -34,17 +35,20 @@ API =
       card.deferred = card.fetch()
     return card
 
+  _nullDeferred: ->
+    # This deferred stub used to handle `return null` cases in the same manner
+    # as if actual data will be returned
+    return (new $.Deferred).resolve()
+
   getNextCard: (currentCard) ->
-    return unless cache.cards
-    idx = cache.cards.indexOf currentCard
-    unless idx < 0
-      return cache.cards.at (idx + 1)
+    idx = if cache.cards then cache.cards.indexOf currentCard else -1
+    return @_nullDeferred() if idx < 0
+    return cache.cards.deferredAt (idx + 1)
 
   getPrevCard: (currentCard) ->
-    return unless cache.cards
-    idx = cache.cards.indexOf currentCard
-    if idx > 0
-      return cache.cards.at (idx - 1)
+    idx = if cache.cards then cache.cards.indexOf currentCard else -1
+    return @_nullDeferred() unless idx > 0
+    return cache.cards.deferredAt (idx - 1)
 
 module.exports = class Entities extends Marionette.Module
   initialize: ->

@@ -1,3 +1,4 @@
+$ = require 'jquery'
 ApiCollection = require '../../lib/collection'
 Card = require '../models/card'
 
@@ -20,3 +21,19 @@ module.exports = class CardsCollection extends ApiCollection
       @deferred = @fetch update: true, remove: false
       @deferred.done =>
         @url = oldUrl
+    return @deferred
+
+  deferredAt: (index) ->
+    deferred = new $.Deferred
+
+    model = @at index
+    return (deferred.resolve model) if model
+
+    # Load more cards if next card is beyond the last loaded card
+    if @models and index >= @models.length and @meta.next
+      @loadMore().done =>
+        deferred.resolve (@at index)
+    else
+      deferred.resolve()
+
+    return deferred

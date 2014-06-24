@@ -32,16 +32,17 @@ module.exports = class ModalView extends Marionette.Layout
   showRelated: (current, wanted) ->
     event = regionName = wanted
     # NOTE `wanted` should be a string (e.g. next, prev)
-    model = @app.request "#{wanted}:card:entity", current
+    deferred = @app.request "#{wanted}:card:entity", current
     region = @getRegion regionName
     @off event
-    if model
+    deferred.done (model) =>
+      if not model
+        region.close()
+        return
       model.set 'uri', (@app.request 'card:uri', model.id)
       region.show model
       @on event, =>
         @navigate model.get 'uri'
-    else
-      region.close()
 
   onClose: ->
     @app.execute 'last:search:navigate'
