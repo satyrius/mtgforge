@@ -4,7 +4,7 @@ Marionette = require 'backbone.marionette'
 module.exports = class FeedbackModule extends Marionette.Module
   onStart: ->
     apiKey = 'JQfSXfyNsMd9hupTfhZRyQ'
-    src = "//widget.uservoice.com/#{apiKey}.js"
+    src = "http://widget.uservoice.com/#{apiKey}.js"
     $.getScript src, ->
       UserVoice.push ['set',
         accent_color: '#448dd6'
