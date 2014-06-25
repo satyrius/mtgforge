@@ -1,2 +1,3 @@
 module.exports =
-  apiBaseUrl: '$API_HOST/api/v1'
+  apiHost: '$API_HOST'.replace(/([^\/])$/, '$1/')
+  apiBaseUrl: '/api/v1'

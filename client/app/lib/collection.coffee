@@ -1,7 +1,10 @@
 Backbone = require 'backbone'
 _ = require 'underscore'
-resolveUrl = require './url'
+urls = require './urls'
 
 module.exports = class ApiCollection extends Backbone.Collection
   url: ->
-    resolveUrl _.result(@, '_url')
+    @resolveApiUrl _.result(@, '_url')
+
+  resolveApiUrl: (uri) ->
+    urls.resolveApiUrl uri

@@ -1,6 +1,6 @@
 Backbone = require 'backbone'
-resolveUrl = require './url'
+urls = require './urls'
 
 module.exports = class ApiModel extends Backbone.Model
   url: ->
-    resolveUrl super
+    urls.resolveApiUrl super

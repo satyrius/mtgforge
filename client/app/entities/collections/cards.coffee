@@ -17,7 +17,7 @@ module.exports = class CardsCollection extends ApiCollection
     if not @isPending() and @meta.next
       @trigger 'more'
       @deferred = @fetch
-        url: @meta.next
+        url: @resolveApiUrl @meta.next
         update: true,
         remove: false
     return @deferred
