@@ -244,6 +244,41 @@ class CardSavePipelineTest(TestCase):
         self.assertEqual(res.rarity, m.CardRelease.COMMON)
         self.assertEqual(m.CardRelease.objects.all().count(), before + 1)
 
+    @patch.object(cards, 'get_card_set')
+    def test_cards_released_with_the_same_number(self, get_cs):
+        # This is a situation with missprints, fixed prints for the following
+        # card sets:
+        #  - Duel Decks: Divine vs. Demonic
+        #  - Duel Decks: Elves vs. Goblins
+        #  - Duel Decks: Garruk vs. Liliana
+        #  - Duel Decks: Jace vs. Chandra
+        #  - Duel Decks: Phyrexia vs. the Coalition
+        #  - Eighth Edition
+        #  - Ninth Edition
+        #  - Portal Three Kingdoms
+        #  - Promo set for Gatherer
+        #  - Urza's Saga
+        cs = self.cs_recipe.make(name='Eighth Edition')
+        get_cs.return_value = cs
+        self.assertEqual(
+            m.CardRelease.objects.filter(card_number=1).count(), 0)
+
+        # We have already crawled Angel of Mercy...
+        angel_img = self.img_recipe.make()
+        angel_card = self.card_recipe.make(name='Angel of Mercy')
+        angel_release = self.release_recipe.make(
+            card_set=cs, card=angel_card, card_number=1, art=angel_img)
+
+        # Then Eager Cadet was found with the same number
+        cadet_img = self.img_recipe.make()
+        cadet_card = self.card_recipe.make(name='Eager Cadet')
+        item = CardItem(mvid=cadet_img.mvid, number='1', rarity='Common')
+        res = cards.get_or_create_card_release(item, cadet_card, cadet_img)
+
+        self.assertNotEqual(res, angel_release)
+        self.assertEqual(
+            m.CardRelease.objects.filter(card_number=1).count(), 2)
+
     def test_get_card_set(self):
         cs = self.cs_recipe.make()
         recipe = Recipe(CardSetAlias, card_set=cs, name=seq('Alias '))

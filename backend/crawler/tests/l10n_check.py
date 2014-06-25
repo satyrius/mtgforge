@@ -37,6 +37,20 @@ class TestGathererSpider(GathererSpider):
         '''
         return super(TestGathererSpider, self).parse_card(response)
 
+    def pass_en_mvid(self, response):
+        '''Pass en mvid from request meta to l10n item
+
+        @url http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=295766&printed=true
+        @meta en_mvid 239961
+
+        @returns items 1 1
+        @items L10nItem 1
+        @field en_mvid 239961
+
+        @returns requests 0 0
+        '''
+        return super(TestGathererSpider, self).parse_card(response)
+
     def splitted_card_print(self, response):
         '''Parse splitted card
 
@@ -68,16 +82,16 @@ class TestGathererSpider(GathererSpider):
 
         @returns items 0 0
         @returns requests 10 10
-        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=295034&printed=true @language Chinese Traditional
-        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=340526&printed=true @language German
-        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=295522&printed=true @language French
-        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=296254&printed=true @language Italian
-        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=294245&printed=true @language Japanese
-        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=294790&printed=true @language Korean
-        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=295278&printed=true @language Portuguese (Brazil)
-        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=295766&printed=true @language Russian
-        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=294546&printed=true @language Chinese Simplified
-        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=296010&printed=true @language Spanish
+        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=295034&printed=true @en_mvid 239961 @language Chinese Traditional
+        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=340526&printed=true @en_mvid 239961 @language German
+        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=295522&printed=true @en_mvid 239961 @language French
+        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=296254&printed=true @en_mvid 239961 @language Italian
+        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=294245&printed=true @en_mvid 239961 @language Japanese
+        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=294790&printed=true @en_mvid 239961 @language Korean
+        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=295278&printed=true @en_mvid 239961 @language Portuguese (Brazil)
+        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=295766&printed=true @en_mvid 239961 @language Russian
+        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=294546&printed=true @en_mvid 239961 @language Chinese Simplified
+        @request http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=296010&printed=true @en_mvid 239961 @language Spanish
         '''
         return super(TestGathererSpider, self).parse_languages(response)
 

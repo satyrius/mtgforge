@@ -92,6 +92,46 @@ class CardL10nSaveTest(TestCase):
         item = L10nItem(number=str(cr.card_number))
         self.assertEqual(l10n.get_card_release(item), (cr, cf))
 
+    @patch.object(cards, 'get_card_set')
+    def test_cards_released_with_the_same_number(self, get_cs):
+        # This is a situation with missprints, fixed prints for the following
+        # card sets:
+        #  - Duel Decks: Divine vs. Demonic
+        #  - Duel Decks: Elves vs. Goblins
+        #  - Duel Decks: Garruk vs. Liliana
+        #  - Duel Decks: Jace vs. Chandra
+        #  - Duel Decks: Phyrexia vs. the Coalition
+        #  - Eighth Edition
+        #  - Ninth Edition
+        #  - Portal Three Kingdoms
+        #  - Promo set for Gatherer
+        #  - Urza's Saga
+        cs = self.cs_recipe.make(name='Eighth Edition')
+        get_cs.return_value = cs
+
+        # We have two cards released with the same number in one card set
+        angel_name = 'Angel of Mercy'
+        angel_img = self.img_recipe.make(mvid=45195)
+        angel_release = self.release_recipe.make(
+            card_set=cs, card_number=1, card__name=angel_name, art=angel_img)
+        angel_face = self.face_recipe.make(
+            card=angel_release.card, name=angel_name)
+
+        cadet_name = 'Eager Cadet'
+        cadet_img = self.img_recipe.make(mvid=47784)
+        cadet_release = self.release_recipe.make(
+            card_set=cs, card_number=1, card__name=cadet_name, art=cadet_img)
+        self.face_recipe.make(card=cadet_release.card, name=cadet_name)
+
+        # Process localization for non-English language
+        l10n_art = self.img_recipe.make(mvid=164888)
+        item = L10nItem(
+            name='Angelo della Misericordia', language='Italian',
+            mvid=str(l10n_art.mvid), en_mvid=str(angel_img.mvid), number='1')
+        self.assertEqual(
+            l10n.get_card_release(item),
+            (angel_release, angel_face))
+
     def test_get_existing_instance(self):
         cr = self.release_recipe.make()
         cf = self.face_recipe.make(card=cr.card)
