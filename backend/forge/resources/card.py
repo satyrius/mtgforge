@@ -20,7 +20,10 @@ def get_thumb_url(name):
 class CardResource(ModelResource):
     class Meta:
         resource_name = 'cards'
-        queryset = CardFace.objects.all()
+        queryset = CardFace.objects.prefetch_related(
+            'card__cardrelease_set__art',
+            'card__cardrelease_set__card_set'
+        )
         list_allowed_methods = []
         details_allowed_methods = ['get']
 
@@ -35,6 +38,19 @@ class CardResource(ModelResource):
                 get_art_url(bundle.obj.file)
         if hasattr(bundle.obj, 'thumb') and bundle.obj.thumb:
             bundle.data['thumb'] = get_thumb_url(bundle.obj.thumb)
+        if 'thumb' not in bundle.data:
+            releases = sorted(
+                bundle.obj.card.cardrelease_set.all(),
+                key=lambda cr: cr.card_set.released_at,
+                reverse=True)
+            if releases:
+                cr = releases[0]
+                if cr.art.file:
+                    thumb = get_art_url(cr.art.file)
+                else:
+                    thumb = cr.art.scan
+                    settings.CARD_IMAGE_SERP_THUMB
+                bundle.data['thumb'] = thumb
 
         # Debug ranking
         if settings.DEBUG_SERP:
