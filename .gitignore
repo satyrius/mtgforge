@@ -6,3 +6,4 @@ media/*
 *.sw[po]
 .env
 __pycache__
+.vagrant
