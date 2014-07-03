@@ -19,6 +19,19 @@ RUN npm install
 COPY frontend/bower.json /tmp/build/frontend/
 RUN bower install --allow-root
 
+# Install backend app dependencies
+RUN apt-get update && apt-get install -yV \
+    python-dev \
+    python-lxml \
+    python-openssl \
+    python-pil \
+    python-pip \
+    python-psycopg2 \
+    python-twisted
+WORKDIR /tmp/build
+COPY requirements.txt /tmp/build/
+RUN pip install -r requirements.txt
+
 # Build client app
 WORKDIR /tmp/build/frontend/
 COPY frontend/ /tmp/build/frontend
