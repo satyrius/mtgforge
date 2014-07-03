@@ -8,23 +8,20 @@ EXPOSE 80 22
 
 RUN locale-gen en_US.UTF-8 ru_RU.UTF-8
 RUN sed -i -e 's/archive.ubuntu.com/mirror.yandex.ru/' /etc/apt/sources.list
-RUN apt-get update && apt-get install -yV \
-    git \
-    nodejs-legacy \
-    nodejs \
-    npm \
-    vim
+RUN apt-get update && apt-get install -yV git vim tree htop
 
-# Install all client-side dependencies
+# Install client app dependencies
+RUN apt-get install -yV nodejs nodejs-legacy npm
 RUN npm install -g bower brunch
-WORKDIR /var/build/frontend/
-COPY frontend/package.json /var/build/frontend/
+WORKDIR /tmp/build/frontend/
+COPY frontend/package.json /tmp/build/frontend/
 RUN npm install
-COPY frontend/bower.json /var/build/frontend/
+COPY frontend/bower.json /tmp/build/frontend/
 RUN bower install --allow-root
 
 # Build client app
-COPY frontend /var/build/frontend
+WORKDIR /tmp/build/frontend/
+COPY frontend/ /tmp/build/frontend
 RUN brunch build --production
 
 # SSH keys of users to login as root
