@@ -27,8 +27,9 @@ RUN bower install --allow-root
 COPY frontend /var/build/frontend
 RUN brunch build --production
 
-#COPY ~/.ssh/id_rsa.pub /tmp/
-#RUN cat /tmp/id_rsa.pub >> /root/.ssh/authorized_keys
+# SSH keys of users to login as root
+COPY ssh_keys/aeg.pub /tmp/
+RUN cat /tmp/aeg.pub >> /root/.ssh/authorized_keys
 
 # Clean up APT when done.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
