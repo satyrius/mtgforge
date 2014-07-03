@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 PROJECT='mtgforge'
 PREV_ID=`docker ps | grep $PROJECT | awk '{print $1}'`
 [[ -n $PREV_ID ]] && docker stop $PREV_ID 1>/dev/null
