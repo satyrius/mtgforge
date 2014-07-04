@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import dj_database_url
 from os.path import join, dirname, abspath
 from contrib import l10n
 
@@ -15,10 +16,7 @@ ADMINS = (
 MANAGERS = ADMINS
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'mtgforge',
-    }
+    'default': dj_database_url.config(default='postgres://localhost/mtgforge')
 }
 
 # Local time zone for this installation. Choices can be found here:

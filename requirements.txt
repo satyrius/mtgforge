@@ -5,6 +5,7 @@ Scrapy==0.22.2
 South==0.8.4
 Twisted==13.2.0 # required by Scrapy
 cssselect==0.9.1 # required by Scrapy
+dj-database-url==0.3.0
 django-arrayfields==0.1.0
 django-debug-toolbar==1.0.1
 django-extensions==1.2.0
