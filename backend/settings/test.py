@@ -4,6 +4,14 @@ from settings.common import *
 
 DEBUG_SERP = True
 
+# Use Django Nose test runner.
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+NOSE_ARGS = ['--verbosity=2', '--with-id']
+
+# South's test runner integration will make the test database be created using
+# syncdb, rather than via migrations.
+SOUTH_TESTS_MIGRATE = True
+
 # Save upload media to the temporary directory
 MEDIA_ROOT = '/tmp/mtgforge/media/'
 # Make it clean before running

@@ -70,7 +70,7 @@ STATICFILES_DIRS = [
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    #'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 DEFAULT_FILE_STORAGE = 'storages.backends.hashpath.HashPathStorage'
@@ -144,14 +144,6 @@ CACHES = {
         }
     },
 }
-
-# Use Django Nose test runner.
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-NOSE_ARGS = ['--verbosity=2', '--with-id']
-
-# South’s test runner integration will make the test database be created using
-# syncdb, rather than via migrations.
-SOUTH_TESTS_MIGRATE = True
 
 # Modeltranslation settings.
 # http://code.google.com/p/django-modeltranslation/wiki/InstallationAndUsage03
