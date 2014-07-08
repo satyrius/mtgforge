@@ -43,7 +43,20 @@ WORKDIR frontend
 RUN brunch build --production
 
 # Build backend app
-COPY backend /var/www/mtgforge
+COPY backend /tmp/docker_build/backend
+WORKDIR /tmp/docker_build/backend
+RUN find -name '*.pyc' -delete
+RUN python -c "import compileall; compileall.compile_dir('.', force=1)" > /dev/null
+# TODO version file
+ENV DJANGO_STATIC_ROOT /var/www/mtgforge-static
+ENV DJANGO_MEDIA_ROOT /var/www/mtgforge-media
+ENV DJANGO_WEB_ROOT /var/www/mtgforge
+RUN mkdir -p /var/www $DJANGO_STATIC_ROOT $DJANGO_MEDIA_ROOT /var/log/mtgforge
+RUN chown www-data $DJANGO_STATIC_ROOT $DJANGO_MEDIA_ROOT /var/log/mtgforge
+RUN setuser www-data ./manage.py collectstatic --noinput --clear
+WORKDIR ..
+RUN mv backend $DJANGO_WEB_ROOT
+RUN chown -R root:root $DJANGO_WEB_ROOT
 
 # SSH keys of users to login as root
 COPY ssh_keys/aeg.pub /tmp/
