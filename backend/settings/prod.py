@@ -33,8 +33,3 @@ ADMINS = (
 )
 
 MANAGERS = ADMINS
-
-try:
-    from settings.local import *
-except ImportError:
-    pass

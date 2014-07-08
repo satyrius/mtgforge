@@ -25,8 +25,3 @@ for d in ['art', 'thumbs']:
 CACHES['default'] = {
     'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
 }
-
-try:
-    from settings.local import *
-except ImportError:
-    pass

@@ -40,8 +40,3 @@ LOGGING['loggers']['oracle.management']['level'] = 'DEBUG'
 
 # To enable django debug toolbar set this variable to True
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
-
-try:
-    from settings.local import *
-except ImportError:
-    pass
