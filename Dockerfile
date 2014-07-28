@@ -9,30 +9,41 @@ EXPOSE 80 22
 
 RUN locale-gen en_US.UTF-8 ru_RU.UTF-8
 RUN sed -i -e 's/archive.ubuntu.com/mirror.yandex.ru/' /etc/apt/sources.list
-RUN apt-get update && apt-get install -yV git vim tree htop
-
-WORKDIR /tmp/docker_build
-
-# Install client app dependencies
-RUN apt-get update && apt-get install -yV nodejs nodejs-legacy npm
-RUN npm install -g bower brunch
-COPY frontend/package.json /tmp/docker_build/
-RUN npm install
-COPY frontend/bower.json /tmp/docker_build/
-RUN bower install --allow-root
-
-# Install backend app dependencies
 RUN apt-get update && apt-get install -yV \
-    postgresql-client-9.3 \
+    gunicorn \
+    nginx \
+    nodejs \
+    nodejs-legacy \
+    npm \
     python-dev \
     python-lxml \
     python-openssl \
     python-pil \
     python-pip \
     python-psycopg2 \
-    python-twisted
+    python-twisted \
+    ruby \
+    git \
+    htop \
+    postgresql-client-9.3 \
+    tree \
+    vim
+
+# Install build tools
+RUN gem install --no-rdoc --no-ri foreman
+RUN npm install -g bower brunch
+
+WORKDIR /tmp/docker_build
+
+# Install backend app dependencies
 COPY requirements.txt /tmp/docker_build/
 RUN pip install -r requirements.txt
+
+# Install client app dependencies
+COPY frontend/package.json /tmp/docker_build/
+RUN npm install
+COPY frontend/bower.json /tmp/docker_build/
+RUN bower install --allow-root
 
 # Build client app
 COPY frontend /tmp/docker_build/frontend
@@ -48,15 +59,29 @@ WORKDIR /tmp/docker_build/backend
 RUN find -name '*.pyc' -delete
 RUN python -c "import compileall; compileall.compile_dir('.', force=1)" > /dev/null
 # TODO version file
-ENV DJANGO_STATIC_ROOT /var/www/mtgforge-static
+ENV DJANGO_SETTINGS_MODULE topdeck.settings.prod
+ENV DJANGO_APP_LOGS /var/log/mtgforge
+ENV DJANGO_APP_ROOT /var/www/mtgforge
 ENV DJANGO_MEDIA_ROOT /var/www/mtgforge-media
-ENV DJANGO_WEB_ROOT /var/www/mtgforge
-RUN mkdir -p /var/www $DJANGO_STATIC_ROOT $DJANGO_MEDIA_ROOT /var/log/mtgforge
-RUN chown www-data $DJANGO_STATIC_ROOT $DJANGO_MEDIA_ROOT /var/log/mtgforge
+ENV DJANGO_STATIC_ROOT /var/www/mtgforge-static
+RUN mkdir -p /var/www $DJANGO_STATIC_ROOT $DJANGO_MEDIA_ROOT $DJANGO_APP_LOGS
+RUN chown www-data $DJANGO_STATIC_ROOT $DJANGO_MEDIA_ROOT $DJANGO_APP_LOGS
 RUN setuser www-data ./manage.py collectstatic --noinput --clear
-WORKDIR ..
-RUN mv backend $DJANGO_WEB_ROOT
-RUN chown -R root:root $DJANGO_WEB_ROOT
+
+# Web server setup
+RUN mv /tmp/docker_build/backend $DJANGO_APP_ROOT
+COPY Procfile /var/www/mtgforge/
+WORKDIR /var/www/mtgforge/
+RUN chown -R root:root .
+RUN foreman export \
+    --app=mtgforge \
+    --log=$DJANGO_APP_LOGS \
+    --user=www-data \
+    --root=$DJANGO_APP_ROOT \
+    runit /etc/service
+COPY package/etc /etc
+WORKDIR /etc/nginx/sites-enabled
+RUN rm default && ln -s ../mtgforge/_.conf mtgforge.conf
 
 # SSH keys of users to login as root
 COPY ssh_keys/aeg.pub /tmp/
