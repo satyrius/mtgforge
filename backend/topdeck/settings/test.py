@@ -1,6 +1,6 @@
 import os
 import shutil
-from settings.common import *
+from .common import *
 
 DEBUG_SERP = True
 

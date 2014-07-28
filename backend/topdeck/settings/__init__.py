@@ -1,8 +1,8 @@
 import sys
 
 if 'test' in sys.argv:
-    from test import *
+    from .test import *
 elif sys.platform.startswith('darwin'):
-    from dev import *
+    from .dev import *
 else:
-    from prod import *
+    from .prod import *

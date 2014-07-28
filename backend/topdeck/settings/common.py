@@ -7,7 +7,9 @@ from contrib import l10n
 DEBUG = False
 TEMPLATE_DEBUG = False
 
-PROJECT_ROOT = abspath(join(dirname(__file__), '../..'))
+PROJECT_ROOT = abspath(join(dirname(__file__), '../../..'))
+APP_ROOT = os.environ.get(
+    'DJANGO_APP_ROOT', os.path.join(PROJECT_ROOT, 'backend'))
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -97,13 +99,13 @@ INTERNAL_IPS = ('127.0.0.1',)
 ROOT_URLCONF = 'urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'wsgi.application'
+WSGI_APPLICATION = 'topdeck.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(PROJECT_ROOT, 'backend', 'templates'),
+    os.path.join(APP_ROOT, 'templates'),
 )
 
 INSTALLED_APPS = (
