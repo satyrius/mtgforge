@@ -84,8 +84,8 @@ WORKDIR /etc/nginx/sites-enabled
 RUN rm default && ln -s ../mtgforge/_.conf mtgforge.conf
 
 # SSH keys of users to login as root
-COPY ssh_keys/aeg.pub /tmp/
-RUN cat /tmp/aeg.pub >> /root/.ssh/authorized_keys
+COPY ./authorized_keys /root/.ssh/
+RUN chmod go-rwx /root/.ssh/authorized_keys
 
 # Clean up APT when done.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
