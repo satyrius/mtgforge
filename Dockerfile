@@ -1,5 +1,5 @@
 # Base image
-FROM phusion/baseimage:0.9.11
+FROM phusion/baseimage:0.9.12
 MAINTAINER Anton Egorov <anton.egoroff@gmail.com>
 ENV HOME /root
 RUN /etc/my_init.d/00_regen_ssh_host_keys.sh
