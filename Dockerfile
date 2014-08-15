@@ -9,7 +9,7 @@ EXPOSE 80 22
 
 RUN locale-gen en_US.UTF-8 ru_RU.UTF-8
 RUN sed -i -e 's/archive.ubuntu.com/mirror.yandex.ru/' /etc/apt/sources.list
-RUN apt-get update && apt-get install -yV \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -yV \
     gunicorn \
     nginx \
     nodejs-legacy \
@@ -21,11 +21,14 @@ RUN apt-get update && apt-get install -yV \
     python-pip \
     python-psycopg2 \
     python-twisted \
-    ruby \
     git
 
+# Install ruby and foreman with freezed version
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -yV ruby \
+    && gem install --no-rdoc --no-ri --version=0.74.0 foreman
+
 # Tolls and other useful stuff
-RUN apt-get install -yV \
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -yV \
     bash-completion \
     command-not-found \
     htop \
@@ -33,8 +36,6 @@ RUN apt-get install -yV \
     tree \
     vim
 
-# Install build tools
-RUN gem install --no-rdoc --no-ri foreman
 RUN npm install -g bower brunch
 
 WORKDIR /tmp/docker_build
