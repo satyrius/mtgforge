@@ -4,4 +4,4 @@
 nginx -t
 
 # Validates all installed models and prints validation errors to standard output
-setuser www-data /var/www/extrota/manage.py validate
+setuser www-data /var/www/mtgforge/manage.py validate
