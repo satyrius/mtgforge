@@ -12,7 +12,6 @@ RUN sed -i -e 's/archive.ubuntu.com/mirror.yandex.ru/' /etc/apt/sources.list
 RUN apt-get update && apt-get install -yV \
     gunicorn \
     nginx \
-    nodejs \
     nodejs-legacy \
     npm \
     python-dev \
@@ -23,7 +22,12 @@ RUN apt-get update && apt-get install -yV \
     python-psycopg2 \
     python-twisted \
     ruby \
-    git \
+    git
+
+# Tolls and other useful stuff
+RUN apt-get install -yV \
+    bash-completion \
+    command-not-found \
     htop \
     postgresql-client-9.3 \
     tree \
