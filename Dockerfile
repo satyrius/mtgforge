@@ -56,11 +56,13 @@ WORKDIR /tmp/docker_build
 RUN mv node_modules frontend
 RUN mv bower_components frontend
 WORKDIR frontend
+RUN find -name '*.swp' -delete
 RUN brunch build --production
 
 # Build backend app
 COPY backend /tmp/docker_build/backend
 WORKDIR /tmp/docker_build/backend
+RUN find -name '*.swp' -delete
 RUN find -name '*.pyc' -delete
 RUN python -c "import compileall; compileall.compile_dir('.', force=1)" > /dev/null
 # TODO version file
