@@ -5,8 +5,6 @@ ENV HOME /root
 RUN /etc/my_init.d/00_regen_ssh_host_keys.sh
 CMD ["/sbin/my_init"]
 
-EXPOSE 80 22
-
 RUN locale-gen en_US.UTF-8 ru_RU.UTF-8
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -yV \
     bash-completion \
@@ -34,6 +32,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -yV \
 
 RUN npm install -g bower brunch
 
+EXPOSE 80 22
 WORKDIR /tmp/docker_build
 
 # Install backend app dependencies
