@@ -9,31 +9,28 @@ EXPOSE 80 22
 
 RUN locale-gen en_US.UTF-8 ru_RU.UTF-8
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -yV \
-    gunicorn \
-    nginx \
-    nodejs-legacy \
-    npm \
-    python-dev \
-    python-lxml \
-    python-openssl \
-    python-pil \
-    python-pip \
-    python-psycopg2 \
-    python-twisted \
-    git
-
-# Install ruby and foreman with freezed version
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -yV ruby \
-    && gem install --no-rdoc --no-ri --version=0.74.0 foreman
-
-# Tolls and other useful stuff
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -yV \
     bash-completion \
     command-not-found \
+    curl \
     htop \
     postgresql-client-9.3 \
+    psmisc \
     tree \
-    vim
+    vim \
+        git-core \
+        gunicorn \
+        nginx \
+        nodejs-legacy npm \
+        python-dev \
+        python-lxml \
+        python-openssl \
+        python-pil \
+        python-pip \
+        python-psycopg2 \
+        python-twisted \
+        ruby \
+    && gem install --no-rdoc --no-ri --version=0.74.0 foreman \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN npm install -g bower brunch
 
