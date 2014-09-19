@@ -84,6 +84,7 @@ RUN foreman export \
 COPY package/etc /etc
 WORKDIR /etc/nginx/sites-enabled
 RUN rm default && ln -s ../mtgforge/_.conf mtgforge.conf
+RUN nginx -t
 RUN chmod +x /etc/my_init.d/*.sh
 
 # SSH keys of users to login as root
