@@ -8,7 +8,6 @@ CMD ["/sbin/my_init"]
 EXPOSE 80 22
 
 RUN locale-gen en_US.UTF-8 ru_RU.UTF-8
-RUN sed -i -e 's/archive.ubuntu.com/mirror.yandex.ru/' /etc/apt/sources.list
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -yV \
     gunicorn \
     nginx \
