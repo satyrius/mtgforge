@@ -3,6 +3,7 @@ dockerpty==0.2.3
 docopt==0.6.1
 fig==0.5.2
 flake8==2.2.1
+gnureadline==6.3.3
 ipdb==0.8
 ipython==2.1.0
 jedi==0.8.0-final0
@@ -13,3 +14,4 @@ pyflakes==0.8.1
 requests==2.2.1
 texttable==0.8.1
 websocket-client==0.11.0
+yolk==0.4.3
