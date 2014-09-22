@@ -86,7 +86,3 @@ RUN chown -R root:root . \
         --user=www-data \
         --root=$DJANGO_APP_ROOT \
         runit /etc/service
-
-# SSH keys of users to login as root
-COPY ./authorized_keys /root/.ssh/
-RUN chmod go-rwx /root/.ssh/authorized_keys
