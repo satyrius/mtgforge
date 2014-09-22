@@ -63,14 +63,16 @@ RUN rm /etc/nginx/sites-enabled/default \
 ENV DJANGO_SETTINGS_MODULE topdeck.settings.prod
 ENV DJANGO_APP_LOGS /var/log/mtgforge
 ENV DJANGO_APP_ROOT /var/www/mtgforge
-ENV DJANGO_MEDIA_ROOT /var/www/mtgforge-media
 ENV DJANGO_STATIC_ROOT /var/www/mtgforge-static
+VOLUME [
+    "/var/www/mtgforge-media/"
+]
 
 # Build backend app
 COPY backend/ /tmp/docker_build/backend/
 WORKDIR /tmp/docker_build/backend
-RUN mkdir -p /var/www $DJANGO_STATIC_ROOT $DJANGO_MEDIA_ROOT $DJANGO_APP_LOGS \
-    && chown www-data $DJANGO_STATIC_ROOT $DJANGO_MEDIA_ROOT $DJANGO_APP_LOGS \
+RUN mkdir -p /var/www $DJANGO_STATIC_ROOT $DJANGO_APP_LOGS \
+    && chown www-data $DJANGO_STATIC_ROOT $DJANGO_APP_LOGS \
     && setuser www-data ./manage.py collectstatic --noinput --clear \
     && find -name '*.swp' -delete \
     && find -name '*.pyc' -delete \
