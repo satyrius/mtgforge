@@ -46,50 +46,47 @@ COPY frontend/bower.json /tmp/docker_build/
 RUN bower install --allow-root
 
 # Build client app
-COPY frontend /tmp/docker_build/frontend
-WORKDIR /tmp/docker_build
-RUN mv node_modules frontend
-RUN mv bower_components frontend
+COPY frontend/ /tmp/docker_build/frontend/
+RUN mv node_modules frontend \
+    && mv bower_components frontend
 WORKDIR frontend
-RUN find -name '*.swp' -delete
-RUN brunch build --production
+RUN find -name '*.swp' -delete \
+    && brunch build --production
 
-# Build backend app
-COPY backend /tmp/docker_build/backend
-WORKDIR /tmp/docker_build/backend
-RUN find -name '*.swp' -delete
-RUN find -name '*.pyc' -delete
-RUN python -c "import compileall; compileall.compile_dir('.', force=1)" > /dev/null
-# TODO version file
+COPY etc/ /etc/
+WORKDIR /etc/nginx/sites-enabled
+RUN rm /etc/nginx/sites-enabled/default \
+    && ln -s /etc/nginx/mtgforge/_.conf /etc/nginx/sites-enabled/mtgforge.conf \
+    && nginx -t \
+    && chmod +x /etc/my_init.d/*.sh
+
 ENV DJANGO_SETTINGS_MODULE topdeck.settings.prod
 ENV DJANGO_APP_LOGS /var/log/mtgforge
 ENV DJANGO_APP_ROOT /var/www/mtgforge
 ENV DJANGO_MEDIA_ROOT /var/www/mtgforge-media
 ENV DJANGO_STATIC_ROOT /var/www/mtgforge-static
-RUN mkdir -p /var/www $DJANGO_STATIC_ROOT $DJANGO_MEDIA_ROOT $DJANGO_APP_LOGS
-RUN chown www-data $DJANGO_STATIC_ROOT $DJANGO_MEDIA_ROOT $DJANGO_APP_LOGS
-RUN setuser www-data ./manage.py collectstatic --noinput --clear
+
+# Build backend app
+COPY backend/ /tmp/docker_build/backend/
+WORKDIR /tmp/docker_build/backend
+RUN mkdir -p /var/www $DJANGO_STATIC_ROOT $DJANGO_MEDIA_ROOT $DJANGO_APP_LOGS \
+    && chown www-data $DJANGO_STATIC_ROOT $DJANGO_MEDIA_ROOT $DJANGO_APP_LOGS \
+    && setuser www-data ./manage.py collectstatic --noinput --clear \
+    && find -name '*.swp' -delete \
+    && find -name '*.pyc' -delete \
+    && python -c "import compileall; compileall.compile_dir('.', force=1)" > /dev/null \
+    && cd .. && mv backend $DJANGO_APP_ROOT
 
 # Web server setup
-RUN mv /tmp/docker_build/backend $DJANGO_APP_ROOT
-COPY Procfile /var/www/mtgforge/
-WORKDIR /var/www/mtgforge/
-RUN chown -R root:root .
-RUN foreman export \
-    --app=mtgforge \
-    --log=$DJANGO_APP_LOGS \
-    --user=www-data \
-    --root=$DJANGO_APP_ROOT \
-    runit /etc/service
-COPY package/etc /etc
-WORKDIR /etc/nginx/sites-enabled
-RUN rm default && ln -s ../mtgforge/_.conf mtgforge.conf
-RUN nginx -t
-RUN chmod +x /etc/my_init.d/*.sh
+WORKDIR /var/www/mtgforge
+RUN chown -R root:root . \
+    && foreman export \
+        --app=mtgforge \
+        --log=$DJANGO_APP_LOGS \
+        --user=www-data \
+        --root=$DJANGO_APP_ROOT \
+        runit /etc/service
 
 # SSH keys of users to login as root
 COPY ./authorized_keys /root/.ssh/
 RUN chmod go-rwx /root/.ssh/authorized_keys
-
-# Clean up APT when done.
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
