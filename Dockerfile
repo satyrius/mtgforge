@@ -64,9 +64,7 @@ ENV DJANGO_SETTINGS_MODULE topdeck.settings.prod
 ENV DJANGO_APP_LOGS /var/log/mtgforge
 ENV DJANGO_APP_ROOT /var/www/mtgforge
 ENV DJANGO_STATIC_ROOT /var/www/mtgforge-static
-VOLUME [
-    "/var/www/mtgforge-media/"
-]
+VOLUME "/var/www/mtgforge-media/"
 
 # Build backend app
 COPY backend/ /tmp/docker_build/backend/
