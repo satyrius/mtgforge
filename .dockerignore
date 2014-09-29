@@ -1,3 +1,6 @@
 .?*
 pyenv
 media
+frontend/node_modules
+frontend/bower_components
+frontend/public
