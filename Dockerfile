@@ -5,28 +5,30 @@ ENV HOME /root
 RUN /etc/my_init.d/00_regen_ssh_host_keys.sh
 CMD ["/sbin/my_init"]
 
-RUN locale-gen en_US.UTF-8 ru_RU.UTF-8
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -yV \
-    bash-completion \
-    command-not-found \
-    curl \
-    htop \
-    postgresql-client-9.3 \
-    psmisc \
-    tree \
-    vim \
-        git-core \
-        gunicorn \
-        nginx \
-        nodejs-legacy npm \
-        python-dev \
-        python-lxml \
-        python-openssl \
-        python-pil \
-        python-pip \
-        python-psycopg2 \
-        python-twisted \
-        ruby \
+RUN locale-gen en_US.UTF-8 ru_RU.UTF-8 \
+    && apt-get update -qq \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -qq \
+        bash>=4.3-7ubuntu1.1 \
+        bash-completion \
+        command-not-found \
+        curl \
+        htop \
+        postgresql-client-9.3 \
+        psmisc \
+        tree \
+        vim \
+            git-core \
+            gunicorn \
+            nginx \
+            nodejs-legacy npm \
+            python-dev \
+            python-lxml \
+            python-openssl \
+            python-pil \
+            python-pip \
+            python-psycopg2 \
+            python-twisted \
+            ruby \
     && gem install --no-rdoc --no-ri --version=0.74.0 foreman \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
