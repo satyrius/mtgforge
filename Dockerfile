@@ -63,16 +63,18 @@ RUN rm /etc/nginx/sites-enabled/default \
     && chmod +x /etc/my_init.d/*.sh
 
 ENV DJANGO_SETTINGS_MODULE topdeck.settings.prod
-ENV DJANGO_APP_LOGS /var/log/mtgforge
 ENV DJANGO_APP_ROOT /var/www/mtgforge
 ENV DJANGO_STATIC_ROOT /var/www/mtgforge-static
-VOLUME "/var/www/mtgforge-media/"
+VOLUME = [ \
+    "/var/www/mtgforge-media/", \
+    "/var/log/mtgforge/", \
+    "/var/log/nginx/"]
 
 # Build backend app
 COPY backend/ /tmp/docker_build/backend/
 WORKDIR /tmp/docker_build/backend
-RUN mkdir -p /var/www $DJANGO_STATIC_ROOT $DJANGO_APP_LOGS \
-    && chown www-data $DJANGO_STATIC_ROOT $DJANGO_APP_LOGS \
+RUN mkdir -p /var/www $DJANGO_STATIC_ROOT \
+    && chown www-data $DJANGO_STATIC_ROOT \
     && setuser www-data ./manage.py collectstatic --noinput --clear \
     && find -name '*.swp' -delete \
     && find -name '*.pyc' -delete \
@@ -84,7 +86,7 @@ WORKDIR /var/www/mtgforge
 RUN chown -R root:root . \
     && foreman export \
         --app=mtgforge \
-        --log=$DJANGO_APP_LOGS \
+        --log=/var/log/mtgforge \
         --user=www-data \
         --root=$DJANGO_APP_ROOT \
         runit /etc/service

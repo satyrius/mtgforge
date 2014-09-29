@@ -6,3 +6,5 @@ web:
     - "80"
   volumes:
     - /var/www/mtgforge-media/
+    - /var/log/mtgforge/
+    - /var/log/nginx/
