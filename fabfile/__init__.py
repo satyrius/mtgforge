@@ -1,6 +1,5 @@
 import sys
 from fabric.api import env
-from fabfile.deploy import *
 from fabfile.media import *
 from fabfile.pg import *
 
