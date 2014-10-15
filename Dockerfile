@@ -39,7 +39,8 @@ WORKDIR /tmp/docker_build
 
 # Install backend app dependencies
 COPY requirements.txt /tmp/docker_build/
-RUN pip install -r requirements.txt
+COPY requirements-crawl.txt /tmp/docker_build/
+RUN pip install -r requirements.txt -r requirements-crawl.txt
 
 # Install client app dependencies
 COPY frontend/package.json /tmp/docker_build/
