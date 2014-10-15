@@ -38,7 +38,7 @@ SPIDER_CONTRACTS = {
     'crawler.contracts.ItemContract': 112,
 }
 
-HTTPCACHE_ENABLED = True
+HTTPCACHE_ENABLED = False
 HTTPCACHE_DIR = '/tmp/crawler'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
