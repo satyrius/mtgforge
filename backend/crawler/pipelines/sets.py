@@ -67,12 +67,12 @@ class CardSetsPipeline(BaseCardSetItemPipeline):
     def _process_item(self, item, spider):
         name = item['name'].strip()
         # Return immediately if alias already exists
-        if CardSetAlias.objects.filter(name=name).count():
+        if CardSetAlias.objects.filter(name__iexact=name).count():
             return
 
         # Get existing card set by name or create new one
         try:
-            cs = CardSet.objects.get(name=name)
+            cs = CardSet.objects.get(name__iexact=name)
         except CardSet.DoesNotExist:
             # Save card set using form to pass all validation
 
@@ -100,7 +100,7 @@ class InfoPipeline(BaseCardSetItemPipeline):
         released_at = item.get('released_at')
 
         if cards or released_at:
-            cs = CardSetAlias.objects.get(name=item['name']).card_set
+            cs = CardSetAlias.objects.get(name__iexact=item['name']).card_set
 
             if cards and cs.cards is None:
                 cs.cards = int(cards)

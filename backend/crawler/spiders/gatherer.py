@@ -49,7 +49,7 @@ class GathererSpider(CrawlSpider):
         '''
         # Follow pagination
         sel = Selector(response)
-        for page_link in sel.css('div.pagingControls a'):
+        for page_link in sel.css('div.bottom div.pagingcontrols a'):
             page_url = page_link.xpath('@href').extract()[0]
             page_num = page_link.xpath('text()').extract()[0].strip()
             if page_url and page_num.isdigit():
