@@ -21,18 +21,20 @@ RUN locale-gen en_US.UTF-8 ru_RU.UTF-8 \
             gunicorn \
             nginx \
             nodejs-legacy npm \
+            python-cffi \
             python-dev \
             python-lxml \
             python-openssl \
             python-pil \
             python-pip \
             python-psycopg2 \
+            python-pycparser \
             python-twisted \
             ruby \
     && gem install --no-rdoc --no-ri --version=0.74.0 foreman \
+    && npm install -g bower brunch \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN npm install -g bower brunch
 
 EXPOSE 80 22
 WORKDIR /tmp/docker_build
