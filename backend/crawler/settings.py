@@ -5,7 +5,7 @@ from os.path import abspath, dirname, join
 # Setup Django environment
 DJANGO_PROJECT = abspath(join(dirname(__file__), '..'))
 sys.path.append(DJANGO_PROJECT)
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'topdeck.settings')
 from django.conf import settings
 
 BOT_NAME = 'crawler'
