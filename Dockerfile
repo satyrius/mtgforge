@@ -1,5 +1,5 @@
 # Base image
-FROM phusion/baseimage:0.9.13
+FROM phusion/baseimage:0.9.15
 MAINTAINER Anton Egorov <anton.egoroff@gmail.com>
 ENV HOME /root
 RUN /etc/my_init.d/00_regen_ssh_host_keys.sh
@@ -8,7 +8,6 @@ CMD ["/sbin/my_init"]
 RUN locale-gen en_US.UTF-8 ru_RU.UTF-8 \
     && apt-get update -qq \
     && DEBIAN_FRONTEND=noninteractive apt-get install -qq \
-        bash>=4.3-7ubuntu1.1 \
         bash-completion \
         command-not-found \
         curl \
@@ -32,11 +31,10 @@ RUN locale-gen en_US.UTF-8 ru_RU.UTF-8 \
             python-twisted \
             ruby \
     && gem install --no-rdoc --no-ri --version=0.74.0 foreman \
-    && npm install -g bower brunch \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 
-EXPOSE 80 22
+EXPOSE 80
 WORKDIR /tmp/docker_build
 
 # Install backend app dependencies
@@ -44,24 +42,16 @@ COPY requirements.txt /tmp/docker_build/
 COPY requirements-crawl.txt /tmp/docker_build/
 RUN pip install -r requirements.txt -r requirements-crawl.txt
 
-# Install client app dependencies
-COPY frontend/package.json /tmp/docker_build/
+# Install client app dependencies and build app
+WORKDIR /tmp/docker_build/client/
+COPY client/package.json /tmp/docker_build/client/
 RUN npm install
-COPY frontend/bower.json /tmp/docker_build/
-RUN bower install --allow-root
-
-# Build client app
-COPY frontend/ /tmp/docker_build/frontend/
-RUN mv node_modules frontend \
-    && mv bower_components frontend
-WORKDIR frontend
-RUN find -name '*.swp' -delete \
-    && brunch build --production
+COPY client/ /tmp/docker_build/client/
+RUN find . -name '*.swp' -delete \
+    && ./node_modules/.bin/gulp prod
 
 COPY etc/ /etc/
-WORKDIR /etc/nginx/sites-enabled
-RUN rm /etc/nginx/sites-enabled/default \
-    && ln -s /etc/nginx/mtgforge/_.conf /etc/nginx/sites-enabled/mtgforge.conf \
+RUN find . -name '*.swp' -delete \
     && nginx -t \
     && chmod +x /etc/my_init.d/*.sh
 
@@ -79,8 +69,8 @@ WORKDIR /tmp/docker_build/backend
 RUN mkdir -p /var/www $DJANGO_STATIC_ROOT \
     && chown www-data $DJANGO_STATIC_ROOT \
     && setuser www-data ./manage.py collectstatic --noinput --clear \
-    && find -name '*.swp' -delete \
-    && find -name '*.pyc' -delete \
+    && find . -name '*.swp' -delete \
+    && find . -name '*.pyc' -delete \
     && python -c "import compileall; compileall.compile_dir('.', force=1)" > /dev/null \
     && cd .. && mv backend $DJANGO_APP_ROOT
 

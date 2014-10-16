@@ -17,4 +17,4 @@ proxy_connect_timeout 15s;
 proxy_read_timeout 15s;
 proxy_send_timeout 15s;
 
-proxy_pass http://gunicorn_backend;
+proxy_pass http://app_server;

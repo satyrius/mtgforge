@@ -1,0 +1,49 @@
+log_format web
+    '$remote_addr [$time_local] "$request" '
+    '$status $body_bytes_sent "$request_time" '
+    '"$http_referer" "$http_user_agent" "$http_host"';
+
+upstream app_server {
+    server 127.0.0.1:8000 fail_timeout=1s;
+}
+
+server {
+    listen 80 default_server;
+    access_log /var/log/nginx/access.log web;
+
+    location = / {
+        index index.html;
+    }
+
+    location /admin/ {
+        include mtgforge/gunicorn.inc;
+        access_log /var/log/nginx/admin.access.log web;
+    }
+
+    location /api/ {
+        include mtgforge/cors.inc;
+        include mtgforge/gunicorn.inc;
+        access_log /var/log/nginx/api.access.log web;
+    }
+
+    location /static/ {
+        alias    /var/www/mtgforge-static/;
+        access_log /var/log/nginx/static.access.log web;
+    }
+
+    location ~ ^/(js/|css/|img/|fonts/|index.html) {
+        root    /var/www/mtgforge-static/;
+        access_log /var/log/nginx/client.access.log web;
+    }
+
+    location /media/ {
+        alias /var/www/mtgforge-media/;
+        access_log /var/log/nginx/media.access.log web;
+        default_type image/jpeg;
+    }
+
+    location = /favicon.ico {
+        access_log off;
+        empty_gif;
+    }
+}

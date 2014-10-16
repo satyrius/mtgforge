@@ -1,0 +1,33 @@
+{
+  "name": "topdeck",
+  "version": "0.1.0",
+  "author": "Anton Egorov",
+  "description": "Topdeck, the MTG Forge API client",
+  "dependencies": {
+    "gulp": "~3.5.2",
+    "gulp-browserify": "~0.4.4",
+    "gulp-clean": "0.2.4",
+    "gulp-concat": "~2.1.7",
+    "gulp-debug": "0.3.0",
+    "gulp-jade": "~0.4.1",
+    "gulp-less": "~1.2.3",
+    "gulp-minify-css": "~0.3.0",
+    "gulp-plumber": "~0.5.6",
+    "gulp-replace": "~0.3.0",
+    "gulp-stylus": "0.0.12",
+    "gulp-uglify": "~0.2.1",
+    "gulp-util": "2.2.14",
+    "backbone": "1.1.2",
+    "backbone.marionette": "1.8.5",
+    "browserify": "~3.28.2",
+    "coffeeify": "~0.6.0",
+    "jade": "~1.1.5",
+    "jadeify": "~2.1.1",
+    "jquery": "2.1.1",
+    "qs": "~0.6.6",
+    "spin.js": "~2.0.1",
+    "streamqueue": "0.0.7",
+    "twitter-bootstrap-3.0.0": "3.0.0",
+    "underscore": "1.6.0"
+  }
+}

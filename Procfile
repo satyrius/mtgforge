@@ -1,2 +1,2 @@
-api: ./backend/manage.py runserver
-client: cd ./frontend && brunch watch
+api: PYTHONUNBUFFERED=true ./backend/manage.py runserver
+topdeck: ./client/node_modules/.bin/gulp watch --cwd=./client

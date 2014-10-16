@@ -1,4 +1,4 @@
-default: install
+default: build
 
 install: python-env node-env
 
@@ -9,8 +9,7 @@ python-env:
 	pip install -r requirements-dev.txt
 
 node-env:
-	npm install -g brunch bower
-	cd frontend && npm install && bower install
+	cd client && npm install
 
 test:
 	./backend/manage.py test $(filter-out $@,$(MAKECMDGOALS))
@@ -29,4 +28,9 @@ run:
 build:
 	docker build -t mtgforge_web .
 
-.PHONY: install test check run build
+drun:
+	fig stop
+	fig up -d
+	docker ps
+
+.PHONY: install test check run build drun

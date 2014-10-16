@@ -63,7 +63,7 @@ STATICFILES_DIRS = [
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(PROJECT_ROOT, 'frontend', 'public'),
+    os.path.join(PROJECT_ROOT, 'client', 'public'),
     os.path.join(PROJECT_ROOT, 'backend', 'oracle', 'static'),
 ]
 
@@ -96,7 +96,7 @@ MIDDLEWARE_CLASSES = (
 )
 INTERNAL_IPS = ('127.0.0.1',)
 
-ROOT_URLCONF = 'urls'
+ROOT_URLCONF = 'topdeck.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'topdeck.wsgi.application'
@@ -105,6 +105,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    os.path.join(PROJECT_ROOT, 'client', 'public'),
     os.path.join(APP_ROOT, 'templates'),
 )
 
@@ -223,6 +224,14 @@ LOGGING = {
         },
     }
 }
+
+# Log database requests to the console output
+if os.getenv('DEBUG_DB'):
+    LOGGING['loggers']['django.db'] = {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+        'propagate': True,
+    }
 
 GRAPPELLI_ADMIN_TITLE = 'MTG Forge'
 
