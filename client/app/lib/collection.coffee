@@ -7,4 +7,4 @@ module.exports = class ApiCollection extends Backbone.Collection
     @resolveApiUrl _.result(@, '_url')
 
   resolveApiUrl: (uri) ->
-    urls.resolveApiUrl uri
+    urls.resolveApiUrl uri.replace(/\/?$/, '/')
