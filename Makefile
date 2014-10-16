@@ -1,4 +1,4 @@
-default: install
+default: build
 
 install: python-env node-env
 
@@ -28,4 +28,9 @@ run:
 build:
 	docker build -t mtgforge_web .
 
-.PHONY: install test check run build
+drun:
+	fig stop
+	fig up -d
+	docker ps
+
+.PHONY: install test check run build drun
