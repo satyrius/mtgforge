@@ -1,10 +1,8 @@
 Django==1.6.2
 Fabric==1.8.0
 Pillow==2.3.0
-Scrapy==0.22.2
 South==0.8.4
-Twisted==13.2.0 # required by Scrapy
-cssselect==0.9.1 # required by Scrapy
+dj-database-url==0.3.0
 django-arrayfields==0.1.0
 django-debug-toolbar==1.0.1
 django-extensions==1.2.0
@@ -14,20 +12,16 @@ django-nose==1.2
 django-storages==1.1.8
 django-tastypie==0.10.0
 grappelli-modeltranslation==0.1.3
-honcho==0.5.0
-lxml==3.3.3
-mimeparse==0.1.3 # required by django-tastypie
+mimeparse==0.1.3
 mock==1.0.1
-model_mommy==1.2
+model-mommy==1.2
 nose-parameterized==0.3.3
 nose==1.3.0
-paramiko==1.11.1 # required by Fabric
-psycopg2==2.5.2
-pyOpenSSL==0.13.1 # required by Scrapy
-pycrypto==2.6 # required by paramiko
-python-dateutil==2.2 # required by django-tastypie
+paramiko==1.11.1
+psycopg2==2.4.5
+pycrypto==2.6
+python-dateutil==2.2
 python-memcached==1.53
-queuelib==1.1.1 # required by Scrapy
-six==1.4.1 # required by python-dateutil
-w3lib==1.5 # required by Scrapy
-zope.interface==4.0.5 # required by Twisted
+six==1.8.0
+sqlparse==0.1.11
+wsgiref==0.1.2

@@ -1,0 +1,10 @@
+web:
+  build: .
+  environment:
+    DATABASE_URL: postgres://aeg@192.168.59.3/mtgforge
+  ports:
+    - "80"
+  volumes:
+    - /var/www/mtgforge-media/
+    - /var/log/mtgforge/
+    - /var/log/nginx/

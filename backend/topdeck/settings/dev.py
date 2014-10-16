@@ -1,9 +1,8 @@
 import os
-from settings.common import *
+from .common import *
 
 DEBUG = True
 TEMPLATE_DEBUG = True
-MEDIA_DEV_MODE = True
 DEBUG_SERP = True
 
 # Django's normal exception handling of view functions will be suppressed,
@@ -33,8 +32,3 @@ LOGGING['loggers']['oracle.management']['level'] = 'DEBUG'
 
 # To enable django debug toolbar set this variable to True
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
-
-try:
-    from settings.local import *
-except ImportError:
-    pass

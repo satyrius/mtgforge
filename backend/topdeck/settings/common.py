@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 import os
+import dj_database_url
 from os.path import join, dirname, abspath
 from contrib import l10n
 
 DEBUG = False
 TEMPLATE_DEBUG = False
 
-PROJECT_ROOT = abspath(join(dirname(__file__), '../..'))
+PROJECT_ROOT = abspath(join(dirname(__file__), '../../..'))
+APP_ROOT = os.environ.get(
+    'DJANGO_APP_ROOT', os.path.join(PROJECT_ROOT, 'backend'))
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -15,10 +18,7 @@ ADMINS = (
 MANAGERS = ADMINS
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'mtgforge',
-    }
+    'default': dj_database_url.config(default='postgres://localhost/mtgforge')
 }
 
 # Local time zone for this installation. Choices can be found here:
@@ -72,7 +72,7 @@ STATICFILES_DIRS = [
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    #'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 DEFAULT_FILE_STORAGE = 'storages.backends.hashpath.HashPathStorage'
@@ -96,17 +96,17 @@ MIDDLEWARE_CLASSES = (
 )
 INTERNAL_IPS = ('127.0.0.1',)
 
-ROOT_URLCONF = 'urls'
+ROOT_URLCONF = 'topdeck.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'wsgi.application'
+WSGI_APPLICATION = 'topdeck.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     os.path.join(PROJECT_ROOT, 'client', 'public'),
-    os.path.join(PROJECT_ROOT, 'backend', 'templates'),
+    os.path.join(APP_ROOT, 'templates'),
 )
 
 INSTALLED_APPS = (
@@ -213,7 +213,7 @@ LOGGING = {
     },
     'loggers': {
         'django.request': {
-            'handlers': ['mail_admins'],
+            'handlers': ['mail_admins', 'console'],
             'level': 'ERROR',
             'propagate': True,
         },
