@@ -3,27 +3,36 @@ log_format web
     '$status $body_bytes_sent "$request_time" '
     '"$http_referer" "$http_user_agent" "$http_host"';
 
-upstream gunicorn_backend {
+upstream app_server {
     server 127.0.0.1:8000 fail_timeout=1s;
 }
 
 server {
     listen 80 default_server;
-    access_log /var/log/nginx/mtgforge.access.log web;
+    access_log /var/log/nginx/access.log web;
+
+    location = / {
+        index index.html;
+    }
 
     location / {
-        include mtgforge/robots.inc;
         include mtgforge/gunicorn.inc;
     }
 
     location /api/ {
         include mtgforge/cors.inc;
         include mtgforge/gunicorn.inc;
+        access_log /var/log/nginx/api.access.log web;
     }
 
     location /static/ {
         alias    /var/www/mtgforge-static/;
         access_log /var/log/nginx/static.access.log web;
+    }
+
+    location ~ ^/(js/|css/|img/|fonts/|index.html) {
+        root    /var/www/mtgforge-static/;
+        access_log /var/log/nginx/client.access.log web;
     }
 
     location /media/ {
