@@ -1,5 +1,5 @@
 # Base image
-FROM phusion/baseimage:0.9.13
+FROM phusion/baseimage:0.9.15
 MAINTAINER Anton Egorov <anton.egoroff@gmail.com>
 ENV HOME /root
 RUN /etc/my_init.d/00_regen_ssh_host_keys.sh
@@ -8,7 +8,6 @@ CMD ["/sbin/my_init"]
 RUN locale-gen en_US.UTF-8 ru_RU.UTF-8 \
     && apt-get update -qq \
     && DEBIAN_FRONTEND=noninteractive apt-get install -qq \
-        bash>=4.3-7ubuntu1.1 \
         bash-completion \
         command-not-found \
         curl \
