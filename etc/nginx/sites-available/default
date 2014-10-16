@@ -15,8 +15,9 @@ server {
         index index.html;
     }
 
-    location / {
+    location /admin/ {
         include mtgforge/gunicorn.inc;
+        access_log /var/log/nginx/admin.access.log web;
     }
 
     location /api/ {

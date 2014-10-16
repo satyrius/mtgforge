@@ -12,7 +12,7 @@ admin.autodiscover()
 urlpatterns = patterns(
     '',
     (r'^', include(forge_urls)),
-    (r'^grappelli/', include('grappelli.urls')),
+    (r'^admin/grappelli/', include('grappelli.urls')),
     (r'^admin/', include(admin.site.urls)),
 )
 
