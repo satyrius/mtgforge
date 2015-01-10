@@ -1,13 +1,10 @@
 default: build
 
-install: python-env node-env
+install: python-env
 
 python-env:
 	[ -d env ] || virtualenv env
 	./env/bin/pip install -r requirements-dev.txt
-
-node-env:
-	cd client && npm install
 
 test:
 	./backend/manage.py test $(filter-out $@,$(MAKECMDGOALS))
