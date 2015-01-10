@@ -3,10 +3,8 @@ default: build
 install: python-env node-env
 
 python-env:
-	[ -d pyenv ] || virtualenv pyenv
-	. pyenv/bin/activate
-	pip install -r requirements.txt
-	pip install -r requirements-dev.txt
+	[ -d env ] || virtualenv env
+	./env/bin/pip install -r requirements-dev.txt
 
 node-env:
 	cd client && npm install
