@@ -1,3 +1,5 @@
+tag = latest
+
 default: build
 
 install: python-env
@@ -23,9 +25,13 @@ run:
 build:
 	docker build -t mtgforge_api .
 
+push: build
+	docker tag mtgforge_api satyrius/mtgbox:$(tag)
+	docker push satyrius/mtgbox:$(tag)
+
 up:
 	fig stop
 	fig up -d
 	docker ps
 
-.PHONY: install test check run build up
+.PHONY: install test check run build up push
