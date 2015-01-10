@@ -16,10 +16,11 @@ RUN locale-gen en_US.UTF-8 ru_RU.UTF-8 \
         psmisc \
         tree \
         vim \
+            build-essential \
             git-core \
             gunicorn \
+            libssl-dev \
             nginx \
-            nodejs-legacy npm \
             python-cffi \
             python-dev \
             python-lxml \
@@ -41,14 +42,6 @@ WORKDIR /tmp/docker_build
 COPY requirements.txt /tmp/docker_build/
 COPY requirements-crawl.txt /tmp/docker_build/
 RUN pip install -r requirements.txt -r requirements-crawl.txt
-
-# Install client app dependencies and build app
-WORKDIR /tmp/docker_build/client/
-COPY client/package.json /tmp/docker_build/client/
-RUN npm install
-COPY client/ /tmp/docker_build/client/
-RUN find . -name '*.swp' -delete \
-    && ./node_modules/.bin/gulp prod
 
 COPY etc/ /etc/
 RUN find . -name '*.swp' -delete \

@@ -21,11 +21,11 @@ run:
 	honcho start
 
 build:
-	docker build -t mtgforge_web .
+	docker build -t mtgforge_api .
 
-drun:
+up:
 	fig stop
 	fig up -d
 	docker ps
 
-.PHONY: install test check run build drun
+.PHONY: install test check run build up

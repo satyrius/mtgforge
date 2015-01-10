@@ -11,10 +11,6 @@ server {
     listen 80 default_server;
     access_log /var/log/nginx/access.log web;
 
-    location = / {
-        index index.html;
-    }
-
     location /admin/ {
         include mtgforge/gunicorn.inc;
         access_log /var/log/nginx/admin.access.log web;
@@ -31,9 +27,8 @@ server {
         access_log /var/log/nginx/static.access.log web;
     }
 
-    location ~ ^/(js/|css/|img/|fonts/|index.html) {
-        root    /var/www/mtgforge-static/;
-        access_log /var/log/nginx/client.access.log web;
+    location = / {
+        include mtgforge/gunicorn.inc;
     }
 
     location /media/ {
